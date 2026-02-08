@@ -346,6 +346,13 @@ async function getTelegramLinkedWallet(telegramHash) {
   return wallet;
 }
 
+// 지갑에 연결된 텔레그램 조회 (역방향)
+async function getWalletLinkedTelegram(walletAddress) {
+  const telegramHash = await contract.getWalletLinkedTelegram(toAddr(walletAddress));
+  // bytes32를 hex string으로 변환 (0x 제거)
+  return telegramHash.slice(2);
+}
+
 // 텔레그램을 지갑에 연결 (서버가 admin 권한으로 호출)
 async function linkTelegramToWallet(telegramHash, walletAddress) {
   const tx = await contract.linkTelegramToWallet('0x' + telegramHash, toAddr(walletAddress));
@@ -390,6 +397,7 @@ module.exports = {
   getTelegramBalance,
   getTelegramStampInfo,
   getTelegramLinkedWallet,
+  getWalletLinkedTelegram,
   linkTelegramToWallet,
   updateMetadata,
   updateAllowDuplicateClaims,

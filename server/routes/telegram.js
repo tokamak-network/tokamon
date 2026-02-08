@@ -395,5 +395,104 @@ router.post('/verify-code', (req, res) => {
   }
 });
 
+// GET /api/telegram/linked/:wallet - 지갑에 연결된 텔레그램 ID 조회
+router.get('/linked/:wallet', async (req, res) => {
+  try {
+    const { wallet } = req.params;
+    
+    if (!isValidEthAddress(wallet)) {
+      return res.status(400).json({ error: '올바르지 않은 지갑 주소입니다' });
+    }
+    
+    // DB에서 지갑 주소로 해시를 찾고, 그 해시로 username 조회
+    db.get(
+      `SELECT twl.telegram_hash, thu.telegram_username
+       FROM telegram_wallet_links twl
+       LEFT JOIN telegram_hash_username thu ON twl.telegram_hash = thu.telegram_hash
+       WHERE twl.wallet_address = ?`,
+      [wallet.toLowerCase()],
+      (err, row) => {
+        if (err) {
+          console.error('DB 조회 에러:', err);
+          return res.status(500).json({ error: 'DB 조회 실패' });
+        }
+        
+        if (!row) {
+          return res.json({ 
+            linked: false, 
+            telegram_hash: null, 
+            telegram_username: null 
+          });
+        }
+        
+        const username = row.telegram_username ? '@' + row.telegram_username : null;
+        
+        res.json({ 
+          linked: true, 
+          telegram_hash: row.telegram_hash,
+          telegram_username: username
+        });
+      }
+    );
+  } catch (err) {
+    console.error('텔레그램 연결 조회 에러:', err);
+    res.status(500).json({ error: err.message || '텔레그램 연결 조회 실패' });
+  }
+});
+
+// POST /api/telegram/claim-to-wallet - 텔레그램 잔액을 지갑으로 클레임
+router.post('/claim-to-wallet', async (req, res) => {
+  try {
+    const { wallet_address, telegram_hash } = req.body;
+    
+    if (!wallet_address || !telegram_hash) {
+      return res.status(400).json({ error: '필수 항목이 누락되었습니다' });
+    }
+    
+    if (!isValidEthAddress(wallet_address)) {
+      return res.status(400).json({ error: '올바른 지갑 주소가 아닙니다' });
+    }
+    
+    // 연결 확인
+    console.log('=== 클레임 연결 확인 ===');
+    console.log('요청 지갑:', wallet_address);
+    console.log('요청 해시:', telegram_hash);
+    const linkedHash = await blockchain.getWalletLinkedTelegram(wallet_address);
+    console.log('컨트랙트 조회 해시:', linkedHash);
+    
+    // 해시 정규화 (0x 제거하여 비교)
+    const normalizedRequestHash = telegram_hash.toLowerCase().replace('0x', '');
+    const normalizedLinkedHash = linkedHash.toLowerCase().replace('0x', '');
+    console.log('정규화된 요청 해시:', normalizedRequestHash);
+    console.log('정규화된 조회 해시:', normalizedLinkedHash);
+    console.log('해시 일치:', normalizedLinkedHash === normalizedRequestHash);
+    
+    if (!linkedHash || normalizedLinkedHash !== normalizedRequestHash) {
+      console.log('❌ 연결 확인 실패');
+      return res.status(400).json({ error: '지갑과 텔레그램이 연결되어 있지 않습니다' });
+    }
+    console.log('✅ 연결 확인 성공');
+    
+    // 텔레그램 잔액 확인
+    const telegramBalance = await blockchain.getTelegramBalance(telegram_hash);
+    if (telegramBalance <= 0) {
+      return res.status(400).json({ error: '텔레그램 잔액이 없습니다' });
+    }
+    
+    // linkTelegramToWallet을 다시 호출하여 잔액 이전
+    // 이미 연결되어 있으면 잔액만 이전됨
+    const result = await blockchain.linkTelegramToWallet(telegram_hash, wallet_address);
+    
+    res.json({
+      success: true,
+      message: '텔레그램 잔액이 지갑으로 이전되었습니다',
+      transferred_amount: result.transferredAmount,
+    });
+  } catch (err) {
+    console.error('텔레그램 잔액 클레임 에러:', err);
+    res.status(500).json({ error: err.message || '클레임 실패' });
+  }
+});
+
 return router;
 };

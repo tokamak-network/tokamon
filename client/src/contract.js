@@ -11,6 +11,9 @@ const ABI = [
   'function updateCooldown(uint256 spotId, uint256 newCooldown) external',
   'function updateAllowDuplicateClaims(uint256 spotId, bool allow) external',
   'function getBalance(address user) external view returns (uint256)',
+  'function getTelegramBalance(bytes32 telegramHash) external view returns (uint256)',
+  'function getWalletLinkedTelegram(address wallet) external view returns (bytes32)',
+  'function claimTelegramToWallet(bytes32 telegramHash) external',
   'function nextSpotId() external view returns (uint256)',
   'event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit)',
 ];
@@ -113,4 +116,25 @@ export async function getBalance(address) {
   const { contract } = await getSignerAndContract();
   const bal = await contract.getBalance(address);
   return Number(ethers.formatEther(bal));
+}
+
+// 텔레그램 잔액 조회
+export async function getTelegramBalance(telegramHash) {
+  const { contract } = await getSignerAndContract();
+  const bal = await contract.getTelegramBalance(telegramHash);
+  return Number(ethers.formatEther(bal));
+}
+
+// 지갑에 연결된 텔레그램 해시 조회
+export async function getWalletLinkedTelegram(address) {
+  const { contract } = await getSignerAndContract();
+  const telegramHash = await contract.getWalletLinkedTelegram(address);
+  return telegramHash;
+}
+
+// 텔레그램 잔액을 지갑으로 클레임
+export async function claimTelegramToWallet(telegramHash) {
+  const { contract } = await getSignerAndContract();
+  const tx = await contract.claimTelegramToWallet(telegramHash);
+  await tx.wait();
 }

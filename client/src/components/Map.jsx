@@ -1,6 +1,7 @@
 import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
+import { t } from '../translations';
 
 // 초록: 클레임 가능 (활성 + TON 남음) - 토카막 심볼
 const activeIcon = new L.DivIcon({

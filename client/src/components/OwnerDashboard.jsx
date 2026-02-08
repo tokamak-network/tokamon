@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { redepositSelf, updateCooldown, updateAllowDuplicateClaims } from '../contract';
+import { t } from '../translations';
 
-export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet, onRedeposited }) {
+export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet, onRedeposited, language = 'ko' }) {
   const [redepositSpotId, setRedepositSpotId] = useState(null);
   const [redepositAmount, setRedepositAmount] = useState('');
   const [redepositing, setRedepositing] = useState(false);
@@ -15,9 +16,9 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
     return (
       <div className="owner-dashboard">
         <div className="wallet-connect-prompt">
-          <p>지갑을 연결하면 내 스팟을 관리할 수 있습니다</p>
+          <p>{t(language, 'connectWalletToManageSpots')}</p>
           <button className="primary" onClick={onConnectWallet}>
-            지갑 연결
+            {t(language, 'connectWallet')}
           </button>
         </div>
       </div>

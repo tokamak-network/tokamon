@@ -1,47 +1,35 @@
 import React, { useState, useEffect } from 'react';
+import { t } from '../translations';
 
-export default function Settings({ onClose }) {
-  const [telegramUsername, setTelegramUsername] = useState('');
-  const [saved, setSaved] = useState(false);
+export default function Settings({ onClose, account, language, onLanguageChange }) {
+  const [linkedTelegram, setLinkedTelegram] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // localStorage에서 불러오기
+  // 연결된 텔레그램 ID 조회
   useEffect(() => {
-    const savedUsername = localStorage.getItem('tokamon_telegram_username');
-    if (savedUsername) {
-      setTelegramUsername(savedUsername);
+    if (account) {
+      fetchLinkedTelegram();
     }
-  }, []);
+  }, [account]);
 
-  // 텔레그램 username 입력 핸들러
-  const handleUsernameChange = (e) => {
-    let value = e.target.value;
-    // @ 없이 입력해도 자동으로 추가
-    if (value && !value.startsWith('@')) {
-      value = '@' + value;
-    }
-    setTelegramUsername(value);
-    setSaved(false);
-  };
-
-  // 저장
-  const handleSave = () => {
-    const username = telegramUsername.replace('@', '').trim();
-    if (username.length < 5) {
-      alert('텔레그램 username은 최소 5자 이상이어야 합니다');
-      return;
-    }
-
-    localStorage.setItem('tokamon_telegram_username', telegramUsername);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
-  };
-
-  // 삭제
-  const handleClear = () => {
-    if (confirm('저장된 텔레그램 아이디를 삭제하시겠습니까?')) {
-      localStorage.removeItem('tokamon_telegram_username');
-      setTelegramUsername('');
-      setSaved(false);
+  const fetchLinkedTelegram = async () => {
+    if (!account) return;
+    
+    setLoading(true);
+    try {
+      const response = await fetch(`http://localhost:3001/api/telegram/linked/${account}`);
+      const data = await response.json();
+      
+      if (data.linked && data.telegram_hash) {
+        setLinkedTelegram(data.telegram_hash);
+      } else {
+        setLinkedTelegram(null);
+      }
+    } catch (err) {
+      console.error('텔레그램 연결 조회 실패:', err);
+      setLinkedTelegram(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,56 +37,86 @@ export default function Settings({ onClose }) {
     <div className="settings-overlay" onClick={onClose}>
       <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
         <div className="settings-header">
-          <h2>설정</h2>
+          <h2>{t(language, 'settings')}</h2>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
 
         <div className="settings-content">
           <div className="settings-section">
-            <h3>내 텔레그램 아이디</h3>
-            <p className="settings-desc">
-              텔레그램 username을 저장하면 매번 입력하지 않아도 됩니다.
-            </p>
+            <h3>{t(language, 'telegramAccountLink')}</h3>
             
-            <div className="settings-input-group">
-              <label>텔레그램 Username</label>
-              <input
-                type="text"
-                placeholder="@username"
-                value={telegramUsername}
-                onChange={handleUsernameChange}
-              />
-            </div>
-
-            {saved && (
-              <div className="settings-saved-message">
-                ✓ 저장되었습니다
-              </div>
+            {account && (
+              <>
+                {loading ? (
+                  <div className="settings-loading">{t(language, 'loading')}</div>
+                ) : linkedTelegram ? (
+                  <div className="settings-linked-telegram">
+                    <div className="linked-status">
+                      <span className="status-icon">✅</span>
+                      <span className="status-text">{t(language, 'connected')}</span>
+                    </div>
+                    <div className="linked-hash">
+                      {linkedTelegram.slice(0, 8)}...{linkedTelegram.slice(-8)}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="settings-no-telegram">
+                    <div className="linked-status">
+                      <span className="status-icon">❌</span>
+                      <span className="status-text">{t(language, 'notConnected')}</span>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
-            <div className="settings-actions">
-              <button className="btn-save" onClick={handleSave}>
-                저장
+            <div className="telegram-guide">
+              <div className="guide-title">💡 {t(language, 'connectionGuide')}</div>
+              <ol className="guide-steps">
+                <li>{t(language, 'guideStep1')} <code>@TokamonBot</code> {t(language, 'guideStep1_2')}</li>
+                <li><code>/start</code> {t(language, 'guideStep2')}</li>
+                <li><code>/link</code> {t(language, 'guideStep3')}</li>
+                <li>{t(language, 'guideStep4')} <code className="wallet-code">{account ? `${account.slice(0, 10)}...` : t(language, 'walletRequired')}</code></li>
+              </ol>
+            </div>
+          </div>
+
+          <div className="settings-section settings-section-compact">
+            <h3>{t(language, 'languageSettings')}</h3>
+            
+            <div className="language-selector-compact">
+              <button 
+                className={`lang-btn-compact ${language === 'ko' ? 'active' : ''}`}
+                onClick={() => onLanguageChange('ko')}
+              >
+                한국어
               </button>
-              {telegramUsername && (
-                <button className="btn-clear" onClick={handleClear}>
-                  삭제
-                </button>
-              )}
+              <button 
+                className={`lang-btn-compact ${language === 'en' ? 'active' : ''}`}
+                onClick={() => onLanguageChange('en')}
+              >
+                English
+              </button>
             </div>
           </div>
 
           <div className="settings-section">
-            <h3>정보</h3>
+            <h3>{t(language, 'information')}</h3>
             <div className="settings-info">
               <div className="info-row">
-                <span>버전</span>
+                <span>{t(language, 'version')}</span>
                 <span>1.0.0</span>
               </div>
               <div className="info-row">
-                <span>네트워크</span>
+                <span>{t(language, 'network')}</span>
                 <span>Ganache Local (Chain ID: 1337)</span>
               </div>
+              {account && (
+                <div className="info-row">
+                  <span>{t(language, 'myWallet')}</span>
+                  <span>{account.slice(0, 6)}...{account.slice(-4)}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

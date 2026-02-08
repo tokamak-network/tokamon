@@ -12,6 +12,7 @@ import Settings from './components/Settings';
 import { getSpots, requestClaim, getClaimHistory, getTelegramBalance } from './api';
 import { getBalance as getContractBalance, resetContractCache } from './contract';
 import { getETH, getTON, resetFaucetCache } from './faucet';
+import { t } from './translations';
 
 // MetaMask 연결
 async function connectMetaMask() {
@@ -77,6 +78,21 @@ export default function App() {
 
   // 지갑 메뉴 드롭다운
   const [showWalletMenu, setShowWalletMenu] = useState(false);
+
+  // 언어 설정 (시스템 언어 기본값)
+  const [language, setLanguage] = useState(() => {
+    const saved = localStorage.getItem('tokamon_language');
+    if (saved) return saved;
+    // 브라우저 언어 감지
+    const browserLang = navigator.language.toLowerCase();
+    return browserLang.startsWith('ko') ? 'ko' : 'en';
+  });
+
+  // 언어 변경 함수
+  const changeLanguage = (lang) => {
+    setLanguage(lang);
+    localStorage.setItem('tokamon_language', lang);
+  };
 
   // 메뉴 외부 클릭 시 닫기
   useEffect(() => {
@@ -356,7 +372,7 @@ export default function App() {
 
   // 역할 미선택 → 역할 선택 화면
   if (!role) {
-    return <RoleSelect onSelect={handleRoleSelect} />;
+    return <RoleSelect onSelect={handleRoleSelect} language={language} />;
   }
 
   // store 역할일 때
@@ -366,22 +382,22 @@ export default function App() {
         <div className="header">
           <h1 onClick={() => setRole(null)} style={{ cursor: 'pointer' }}>Tokamon</h1>
         </div>
-        <StoreKiosk />
+        <StoreKiosk language={language} onLanguageChange={changeLanguage} />
       </>
     );
   }
 
   // 고객 탭 목록
   const customerTabs = [
-    { key: 'map', label: '지도' },
-    { key: 'list', label: '스팟 목록' },
-    { key: 'history', label: '내 기록' },
+    { key: 'map', label: t(language, 'map') },
+    { key: 'list', label: t(language, 'spotList') },
+    { key: 'history', label: t(language, 'myTokamon') },
   ];
 
   // 점주 탭 목록
   const ownerTabs = [
-    { key: 'owner-dashboard', label: '내 스팟 관리' },
-    { key: 'create', label: '스팟 만들기' },
+    { key: 'owner-dashboard', label: t(language, 'mySpotManagement') },
+    { key: 'create', label: t(language, 'createSpot') },
   ];
 
   const tabs = role === 'customer' ? customerTabs : ownerTabs;
@@ -437,7 +453,7 @@ export default function App() {
             </div>
           ) : (
             <button className="faucet-btn" onClick={handleConnect} disabled={connecting}>
-              {connecting ? '연결 중...' : '지갑 연결'}
+              {connecting ? t(language, 'connecting') : t(language, 'connectWallet')}
             </button>
           )}
           <button className="settings-btn" onClick={() => setShowSettings(true)}>
@@ -504,6 +520,7 @@ export default function App() {
         {tab === 'list' && (
           <SpotList
             spots={spots}
+            language={language}
             onSelect={(spot) => {
               setSelectedSpot(spot);
               switchTab('map');
@@ -511,15 +528,20 @@ export default function App() {
           />
         )}
 
-        {/* 고객: 내 기록 탭 */}
+        {/* 고객: 내 토카몬 탭 */}
         {tab === 'history' && (
           wallet ? (
-            <History history={history} />
+            <History 
+              history={history} 
+              balance={balance}
+              account={wallet}
+              language={language}
+            />
           ) : (
             <div className="wallet-connect-prompt">
-              <p>클레임 기록을 보려면 지갑을 연결해주세요</p>
+              <p>{t(language, 'connectWalletPrompt')}</p>
               <button className="primary" onClick={handleConnect} disabled={connecting}>
-                {connecting ? '연결 중...' : '지갑 연결'}
+                {connecting ? t(language, 'connecting') : t(language, 'connectWallet')}
               </button>
             </div>
           )
@@ -533,6 +555,7 @@ export default function App() {
             balance={balance}
             onConnectWallet={handleConnect}
             onRedeposited={() => { refreshSpots(); refreshBalance(); }}
+            language={language}
           />
         )}
 
@@ -576,12 +599,17 @@ export default function App() {
 
       {/* 설정 모달 */}
       {showSettings && (
-        <Settings onClose={() => {
-          setShowSettings(false);
-          if (role === 'customer') {
-            refreshTelegramBalance();
-          }
-        }} />
+        <Settings 
+          account={wallet}
+          language={language}
+          onLanguageChange={changeLanguage}
+          onClose={() => {
+            setShowSettings(false);
+            if (role === 'customer') {
+              refreshTelegramBalance();
+            }
+          }} 
+        />
       )}
     </>
   );

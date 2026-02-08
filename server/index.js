@@ -62,6 +62,25 @@ db.serialize(() => {
     )
   `);
   
+  // 지갑 <-> 텔레그램 해시 매핑 테이블
+  db.run(`
+    CREATE TABLE IF NOT EXISTS telegram_wallet_links (
+      wallet_address TEXT PRIMARY KEY,
+      telegram_hash TEXT NOT NULL,
+      created_at INTEGER NOT NULL
+    )
+  `);
+  
+  // 텔레그램 해시 <-> username 매핑 테이블
+  db.run(`
+    CREATE TABLE IF NOT EXISTS telegram_hash_username (
+      telegram_hash TEXT PRIMARY KEY,
+      telegram_username TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    )
+  `);
+  
   console.log('✅ DB 초기화 완료');
 });
 

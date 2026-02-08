@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
+import { t } from '../translations';
 
-export default function SpotList({ spots, onSelect }) {
+export default function SpotList({ spots, onSelect, language = 'ko' }) {
   const [filter, setFilter] = useState('active');
 
   const filtered = useMemo(() => {
@@ -18,21 +19,21 @@ export default function SpotList({ spots, onSelect }) {
           className={filter === 'active' ? 'active' : ''}
           onClick={() => setFilter('active')}
         >
-          활성 스팟
+          {t(language, 'activeSpots')}
         </button>
         <button
           className={filter === 'all' ? 'active' : ''}
           onClick={() => setFilter('all')}
         >
-          전체
+          {t(language, 'allSpots')}
         </button>
       </div>
 
       {filtered.length === 0 ? (
         <div className="spot-list-empty">
           {filter === 'all'
-            ? '등록된 스팟이 없습니다'
-            : '활성 스팟이 없습니다'}
+            ? t(language, 'noSpotsRegistered')
+            : t(language, 'noActiveSpots')}
         </div>
       ) : (
         filtered.map((spot) => {
@@ -52,18 +53,18 @@ export default function SpotList({ spots, onSelect }) {
                 <span
                   className={`spot-list-item-status ${isExhausted ? 'exhausted' : spot.active ? 'active' : 'inactive'}`}
                 >
-                  {isExhausted ? '소진' : spot.active ? '활성' : '비활성'}
+                  {isExhausted ? t(language, 'exhausted') : spot.active ? t(language, 'active') : t(language, 'inactive')}
                 </span>
               </div>
               <div className="spot-list-item-detail">
-                보상 {spot.reward} TON · 남은 횟수 {claimsLeft}회
+                {t(language, 'reward')} {spot.reward} TON · {t(language, 'remainingClaims')} {claimsLeft}{t(language, 'times')}
               </div>
               <div className="spot-list-item-detail">
-                {spot.start_time} ~ {spot.end_time} · 쿨다운 {cooldownHours}시간
+                {spot.start_time} ~ {spot.end_time} · {t(language, 'cooldown')} {cooldownHours}{t(language, 'hours')}
               </div>
               {spot.stamp_goal > 0 && (
                 <div className="spot-list-item-stamp">
-                  스탬프 {spot.stamp_goal}회 달성 시 +{spot.stamp_bonus} TON
+                  {t(language, 'stampGoalAchievement')} {spot.stamp_goal}{t(language, 'stampGoalAchievement2')} +{spot.stamp_bonus} TON
                 </div>
               )}
             </div>

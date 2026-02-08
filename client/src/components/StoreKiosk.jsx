@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import { t } from '../translations';
 
 const API = 'http://localhost:3001';
 
-export default function StoreKiosk() {
+export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
   const [telegramUsername, setTelegramUsername] = useState('');
   const [balance, setBalance] = useState(null);
   const [spots, setSpots] = useState([]);
@@ -78,7 +79,7 @@ export default function StoreKiosk() {
   // MetaMask 연결
   const connectWallet = async () => {
     if (!window.ethereum) {
-      setMessage('MetaMask가 설치되어 있지 않습니다');
+      setMessage(t(language, 'metaMaskNotInstalled'));
       return;
     }
 
@@ -102,7 +103,7 @@ export default function StoreKiosk() {
       // 메시지 제거 - 헤더에 연결 상태가 표시됨
     } catch (err) {
       console.error('지갑 연결 실패:', err);
-      alert('지갑 연결 실패: ' + err.message);
+      alert(t(language, 'walletConnectionFailed') + ': ' + err.message);
     }
   };
 
@@ -137,7 +138,7 @@ export default function StoreKiosk() {
   const handleCheckBalance = async () => {
     const username = telegramUsername.replace('@', '').trim();
     if (username.length < 5) {
-      setMessage('올바른 텔레그램 username을 입력해주세요 (최소 5자)');
+      setMessage(t(language, 'enterValidTelegram'));
       return;
     }
 
@@ -197,7 +198,7 @@ export default function StoreKiosk() {
     }
 
     setLoading(true);
-    setMessage('MetaMask에서 트랜잭션을 승인해주세요...');
+    setMessage(t(language, 'approveInMetaMask'));
 
     try {
       // 텔레그램 ID 해싱
@@ -256,7 +257,7 @@ export default function StoreKiosk() {
       console.log('잔액 조회 결과:', { balanceWei: balanceWei.toString(), balanceTon });
       setBalance(balanceTon);
 
-      setMessage(`✅ ${selectedSpot.reward} TON 적립 완료!`);
+      setMessage(`✅ ${selectedSpot.reward} TON ${t(language, 'claimCompleted')}`);
       
       // 텔레그램 알림 전송
       try {
@@ -293,12 +294,12 @@ export default function StoreKiosk() {
     return (
       <div className="store-kiosk">
         <div className="kiosk-header">
-          <h1>매장 키오스크</h1>
-          <p>리워드를 받을 스팟을 선택하세요</p>
+          <h1>{t(language, 'storeKiosk')}</h1>
+          <p>{t(language, 'selectSpotForReward')}</p>
           {wallet && (
-            <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
               <p style={{ fontSize: '14px', color: '#10b981', margin: 0 }}>
-                🔗 점주 연결됨: {wallet.slice(0, 6)}...{wallet.slice(-4)}
+                🔗 {t(language, 'ownerConnected')}: {wallet.slice(0, 6)}...{wallet.slice(-4)}
               </p>
               <button 
                 onClick={disconnectWallet}
@@ -322,8 +323,51 @@ export default function StoreKiosk() {
                   e.target.style.borderColor = 'rgba(239, 68, 68, 0.3)';
                 }}
               >
-                연결 해제
+                {t(language, 'disconnect')}
               </button>
+              
+              {/* 언어 설정 */}
+              <div style={{ 
+                display: 'flex', 
+                gap: '8px',
+                padding: '8px',
+                background: 'rgba(59, 130, 246, 0.1)',
+                borderRadius: '8px',
+                border: '1px solid rgba(59, 130, 246, 0.2)'
+              }}>
+                <button
+                  onClick={() => onLanguageChange && onLanguageChange('ko')}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '13px',
+                    background: language === 'ko' ? '#3b82f6' : 'transparent',
+                    border: '1px solid ' + (language === 'ko' ? '#3b82f6' : '#444'),
+                    borderRadius: '6px',
+                    color: language === 'ko' ? '#fff' : '#ccc',
+                    cursor: 'pointer',
+                    fontWeight: language === 'ko' ? '600' : '500',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  한국어
+                </button>
+                <button
+                  onClick={() => onLanguageChange && onLanguageChange('en')}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '13px',
+                    background: language === 'en' ? '#3b82f6' : 'transparent',
+                    border: '1px solid ' + (language === 'en' ? '#3b82f6' : '#444'),
+                    borderRadius: '6px',
+                    color: language === 'en' ? '#fff' : '#ccc',
+                    cursor: 'pointer',
+                    fontWeight: language === 'en' ? '600' : '500',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  English
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -331,16 +375,16 @@ export default function StoreKiosk() {
         <div className="kiosk-spot-selection">
           {!wallet ? (
             <div className="no-spots">
-              <p>점주 지갑을 먼저 연결해주세요</p>
+              <p>{t(language, 'connectOwnerWallet')}</p>
               <button className="kiosk-connect-wallet" onClick={connectWallet}>
-                점주 지갑 연결 (MetaMask)
+                {t(language, 'connectOwnerWalletMetaMask')}
               </button>
             </div>
           ) : ownerSpots.length === 0 ? (
             <div className="no-spots">
-              <p>연결된 지갑으로 생성한 스팟이 없습니다</p>
+              <p>{t(language, 'noSpotsForWallet')}</p>
               <p style={{ fontSize: '14px', color: '#888' }}>
-                지갑 주소: {wallet.slice(0, 10)}...{wallet.slice(-8)}
+                {t(language, 'walletAddress')}: {wallet.slice(0, 10)}...{wallet.slice(-8)}
               </p>
             </div>
           ) : (
@@ -361,16 +405,16 @@ export default function StoreKiosk() {
                   
                   <div className="spot-compact-info">
                     <div className="spot-compact-row">
-                      <span className="compact-label">💰 남은 잔액</span>
-                      <span className="compact-value">{spot.remaining} TON ({Math.floor(spot.remaining / spot.reward)}회)</span>
+                      <span className="compact-label">💰 {t(language, 'remainingBalance')}</span>
+                      <span className="compact-value">{spot.remaining} TON ({Math.floor(spot.remaining / spot.reward)}{t(language, 'visits')})</span>
                     </div>
                     <div className="spot-compact-row">
-                      <span className="compact-label">🕐 영업시간</span>
+                      <span className="compact-label">🕐 {t(language, 'businessHours')}</span>
                       <span className="compact-value">{spot.start_time} ~ {spot.end_time}</span>
                     </div>
                     <div className="spot-compact-row">
-                      <span className="compact-label">🎯 스탬프</span>
-                      <span className="compact-value">{spot.stamp_goal}회 → +{spot.stamp_bonus} TON</span>
+                      <span className="compact-label">🎯 {t(language, 'stamp')}</span>
+                      <span className="compact-value">{spot.stamp_goal}{t(language, 'visits')} → +{spot.stamp_bonus} TON</span>
                     </div>
                   </div>
                 </div>
@@ -387,24 +431,24 @@ export default function StoreKiosk() {
     <div className="store-kiosk">
       <div className="kiosk-header-with-back">
         <button className="back-button" onClick={() => setSelectedSpot(null)}>
-          ← 뒤로
+          ← {t(language, 'back')}
         </button>
         <div className="kiosk-header-content">
           <h2>{selectedSpot.name}</h2>
-          <p>텔레그램 username을 입력하여 {selectedSpot.reward} TON을 받으세요</p>
+          <p>{t(language, 'enterTelegramToReceiveTON').replace('{amount}', selectedSpot.reward)}</p>
           <p style={{ 
             fontSize: '13px', 
             color: '#aaa',
             marginTop: '8px'
           }}>
-            💬 적립 알림을 받으려면 텔레그램 <strong style={{ color: '#0088CC' }}>@TokamonBot</strong>에게 <strong style={{ color: '#0088CC' }}>/start</strong> 입력 (최초 1회)
+            💬 {t(language, 'notificationInfo')} <strong style={{ color: '#0088CC' }}>@TokamonBot</strong> <strong style={{ color: '#0088CC' }}>/start</strong> {t(language, 'sendStartCommand')}
           </p>
         </div>
       </div>
 
       <div className="kiosk-main">
         <div className="telegram-input-large">
-          <label>톤을 받으실 텔레그램 Username</label>
+          <label>{t(language, 'telegramUsernameToReceive')}</label>
           <input
             type="text"
             placeholder="@username"
@@ -423,7 +467,7 @@ export default function StoreKiosk() {
 
         {balance !== null && (
           <div className="balance-display-large">
-            <span>현재 잔액:</span>
+            <span>{t(language, 'currentBalance')}:</span>
             <span className="balance-amount">{Number(balance).toFixed(2)} TON</span>
           </div>
         )}
@@ -434,14 +478,14 @@ export default function StoreKiosk() {
             onClick={handleCheckBalance}
             disabled={loading || telegramUsername.replace('@', '').length < 5}
           >
-            잔액 확인
+            {t(language, 'checkBalance')}
           </button>
           <button
             className="btn-primary"
             onClick={handleClaim}
             disabled={loading || !wallet || telegramUsername.replace('@', '').length < 5}
           >
-            {loading ? '처리 중...' : `${selectedSpot.reward} TON 받기`}
+            {loading ? t(language, 'processing') : `${selectedSpot.reward} TON ${t(language, 'receive')}`}
           </button>
         </div>
 

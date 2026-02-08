@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import DinoCharacter from './DinoCharacter';
+import { t } from '../translations';
 
-export default function RoleSelect({ onSelect }) {
+export default function RoleSelect({ onSelect, language = 'ko' }) {
   const [animation, setAnimation] = useState('idle');
 
   return (
@@ -23,10 +24,10 @@ export default function RoleSelect({ onSelect }) {
               cameraPosition={[0, 2, 4]}
             />
           </div>
-          <h1 className="main-title">Tokamon</h1>
+          <h1 className="main-title">{t(language, 'appName')}</h1>
         </div>
-        <p className="role-select-subtitle">매장 방문하고 TON 받자</p>
-        <p className="role-select-subtitle-sub">Web3 기반 로열티 리워드 플랫폼</p>
+        <p className="role-select-subtitle">{t(language, 'roleSelectSubtitle')}</p>
+        <p className="role-select-subtitle-sub">{t(language, 'roleSelectSubtitleSub')}</p>
       </div>
 
       <div className="role-select-buttons">
@@ -35,19 +36,8 @@ export default function RoleSelect({ onSelect }) {
             <span className="role-select-icon">🚶</span>
           </div>
           <div className="role-btn-content">
-            <span className="role-select-label">고객</span>
-            <span className="role-select-desc">스팟 탐색하고 TON 받기</span>
-          </div>
-          <span className="role-btn-arrow">→</span>
-        </button>
-
-        <button className="role-select-btn owner" onClick={() => onSelect('owner')}>
-          <div className="role-btn-icon-wrapper">
-            <span className="role-select-icon">🏪</span>
-          </div>
-          <div className="role-btn-content">
-            <span className="role-select-label">점주</span>
-            <span className="role-select-desc">내 스팟 만들고 관리하기</span>
+            <span className="role-select-label">{t(language, 'customer')}</span>
+            <span className="role-select-desc">{t(language, 'customerDesc')}</span>
           </div>
           <span className="role-btn-arrow">→</span>
         </button>
@@ -57,15 +47,26 @@ export default function RoleSelect({ onSelect }) {
             <span className="role-select-icon">📱</span>
           </div>
           <div className="role-btn-content">
-            <span className="role-select-label">매장 키오스크</span>
-            <span className="role-select-desc">텔레그램으로 TON 발급하기</span>
+            <span className="role-select-label">{t(language, 'storeKiosk')}</span>
+            <span className="role-select-desc">{t(language, 'storeKioskDesc')}</span>
+          </div>
+          <span className="role-btn-arrow">→</span>
+        </button>
+
+        <button className="role-select-btn owner" onClick={() => onSelect('owner')}>
+          <div className="role-btn-icon-wrapper">
+            <span className="role-select-icon">🏪</span>
+          </div>
+          <div className="role-btn-content">
+            <span className="role-select-label">{t(language, 'owner')}</span>
+            <span className="role-select-desc">{t(language, 'ownerDesc')}</span>
           </div>
           <span className="role-btn-arrow">→</span>
         </button>
       </div>
 
       <div className="role-select-footer">
-        <p>🔒 MetaMask로 안전하게 연결</p>
+        <p>{t(language, 'connectSafely')}</p>
       </div>
     </div>
   );
