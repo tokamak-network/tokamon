@@ -52,6 +52,7 @@ contracts/out/
 contracts/cache/
 contracts/solidity/*.json
 contracts/artifacts/
+contracts/broadcast/
 
 # Compiled contract artifacts
 **/Tokamon.json
