@@ -1,7 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 const crypto = require('crypto');
 const blockchain = require('./blockchain');
-const { hashTelegramId } = require('./utils');
+const { hashTelegramId, isValidEthAddress } = require('./utils');
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const WEB_URL = process.env.WEB_URL || 'http://localhost:5173';
@@ -11,6 +11,9 @@ let db = null;
 
 // chat_id 캐시 (username → chat_id)
 const chatIdCache = new Map();
+
+// 사용자 상태 추적 (username → { state, data })
+const userStates = new Map();
 
 // 봇 초기화
 function initBot(database) {
@@ -83,6 +86,7 @@ function initBot(database) {
 /start - 시작하기
 /balance - 현재 잔액 조회
 /link - 지갑 연결하기
+/cancel - 현재 작업 취소
 /help - 도움말
 
 💡 매장에서 TON 받는 방법:
@@ -92,7 +96,7 @@ function initBot(database) {
 
 🔗 지갑으로 이전하는 방법:
 1. /link 명령어 입력
-2. 링크 클릭하여 웹에서 지갑 주소 입력
+2. 이더리움 주소 입력 (0x...)
 3. 완료!
     `;
     
@@ -128,6 +132,92 @@ function initBot(database) {
     }
   });
 
+  // /cancel 명령어
+  bot.onText(/\/cancel/, (msg) => {
+    const chatId = msg.chat.id;
+    const username = msg.from.username;
+    
+    if (!username) {
+      return bot.sendMessage(chatId, '❌ 텔레그램 username을 설정해주세요');
+    }
+    
+    if (userStates.has(username)) {
+      userStates.delete(username);
+      bot.sendMessage(chatId, '✅ 작업이 취소되었습니다.');
+    } else {
+      bot.sendMessage(chatId, '현재 진행 중인 작업이 없습니다.');
+    }
+  });
+
+  // 일반 메시지 핸들러 (이더리움 주소 입력)
+  bot.on('message', async (msg) => {
+    const chatId = msg.chat.id;
+    const username = msg.from.username;
+    const text = msg.text;
+    
+    // 명령어는 이미 처리되었으므로 스킵
+    if (!text || text.startsWith('/')) {
+      return;
+    }
+    
+    if (!username) {
+      return;
+    }
+    
+    const userState = userStates.get(username);
+    
+    // 지갑 주소 입력 대기 중인 경우
+    if (userState && userState.state === 'WAITING_FOR_ADDRESS') {
+      const address = text.trim();
+      
+      // 이더리움 주소 검증
+      if (!isValidEthAddress(address)) {
+        return bot.sendMessage(chatId, `
+❌ 올바르지 않은 이더리움 주소입니다.
+
+주소는 0x로 시작하고 40자리 16진수여야 합니다.
+예시: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+
+다시 입력하거나 /cancel로 취소하세요.
+        `);
+      }
+      
+      try {
+        // 텔레그램 해시 생성
+        const telegramHash = hashTelegramId(username);
+        
+        // 현재 잔액 확인
+        const currentBalance = await blockchain.getTelegramBalance(telegramHash);
+        
+        // 블록체인에 연결
+        bot.sendMessage(chatId, '⏳ 지갑을 연결하는 중입니다...');
+        
+        const result = await blockchain.linkTelegramToWallet(telegramHash, address);
+        
+        // 상태 초기화
+        userStates.delete(username);
+        
+        // 성공 메시지
+        let message = `✅ 지갑 연결 완료!\n\n`;
+        message += `💼 연결된 지갑: ${address.slice(0, 6)}...${address.slice(-4)}\n`;
+        
+        if (result.transferredAmount > 0) {
+          message += `💰 이전된 잔액: ${result.transferredAmount.toFixed(2)} TON\n\n`;
+          message += `이제 해당 지갑으로 로그인하여 사용하실 수 있습니다!`;
+        } else {
+          message += `\n현재 이전할 잔액이 없습니다.`;
+        }
+        
+        bot.sendMessage(chatId, message);
+        
+      } catch (err) {
+        console.error('지갑 연결 에러:', err);
+        userStates.delete(username);
+        bot.sendMessage(chatId, `❌ 지갑 연결 실패: ${err.message}\n\n다시 시도하려면 /link를 입력하세요.`);
+      }
+    }
+  });
+
   // /link 명령어
   bot.onText(/\/link/, async (msg) => {
     const chatId = msg.chat.id;
@@ -149,32 +239,24 @@ function initBot(database) {
 현재 연결된 지갑: ${linkedWallet.slice(0, 6)}...${linkedWallet.slice(-4)}
 현재 잔액: ${balance.toFixed(2)} TON
 
-다른 지갑으로 변경하려면 아래 버튼을 클릭하세요.
-        `, {
-          reply_markup: {
-            inline_keyboard: [[
-              { text: '🔗 지갑 변경하기', url: `${WEB_URL}/telegram-link?token=${generateLinkToken(username, chatId)}` }
-            ]]
-          }
-        });
+다른 지갑으로 변경하려면 새 이더리움 주소를 입력해주세요.
+(형식: 0x로 시작하는 40자리 주소)
+        `);
       }
       
-      // 새 연결 토큰 생성
-      const token = generateLinkToken(username, chatId);
-      const linkUrl = `${WEB_URL}/telegram-link?token=${token}`;
+      // 사용자 상태를 "지갑 주소 입력 대기"로 설정
+      userStates.set(username, { state: 'WAITING_FOR_ADDRESS' });
       
       bot.sendMessage(chatId, `
-🔗 지갑 연결 링크가 생성되었습니다!
+🔗 지갑 연결을 시작합니다!
 
-아래 버튼을 클릭하여 지갑 주소를 입력해주세요.
-(링크는 10분간 유효합니다)
-      `, {
-        reply_markup: {
-          inline_keyboard: [[
-            { text: '🔗 지갑 연결하기', url: linkUrl }
-          ]]
-        }
-      });
+이더리움 주소를 입력해주세요.
+(형식: 0x로 시작하는 40자리 주소)
+
+예시: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+
+취소하려면 /cancel 입력
+      `);
     } catch (err) {
       console.error('링크 생성 에러:', err);
       bot.sendMessage(chatId, '❌ 링크 생성 실패: ' + err.message);
