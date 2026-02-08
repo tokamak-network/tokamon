@@ -1,0 +1,18 @@
+{
+  "name": "tokamon-contracts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "node tests/contract.test.js",
+    "deploy": "node scripts/deploy.js"
+  },
+  "dependencies": {
+    "@ton-community/func-js": "^0.7.0",
+    "@ton/core": "^0.56.0",
+    "@ton/crypto": "^3.3.0",
+    "@ton/sandbox": "^0.20.0",
+    "@ton/ton": "^14.0.0",
+    "tweetnacl": "^1.0.3"
+  }
+}

@@ -1,0 +1,105 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Production
+build/
+dist/
+
+# Environment variables (CRITICAL - NEVER COMMIT!)
+.env
+.env.*
+*.env
+**/.env
+**/.env.*
+
+# Misc
+.DS_Store
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# React Native
+packages/mobile/android/app/build/
+packages/mobile/ios/Pods/
+packages/mobile/ios/build/
+packages/mobile/.expo/
+
+# Backend
+packages/backend/dist/
+packages/backend/logs/
+
+# Contracts
+packages/contracts/build/
+packages/contracts/artifacts/
+contracts/build/
+contracts/out/
+contracts/cache/
+contracts/solidity/*.json
+contracts/artifacts/
+
+# Compiled contract artifacts
+**/Tokamon.json
+**/Faucet.json
+
+# Server generated & sensitive data
+server/contract-address.json
+server/tokamon.db
+server/admin_keys.json
+server/spot-metadata.json
+server/*.log
+server/nohup.out
+
+# Client logs
+client/*.log
+client/nohup.out
+
+# Private keys & secrets (CRITICAL - NEVER COMMIT!)
+**/admin_keys.json
+**/*_keys.json
+**/private-key.txt
+**/*.pem
+**/*.key
+**/secrets.json
+**/credentials.json
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Telegram bot tokens (already in .env but extra safety)
+**/telegram-bot-token.txt
+
+# TypeScript
+*.tsbuildinfo
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+temp/
+
+# Backup files
+*.backup
+*.bak
+*~
