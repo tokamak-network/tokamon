@@ -1,92 +1,70 @@
 # Tokamon
 
-점주가 매장에 TON을 걸고, 방문한 고객에게 보상하는 위치 기반 리워드 플랫폼
+**Turn every store visit into crypto rewards.**
 
-## 구조
+Tokamon is a location-based loyalty reward platform on EVM. Store owners deposit TON and create reward spots. Customers earn TON just by visiting — no wallet needed, just Telegram.
 
-```
-tokamon/
-├── contracts/          # Solidity 스마트 컨트랙트
-│   └── solidity/       # Tokamon.sol, compile.js, deploy.js
-├── server/             # Express API 서버
-│   ├── routes/         # faucet, spots, claim, stamps
-│   ├── blockchain.js   # ethers.js 컨트랙트 연동
-│   └── db.js           # SQLite 메타데이터
-├── client/             # React 웹 클라이언트
-│   └── src/
-│       ├── App.jsx
-│       └── components/ # Map, SpotInfo, SpotList, History, CreateSpot,
-│                       # RoleSelect, OwnerDashboard
-└── docs/               # 프로젝트 문서
-```
+## How It Works
 
-## 기술 스택
+1. **Store owner** deposits TON and creates a reward spot
+2. **Customer visits** the store, staff enters their Telegram username on the kiosk
+3. **TON is issued** on-chain, customer gets a Telegram notification
+4. **Customer links wallet** via Telegram bot and claims TON anytime
 
-| 영역 | 기술 |
-|------|------|
-| 프론트엔드 | React 18 + Vite + Leaflet |
-| 백엔드 | Node.js + Express + SQLite |
-| 블록체인 | Solidity 0.8.19 (EVM) |
-| 개발환경 | Ganache (로컬 EVM, 포트 8999) |
+## Features
 
-## 화면 흐름
+- **Zero friction** — Start earning with just a Telegram username, no wallet required
+- **On-chain transparency** — Every reward is a real blockchain transaction
+- **Telegram-first** — Notifications, balance check, wallet linking via bot
+- **Stamp bonuses** — Repeat visits earn extra TON
+- **Self-custody** — Claim to your own wallet whenever you want
 
-```
-[앱 시작] → 역할 선택
-    ├─ 고객 (지도 / 스팟 목록 / 내 기록)
-    └─ 점주 (내 스팟 관리 / 스팟 만들기)
-```
+## Upcoming
 
-- 지갑 없이도 지도/스팟 탐색 가능
-- 지갑 연결은 클레임, 스팟 생성, 내 기록, 스팟 관리 시에만 요청
-- 헤더에서 역할 전환 가능
+- **GPS Auto-Claim** — Customer app will detect store location via GPS and allow customers to claim rewards automatically when nearby, without needing the store kiosk
 
-## 빠른 시작
+## Quick Start
+
+**Prerequisites:** Node.js 18+, [Foundry](https://book.getfoundry.sh/getting-started/installation), MetaMask
 
 ```bash
-# 의존성 설치
+git clone https://github.com/tokamak-network/tokamon.git
+cd tokamon
 npm run install:all
-
-# 전체 실행 (Ganache + 배포 + 서버 + 클라이언트)
 npm run dev
 ```
 
-브라우저에서 `http://localhost:5173` 접속
+Open http://localhost:5173 and connect MetaMask (Chain ID: 1337, RPC: http://127.0.0.1:8999).
 
-## 수동 실행
+For Telegram bot, set `TELEGRAM_BOT_TOKEN` in `.env`.
 
-```bash
-# 터미널 1: Ganache
-npm run ganache
+## Tech Stack
 
-# 터미널 2: 컨트랙트 배포 → 서버
-npm run deploy
-npm run server
+| Layer | Technology |
+|-------|------------|
+| Contracts | Solidity 0.8.19, Foundry |
+| Frontend | React 18, Vite, Leaflet |
+| Backend | Node.js, Express, SQLite |
+| Bot | Telegram Bot API |
 
-# 터미널 3: 클라이언트
-npm run client
+## Architecture
+
+```
+contracts/    Tokamon.sol (core), TONToken.sol (ERC20), Faucet.sol (testnet)
+server/       Express API + Telegram bot + SQLite
+client/       React app — Customer / Store Kiosk / Store Manager views
 ```
 
-## API
+## Testing
 
-| 엔드포인트 | 메소드 | 설명 |
-|-----------|--------|------|
-| `/api/spots` | GET | 스팟 목록 |
-| `/api/spots` | POST | 스팟 생성 |
-| `/api/spots/:id/redeposit` | POST | 스팟 재예치 |
-| `/api/claim/request` | POST | 클레임 요청 |
-| `/api/claim/history` | GET | 클레임 기록 |
-| `/api/stamps/:spotId` | GET | 스탬프 현황 |
-| `/api/faucet` | POST | 테스트 TON 충전 |
-| `/api/faucet/balance` | GET | 잔액 조회 |
+```bash
+cd contracts && forge test -vv
+```
 
-## 문서
+## Documentation
 
-- [서비스 기획서](docs/SERVICE_OVERVIEW.md)
-- [MVP 계획](docs/MVP_PLAN.md)
-- [데모 가이드](docs/DEMO_GUIDE.md)
-- [유즈케이스](docs/USE_CASES.md)
-- [점주 기능 명세](docs/SPEC_OWNER.md)
-- [사용자 기능 명세](docs/SPEC_USER.md)
-- [서버 API 명세](docs/SPEC_SERVER.md)
-- [컨트랙트 명세](docs/SPEC_CONTRACT.md)
+See [docs/](docs/) for detailed specs and guides.
+
+## License
+
+MIT
