@@ -29,7 +29,7 @@ contract DeployScript is Script {
         Faucet faucet = new Faucet{value: 1000 ether}(address(tokamon), address(tonToken));
         console.log("Faucet deployed at:", address(faucet));
         console.log("Faucet ETH balance:", faucet.getBalance() / 1 ether, "ETH");
-        
+
         // 4. Faucet에 TON 토큰 전송 (100,000 TON)
         tonToken.transfer(address(faucet), 100_000 * 1e18);
         console.log("Faucet TON balance:", tonToken.balanceOf(address(faucet)) / 1e18, "TON");
@@ -53,7 +53,8 @@ contract DeployScript is Script {
             '  "tonToken": "', vm.toString(address(tonToken)), '",\n',
             '  "tokamon": "', vm.toString(address(tokamon)), '",\n',
             '  "faucet": "', vm.toString(address(faucet)), '",\n',
-            '  "address": "', vm.toString(address(tokamon)), '"\n',
+            '  "address": "', vm.toString(address(tokamon)), '",\n',
+            '  "tonContract": null\n',
             '}'
         ));
 

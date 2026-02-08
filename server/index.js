@@ -106,6 +106,8 @@ app.get('/api/contract', (req, res) => {
     res.json({
       address: data.address || data.tokamon, // 하위 호환성
       tokamon: data.tokamon || data.address,
+      tonToken: data.tonToken, // ERC20 TON 토큰 컨트랙트 주소 (EVM)
+      tonContract: data.tonContract || null, // TON 블록체인 컨트랙트 주소 (EQ...)
       faucet: data.faucet,
       chainId: 1337
     });

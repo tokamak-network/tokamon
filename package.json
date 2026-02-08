@@ -6,7 +6,7 @@
   "scripts": {
     "anvil": "anvil --port 8999 --chain-id 1337 --balance 10000",
     "build": "cd contracts && forge build 2>/dev/null || true",
-    "deploy": "cd contracts && forge build 2>/dev/null || true && forge script script/Deploy.s.sol:DeployScript --rpc-url http://127.0.0.1:8999 --broadcast",
+    "deploy": "cd contracts && forge build 2>/dev/null || true && forge script script/Deploy.s.sol:DeployScript --rpc-url http://127.0.0.1:8999 --broadcast --unlocked --sender 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "server": "node server/index.js",
     "client": "client/node_modules/.bin/vite client",
     "dev": "npm run anvil & sleep 2 && npm run deploy && npm run server & npm run client",
