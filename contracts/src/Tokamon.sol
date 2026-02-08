@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./interfaces/IERC20.sol";
+
 contract Tokamon {
     address public admin;
     uint256 public nextSpotId;
+    IERC20 public tonToken;
 
     struct Spot {
         address creator;
@@ -33,37 +36,28 @@ contract Tokamon {
     mapping(uint256 => Spot) public spots;
     mapping(address => uint256) public balances;
 
-    // 스탬프: spotId => user => 현재 스탬프 횟수
-    mapping(uint256 => mapping(address => uint256)) public stampCount;
-
-    // 쿨다운: spotId => user => 마지막 클레임 시간
-    mapping(uint256 => mapping(address => uint256)) public lastClaimTime;
-
-    // 핸드폰 번호 해시 => TON 잔액
-    mapping(bytes32 => uint256) public phoneBalances;
-
-    // 핸드폰 번호 해시 => 스팟 ID => 스탬프 카운트
-    mapping(bytes32 => mapping(uint256 => uint256)) public phoneStampCount;
-
-    // 핸드폰 번호 해시 => 스팟 ID => 마지막 클레임 시간
-    mapping(bytes32 => mapping(uint256 => uint256)) public phoneLastClaimTime;
-
-    // 텔레그램 ID 해시 => TON 잔액
+    // === 통합 클레임 관리 (텔레그램 해시 기반) ===
+    // 모든 클레임은 텔레그램 해시로 관리됨
+    // 지갑 주소로 클레임 시 연결된 텔레그램 해시 사용, 없으면 지갑 주소를 해시로 변환하여 사용
+    
+    // 텔레그램 ID 해시 => TON 잔액 (클레임 대기 중인 잔액)
     mapping(bytes32 => uint256) public telegramBalances;
 
-    // 텔레그램 ID 해시 => 스팟 ID => 스탬프 카운트
-    mapping(bytes32 => mapping(uint256 => uint256)) public telegramStampCount;
+    // 통합 식별자(해시) => 스팟 ID => 스탬프 카운트
+    mapping(bytes32 => mapping(uint256 => uint256)) public claimStampCount;
 
-    // 텔레그램 ID 해시 => 스팟 ID => 마지막 클레임 시간
-    mapping(bytes32 => mapping(uint256 => uint256)) public telegramLastClaimTime;
+    // 통합 식별자(해시) => 스팟 ID => 마지막 클레임 시간
+    mapping(bytes32 => mapping(uint256 => uint256)) public claimLastTime;
 
     // 텔레그램 ID 해시 => 연결된 지갑 주소
     mapping(bytes32 => address) public telegramToWallet;
 
+    // 지갑 주소 => 연결된 텔레그램 ID 해시 (역방향 매핑)
+    mapping(address => bytes32) public walletToTelegram;
+
     event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit);
     event Claimed(uint256 indexed spotId, address indexed user, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
     event Redeposited(uint256 indexed spotId, address indexed creator, uint256 amount);
-    event ClaimedToPhone(uint256 indexed spotId, bytes32 indexed phoneHash, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
     event TelegramClaimed(uint256 indexed spotId, bytes32 indexed telegramHash, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
     event TelegramLinked(bytes32 indexed telegramHash, address indexed oldWallet, address indexed newWallet, uint256 transferredAmount);
 
@@ -72,14 +66,16 @@ contract Tokamon {
         _;
     }
 
-    constructor() {
+    constructor(address _tonToken) {
         admin = msg.sender;
+        tonToken = IERC20(_tonToken);
     }
 
-    // Faucet: admin이 ETH를 보내면 user의 내부 잔액 증가
-    function deposit(address user) external payable {
-        require(msg.value > 0, "must send ETH");
-        balances[user] += msg.value;
+    // Faucet: admin이 TON 토큰을 전송하면 user의 내부 잔액 증가
+    function deposit(address user, uint256 amount) external onlyAdmin {
+        require(amount > 0, "must deposit TON");
+        require(tonToken.transferFrom(msg.sender, address(this), amount), "TON transfer failed");
+        balances[user] += amount;
     }
 
     // 스팟 생성
@@ -136,100 +132,126 @@ contract Tokamon {
         emit Redeposited(spotId, creator, amount);
     }
 
-    // 클레임: 서버(admin)가 위치/시간 검증 후 호출
+    // === 통합 클레임 함수 ===
+    
+    // 지갑 주소 기반 해시 생성
+    function _walletToHash(address user) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked("wallet:", user));
+    }
+
+    // 쿨다운 체크 (텔레그램 해시와 연결된 지갑 해시 모두 확인)
+    function _checkCooldown(uint256 spotId, bytes32 telegramHash, uint256 cooldown) internal view {
+        // 텔레그램 해시 쿨다운 체크 (첫 클레임이면 통과)
+        uint256 lastTelegram = claimLastTime[telegramHash][spotId];
+        if (lastTelegram > 0) {
+            require(
+                block.timestamp >= lastTelegram + cooldown,
+                "cooldown not elapsed"
+            );
+        }
+        
+        // 연결된 지갑이 있으면 지갑 해시도 체크 (연결 전 지갑으로 클레임한 경우 대비)
+        address linkedWallet = telegramToWallet[telegramHash];
+        if (linkedWallet != address(0)) {
+            bytes32 walletHash = _walletToHash(linkedWallet);
+            uint256 lastWallet = claimLastTime[walletHash][spotId];
+            if (lastWallet > 0) {
+                require(
+                    block.timestamp >= lastWallet + cooldown,
+                    "cooldown not elapsed (wallet)"
+                );
+            }
+        }
+    }
+    
+    // 쿨다운 체크 (지갑 주소와 연결된 텔레그램 해시 모두 확인)
+    function _checkCooldownForWallet(uint256 spotId, address user, uint256 cooldown) internal view {
+        bytes32 walletHash = _walletToHash(user);
+        
+        // 지갑 해시 쿨다운 체크 (첫 클레임이면 통과)
+        uint256 lastWallet = claimLastTime[walletHash][spotId];
+        if (lastWallet > 0) {
+            require(
+                block.timestamp >= lastWallet + cooldown,
+                "cooldown not elapsed"
+            );
+        }
+        
+        // 연결된 텔레그램이 있으면 텔레그램 해시도 체크
+        bytes32 linkedTelegram = walletToTelegram[user];
+        if (linkedTelegram != bytes32(0)) {
+            uint256 lastTelegram = claimLastTime[linkedTelegram][spotId];
+            if (lastTelegram > 0) {
+                require(
+                    block.timestamp >= lastTelegram + cooldown,
+                    "cooldown not elapsed (telegram)"
+                );
+            }
+        }
+    }
+
+    // 스탬프 통합 조회 (텔레그램 해시와 연결된 지갑 해시 중 큰 값)
+    function _getStampCount(uint256 spotId, bytes32 telegramHash) internal view returns (uint256) {
+        uint256 telegramStamps = claimStampCount[telegramHash][spotId];
+        
+        address linkedWallet = telegramToWallet[telegramHash];
+        if (linkedWallet != address(0)) {
+            bytes32 walletHash = _walletToHash(linkedWallet);
+            uint256 walletStamps = claimStampCount[walletHash][spotId];
+            // 더 큰 값 반환 (더 진행된 스탬프)
+            return telegramStamps > walletStamps ? telegramStamps : walletStamps;
+        }
+        return telegramStamps;
+    }
+    
+    // 스탬프 통합 조회 (지갑 기준)
+    function _getStampCountForWallet(uint256 spotId, address user) internal view returns (uint256) {
+        bytes32 walletHash = _walletToHash(user);
+        uint256 walletStamps = claimStampCount[walletHash][spotId];
+        
+        bytes32 linkedTelegram = walletToTelegram[user];
+        if (linkedTelegram != bytes32(0)) {
+            uint256 telegramStamps = claimStampCount[linkedTelegram][spotId];
+            return walletStamps > telegramStamps ? walletStamps : telegramStamps;
+        }
+        return walletStamps;
+    }
+
+    // 지갑 주소로 클레임: 서버(admin)가 위치/시간 검증 후 자동 호출
     function claim(uint256 spotId, address user) external onlyAdmin {
         Spot storage spot = spots[spotId];
         require(spot.reward > 0, "spot does not exist");
 
-        // 쿨다운 확인
-        require(
-            block.timestamp >= lastClaimTime[spotId][user] + spot.cooldown,
-            "cooldown not elapsed"
-        );
+        // 중복 발행이 허용되지 않는 경우 쿨다운 확인 (지갑+텔레그램 통합)
+        if (!spot.allowDuplicateClaims) {
+            _checkCooldownForWallet(spotId, user, spot.cooldown);
+        }
 
-        // 보상 계산
+        // 보상 계산 (스탬프 통합)
         uint256 payout = spot.reward;
-        uint256 newStamp = stampCount[spotId][user] + 1;
+        uint256 newStamp = _getStampCountForWallet(spotId, user) + 1;
         uint256 bonus = 0;
 
-        // 스탬프 목표 달성 시 보너스
         if (newStamp >= spot.stampGoal) {
             bonus = spot.stampBonus;
             payout += bonus;
-            newStamp = 0; // 스탬프 리셋
+            newStamp = 0;
         }
 
         require(spot.remaining >= payout, "spot exhausted");
 
-        // 상태 업데이트
+        // 상태 업데이트 (연결된 텔레그램이 있으면 텔레그램 해시에 기록, 없으면 지갑 해시)
+        bytes32 linkedTelegram = walletToTelegram[user];
+        bytes32 recordHash = linkedTelegram != bytes32(0) ? linkedTelegram : _walletToHash(user);
+        
         spot.remaining -= payout;
-        balances[user] += payout;
-        stampCount[spotId][user] = newStamp;
-        lastClaimTime[spotId][user] = block.timestamp;
+        claimStampCount[recordHash][spotId] = newStamp;
+        claimLastTime[recordHash][spotId] = block.timestamp;
+        
+        // TON을 사용자 지갑으로 직접 전송
+        require(tonToken.transfer(user, payout), "TON transfer failed");
 
-        emit Claimed(spotId, user, spot.reward, bonus, newStamp, block.timestamp);
-    }
-
-    // 핸드폰 번호로 클레임: 서버(admin)가 위치/시간 검증 후 호출
-    function claimToPhone(uint256 spotId, bytes32 phoneHash) external onlyAdmin {
-        Spot storage spot = spots[spotId];
-        require(spot.reward > 0, "spot does not exist");
-
-        // 쿨다운 확인
-        require(
-            block.timestamp >= phoneLastClaimTime[phoneHash][spotId] + spot.cooldown,
-            "cooldown not elapsed"
-        );
-
-        // 보상 계산
-        uint256 payout = spot.reward;
-        uint256 newStamp = phoneStampCount[phoneHash][spotId] + 1;
-        uint256 bonus = 0;
-
-        // 스탬프 목표 달성 시 보너스
-        if (newStamp >= spot.stampGoal) {
-            bonus = spot.stampBonus;
-            payout += bonus;
-            newStamp = 0; // 스탬프 리셋
-        }
-
-        require(spot.remaining >= payout, "spot exhausted");
-
-        // 상태 업데이트
-        spot.remaining -= payout;
-        phoneBalances[phoneHash] += payout;
-        phoneStampCount[phoneHash][spotId] = newStamp;
-        phoneLastClaimTime[phoneHash][spotId] = block.timestamp;
-
-        emit ClaimedToPhone(spotId, phoneHash, spot.reward, bonus, newStamp, block.timestamp);
-    }
-
-    // 핸드폰 번호 잔액 조회
-    function getPhoneBalance(bytes32 phoneHash) external view returns (uint256) {
-        return phoneBalances[phoneHash];
-    }
-
-    // 핸드폰 번호 스탬프 정보 조회
-    function getPhoneStampInfo(uint256 spotId, bytes32 phoneHash) external view returns (
-        uint256 stamps,
-        uint256 goal,
-        uint256 lastClaim,
-        uint256 cooldownRemaining
-    ) {
-        Spot storage s = spots[spotId];
-        uint256 last = phoneLastClaimTime[phoneHash][spotId];
-        uint256 remaining = 0;
-
-        if (last + s.cooldown > block.timestamp) {
-            remaining = (last + s.cooldown) - block.timestamp;
-        }
-
-        return (
-            phoneStampCount[phoneHash][spotId],
-            s.stampGoal,
-            last,
-            remaining
-        );
+        emit Claimed(spotId, user, payout - bonus, bonus, newStamp, block.timestamp);
     }
 
     // === 텔레그램 기능 ===
@@ -240,35 +262,33 @@ contract Tokamon {
         require(spot.reward > 0, "spot does not exist");
         require(spot.creator == msg.sender, "only spot owner can claim");
 
-        // 중복 발행이 허용되지 않는 경우에만 쿨다운 확인
+        // 중복 발행이 허용되지 않는 경우 쿨다운 확인 (텔레그램+지갑 통합)
         if (!spot.allowDuplicateClaims) {
-            require(
-                block.timestamp >= telegramLastClaimTime[telegramHash][spotId] + spot.cooldown,
-                "cooldown not elapsed"
-            );
+            _checkCooldown(spotId, telegramHash, spot.cooldown);
         }
 
-        // 보상 계산
+        // 보상 계산 (스탬프 통합)
         uint256 payout = spot.reward;
-        uint256 newStamp = telegramStampCount[telegramHash][spotId] + 1;
+        uint256 newStamp = _getStampCount(spotId, telegramHash) + 1;
         uint256 bonus = 0;
 
-        // 스탬프 목표 달성 시 보너스
         if (newStamp >= spot.stampGoal) {
             bonus = spot.stampBonus;
             payout += bonus;
-            newStamp = 0; // 스탬프 리셋
+            newStamp = 0;
         }
 
         require(spot.remaining >= payout, "spot exhausted");
 
-        // 상태 업데이트
+        // 상태 업데이트 (항상 텔레그램 해시에 기록)
         spot.remaining -= payout;
+        claimStampCount[telegramHash][spotId] = newStamp;
+        claimLastTime[telegramHash][spotId] = block.timestamp;
+        
+        // TON을 텔레그램 잔액에 추가
         telegramBalances[telegramHash] += payout;
-        telegramStampCount[telegramHash][spotId] = newStamp;
-        telegramLastClaimTime[telegramHash][spotId] = block.timestamp;
 
-        emit TelegramClaimed(spotId, telegramHash, spot.reward, bonus, newStamp, block.timestamp);
+        emit TelegramClaimed(spotId, telegramHash, payout - bonus, bonus, newStamp, block.timestamp);
     }
 
     // 텔레그램 잔액 조회
@@ -276,15 +296,15 @@ contract Tokamon {
         return telegramBalances[telegramHash];
     }
 
-    // 텔레그램 스탬프 정보 조회
-    function getTelegramStampInfo(uint256 spotId, bytes32 telegramHash) external view returns (
+    // 통합 스탬프 정보 조회 (텔레그램 해시 또는 지갑 주소)
+    function getClaimInfo(uint256 spotId, bytes32 identifier) external view returns (
         uint256 stamps,
         uint256 goal,
         uint256 lastClaim,
         uint256 cooldownRemaining
     ) {
         Spot storage s = spots[spotId];
-        uint256 last = telegramLastClaimTime[telegramHash][spotId];
+        uint256 last = claimLastTime[identifier][spotId];
         uint256 remaining = 0;
 
         if (last + s.cooldown > block.timestamp) {
@@ -292,11 +312,21 @@ contract Tokamon {
         }
 
         return (
-            telegramStampCount[telegramHash][spotId],
+            claimStampCount[identifier][spotId],
             s.stampGoal,
             last,
             remaining
         );
+    }
+    
+    // 텔레그램 스탬프 정보 조회 (하위 호환)
+    function getTelegramStampInfo(uint256 spotId, bytes32 telegramHash) external view returns (
+        uint256 stamps,
+        uint256 goal,
+        uint256 lastClaim,
+        uint256 cooldownRemaining
+    ) {
+        return this.getClaimInfo(spotId, telegramHash);
     }
 
     // 텔레그램에 연결된 지갑 조회
@@ -304,29 +334,59 @@ contract Tokamon {
         return telegramToWallet[telegramHash];
     }
 
-    // 텔레그램을 지갑에 연결 (지갑 변경 가능)
+    // 지갑에 연결된 텔레그램 조회 (역방향)
+    function getWalletLinkedTelegram(address wallet) external view returns (bytes32) {
+        return walletToTelegram[wallet];
+    }
+
+    // 텔레그램 잔액을 지갑으로 클레임
+    function claimTelegramToWallet(bytes32 telegramHash) external {
+        // 파라미터로 받은 해시와 지갑에 연결된 해시가 일치하는지 확인
+        bytes32 linkedHash = walletToTelegram[msg.sender];
+        require(linkedHash != bytes32(0), "no telegram linked");
+        require(linkedHash == telegramHash, "hash mismatch");
+        
+        uint256 amount = telegramBalances[telegramHash];
+        require(amount > 0, "no balance");
+        
+        telegramBalances[telegramHash] = 0;
+        // TON 토큰을 지갑으로 전송
+        require(tonToken.transfer(msg.sender, amount), "TON transfer failed");
+    }
+
+    // 텔레그램을 지갑에 연결 (1:1 매핑 보장)
+    // 기존 지갑 기반 클레임 기록을 텔레그램 해시로 병합
     function linkTelegramToWallet(bytes32 telegramHash, address wallet) external onlyAdmin {
         require(wallet != address(0), "invalid wallet");
+        require(telegramHash != bytes32(0), "invalid telegram hash");
 
+        // 이미 다른 텔레그램에 연결되어 있는지 확인
+        bytes32 existingTelegram = walletToTelegram[wallet];
+        require(existingTelegram == bytes32(0) || existingTelegram == telegramHash, "wallet already linked to another telegram");
+
+        // 이전 매핑 제거
         address oldWallet = telegramToWallet[telegramHash];
-        telegramToWallet[telegramHash] = wallet;
-
-        // 텔레그램 잔액을 새 지갑으로 이전
-        uint256 amount = telegramBalances[telegramHash];
-        if (amount > 0) {
-            telegramBalances[telegramHash] = 0;
-            balances[wallet] += amount;
+        if (oldWallet != address(0) && oldWallet != wallet) {
+            delete walletToTelegram[oldWallet];
         }
 
-        emit TelegramLinked(telegramHash, oldWallet, wallet, amount);
+        // 새 매핑 설정 (양방향)
+        telegramToWallet[telegramHash] = wallet;
+        walletToTelegram[wallet] = telegramHash;
+
+        // 참고: 기존 지갑 해시 기반 클레임 기록은 병합하지 않음
+        // 클레임 시점에 양쪽(텔레그램 해시 + 지갑 해시)을 모두 체크하여 중복 방지
+
+        emit TelegramLinked(telegramHash, oldWallet, wallet, 0);
     }
 
     // === 사용자 직접 호출 함수 (MetaMask 연동) ===
 
-    // 충전: 사용자가 직접 ETH를 보내서 내부 잔액 증가
-    function depositSelf() external payable {
-        require(msg.value > 0, "must send ETH");
-        balances[msg.sender] += msg.value;
+    // 충전: 사용자가 직접 TON 토큰을 전송하여 내부 잔액 증가
+    function depositSelf(uint256 amount) external {
+        require(amount > 0, "must deposit TON");
+        require(tonToken.transferFrom(msg.sender, address(this), amount), "TON transfer failed");
+        balances[msg.sender] += amount;
     }
 
     // 스팟 생성: 점주가 직접 트랜잭션 서명
@@ -427,7 +487,7 @@ contract Tokamon {
         return (s.creator, s.reward, s.remaining, s.stampGoal, s.stampBonus, s.cooldown, s.allowDuplicateClaims);
     }
 
-    // 스탬프 현황 조회
+    // 스탬프 현황 조회 (지갑 주소 기준 - 텔레그램 연결 고려)
     function getStampInfo(uint256 spotId, address user) external view returns (
         uint256 stamps,
         uint256 goal,
@@ -435,7 +495,12 @@ contract Tokamon {
         uint256 cooldownRemaining
     ) {
         Spot storage s = spots[spotId];
-        uint256 last = lastClaimTime[spotId][user];
+        
+        // 연결된 텔레그램 해시가 있으면 텔레그램 해시 기록 사용
+        bytes32 linkedTelegram = walletToTelegram[user];
+        bytes32 checkHash = linkedTelegram != bytes32(0) ? linkedTelegram : _walletToHash(user);
+        
+        uint256 last = claimLastTime[checkHash][spotId];
         uint256 remaining = 0;
 
         if (last + s.cooldown > block.timestamp) {
@@ -443,7 +508,7 @@ contract Tokamon {
         }
 
         return (
-            stampCount[spotId][user],
+            _getStampCountForWallet(spotId, user),
             s.stampGoal,
             last,
             remaining
