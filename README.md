@@ -37,12 +37,12 @@ Create a `.env` file in the project root:
 
 ```env
 RPC_URL=http://127.0.0.1:8999
-ADMIN_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+ADMIN_PRIVATE_KEY=<anvil_default_account_0_private_key>
+TELEGRAM_BOT_TOKEN=<your_telegram_bot_token>
 TELEGRAM_HASH_SALT=tokamon-telegram-2024
 ```
 
-> `ADMIN_PRIVATE_KEY` is Anvil's default account #0. `TELEGRAM_BOT_TOKEN` can be obtained from [@BotFather](https://t.me/BotFather).
+> `ADMIN_PRIVATE_KEY` — Use Anvil's default account #0 private key (printed when you run `npm run anvil`). This is a local testnet key with no real value. `TELEGRAM_BOT_TOKEN` — Create a bot via [@BotFather](https://t.me/BotFather).
 
 ```bash
 npm run dev
