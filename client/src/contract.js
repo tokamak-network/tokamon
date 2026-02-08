@@ -5,7 +5,7 @@ const COORD_SCALE = 1_000_000;
 
 // 최소 ABI — 클라이언트에서 호출할 함수만 포함
 const ABI = [
-  'function depositSelf() external payable',
+  'function depositSelf(uint256 amount) external',
   'function createSpotSelf(uint256 depositAmt, uint256 reward, uint256 stampGoal, uint256 stampBonus, uint256 cooldown, bool allowDuplicateClaims, tuple(string name, string description, int256 lat, int256 lng, string startTime, string endTime) meta) external returns (uint256)',
   'function redepositSelf(uint256 spotId, uint256 amount) external',
   'function updateCooldown(uint256 spotId, uint256 newCooldown) external',
@@ -42,18 +42,46 @@ export function resetContractCache() {
   cachedSigner = null;
 }
 
-// 충전: 사용자가 직접 ETH 전송
+// 충전: 사용자가 직접 TON 토큰 전송
 export async function depositSelf(amountTon) {
-  const { contract } = await getSignerAndContract();
-  const tx = await contract.depositSelf({ value: ethers.parseEther(String(amountTon)) });
-  await tx.wait();
+  const contractInfo = await getContractInfo();
+  const tonTokenAddress = contractInfo.tonToken;
+  const { signer, contract } = await getSignerAndContract();
+  
+  const amount = ethers.parseEther(String(amountTon));
+  
+  // 1. TON 토큰 approve
+  const tonTokenAbi = [
+    'function approve(address spender, uint256 amount) returns (bool)',
+    'function balanceOf(address) view returns (uint256)'
+  ];
+  const tonToken = new ethers.Contract(tonTokenAddress, tonTokenAbi, signer);
+  
+  const approveTx = await tonToken.approve(contractInfo.address, amount);
+  await approveTx.wait();
+  
+  // 2. depositSelf 호출
+  const depositTx = await contract.depositSelf(amount);
+  await depositTx.wait();
 }
 
 // 스팟 생성: 점주가 직접 트랜잭션 서명
 export async function createSpotSelf(depositTon, rewardTon, stampGoal, stampBonus, cooldown, allowDuplicateClaims, metadata) {
-  const { contract } = await getSignerAndContract();
+  const contractInfo = await getContractInfo();
+  const tonTokenAddress = contractInfo.tonToken;
+  const { signer, contract } = await getSignerAndContract();
   const { name, description, lat, lng, startTime, endTime } = metadata;
 
+  const depositAmount = ethers.parseEther(String(depositTon));
+
+  // 1. TON 토큰 approve
+  const tonTokenAbi = ['function approve(address spender, uint256 amount) returns (bool)'];
+  const tonToken = new ethers.Contract(tonTokenAddress, tonTokenAbi, signer);
+  
+  const approveTx = await tonToken.approve(contractInfo.address, depositAmount);
+  await approveTx.wait();
+
+  // 2. createSpotSelf 호출
   const meta = {
     name,
     description: description || '',
@@ -64,7 +92,7 @@ export async function createSpotSelf(depositTon, rewardTon, stampGoal, stampBonu
   };
 
   const tx = await contract.createSpotSelf(
-    ethers.parseEther(String(depositTon)),
+    depositAmount,
     ethers.parseEther(String(rewardTon)),
     stampGoal,
     ethers.parseEther(String(stampBonus)),
@@ -92,8 +120,21 @@ export async function createSpotSelf(depositTon, rewardTon, stampGoal, stampBonu
 
 // 재예치: 점주가 직접 트랜잭션 서명
 export async function redepositSelf(spotId, amountTon) {
-  const { contract } = await getSignerAndContract();
-  const tx = await contract.redepositSelf(spotId, ethers.parseEther(String(amountTon)));
+  const contractInfo = await getContractInfo();
+  const tonTokenAddress = contractInfo.tonToken;
+  const { signer, contract } = await getSignerAndContract();
+  
+  const amount = ethers.parseEther(String(amountTon));
+  
+  // 1. TON 토큰 approve
+  const tonTokenAbi = ['function approve(address spender, uint256 amount) returns (bool)'];
+  const tonToken = new ethers.Contract(tonTokenAddress, tonTokenAbi, signer);
+  
+  const approveTx = await tonToken.approve(contractInfo.address, amount);
+  await approveTx.wait();
+  
+  // 2. redepositSelf 호출
+  const tx = await contract.redepositSelf(spotId, amount);
   await tx.wait();
 }
 
@@ -111,11 +152,27 @@ export async function updateAllowDuplicateClaims(spotId, allow) {
   await tx.wait();
 }
 
-// 잔액 조회: 컨트랙트에서 직접 읽기
+// TON 토큰 잔액 조회 (실제 ERC20 토큰 잔액)
 export async function getBalance(address) {
-  const { contract } = await getSignerAndContract();
-  const bal = await contract.getBalance(address);
-  return Number(ethers.formatEther(bal));
+  try {
+    const contractInfo = await getContractInfo();
+    const tonTokenAddress = contractInfo.tonToken;
+    
+    if (!tonTokenAddress) {
+      console.warn('TON Token address not found');
+      return 0;
+    }
+    
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const tonTokenAbi = ['function balanceOf(address) view returns (uint256)'];
+    const tonToken = new ethers.Contract(tonTokenAddress, tonTokenAbi, provider);
+    
+    const bal = await tonToken.balanceOf(address);
+    return Number(ethers.formatEther(bal));
+  } catch (error) {
+    console.error('Error getting TON balance:', error);
+    return 0;
+  }
 }
 
 // 텔레그램 잔액 조회

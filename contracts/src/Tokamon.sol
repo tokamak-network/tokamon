@@ -389,7 +389,7 @@ contract Tokamon {
         balances[msg.sender] += amount;
     }
 
-    // 스팟 생성: 점주가 직접 트랜잭션 서명
+    // 스팟 생성: 점주가 직접 트랜잭션 서명 (TON 토큰 transferFrom 사용)
     function createSpotSelf(
         uint256 depositAmt,
         uint256 reward,
@@ -401,10 +401,9 @@ contract Tokamon {
     ) external returns (uint256) {
         require(reward > 0, "reward must be > 0");
         require(depositAmt >= reward, "deposit must be >= reward");
-        require(balances[msg.sender] >= depositAmt, "insufficient balance");
         require(stampGoal > 0, "stampGoal must be > 0");
 
-        balances[msg.sender] -= depositAmt;
+        require(tonToken.transferFrom(msg.sender, address(this), depositAmt), "TON transfer failed");
 
         uint256 spotId = nextSpotId;
         Spot storage s = spots[spotId];
@@ -429,14 +428,13 @@ contract Tokamon {
         return spotId;
     }
 
-    // 재예치: 점주가 직접 트랜잭션 서명
+    // 재예치: 점주가 직접 트랜잭션 서명 (TON 토큰 transferFrom 사용)
     function redepositSelf(uint256 spotId, uint256 amount) external {
         Spot storage spot = spots[spotId];
         require(spot.reward > 0, "spot does not exist");
         require(spot.creator == msg.sender, "not spot creator");
-        require(balances[msg.sender] >= amount, "insufficient balance");
 
-        balances[msg.sender] -= amount;
+        require(tonToken.transferFrom(msg.sender, address(this), amount), "TON transfer failed");
         spot.remaining += amount;
 
         emit Redeposited(spotId, msg.sender, amount);
