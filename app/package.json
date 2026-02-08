@@ -1,0 +1,26 @@
+{
+  "name": "tokamon-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "node tests/app.test.js"
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-native": "0.73.4",
+    "react-native-maps": "^1.10.0",
+    "@react-native-community/geolocation": "^3.2.1",
+    "jail-monkey": "^2.8.0",
+    "@tonconnect/react-ui": "^2.0.0",
+    "@tonconnect/sdk": "^3.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@babel/preset-env": "^7.20.0",
+    "@babel/runtime": "^7.20.0",
+    "metro-react-native-babel-preset": "0.76.8"
+  }
+}
