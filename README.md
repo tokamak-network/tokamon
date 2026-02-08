@@ -31,12 +31,24 @@ Tokamon is a location-based loyalty reward platform on EVM. Store owners deposit
 git clone https://github.com/tokamak-network/tokamon.git
 cd tokamon
 npm run install:all
+```
+
+Create a `.env` file in the project root:
+
+```env
+RPC_URL=http://127.0.0.1:8999
+ADMIN_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+TELEGRAM_HASH_SALT=tokamon-telegram-2024
+```
+
+> `ADMIN_PRIVATE_KEY` is Anvil's default account #0. `TELEGRAM_BOT_TOKEN` can be obtained from [@BotFather](https://t.me/BotFather).
+
+```bash
 npm run dev
 ```
 
 Open http://localhost:5173 and connect MetaMask (Chain ID: 1337, RPC: http://127.0.0.1:8999).
-
-For Telegram bot, set `TELEGRAM_BOT_TOKEN` in `.env`.
 
 ## Tech Stack
 
