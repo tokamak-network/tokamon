@@ -176,7 +176,7 @@ function initBot(database) {
         return bot.sendMessage(chatId, `
 ❌ 올바르지 않은 이더리움 주소입니다.
 
-주소는 0x로 시작하고 40자리 16진수여야 합니다.
+주소는 0x로 시작하고 20자리 16진수여야 합니다.
 예시: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
 
 다시 입력하거나 /cancel로 취소하세요.
@@ -231,10 +231,8 @@ function initBot(database) {
         
         if (result.transferredAmount > 0) {
           message += `💰 이전된 잔액: ${result.transferredAmount.toFixed(2)} TON\n\n`;
-          message += `이제 해당 지갑으로 로그인하여 사용하실 수 있습니다!`;
-        } else {
-          message += `\n현재 이전할 잔액이 없습니다.`;
         }
+        message += `이제 해당 지갑으로 로그인하여 사용하실 수 있습니다!`;
         
         bot.sendMessage(chatId, message);
         
@@ -280,7 +278,7 @@ function initBot(database) {
 🔗 지갑 연결을 시작합니다!
 
 이더리움 주소를 입력해주세요.
-(형식: 0x로 시작하는 40자리 주소)
+(형식: 0x로 시작하는 20자리 주소)
 
 예시: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
 
@@ -325,9 +323,7 @@ function initBot(database) {
 현재 잔액: ${balance.toFixed(2)} TON
 
 새로운 이더리움 주소를 입력해주세요.
-(형식: 0x로 시작하는 40자리 주소)
-
-⚠️ 주의: 잔액이 새 지갑으로 자동 이전됩니다.
+(형식: 0x로 시작하는 20자리 주소)
 
 취소하려면 /cancel 입력
       `);
@@ -391,24 +387,31 @@ async function getChatIdByUsername(username) {
 }
 
 // 클레임 알림 전송
-async function sendClaimNotification(telegramUsername, spotName, reward, bonus, balance) {
+async function sendClaimNotification(telegramUsername, spotName, reward, bonus, balance, linkedWallet) {
   if (!bot) return;
-  
+
   const chatId = await getChatIdByUsername(telegramUsername);
   if (!chatId) {
     console.log(`텔레그램 알림 실패: @${telegramUsername}의 chat_id를 찾을 수 없음`);
     return;
   }
-  
+
   let message = `✅ [${spotName}]에서 ${reward} TON 적립!`;
-  
+
   if (bonus > 0) {
     message += `\n🎁 스탬프 보너스: ${bonus} TON!`;
   }
-  
+
   message += `\n💰 현재 잔액: ${balance.toFixed(2)} TON`;
-  message += `\n\n지갑에 연결하려면 /link 입력`;
-  
+
+  if (linkedWallet) {
+    message += `\n\n💼 연결된 지갑: ${linkedWallet.slice(0, 6)}...${linkedWallet.slice(-4)}`;
+    message += `\n지갑을 변경하려면 /change 입력`;
+  } else {
+    message += `\n\n지갑을 연결하면 TON을 출금할 수 있습니다.`;
+    message += `\n연결하려면 /link 입력`;
+  }
+
   try {
     await bot.sendMessage(chatId, message);
   } catch (err) {

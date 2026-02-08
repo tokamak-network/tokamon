@@ -304,9 +304,14 @@ router.post('/notify-claim', async (req, res) => {
     console.log('해시 계산:', { telegram_username, username, telegramHash });
     const balance = await blockchain.getTelegramBalance(telegramHash);
     console.log('조회된 잔액:', balance);
-    
+
+    // 연결된 지갑 조회
+    const linkedWallet = await blockchain.getTelegramLinkedWallet(telegramHash);
+    const zeroAddress = '0x0000000000000000000000000000000000000000';
+    const hasLinkedWallet = linkedWallet && linkedWallet !== zeroAddress;
+
     // 텔레그램 알림 전송
-    await sendClaimNotification(username, spot_name, reward, bonus, balance);
+    await sendClaimNotification(username, spot_name, reward, bonus, balance, hasLinkedWallet ? linkedWallet : null);
     
     res.json({ success: true });
   } catch (err) {
