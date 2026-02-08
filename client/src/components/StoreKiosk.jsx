@@ -392,28 +392,17 @@ export default function StoreKiosk() {
         <div className="kiosk-header-content">
           <h2>{selectedSpot.name}</h2>
           <p>텔레그램 username을 입력하여 {selectedSpot.reward} TON을 받으세요</p>
-        </div>
-      </div>
-
-      <div className="kiosk-main">
-        {/* 텔레그램 봇 안내 */}
-        <div style={{ 
-          background: 'rgba(0, 136, 204, 0.1)', 
-          borderRadius: '8px', 
-          padding: '12px 16px',
-          marginBottom: '16px',
-          border: '1px solid rgba(0, 136, 204, 0.3)'
-        }}>
           <p style={{ 
-            margin: 0, 
             fontSize: '13px', 
-            lineHeight: '1.5', 
-            color: '#aaa' 
+            color: '#aaa',
+            marginTop: '8px'
           }}>
             💬 적립 알림을 받으려면 텔레그램 <strong style={{ color: '#0088CC' }}>@TokamonBot</strong>에게 <strong style={{ color: '#0088CC' }}>/start</strong> 입력 (최초 1회)
           </p>
         </div>
+      </div>
 
+      <div className="kiosk-main">
         <div className="telegram-input-large">
           <label>톤을 받으실 텔레그램 Username</label>
           <input
