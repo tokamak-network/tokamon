@@ -13,7 +13,7 @@ export const translations = {
     
     // 역할 선택
     roleSelectSubtitle: '매장 방문하고 TON 받자',
-    roleSelectSubtitleSub: 'Web3 기반 로열티 리워드 플랫폼',
+    roleSelectSubtitleSub: '',
     selectRole: '역할을 선택하세요',
     customer: '고객',
     storeKiosk: '매장 키오스크로 톤받기',
@@ -186,8 +186,8 @@ export const translations = {
     appName: 'Tokamon',
     
     // Role Selection
-    roleSelectSubtitle: 'Visit stores and earn TON',
-    roleSelectSubtitleSub: 'Web3-based Loyalty Reward Platform',
+    roleSelectSubtitle: 'Turn your daily visits into crypto rewards.',
+    roleSelectSubtitleSub: '',
     selectRole: 'Select Your Role',
     customer: 'Customer',
     storeKiosk: 'Store Kiosk Claim',

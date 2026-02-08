@@ -293,83 +293,26 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
     // 1단계: 스팟 선택
     return (
       <div className="store-kiosk">
-        <div className="kiosk-header">
-          <h1>{t(language, 'storeKiosk')}</h1>
-          <p>{t(language, 'selectSpotForReward')}</p>
-          {wallet && (
-            <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-              <p style={{ fontSize: '14px', color: '#10b981', margin: 0 }}>
-                🔗 {t(language, 'ownerConnected')}: {wallet.slice(0, 6)}...{wallet.slice(-4)}
-              </p>
-              <button 
-                onClick={disconnectWallet}
-                style={{
-                  padding: '6px 16px',
-                  fontSize: '13px',
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  borderRadius: '8px',
-                  color: '#ef4444',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  fontWeight: '500'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'rgba(239, 68, 68, 0.2)';
-                  e.target.style.borderColor = 'rgba(239, 68, 68, 0.5)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'rgba(239, 68, 68, 0.1)';
-                  e.target.style.borderColor = 'rgba(239, 68, 68, 0.3)';
-                }}
-              >
-                {t(language, 'disconnect')}
-              </button>
-              
-              {/* 언어 설정 */}
-              <div style={{ 
-                display: 'flex', 
-                gap: '8px',
-                padding: '8px',
-                background: 'rgba(59, 130, 246, 0.1)',
-                borderRadius: '8px',
-                border: '1px solid rgba(59, 130, 246, 0.2)'
-              }}>
-                <button
-                  onClick={() => onLanguageChange && onLanguageChange('ko')}
-                  style={{
-                    padding: '6px 12px',
-                    fontSize: '13px',
-                    background: language === 'ko' ? '#3b82f6' : 'transparent',
-                    border: '1px solid ' + (language === 'ko' ? '#3b82f6' : '#444'),
-                    borderRadius: '6px',
-                    color: language === 'ko' ? '#fff' : '#ccc',
-                    cursor: 'pointer',
-                    fontWeight: language === 'ko' ? '600' : '500',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  한국어
+        <div className="kiosk-topbar">
+          <h1 className="kiosk-topbar-title">{t(language, 'storeKiosk')}</h1>
+          <div className="kiosk-topbar-right">
+            {wallet && (
+              <>
+                <span className="kiosk-topbar-wallet">
+                  🔗 {wallet.slice(0, 6)}...{wallet.slice(-4)}
+                </span>
+                <button className="kiosk-topbar-btn disconnect" onClick={disconnectWallet}>
+                  {t(language, 'disconnect')}
                 </button>
-                <button
-                  onClick={() => onLanguageChange && onLanguageChange('en')}
-                  style={{
-                    padding: '6px 12px',
-                    fontSize: '13px',
-                    background: language === 'en' ? '#3b82f6' : 'transparent',
-                    border: '1px solid ' + (language === 'en' ? '#3b82f6' : '#444'),
-                    borderRadius: '6px',
-                    color: language === 'en' ? '#fff' : '#ccc',
-                    cursor: 'pointer',
-                    fontWeight: language === 'en' ? '600' : '500',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  English
-                </button>
-              </div>
-            </div>
-          )}
+              </>
+            )}
+            <button
+              className="kiosk-topbar-btn lang"
+              onClick={() => onLanguageChange && onLanguageChange(language === 'ko' ? 'en' : 'ko')}
+            >
+              {language === 'ko' ? 'EN' : '한국어'}
+            </button>
+          </div>
         </div>
 
         <div className="kiosk-spot-selection">

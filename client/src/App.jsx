@@ -84,8 +84,7 @@ export default function App() {
     const saved = localStorage.getItem('tokamon_language');
     if (saved) return saved;
     // 브라우저 언어 감지
-    const browserLang = navigator.language.toLowerCase();
-    return browserLang.startsWith('ko') ? 'ko' : 'en';
+    return 'en';
   });
 
   // 언어 변경 함수
@@ -150,15 +149,9 @@ export default function App() {
     };
   }, [fetchNetworkInfo]);
 
-  // GPS
+  // GPS (데모용: 남산 위치 고정)
   useEffect(() => {
-    if (!navigator.geolocation) return;
-    const id = navigator.geolocation.watchPosition(
-      (pos) => setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      (err) => console.warn('GPS:', err.message),
-      { enableHighAccuracy: true, maximumAge: 5000 }
-    );
-    return () => navigator.geolocation.clearWatch(id);
+    setUserPos({ lat: 37.5512, lng: 126.9882 });
   }, []);
 
   // 잔액 갱신 (TON + ETH)

@@ -18,16 +18,15 @@ export default function RoleSelect({ onSelect, language = 'ko' }) {
           >
             <DinoCharacter
               animation={animation}
-              height="80px"
-              width="80px"
-              scale={1}
+              height="145px"
+              width="145px"
+              scale={1.4}
               cameraPosition={[0, 2, 4]}
             />
           </div>
           <h1 className="main-title">{t(language, 'appName')}</h1>
         </div>
         <p className="role-select-subtitle">{t(language, 'roleSelectSubtitle')}</p>
-        <p className="role-select-subtitle-sub">{t(language, 'roleSelectSubtitleSub')}</p>
       </div>
 
       <div className="role-select-buttons">

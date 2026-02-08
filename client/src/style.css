@@ -927,7 +927,7 @@ button.secondary {
   padding: 20px;
   background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
   position: relative;
-  overflow-y: auto;
+  overflow: visible;
 }
 
 /* 배경 이미지 제거됨 */
@@ -940,7 +940,7 @@ button.secondary {
 .role-select-header {
   text-align: center;
   margin-bottom: 16px;
-  padding-top: 0px;
+  padding-top: 60px;
   z-index: 1;
   overflow: visible;
 }
@@ -957,17 +957,18 @@ button.secondary {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 0px;
   overflow: visible;
   padding: 0;
-  margin-top: -60px;
+  margin-top: -40px;
 }
 
 .character-icon {
-  width: 80px;
-  height: 80px;
+  width: 145px;
+  height: 130px;
   flex-shrink: 0;
   overflow: visible;
+  margin-top: 10px;
 }
 
 .title-icon {
@@ -1612,13 +1613,12 @@ button.secondary {
   50% { transform: scale(1.2); opacity: 0.8; }
 }
 
-/* 매장 키오스크 */
+/* 매장 키오스크 (기본) */
 .store-kiosk {
   display: flex;
-  height: calc(100vh - 60px);
+  flex-direction: column;
+  height: calc(100vh - 48px);
   background: #111;
-  padding: 20px;
-  gap: 20px;
 }
 
 .kiosk-left {
@@ -1839,7 +1839,66 @@ button.secondary {
   background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 100%);
 }
 
-/* 키오스크 헤더 */
+/* 키오스크 상단 바 */
+.kiosk-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.kiosk-topbar-title {
+  font-size: 18px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.kiosk-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kiosk-topbar-wallet {
+  font-size: 12px;
+  color: #10b981;
+  white-space: nowrap;
+}
+
+.kiosk-topbar-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  width: auto;
+}
+
+.kiosk-topbar-btn.disconnect {
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.kiosk-topbar-btn.lang {
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+}
+
+/* 키오스크 헤더 (레거시 - 2단계에서 사용) */
 .kiosk-header {
   text-align: center;
   padding: 60px 20px 40px;
@@ -1950,10 +2009,10 @@ button.secondary {
 
 /* 스팟 선택 그리드 */
 .kiosk-spot-selection {
-  padding: 20px 30px;
+  padding: 12px 30px;
   max-width: 1300px;
   margin: 0 auto;
-  max-height: calc(100vh - 250px);
+  max-height: calc(100vh - 60px);
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -1990,7 +2049,7 @@ button.secondary {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 16px;
-  margin-top: 20px;
+  margin-top: 0;
 }
 
 /* 반응형 - 태블릿 */
@@ -2027,26 +2086,35 @@ button.secondary {
   
   .kiosk-spot-selection {
     padding: 16px;
-    max-height: calc(100vh - 220px);
+    max-height: calc(100vh - 50px);
+    min-height: calc(100vh - 50px);
   }
-  
+
+  .kiosk-topbar {
+    padding: 8px 12px;
+  }
+
+  .kiosk-topbar-title {
+    font-size: 15px;
+  }
+
   .kiosk-header {
     padding: 40px 20px 30px;
   }
-  
+
   .kiosk-header h1 {
     font-size: 36px;
   }
-  
+
   .kiosk-header p {
     font-size: 16px;
   }
 }
 
 .spot-card-compact {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   padding: 16px 20px;
   cursor: pointer;
@@ -2567,8 +2635,15 @@ button.secondary {
 @media (max-width: 768px) {
   .store-kiosk {
     flex-direction: column;
-    height: auto;
-    overflow-y: auto;
+    height: calc(100vh - 48px);
+  }
+
+  .kiosk-topbar {
+    padding: 8px 12px;
+  }
+
+  .kiosk-topbar-title {
+    font-size: 14px;
   }
 
   .kiosk-header h1 {

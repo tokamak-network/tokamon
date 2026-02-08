@@ -8,9 +8,9 @@ export default function DinoCharacter({
   scale = 1,
   cameraPosition = [0, 2, 4] // 3D 호환성을 위해 유지
 }) {
-  
+
   return (
-    <div 
+    <div
       className="dino-character-container"
       style={{
         height: height,
@@ -19,10 +19,10 @@ export default function DinoCharacter({
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'visible'
       }}
     >
-      <div 
+      <div
         className={`dino-character dino-${animation}`}
         style={{
           width: '100%',
@@ -32,12 +32,12 @@ export default function DinoCharacter({
           justifyContent: 'center'
         }}
       >
-        <img 
-          src="/tokamon-char.png" 
+        <img
+          src="/tokamon-char.png"
           alt="Tokamon Character"
           style={{
-            maxWidth: '90%',
-            maxHeight: '90%',
+            maxWidth: '70%',
+            maxHeight: '70%',
             objectFit: 'contain',
             filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))'
           }}
@@ -58,38 +58,38 @@ export default function DinoCharacter({
         }
 
         @keyframes dino-idle-anim {
-          0%, 100% { 
-            transform: translateY(0px) scale(${scale}); 
+          0%, 100% {
+            transform: translateY(0px) scale(${scale});
           }
-          50% { 
-            transform: translateY(-8px) scale(${scale}); 
+          50% {
+            transform: translateY(-8px) scale(${scale});
           }
         }
 
         @keyframes dino-walk-anim {
-          0% { 
-            transform: translateX(-5px) rotate(-3deg) scale(${scale}); 
+          0% {
+            transform: translateX(-5px) rotate(-3deg) scale(${scale});
           }
-          50% { 
-            transform: translateX(5px) rotate(3deg) scale(${scale}); 
+          50% {
+            transform: translateX(5px) rotate(3deg) scale(${scale});
           }
-          100% { 
-            transform: translateX(-5px) rotate(-3deg) scale(${scale}); 
+          100% {
+            transform: translateX(-5px) rotate(-3deg) scale(${scale});
           }
         }
 
         @keyframes dino-jump-anim {
-          0%, 100% { 
-            transform: translateY(0px) scale(${scale * 1}, ${scale * 1}); 
+          0%, 100% {
+            transform: translateY(0px) scale(${scale * 1}, ${scale * 1});
           }
-          30% { 
-            transform: translateY(-35px) scale(${scale * 1.1}, ${scale * 0.9}); 
+          30% {
+            transform: translateY(-35px) scale(${scale * 1.1}, ${scale * 0.9});
           }
-          50% { 
-            transform: translateY(-45px) scale(${scale * 1}, ${scale * 1}); 
+          50% {
+            transform: translateY(-45px) scale(${scale * 1}, ${scale * 1});
           }
-          70% { 
-            transform: translateY(-35px) scale(${scale * 0.9}, ${scale * 1.1}); 
+          70% {
+            transform: translateY(-35px) scale(${scale * 0.9}, ${scale * 1.1});
           }
         }
       `}</style>

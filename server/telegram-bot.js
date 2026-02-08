@@ -33,15 +33,15 @@ function initBot(database) {
       const username = msg.from.username;
       const chatId = msg.chat.id;
       const now = Math.floor(Date.now() / 1000);
-      
+
       // 캐시 업데이트
       chatIdCache.set(username, chatId);
-      
+
       // DB에 영구 저장
       db.run(`
         INSERT INTO telegram_users (username, chat_id, first_seen, last_seen)
         VALUES (?, ?, ?, ?)
-        ON CONFLICT(username) 
+        ON CONFLICT(username)
         DO UPDATE SET chat_id = ?, last_seen = ?
       `, [username, chatId, now, now, chatId, now], (err) => {
         if (err) {
@@ -57,50 +57,50 @@ function initBot(database) {
   bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
     const username = msg.from.username;
-    
-    let message = `안녕하세요! Tokamon 봇입니다.\n\n`;
-    
+
+    let message = `Hello! Welcome to the Tokamon Bot.\n\n`;
+
     if (username) {
-      message += `📍 매장에서 @${username} 입력하여 TON을 받으세요\n`;
-      message += `💰 잔액 확인: /balance\n`;
-      message += `🔗 지갑 연결: /link\n`;
-      message += `❓ 도움말: /help`;
+      message += `📍 Enter @${username} at the store kiosk to receive TON\n`;
+      message += `💰 Check balance: /balance\n`;
+      message += `🔗 Link wallet: /link\n`;
+      message += `❓ Help: /help`;
     } else {
-      message += `❌ 텔레그램 username을 먼저 설정해주세요.\n\n`;
-      message += `설정 방법:\n`;
-      message += `1. 설정(Settings) → 프로필 편집\n`;
-      message += `2. Username 입력\n`;
-      message += `3. 다시 /start 입력`;
+      message += `❌ Please set up your Telegram username first.\n\n`;
+      message += `How to set up:\n`;
+      message += `1. Go to Settings → Edit Profile\n`;
+      message += `2. Enter a Username\n`;
+      message += `3. Come back and type /start`;
     }
-    
+
     bot.sendMessage(chatId, message);
   });
 
   // /help 명령어
   bot.onText(/\/help/, (msg) => {
     const chatId = msg.chat.id;
-    
+
     const message = `
-📖 Tokamon 봇 사용법
+📖 Tokamon Bot Guide
 
-/start - 시작하기
-/balance - 현재 잔액 조회
-/link - 지갑 연결하기
-/change - 연결된 지갑 주소 변경
-/cancel - 현재 작업 취소
-/help - 도움말
+/start - Get started
+/balance - Check current balance
+/link - Link your wallet
+/change - Change linked wallet address
+/cancel - Cancel current action
+/help - Show this help
 
-💡 매장에서 TON 받는 방법:
-1. 매장 키오스크에서 @username 입력
-2. "TON 받기" 버튼 클릭하여 적립!
-3. 텔레그램으로 알림 수신
+💡 How to earn TON at a store:
+1. Enter your @username at the store kiosk
+2. Click "Get TON" to earn rewards!
+3. Receive notification via Telegram
 
-🔗 지갑으로 이전하는 방법:
-1. /link 명령어 입력
-2. 이더리움 주소 입력 (0x...)
-3. 완료!
+🔗 How to withdraw to your wallet:
+1. Type /link command
+2. Enter your Ethereum address (0x...)
+3. Done!
     `;
-    
+
     bot.sendMessage(chatId, message);
   });
 
@@ -108,28 +108,28 @@ function initBot(database) {
   bot.onText(/\/balance/, async (msg) => {
     const chatId = msg.chat.id;
     const username = msg.from.username;
-    
+
     if (!username) {
-      return bot.sendMessage(chatId, '❌ 텔레그램 username을 설정해주세요');
+      return bot.sendMessage(chatId, '❌ Please set up your Telegram username first.');
     }
-    
+
     try {
       const telegramHash = hashTelegramId(username);
       const balance = await blockchain.getTelegramBalance(telegramHash);
       const linkedWallet = await blockchain.getTelegramLinkedWallet(telegramHash);
-      
-      let message = `💰 현재 잔액: ${balance.toFixed(2)} TON\n\n`;
-      
+
+      let message = `💰 Current balance: ${balance.toFixed(2)} TON\n\n`;
+
       if (linkedWallet && linkedWallet !== '0x0000000000000000000000000000000000000000') {
-        message += `🔗 연결된 지갑: ${linkedWallet.slice(0, 6)}...${linkedWallet.slice(-4)}`;
+        message += `🔗 Linked wallet: ${linkedWallet.slice(0, 6)}...${linkedWallet.slice(-4)}`;
       } else {
-        message += `지갑에 연결하려면 /link 입력`;
+        message += `Type /link to connect your wallet`;
       }
-      
+
       bot.sendMessage(chatId, message);
     } catch (err) {
       console.error('잔액 조회 에러:', err);
-      bot.sendMessage(chatId, '❌ 잔액 조회 실패: ' + err.message);
+      bot.sendMessage(chatId, '❌ Failed to check balance: ' + err.message);
     }
   });
 
@@ -137,16 +137,16 @@ function initBot(database) {
   bot.onText(/\/cancel/, (msg) => {
     const chatId = msg.chat.id;
     const username = msg.from.username;
-    
+
     if (!username) {
-      return bot.sendMessage(chatId, '❌ 텔레그램 username을 설정해주세요');
+      return bot.sendMessage(chatId, '❌ Please set up your Telegram username first.');
     }
-    
+
     if (userStates.has(username)) {
       userStates.delete(username);
-      bot.sendMessage(chatId, '✅ 작업이 취소되었습니다.');
+      bot.sendMessage(chatId, '✅ Action cancelled.');
     } else {
-      bot.sendMessage(chatId, '현재 진행 중인 작업이 없습니다.');
+      bot.sendMessage(chatId, 'No action in progress.');
     }
   });
 
@@ -155,49 +155,49 @@ function initBot(database) {
     const chatId = msg.chat.id;
     const username = msg.from.username;
     const text = msg.text;
-    
+
     // 명령어는 이미 처리되었으므로 스킵
     if (!text || text.startsWith('/')) {
       return;
     }
-    
+
     if (!username) {
       return;
     }
-    
+
     const userState = userStates.get(username);
-    
+
     // 지갑 주소 입력 대기 중인 경우
     if (userState && userState.state === 'WAITING_FOR_ADDRESS') {
       const address = text.trim();
-      
+
       // 이더리움 주소 검증
       if (!isValidEthAddress(address)) {
         return bot.sendMessage(chatId, `
-❌ 올바르지 않은 이더리움 주소입니다.
+❌ Invalid Ethereum address.
 
-주소는 0x로 시작하고 20자리 16진수여야 합니다.
-예시: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+Address must start with 0x followed by 40 hex characters.
+Example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
 
-다시 입력하거나 /cancel로 취소하세요.
+Please try again or type /cancel to cancel.
         `);
       }
-      
+
       try {
         // 텔레그램 해시 생성
         const telegramHash = hashTelegramId(username);
-        
+
         // 현재 잔액 확인
         const currentBalance = await blockchain.getTelegramBalance(telegramHash);
-        
+
         // 블록체인에 연결
-        bot.sendMessage(chatId, '⏳ 지갑을 연결하는 중입니다...');
-        
+        bot.sendMessage(chatId, '⏳ Linking your wallet...');
+
         const result = await blockchain.linkTelegramToWallet(telegramHash, address);
-        
+
         // DB에 매핑 저장
         const now = Math.floor(Date.now() / 1000);
-        
+
         // 1. 지갑 <-> 텔레그램 해시 매핑
         db.run(`
           INSERT OR REPLACE INTO telegram_wallet_links (wallet_address, telegram_hash, created_at)
@@ -209,7 +209,7 @@ function initBot(database) {
             console.log(`✅ 지갑-해시 매핑 저장: ${address} <-> ${telegramHash}`);
           }
         });
-        
+
         // 2. 텔레그램 해시 <-> username 매핑
         db.run(`
           INSERT OR REPLACE INTO telegram_hash_username (telegram_hash, telegram_username, created_at, updated_at)
@@ -221,25 +221,25 @@ function initBot(database) {
             console.log(`✅ 해시-username 매핑 저장: ${telegramHash} <-> @${username}`);
           }
         });
-        
+
         // 상태 초기화
         userStates.delete(username);
-        
+
         // 성공 메시지
-        let message = `✅ 지갑 연결 완료!\n\n`;
-        message += `💼 연결된 지갑: ${address.slice(0, 6)}...${address.slice(-4)}\n`;
-        
+        let message = `✅ Wallet linked successfully!\n\n`;
+        message += `💼 Linked wallet: ${address.slice(0, 6)}...${address.slice(-4)}\n`;
+
         if (result.transferredAmount > 0) {
-          message += `💰 이전된 잔액: ${result.transferredAmount.toFixed(2)} TON\n\n`;
+          message += `💰 Transferred balance: ${result.transferredAmount.toFixed(2)} TON\n\n`;
         }
-        message += `이제 해당 지갑으로 로그인하여 사용하실 수 있습니다!`;
-        
+        message += `You can now log in with this wallet on Tokamon!`;
+
         bot.sendMessage(chatId, message);
-        
+
       } catch (err) {
         console.error('지갑 연결 에러:', err);
         userStates.delete(username);
-        bot.sendMessage(chatId, `❌ 지갑 연결 실패: ${err.message}\n\n다시 시도하려면 /link를 입력하세요.`);
+        bot.sendMessage(chatId, `❌ Failed to link wallet: ${err.message}\n\nType /link to try again.`);
       }
     }
   });
@@ -248,45 +248,45 @@ function initBot(database) {
   bot.onText(/\/link/, async (msg) => {
     const chatId = msg.chat.id;
     const username = msg.from.username;
-    
+
     if (!username) {
-      return bot.sendMessage(chatId, '❌ 텔레그램 username을 먼저 설정해주세요');
+      return bot.sendMessage(chatId, '❌ Please set up your Telegram username first.');
     }
-    
+
     try {
       // 이미 연결되었는지 확인
       const telegramHash = hashTelegramId(username);
       const linkedWallet = await blockchain.getTelegramLinkedWallet(telegramHash);
-      
+
       if (linkedWallet && linkedWallet !== '0x0000000000000000000000000000000000000000') {
         const balance = await blockchain.getTelegramBalance(telegramHash);
-        
+
         return bot.sendMessage(chatId, `
-✅ 이미 지갑이 연결되어 있습니다!
+✅ Wallet is already linked!
 
-💼 연결된 지갑: ${linkedWallet.slice(0, 6)}...${linkedWallet.slice(-4)}
-💰 현재 잔액: ${balance.toFixed(2)} TON
+💼 Linked wallet: ${linkedWallet.slice(0, 6)}...${linkedWallet.slice(-4)}
+💰 Current balance: ${balance.toFixed(2)} TON
 
-지갑 주소를 변경하려면 /change 명령어를 사용하세요.
+To change your wallet address, use /change command.
         `);
       }
-      
+
       // 사용자 상태를 "지갑 주소 입력 대기"로 설정
       userStates.set(username, { state: 'WAITING_FOR_ADDRESS' });
-      
+
       bot.sendMessage(chatId, `
-🔗 지갑 연결을 시작합니다!
+🔗 Let's link your wallet!
 
-이더리움 주소를 입력해주세요.
-(형식: 0x로 시작하는 20자리 주소)
+Please enter your Ethereum address.
+(Format: starts with 0x, 20-byte address)
 
-예시: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+Example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
 
-취소하려면 /cancel 입력
+Type /cancel to cancel
       `);
     } catch (err) {
       console.error('링크 생성 에러:', err);
-      bot.sendMessage(chatId, '❌ 링크 생성 실패: ' + err.message);
+      bot.sendMessage(chatId, '❌ Failed to start linking: ' + err.message);
     }
   });
 
@@ -294,42 +294,42 @@ function initBot(database) {
   bot.onText(/\/change/, async (msg) => {
     const chatId = msg.chat.id;
     const username = msg.from.username;
-    
+
     if (!username) {
-      return bot.sendMessage(chatId, '❌ 텔레그램 username을 먼저 설정해주세요');
+      return bot.sendMessage(chatId, '❌ Please set up your Telegram username first.');
     }
-    
+
     try {
       const telegramHash = hashTelegramId(username);
       const linkedWallet = await blockchain.getTelegramLinkedWallet(telegramHash);
-      
+
       if (!linkedWallet || linkedWallet === '0x0000000000000000000000000000000000000000') {
         return bot.sendMessage(chatId, `
-❌ 연결된 지갑이 없습니다.
+❌ No wallet linked yet.
 
-먼저 /link 명령어로 지갑을 연결해주세요.
+Please use /link to connect your wallet first.
         `);
       }
-      
+
       const balance = await blockchain.getTelegramBalance(telegramHash);
-      
+
       // 사용자 상태를 "지갑 주소 변경 대기"로 설정
       userStates.set(username, { state: 'WAITING_FOR_ADDRESS', isChange: true });
-      
+
       bot.sendMessage(chatId, `
-🔄 지갑 주소 변경
+🔄 Change Wallet Address
 
-현재 연결된 지갑: ${linkedWallet.slice(0, 6)}...${linkedWallet.slice(-4)}
-현재 잔액: ${balance.toFixed(2)} TON
+Current wallet: ${linkedWallet.slice(0, 6)}...${linkedWallet.slice(-4)}
+Current balance: ${balance.toFixed(2)} TON
 
-새로운 이더리움 주소를 입력해주세요.
-(형식: 0x로 시작하는 20자리 주소)
+Please enter your new Ethereum address.
+(Format: starts with 0x, 20-byte address)
 
-취소하려면 /cancel 입력
+Type /cancel to cancel
       `);
     } catch (err) {
       console.error('지갑 변경 에러:', err);
-      bot.sendMessage(chatId, '❌ 지갑 변경 실패: ' + err.message);
+      bot.sendMessage(chatId, '❌ Failed to change wallet: ' + err.message);
     }
   });
 }
@@ -339,12 +339,12 @@ function generateLinkToken(telegramUsername, chatId) {
   const token = crypto.randomBytes(32).toString('hex');
   const now = Math.floor(Date.now() / 1000);
   const expiresAt = now + 600; // 10분 유효
-  
+
   db.run(
     'INSERT INTO telegram_link_tokens (token, telegram_username, chat_id, created_at, expires_at) VALUES (?, ?, ?, ?, ?)',
     [token, telegramUsername, chatId, now, expiresAt]
   );
-  
+
   return token;
 }
 
@@ -354,7 +354,7 @@ async function getChatIdByUsername(username) {
   if (chatIdCache.has(username)) {
     return chatIdCache.get(username);
   }
-  
+
   // DB에서 조회 (telegram_users 테이블 우선)
   return new Promise((resolve) => {
     db.get(
@@ -396,20 +396,20 @@ async function sendClaimNotification(telegramUsername, spotName, reward, bonus, 
     return;
   }
 
-  let message = `✅ [${spotName}]에서 ${reward} TON 적립!`;
+  let message = `✅ Earned ${reward} TON at [${spotName}]!`;
 
   if (bonus > 0) {
-    message += `\n🎁 스탬프 보너스: ${bonus} TON!`;
+    message += `\n🎁 Stamp bonus: ${bonus} TON!`;
   }
 
-  message += `\n💰 현재 잔액: ${balance.toFixed(2)} TON`;
+  message += `\n💰 Current balance: ${balance.toFixed(2)} TON`;
 
   if (linkedWallet) {
-    message += `\n\n💼 연결된 지갑: ${linkedWallet.slice(0, 6)}...${linkedWallet.slice(-4)}`;
-    message += `\n지갑을 변경하려면 /change 입력`;
+    message += `\n\n💼 Linked wallet: ${linkedWallet.slice(0, 6)}...${linkedWallet.slice(-4)}`;
+    message += `\nTo change wallet, type /change`;
   } else {
-    message += `\n\n지갑을 연결하면 TON을 출금할 수 있습니다.`;
-    message += `\n연결하려면 /link 입력`;
+    message += `\n\nLink your wallet to withdraw TON.`;
+    message += `\nType /link to connect`;
   }
 
   try {
@@ -422,15 +422,15 @@ async function sendClaimNotification(telegramUsername, spotName, reward, bonus, 
 // 연결 완료 알림 함수
 async function notifyLinkComplete(chatId, wallet, transferredAmount) {
   if (!bot) return;
-  
+
   try {
     await bot.sendMessage(chatId, `
-✅ 지갑 연결 완료!
+✅ Wallet linked successfully!
 
-💼 지갑 주소: ${wallet}
-💰 이전된 잔액: ${transferredAmount.toFixed(2)} TON
+💼 Wallet: ${wallet}
+💰 Transferred balance: ${transferredAmount.toFixed(2)} TON
 
-이제 Tokamon 웹에서 해당 지갑으로 로그인하여 사용하실 수 있습니다!
+You can now log in with this wallet on Tokamon!
     `);
   } catch (err) {
     console.error('연결 완료 알림 전송 실패:', err.message);
@@ -443,21 +443,21 @@ async function sendVerificationCode(telegramUsername, code) {
     console.log('봇이 초기화되지 않음');
     return false;
   }
-  
+
   const chatId = await getChatIdByUsername(telegramUsername);
   if (!chatId) {
     console.log(`텔레그램 알림 실패: @${telegramUsername}의 chat_id를 찾을 수 없음`);
     return false;
   }
-  
+
   try {
     await bot.sendMessage(chatId, `
-🔐 Tokamon 인증 코드
+🔐 Tokamon Verification Code
 
-인증 코드: ${code}
+Your code: ${code}
 
-키오스크에 위 코드를 입력해주세요.
-(3분간 유효)
+Please enter this code at the kiosk.
+(Valid for 3 minutes)
     `);
     console.log(`인증 코드 전송 완료: @${telegramUsername}`);
     return true;
@@ -467,9 +467,9 @@ async function sendVerificationCode(telegramUsername, code) {
   }
 }
 
-module.exports = { 
+module.exports = {
   initBot,
-  sendClaimNotification, 
+  sendClaimNotification,
   notifyLinkComplete,
   generateLinkToken,
   sendVerificationCode,
