@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "forge-std/Script.sol";
+import "../src/TONToken.sol";
 import "../src/Tokamon.sol";
 import "../src/Faucet.sol";
 
@@ -12,16 +13,26 @@ contract DeployScript is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        // 1. Tokamon 컨트랙트 배포
+        // 1. TON 토큰 배포
+        console.log("\n=== Deploying TON Token ===");
+        TONToken tonToken = new TONToken();
+        console.log("TON Token deployed at:", address(tonToken));
+        console.log("Initial supply:", tonToken.totalSupply() / 1e18, "TON");
+
+        // 2. Tokamon 컨트랙트 배포
         console.log("\n=== Deploying Tokamon ===");
-        Tokamon tokamon = new Tokamon();
+        Tokamon tokamon = new Tokamon(address(tonToken));
         console.log("Tokamon deployed at:", address(tokamon));
 
-        // 2. Faucet 컨트랙트 배포 (1000 ETH 초기 예치)
+        // 3. Faucet 컨트랙트 배포
         console.log("\n=== Deploying Faucet ===");
-        Faucet faucet = new Faucet{value: 1000 ether}(address(tokamon));
+        Faucet faucet = new Faucet{value: 1000 ether}(address(tokamon), address(tonToken));
         console.log("Faucet deployed at:", address(faucet));
-        console.log("Faucet balance:", faucet.getBalance() / 1 ether, "ETH");
+        console.log("Faucet ETH balance:", faucet.getBalance() / 1 ether, "ETH");
+        
+        // 4. Faucet에 TON 토큰 전송 (100,000 TON)
+        tonToken.transfer(address(faucet), 100_000 * 1e18);
+        console.log("Faucet TON balance:", tonToken.balanceOf(address(faucet)) / 1e18, "TON");
 
         // 3. 테스트 계정에 초기 ETH 지급
         console.log("\n=== Sending initial ETH to test accounts ===");
@@ -36,9 +47,10 @@ contract DeployScript is Script {
 
         vm.stopBroadcast();
 
-        // 3. 주소를 JSON 파일로 저장
+        // 주소를 JSON 파일로 저장
         string memory addresses = string(abi.encodePacked(
             '{\n',
+            '  "tonToken": "', vm.toString(address(tonToken)), '",\n',
             '  "tokamon": "', vm.toString(address(tokamon)), '",\n',
             '  "faucet": "', vm.toString(address(faucet)), '",\n',
             '  "address": "', vm.toString(address(tokamon)), '"\n',
