@@ -1,0 +1,107 @@
+;; Walk to Earn - TON Smart Contract
+;; 토큰 스팟 관리 스마트 컨트랙트
+
+#include "stdlib.fc";
+
+;; Storage structure
+;; storage#_ owner_address:MsgAddress total_spots:uint32 = Storage;
+
+(slice, int) load_data() inline {
+    slice ds = get_data().begin_parse();
+    return (
+        ds~load_msg_addr(),  ;; owner_address
+        ds~load_uint(32)     ;; total_spots
+    );
+}
+
+() save_data(slice owner_address, int total_spots) impure inline {
+    set_data(
+        begin_cell()
+            .store_slice(owner_address)
+            .store_uint(total_spots, 32)
+        .end_cell()
+    );
+}
+
+;; 스팟 생성
+() create_spot(
+    slice sender_address,
+    int token_amount,
+    int deposit_amount,
+    int latitude,
+    int longitude,
+    cell spot_data
+) impure {
+    (slice owner, int total_spots) = load_data();
+    
+    ;; 최소 예치금 검증
+    throw_unless(101, deposit_amount >= token_amount);
+    
+    ;; 스팟 정보 저장 (실제로는 별도 dictionary 사용)
+    ;; TODO: spot_id를 키로 하는 dictionary 구조 필요
+    
+    ;; 스팟 카운트 증가
+    save_data(owner, total_spots + 1);
+}
+
+;; 토큰 수집
+() collect_token(
+    slice collector_address,
+    int spot_id
+) impure {
+    ;; 스팟 존재 여부 확인
+    ;; 이미 수집했는지 확인
+    ;; 남은 토큰 확인
+    ;; 토큰 전송
+    
+    ;; TODO: 실제 구현 필요
+}
+
+;; 스팟 정보 조회
+cell get_spot_info(int spot_id) method_id {
+    ;; TODO: dictionary에서 스팟 정보 조회
+    return begin_cell().end_cell();
+}
+
+;; 총 스팟 수 조회
+int get_total_spots() method_id {
+    (slice owner, int total_spots) = load_data();
+    return total_spots;
+}
+
+;; 메인 수신 함수
+() recv_internal(int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    if (in_msg_body.slice_empty?()) {
+        return ();
+    }
+
+    slice cs = in_msg_full.begin_parse();
+    int flags = cs~load_uint(4);
+    
+    if (flags & 1) {
+        return ();
+    }
+    
+    slice sender_address = cs~load_msg_addr();
+    
+    int op = in_msg_body~load_uint(32);
+    
+    if (op == 1) {  ;; create_spot
+        int token_amount = in_msg_body~load_coins();
+        int deposit_amount = in_msg_body~load_coins();
+        int latitude = in_msg_body~load_int(32);
+        int longitude = in_msg_body~load_int(32);
+        cell spot_data = in_msg_body~load_ref();
+        
+        create_spot(sender_address, token_amount, deposit_amount, latitude, longitude, spot_data);
+        return ();
+    }
+    
+    if (op == 2) {  ;; collect_token
+        int spot_id = in_msg_body~load_uint(32);
+        collect_token(sender_address, spot_id);
+        return ();
+    }
+    
+    throw(0xffff);
+}
