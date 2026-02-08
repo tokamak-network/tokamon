@@ -1,0 +1,16 @@
+{
+  "name": "@walk-to-earn/shared",
+  "version": "1.0.0",
+  "description": "Walk to Earn 공유 타입 및 유틸리티",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  },
+  "private": true
+}
