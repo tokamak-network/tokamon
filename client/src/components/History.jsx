@@ -12,7 +12,7 @@ function formatTime(timestamp) {
   return `${month}/${day} ${hours}:${minutes}`;
 }
 
-export default function History({ history, balance = 0, account, language = 'ko' }) {
+export default function History({ history, balance = 0, account, language = 'ko', onBalanceChange }) {
   const [linkedTelegram, setLinkedTelegram] = useState(null);
   const [telegramHash, setTelegramHash] = useState(null);
   const [telegramBalance, setTelegramBalance] = useState(0);
@@ -132,10 +132,10 @@ export default function History({ history, balance = 0, account, language = 'ko'
       
       console.log('✅ 클레임 성공!');
       alert(`${telegramBalance.toFixed(4)} TON이 지갑으로 전송되었습니다!`);
-      
+
       // 잔액 갱신
       await fetchLinkedTelegram();
-      window.location.reload(); // 전체 잔액 갱신
+      if (onBalanceChange) onBalanceChange();
     } catch (err) {
       console.error('❌ 클레임 실패:', err);
       alert(err.message || '클레임 중 오류가 발생했습니다');
@@ -216,7 +216,6 @@ export default function History({ history, balance = 0, account, language = 'ko'
 
       {/* 클레임 기록 */}
       <div className="history-list">
-        <div className="history-header">{t(language, 'claimHistory')}</div>
         {(!history || history.length === 0) ? (
           <div className="history-empty">
             {t(language, 'noClaimHistory')}

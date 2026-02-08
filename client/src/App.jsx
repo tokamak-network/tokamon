@@ -531,11 +531,12 @@ export default function App() {
         {/* 고객: 내 토카몬 탭 */}
         {tab === 'history' && (
           wallet ? (
-            <History 
-              history={history} 
+            <History
+              history={history}
               balance={balance}
               account={wallet}
               language={language}
+              onBalanceChange={refreshBalance}
             />
           ) : (
             <div className="wallet-connect-prompt">
