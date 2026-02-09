@@ -1,4 +1,4 @@
-const { haversineDistance, isWithinTimeRange, isSpeedValid, generateClaimId } = require('../utils');
+const { haversineDistance, isWithinTimeRange, isSpeedValid, generateClaimId, hashDeviceId, isValidDeviceId } = require('../utils');
 const { signClaim, getPublicKey } = require('../signer');
 const nacl = require('tweetnacl');
 const { beginCell, Address } = require('@ton/core');
@@ -144,6 +144,78 @@ test('잘못된 데이터로 검증 실패', () => {
   const pubkey = getPublicKey();
   const valid = nacl.sign.detached.verify(hash, signature, pubkey);
   assert(valid === false, '잘못된 데이터도 통과하면 안됨');
+});
+
+// ===== 기기 ID 해싱 테스트 =====
+console.log('\n[기기 ID 해싱]');
+
+test('hashDeviceId: 동일 입력 → 동일 해시', () => {
+  const h1 = hashDeviceId('abcdef0123456789');
+  const h2 = hashDeviceId('abcdef0123456789');
+  assert(h1 === h2, `해시 불일치: ${h1} !== ${h2}`);
+});
+
+test('hashDeviceId: 대소문자 무시', () => {
+  const h1 = hashDeviceId('ABCDEF0123456789');
+  const h2 = hashDeviceId('abcdef0123456789');
+  assert(h1 === h2, '대소문자 다르면 해시 달라짐');
+});
+
+test('hashDeviceId: 앞뒤 공백 제거', () => {
+  const h1 = hashDeviceId('  abcdef0123456789  ');
+  const h2 = hashDeviceId('abcdef0123456789');
+  assert(h1 === h2, '공백 제거 안됨');
+});
+
+test('hashDeviceId: 다른 입력 → 다른 해시', () => {
+  const h1 = hashDeviceId('abcdef0123456789');
+  const h2 = hashDeviceId('1234567890abcdef');
+  assert(h1 !== h2, '다른 입력인데 해시 동일');
+});
+
+test('hashDeviceId: 64자리 hex 반환', () => {
+  const h = hashDeviceId('abcdef0123456789');
+  assert(h.length === 64, `길이: ${h.length}, expected 64`);
+  assert(/^[a-f0-9]{64}$/.test(h), `hex 형식이 아님: ${h}`);
+});
+
+// ===== 기기 ID 검증 테스트 =====
+console.log('\n[기기 ID 검증]');
+
+test('isValidDeviceId: 정상 16자리 hex', () => {
+  assert(isValidDeviceId('abcdef0123456789') === true, '유효한 ID 거부');
+});
+
+test('isValidDeviceId: 대문자 hex도 허용', () => {
+  assert(isValidDeviceId('ABCDEF0123456789') === true, '대문자 거부');
+});
+
+test('isValidDeviceId: null 거부', () => {
+  assert(isValidDeviceId(null) === false, 'null 허용됨');
+});
+
+test('isValidDeviceId: undefined 거부', () => {
+  assert(isValidDeviceId(undefined) === false, 'undefined 허용됨');
+});
+
+test('isValidDeviceId: 빈 문자열 거부', () => {
+  assert(isValidDeviceId('') === false, '빈 문자열 허용됨');
+});
+
+test('isValidDeviceId: 15자리 거부 (짧음)', () => {
+  assert(isValidDeviceId('abcdef012345678') === false, '15자리 허용됨');
+});
+
+test('isValidDeviceId: 17자리 거부 (김)', () => {
+  assert(isValidDeviceId('abcdef01234567890') === false, '17자리 허용됨');
+});
+
+test('isValidDeviceId: 비 hex 문자 거부', () => {
+  assert(isValidDeviceId('ghijklmnopqrstuv') === false, '비 hex 문자 허용됨');
+});
+
+test('isValidDeviceId: 숫자 타입 거부', () => {
+  assert(isValidDeviceId(1234567890123456) === false, '숫자 타입 허용됨');
 });
 
 // ===== 결과 =====
