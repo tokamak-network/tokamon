@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { t } from '../translations';
 
@@ -69,7 +69,28 @@ function MapClickHandler({ createMode, onMapClick }) {
   return null;
 }
 
-export default function Map({ userPos, spots, selectedSpot, onSelectSpot, initialCenter, createMode, pinPos, onMapClick }) {
+// 내 위치로 이동 버튼
+function LocateButton({ userPos }) {
+  const map = useMap();
+  if (!userPos) return null;
+  return (
+    <button
+      onClick={() => map.flyTo([userPos.lat, userPos.lng], 16)}
+      style={{
+        position: 'absolute', bottom: '20px', right: '10px', zIndex: 1000,
+        width: '40px', height: '40px', borderRadius: '50%',
+        background: '#fff', border: '2px solid #ccc', boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: 'pointer', fontSize: '18px', padding: 0,
+      }}
+      title="내 위치로"
+    >
+      ◎
+    </button>
+  );
+}
+
+export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectSpot, initialCenter, createMode, pinPos, onMapClick }) {
   const center = initialCenter || { lat: 37.5665, lng: 126.978 };
 
   return (
@@ -77,6 +98,34 @@ export default function Map({ userPos, spots, selectedSpot, onSelectSpot, initia
       {createMode && (
         <div className="create-mode-banner">
           지도를 탭하여 스팟 위치를 선택하세요
+        </div>
+      )}
+      {gpsStatus === 'loading' && (
+        <div style={{
+          position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', zIndex: 1000,
+          background: 'rgba(0,0,0,0.7)', color: '#fff', padding: '8px 16px', borderRadius: '20px',
+          fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px',
+        }}>
+          <span style={{ display: 'inline-block', width: '12px', height: '12px', border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          위치를 찾고 있습니다...
+        </div>
+      )}
+      {gpsStatus === 'denied' && (
+        <div style={{
+          position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', zIndex: 1000,
+          background: '#ef4444', color: '#fff', padding: '8px 16px', borderRadius: '20px',
+          fontSize: '13px',
+        }}>
+          위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.
+        </div>
+      )}
+      {gpsStatus === 'unavailable' && (
+        <div style={{
+          position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', zIndex: 1000,
+          background: '#f59e0b', color: '#fff', padding: '8px 16px', borderRadius: '20px',
+          fontSize: '13px',
+        }}>
+          위치 서비스를 사용할 수 없습니다.
         </div>
       )}
       <MapContainer
@@ -91,6 +140,7 @@ export default function Map({ userPos, spots, selectedSpot, onSelectSpot, initia
         />
 
         <MapClickHandler createMode={createMode} onMapClick={onMapClick} />
+        <LocateButton userPos={userPos} />
 
         {userPos && (
           <>
