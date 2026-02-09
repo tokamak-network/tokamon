@@ -552,6 +552,179 @@ contract TokamonUnitTest is Test {
         tokamon.claimTelegramToWallet(telegramHash2);
     }
     
+    // ==================== claimByDevice() 테스트 ====================
+
+    event DeviceClaimed(uint256 indexed spotId, bytes32 indexed deviceHash, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
+
+    function _createSpotForDevice(uint256 deposit, uint256 reward, uint256 stampGoal, uint256 stampBonus, uint256 cooldown, bool allowDup) internal returns (uint256) {
+        vm.startPrank(spotCreator);
+        tonToken.approve(address(tokamon), deposit);
+        uint256 spotId = tokamon.createSpotSelf(
+            deposit, reward, stampGoal, stampBonus, cooldown, allowDup,
+            Tokamon.SpotMetadata("Device Test", "Test", 0, 0, "00:00", "23:59")
+        );
+        vm.stopPrank();
+        return spotId;
+    }
+
+    function testClaimByDeviceBasic() public {
+        uint256 spotId = _createSpotForDevice(100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false);
+        bytes32 deviceHash = keccak256(abi.encodePacked("device_abc123"));
+
+        vm.expectEmit(true, true, false, false);
+        emit DeviceClaimed(spotId, deviceHash, 10 * 1e18, 0, 1, block.timestamp);
+
+        vm.prank(admin);
+        tokamon.claimByDevice(spotId, deviceHash);
+
+        // deviceBalances에 누적 확인
+        assertEq(tokamon.deviceBalances(deviceHash), 10 * 1e18);
+        assertEq(tokamon.getDeviceBalance(deviceHash), 10 * 1e18);
+    }
+
+    function testClaimByDeviceOnlyAdmin() public {
+        uint256 spotId = _createSpotForDevice(100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false);
+        bytes32 deviceHash = keccak256(abi.encodePacked("device_abc123"));
+
+        vm.prank(customer1);
+        vm.expectRevert("only admin");
+        tokamon.claimByDevice(spotId, deviceHash);
+    }
+
+    function testClaimByDeviceCooldown() public {
+        uint256 spotId = _createSpotForDevice(100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 3600, false);
+        bytes32 deviceHash = keccak256(abi.encodePacked("device_abc123"));
+
+        // 첫 번째 클레임 성공
+        vm.prank(admin);
+        tokamon.claimByDevice(spotId, deviceHash);
+
+        // 쿨다운 중 두 번째 클레임 실패
+        vm.prank(admin);
+        vm.expectRevert("cooldown not elapsed");
+        tokamon.claimByDevice(spotId, deviceHash);
+    }
+
+    function testClaimByDeviceAfterCooldown() public {
+        uint256 spotId = _createSpotForDevice(100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 3600, false);
+        bytes32 deviceHash = keccak256(abi.encodePacked("device_abc123"));
+
+        vm.prank(admin);
+        tokamon.claimByDevice(spotId, deviceHash);
+
+        // 쿨다운 경과
+        vm.warp(block.timestamp + 3601);
+
+        // 두 번째 클레임 성공
+        vm.prank(admin);
+        tokamon.claimByDevice(spotId, deviceHash);
+
+        assertEq(tokamon.deviceBalances(deviceHash), 20 * 1e18);
+    }
+
+    function testClaimByDeviceAllowDuplicate() public {
+        uint256 spotId = _createSpotForDevice(100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 3600, true);
+        bytes32 deviceHash = keccak256(abi.encodePacked("device_abc123"));
+
+        // 연속 클레임 가능 (allowDuplicateClaims = true)
+        vm.startPrank(admin);
+        tokamon.claimByDevice(spotId, deviceHash);
+        tokamon.claimByDevice(spotId, deviceHash);
+        tokamon.claimByDevice(spotId, deviceHash);
+        vm.stopPrank();
+
+        assertEq(tokamon.deviceBalances(deviceHash), 30 * 1e18);
+    }
+
+    function testClaimByDeviceStampBonus() public {
+        // stampGoal=3, stampBonus=20 TON
+        uint256 spotId = _createSpotForDevice(200 * 1e18, 10 * 1e18, 3, 20 * 1e18, 0, true);
+        bytes32 deviceHash = keccak256(abi.encodePacked("device_abc123"));
+
+        vm.startPrank(admin);
+        tokamon.claimByDevice(spotId, deviceHash); // stamp=1
+        tokamon.claimByDevice(spotId, deviceHash); // stamp=2
+        tokamon.claimByDevice(spotId, deviceHash); // stamp=3 → 보너스! stamp=0
+        vm.stopPrank();
+
+        // 10 + 10 + (10 + 20) = 50 TON
+        assertEq(tokamon.deviceBalances(deviceHash), 50 * 1e18);
+
+        // 스탬프 리셋 확인
+        (uint256 stamps, , , ) = tokamon.getClaimInfo(spotId, deviceHash);
+        assertEq(stamps, 0);
+    }
+
+    function testClaimByDeviceSpotExhausted() public {
+        uint256 spotId = _createSpotForDevice(15 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, true);
+        bytes32 deviceHash = keccak256(abi.encodePacked("device_abc123"));
+
+        // 첫 번째 클레임 성공 (10 TON)
+        vm.prank(admin);
+        tokamon.claimByDevice(spotId, deviceHash);
+
+        // 두 번째 클레임 실패 (남은 5 TON < 10 TON reward)
+        vm.prank(admin);
+        vm.expectRevert("spot exhausted");
+        tokamon.claimByDevice(spotId, deviceHash);
+    }
+
+    function testClaimByDeviceSpotNotExist() public {
+        bytes32 deviceHash = keccak256(abi.encodePacked("device_abc123"));
+
+        vm.prank(admin);
+        vm.expectRevert("spot does not exist");
+        tokamon.claimByDevice(999, deviceHash);
+    }
+
+    function testClaimByDeviceMultipleDevices() public {
+        uint256 spotId = _createSpotForDevice(100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 3600, false);
+        bytes32 device1 = keccak256(abi.encodePacked("device_111"));
+        bytes32 device2 = keccak256(abi.encodePacked("device_222"));
+
+        // 서로 다른 기기는 독립적으로 클레임 가능
+        vm.startPrank(admin);
+        tokamon.claimByDevice(spotId, device1);
+        tokamon.claimByDevice(spotId, device2);
+        vm.stopPrank();
+
+        assertEq(tokamon.deviceBalances(device1), 10 * 1e18);
+        assertEq(tokamon.deviceBalances(device2), 10 * 1e18);
+    }
+
+    function testClaimByDeviceBalanceAccumulates() public {
+        // 두 개의 스팟에서 같은 기기로 클레임 → 잔액 합산
+        uint256 spot1 = _createSpotForDevice(100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false);
+        uint256 spot2 = _createSpotForDevice(100 * 1e18, 20 * 1e18, 5, 50 * 1e18, 0, false);
+        bytes32 deviceHash = keccak256(abi.encodePacked("device_abc123"));
+
+        vm.startPrank(admin);
+        tokamon.claimByDevice(spot1, deviceHash);
+        tokamon.claimByDevice(spot2, deviceHash);
+        vm.stopPrank();
+
+        // 10 + 20 = 30 TON
+        assertEq(tokamon.deviceBalances(deviceHash), 30 * 1e18);
+    }
+
+    function testDeviceClaimIndependentFromTelegram() public {
+        // 기기 클레임과 텔레그램 클레임은 독립적
+        uint256 spotId = _createSpotForDevice(100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 3600, false);
+        bytes32 deviceHash = keccak256(abi.encodePacked("device_abc123"));
+        bytes32 telegramHash = keccak256(abi.encodePacked("telegram_user"));
+
+        // 기기로 클레임
+        vm.prank(admin);
+        tokamon.claimByDevice(spotId, deviceHash);
+
+        // 텔레그램으로도 클레임 가능 (독립적)
+        vm.prank(spotCreator);
+        tokamon.claimToTelegram(spotId, telegramHash);
+
+        assertEq(tokamon.deviceBalances(deviceHash), 10 * 1e18);
+        assertEq(tokamon.telegramBalances(telegramHash), 10 * 1e18);
+    }
+
     function testRevertDepositZeroAmount() public {
         vm.prank(customer1);
         vm.expectRevert("must deposit TON");

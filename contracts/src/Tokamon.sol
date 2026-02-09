@@ -43,6 +43,9 @@ contract Tokamon {
     // 텔레그램 ID 해시 => TON 잔액 (클레임 대기 중인 잔액)
     mapping(bytes32 => uint256) public telegramBalances;
 
+    // 기기 해시 => TON 잔액 (기기 기반 클레임 대기 중인 잔액)
+    mapping(bytes32 => uint256) public deviceBalances;
+
     // 통합 식별자(해시) => 스팟 ID => 스탬프 카운트
     mapping(bytes32 => mapping(uint256 => uint256)) public claimStampCount;
 
@@ -60,6 +63,7 @@ contract Tokamon {
     event Redeposited(uint256 indexed spotId, address indexed creator, uint256 amount);
     event TelegramClaimed(uint256 indexed spotId, bytes32 indexed telegramHash, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
     event TelegramLinked(bytes32 indexed telegramHash, address indexed oldWallet, address indexed newWallet, uint256 transferredAmount);
+    event DeviceClaimed(uint256 indexed spotId, bytes32 indexed deviceHash, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
 
     modifier onlyAdmin() {
         require(msg.sender == admin, "only admin");
@@ -378,6 +382,43 @@ contract Tokamon {
         // 클레임 시점에 양쪽(텔레그램 해시 + 지갑 해시)을 모두 체크하여 중복 방지
 
         emit TelegramLinked(telegramHash, oldWallet, wallet, 0);
+    }
+
+    // === 기기 기반 클레임 ===
+
+    function claimByDevice(uint256 spotId, bytes32 deviceHash) external onlyAdmin {
+        Spot storage spot = spots[spotId];
+        require(spot.reward > 0, "spot does not exist");
+
+        if (!spot.allowDuplicateClaims) {
+            uint256 last = claimLastTime[deviceHash][spotId];
+            if (last > 0) {
+                require(block.timestamp >= last + spot.cooldown, "cooldown not elapsed");
+            }
+        }
+
+        uint256 payout = spot.reward;
+        uint256 newStamp = claimStampCount[deviceHash][spotId] + 1;
+        uint256 bonus = 0;
+
+        if (newStamp >= spot.stampGoal) {
+            bonus = spot.stampBonus;
+            payout += bonus;
+            newStamp = 0;
+        }
+
+        require(spot.remaining >= payout, "spot exhausted");
+
+        spot.remaining -= payout;
+        claimStampCount[deviceHash][spotId] = newStamp;
+        claimLastTime[deviceHash][spotId] = block.timestamp;
+        deviceBalances[deviceHash] += payout;
+
+        emit DeviceClaimed(spotId, deviceHash, payout - bonus, bonus, newStamp, block.timestamp);
+    }
+
+    function getDeviceBalance(bytes32 deviceHash) external view returns (uint256) {
+        return deviceBalances[deviceHash];
     }
 
     // === 사용자 직접 호출 함수 (MetaMask 연동) ===
