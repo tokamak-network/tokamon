@@ -4,6 +4,7 @@ const path = require('path');
 
 const RPC_URL = process.env.RPC_URL || 'http://127.0.0.1:8999';
 const ARTIFACT_PATH = path.join(__dirname, '..', 'contracts', 'out', 'Tokamon.sol', 'Tokamon.json');
+const TON_ARTIFACT_PATH = path.join(__dirname, '..', 'contracts', 'out', 'TONToken.sol', 'TONToken.json');
 const ADDRESS_PATH = path.join(__dirname, 'contract-address.json');
 const METADATA_PATH = path.join(__dirname, 'spot-metadata.json');
 
@@ -12,6 +13,7 @@ const COORD_SCALE = 1_000_000; // 좌표 스케일 (1e6)
 let provider;
 let signer; // admin (Ganache account[0])
 let contract;
+let tonToken; // TON 토큰 컨트랙트
 
 // 스팟 메타데이터 캐시 (컨트랙트 string 반환 문제 우회)
 let spotMetadata = {};
@@ -59,19 +61,33 @@ async function init() {
     throw new Error('contract-address.json이 없습니다. 먼저 npm run deploy를 실행하세요.');
   }
 
-  const { address } = JSON.parse(fs.readFileSync(ADDRESS_PATH, 'utf8'));
+  const addressData = JSON.parse(fs.readFileSync(ADDRESS_PATH, 'utf8'));
+  const address = addressData.address || addressData.tokamon;
   const artifact = JSON.parse(fs.readFileSync(ARTIFACT_PATH, 'utf8'));
 
   contract = new ethers.Contract(address, artifact.abi, signer);
   console.log(`블록체인 연결 완료 (컨트랙트: ${address})`);
 
+  // TON 토큰 컨트랙트 로드
+  if (addressData.tonToken && fs.existsSync(TON_ARTIFACT_PATH)) {
+    const tonArtifact = JSON.parse(fs.readFileSync(TON_ARTIFACT_PATH, 'utf8'));
+    tonToken = new ethers.Contract(addressData.tonToken, tonArtifact.abi, signer);
+    console.log(`TON 토큰 연결 완료 (${addressData.tonToken})`);
+  }
+
   // 메타데이터 로드
   loadMetadata();
 }
 
-// Faucet: admin이 ETH를 컨트랙트에 보내고 user 잔액 증가
+// admin이 TON 토큰을 user 내부 잔액으로 입금
 async function deposit(userAddress, amountTon) {
-  const tx = await contract.deposit(toAddr(userAddress), { value: toWei(amountTon) });
+  const amount = toWei(amountTon);
+  // admin이 TON 토큰을 Tokamon 컨트랙트에 approve
+  if (tonToken) {
+    const approveTx = await tonToken.approve(await contract.getAddress(), amount);
+    await approveTx.wait();
+  }
+  const tx = await contract.deposit(toAddr(userAddress), amount);
   await tx.wait();
   const bal = await contract.getBalance(toAddr(userAddress));
   return fromWei(bal);
@@ -372,6 +388,44 @@ async function linkTelegramToWallet(telegramHash, walletAddress) {
   };
 }
 
+// 기기 해시로 클레임
+async function claimByDevice(spotId, deviceHash) {
+  const tx = await contract.claimByDevice(spotId, '0x' + deviceHash);
+  const receipt = await tx.wait();
+  const event = receipt.logs
+    .map((log) => {
+      try { return contract.interface.parseLog(log); } catch (_) { return null; }
+    })
+    .find((e) => e && e.name === 'DeviceClaimed');
+  const bal = await contract.getDeviceBalance('0x' + deviceHash);
+  if (event) {
+    return {
+      reward: fromWei(event.args.reward),
+      bonus: fromWei(event.args.bonus),
+      stamp: Number(event.args.stamp),
+      balance: fromWei(bal),
+    };
+  }
+  return { reward: 0, bonus: 0, stamp: 0, balance: fromWei(bal) };
+}
+
+// 기기 해시 잔액 조회
+async function getDeviceBalance(deviceHash) {
+  const bal = await contract.getDeviceBalance('0x' + deviceHash);
+  return fromWei(bal);
+}
+
+// 기기 해시 스탬프 정보 조회
+async function getDeviceStampInfo(spotId, deviceHash) {
+  const info = await contract.getClaimInfo(spotId, '0x' + deviceHash);
+  return {
+    stamps: Number(info.stamps),
+    goal: Number(info.goal),
+    last_claim: Number(info.lastClaim),
+    cooldown_remaining: Number(info.cooldownRemaining),
+  };
+}
+
 // 중복 발행 허용 여부 수정
 async function updateAllowDuplicateClaims(spotId, allow) {
   const tx = await contract.updateAllowDuplicateClaims(spotId, allow);
@@ -399,6 +453,9 @@ module.exports = {
   getTelegramLinkedWallet,
   getWalletLinkedTelegram,
   linkTelegramToWallet,
+  claimByDevice,
+  getDeviceBalance,
+  getDeviceStampInfo,
   updateMetadata,
   updateAllowDuplicateClaims,
 };

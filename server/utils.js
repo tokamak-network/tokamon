@@ -57,6 +57,19 @@ function hashTelegramId(username) {
   return crypto.createHash('sha256').update(salt + cleaned).digest('hex');
 }
 
+// Android SSAID 해싱 (기기 인식용)
+function hashDeviceId(deviceId) {
+  const cleaned = deviceId.trim().toLowerCase();
+  const salt = process.env.DEVICE_HASH_SALT || 'tokamon-device-2024';
+  return crypto.createHash('sha256').update(salt + cleaned).digest('hex');
+}
+
+// Android SSAID 형식 검증 (16자리 hex 문자열)
+function isValidDeviceId(deviceId) {
+  if (!deviceId || typeof deviceId !== 'string') return false;
+  return /^[a-fA-F0-9]{16}$/.test(deviceId.trim());
+}
+
 // 이더리움 주소 검증
 function isValidEthAddress(address) {
   return /^0x[a-fA-F0-9]{40}$/.test(address);
@@ -76,6 +89,8 @@ module.exports = {
   hashPhoneNumber,
   isValidPhoneNumber,
   hashTelegramId,
+  hashDeviceId,
+  isValidDeviceId,
   isValidEthAddress,
   isValidTelegramUsername,
 };

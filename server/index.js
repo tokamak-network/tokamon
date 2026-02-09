@@ -11,6 +11,7 @@ const claimRoutes = require('./routes/claim');
 // const faucetRoutes = require('./routes/faucet'); // 제거됨
 const stampRoutes = require('./routes/stamps');
 const kioskRoutes = require('./routes/kiosk');
+const deviceRoutes = require('./routes/device');
 const telegramRoutesFactory = require('./routes/telegram');
 
 const app = express();
@@ -122,6 +123,7 @@ app.use('/api/claim', claimRoutes);
 // app.use('/api/faucet', faucetRoutes);
 app.use('/api/stamps', stampRoutes);
 app.use('/api/kiosk', kioskRoutes);
+app.use('/api/device', deviceRoutes);
 app.use('/api/telegram', telegramRoutesFactory(db));
 
 async function start() {
