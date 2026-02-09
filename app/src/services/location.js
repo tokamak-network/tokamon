@@ -1,5 +1,15 @@
 import Geolocation from '@react-native-community/geolocation';
-import { Platform } from 'react-native';
+import { Platform, PermissionsAndroid } from 'react-native';
+
+Geolocation.setRNConfiguration({
+  skipPermissionRequests: false,
+  authorizationLevel: 'whenInUse',
+  enableBackgroundLocationUpdates: false,
+});
+
+if (Platform.OS === 'ios') {
+  Geolocation.requestAuthorization();
+}
 
 // Fused Location 설정 (GPS + Wi-Fi + 셀타워)
 const CONFIG = {

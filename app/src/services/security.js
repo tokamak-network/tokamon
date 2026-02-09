@@ -22,7 +22,7 @@ export function getSecurityStatus() {
   }
 
   // 루팅/탈옥 감지
-  if (JailMonkey.isJailBroken()) {
+  if (typeof JailMonkey.isJailBroken === 'function' && JailMonkey.isJailBroken()) {
     result.isRooted = true;
     result.safe = false;
     result.warnings.push('루팅/탈옥된 기기입니다');

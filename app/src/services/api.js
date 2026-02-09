@@ -27,3 +27,76 @@ export async function getClaimHistory(userAddress) {
   const res = await fetch(`${API_URL}/api/claim/history?user_address=${userAddress}`);
   return res.json();
 }
+
+export async function requestDeviceClaim(deviceId, spotId, lat, lng) {
+  const res = await fetch(`${API_URL}/api/device/claim`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ device_id: deviceId, spot_id: spotId, lat, lng }),
+  });
+  return res.json();
+}
+
+export async function getDeviceBalance(deviceId) {
+  const res = await fetch(`${API_URL}/api/device/balance`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ device_id: deviceId }),
+  });
+  return res.json();
+}
+
+export async function getDeviceClaimHistory(deviceId) {
+  const res = await fetch(`${API_URL}/api/device/claim-history`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ device_id: deviceId }),
+  });
+  return res.json();
+}
+
+export async function getSpotClaimHistory(spotId) {
+  const res = await fetch(`${API_URL}/api/claim/history?spot_id=${spotId}`);
+  return res.json();
+}
+
+export async function redepositSpot(spotId, amount, wallet) {
+  const res = await fetch(`${API_URL}/api/spots/${spotId}/redeposit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount, wallet }),
+  });
+  return res.json();
+}
+
+export async function updateSpotCooldown(spotId, cooldownSeconds, wallet) {
+  const res = await fetch(`${API_URL}/api/spots/${spotId}/cooldown`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cooldown: cooldownSeconds, wallet }),
+  });
+  return res.json();
+}
+
+export async function kioskCheckBalance(telegramUsername) {
+  const res = await fetch(`${API_URL}/api/kiosk/balance`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ telegram_username: telegramUsername }),
+  });
+  return res.json();
+}
+
+export async function kioskClaim(telegramUsername, spotId, lat, lng) {
+  const res = await fetch(`${API_URL}/api/kiosk/telegram-claim`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      telegram_username: telegramUsername,
+      spot_id: spotId,
+      lat,
+      lng,
+    }),
+  });
+  return res.json();
+}
