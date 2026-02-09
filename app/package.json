@@ -9,13 +9,22 @@
     "test": "node tests/app.test.js"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.22.3",
+    "@react-native-community/geolocation": "^3.2.1",
+    "@react-native-community/netinfo": "^11.3.1",
+    "@react-native/metro-config": "^0.83.1",
+    "@reown/appkit-ethers-react-native": "^2.0.1",
+    "@reown/appkit-react-native": "^2.0.1",
+    "@walletconnect/react-native-compat": "^2.23.4",
+    "jail-monkey": "^2.8.0",
     "react": "18.2.0",
     "react-native": "0.73.4",
-    "react-native-maps": "^1.10.0",
-    "@react-native-community/geolocation": "^3.2.1",
-    "jail-monkey": "^2.8.0",
-    "@tonconnect/react-ui": "^2.0.0",
-    "@tonconnect/sdk": "^3.0.0"
+    "react-native-device-info": "^11.1.0",
+    "react-native-get-random-values": "^1.11.0",
+    "react-native-maps": "1.14.0",
+    "react-native-modal": "^14.0.0-rc.1",
+    "react-native-safe-area-context": "^4.8.2",
+    "react-native-svg": "^14.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
