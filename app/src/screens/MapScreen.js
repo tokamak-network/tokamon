@@ -1,22 +1,24 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Alert, Platform,
 } from 'react-native';
 import MapView, { Marker, Circle } from 'react-native-maps';
 import { getCurrentPosition, watchPosition, clearWatch } from '../services/location';
 import { getSecurityStatus, isLocationMocked } from '../services/security';
-import { getSpots, requestClaim } from '../services/api';
-import { buildClaimTx } from '../services/ton';
+import { getSpots, requestDeviceClaim } from '../services/api';
+import { getDeviceId } from '../services/device';
 import { haversineDistance } from '../utils/distance';
 
 const COLLECT_RADIUS = 50;
 
-export default function MapScreen({ walletAddress, sendTransaction }) {
+export default function MapScreen() {
   const [userPos, setUserPos] = useState(null);
   const [spots, setSpots] = useState([]);
   const [selectedSpot, setSelectedSpot] = useState(null);
   const [claiming, setClaiming] = useState(false);
   const [message, setMessage] = useState(null);
+  const mapRef = useRef(null);
+  const hascentered = useRef(false);
 
   // 보안 체크
   useEffect(() => {
@@ -34,6 +36,15 @@ export default function MapScreen({ walletAddress, sendTransaction }) {
         return;
       }
       setUserPos(pos);
+      if (!hascentered.current && mapRef.current) {
+        mapRef.current.animateToRegion({
+          latitude: pos.lat,
+          longitude: pos.lng,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
+        }, 1000);
+        hascentered.current = true;
+      }
     });
     return () => clearWatch(watchId);
   }, []);
@@ -50,9 +61,9 @@ export default function MapScreen({ walletAddress, sendTransaction }) {
     return () => clearInterval(interval);
   }, [refreshSpots]);
 
-  // 클레임 처리
+  // 클레임 처리 (기기 기반)
   const handleClaim = async (spot) => {
-    if (!userPos || !walletAddress) return;
+    if (!userPos) return;
 
     const distance = haversineDistance(userPos.lat, userPos.lng, spot.lat, spot.lng);
     if (distance > COLLECT_RADIUS) {
@@ -64,8 +75,8 @@ export default function MapScreen({ walletAddress, sendTransaction }) {
     setMessage(null);
 
     try {
-      // 1. 서버에 클레임 요청 (위치+시간 검증 → 서명 받기)
-      const result = await requestClaim(walletAddress, spot.id, userPos.lat, userPos.lng);
+      const deviceId = await getDeviceId();
+      const result = await requestDeviceClaim(deviceId, spot.id, userPos.lat, userPos.lng);
 
       if (result.error) {
         setMessage({ type: 'error', text: result.error });
@@ -73,16 +84,14 @@ export default function MapScreen({ walletAddress, sendTransaction }) {
         return;
       }
 
-      // 2. 서명으로 컨트랙트에 직접 클레임 TX 전송
-      const tx = buildClaimTx(
-        result.signature,
-        result.contract_spot_id,
-        result.claim_id,
-        result.valid_until,
-      );
-
-      await sendTransaction(tx);
-      setMessage({ type: 'success', text: 'TON 클레임 성공!' });
+      let text = `${result.reward} TON 적립!`;
+      if (result.bonus > 0) {
+        text = `스탬프 달성! ${result.reward + result.bonus} TON 적립!`;
+      }
+      if (result.balance != null) {
+        text += ` (잔액: ${result.balance} TON)`;
+      }
+      setMessage({ type: 'success', text });
       refreshSpots();
     } catch (e) {
       setMessage({ type: 'error', text: e.message || '클레임 실패' });
@@ -99,6 +108,7 @@ export default function MapScreen({ walletAddress, sendTransaction }) {
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef}
         style={styles.map}
         showsUserLocation
         showsMyLocationButton
