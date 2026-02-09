@@ -40,6 +40,14 @@ packages/mobile/ios/Pods/
 packages/mobile/ios/build/
 packages/mobile/.expo/
 
+# React Native app build directories (large, regeneratable)
+app/android/
+app/ios/
+
+# Broken symlinks (npm link artifacts)
+react
+react-dom
+
 # Backend
 packages/backend/dist/
 packages/backend/logs/
