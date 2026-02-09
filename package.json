@@ -18,13 +18,24 @@
   "dependencies": {
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
+    "@reown/appkit": "^1.8.17",
+    "@reown/appkit-adapter-ethers": "^1.8.17",
     "ethers": "^6.16.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "solc": "^0.8.28",
     "three": "^0.182.0"
   },
   "license": "MIT",
   "devDependencies": {
     "@playwright/test": "^1.58.2",
-    "playwright": "^1.58.2"
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^15.0.7",
+    "@testing-library/user-event": "^14.6.1",
+    "@vitejs/plugin-basic-ssl": "^2.1.4",
+    "happy-dom": "^20.5.3",
+    "jsdom": "^28.0.0",
+    "playwright": "^1.58.2",
+    "vitest": "^4.0.18"
   }
 }

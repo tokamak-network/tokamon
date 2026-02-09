@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import { getContractInfo } from './api';
+import { getWalletProvider } from './walletProvider';
 
 // Faucet ABI (getETH, getTON 함수만)
 const FAUCET_ABI = [
@@ -18,9 +19,10 @@ async function getSignerAndFaucetContract() {
     return { signer: cachedSigner, contract: cachedFaucetContract };
   }
 
-  if (!window.ethereum) throw new Error('MetaMask가 설치되어 있지 않습니다');
+  const walletProv = getWalletProvider();
+  if (!walletProv) throw new Error('지갑이 연결되어 있지 않습니다');
 
-  const provider = new ethers.BrowserProvider(window.ethereum);
+  const provider = new ethers.BrowserProvider(walletProv);
   const signer = await provider.getSigner();
   const { faucet } = await getContractInfo();
 

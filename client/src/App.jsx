@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import './appkitConfig';  // AppKit 초기화 (사이드 이펙트)
+import { useAppKitAccount, useAppKitProvider, useAppKit, useDisconnect } from '@reown/appkit/react';
+import { setWalletProvider, getWalletProvider } from './walletProvider';
 import Map from './components/Map';
 import SpotInfo from './components/SpotInfo';
 import CreateSpot from './components/CreateSpot';
@@ -13,8 +16,9 @@ import { getSpots, requestClaim, getClaimHistory, getTelegramBalance } from './a
 import { getBalance as getContractBalance, resetContractCache } from './contract';
 import { getETH, getTON, resetFaucetCache } from './faucet';
 import { t } from './translations';
+import useGeolocation from './hooks/useGeolocation';
 
-// MetaMask 연결
+// MetaMask 연결 (오너 모드용)
 async function connectMetaMask() {
   if (!window.ethereum) {
     alert('MetaMask가 설치되어 있지 않습니다');
@@ -36,6 +40,7 @@ async function connectMetaMask() {
   }
 
   const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+  setWalletProvider(window.ethereum);
   return accounts[0];
 }
 
@@ -48,13 +53,19 @@ export default function App() {
     return <TelegramLinkPage />;
   }
 
+  // AppKit hooks (WalletConnect)
+  const { walletProvider: appKitWalletProvider } = useAppKitProvider('eip155');
+  const { address: appKitAddress, isConnected: appKitConnected } = useAppKitAccount();
+  const { open: openAppKit } = useAppKit();
+  const { disconnect: disconnectAppKit } = useDisconnect();
+
   const [wallet, setWallet] = useState(null);
   const [balance, setBalance] = useState(0);
   const [ethBalance, setEthBalance] = useState(0);
   const [telegramBalance, setTelegramBalance] = useState(null);
   const [spots, setSpots] = useState([]);
   const [selectedSpot, setSelectedSpot] = useState(null);
-  const [userPos, setUserPos] = useState(null);
+  const { userPos, gpsStatus } = useGeolocation();
   const [claiming, setClaiming] = useState(false);
   const [message, setMessage] = useState(null);
   const [connecting, setConnecting] = useState(false);
@@ -93,6 +104,17 @@ export default function App() {
     localStorage.setItem('tokamon_language', lang);
   };
 
+  // 고객 모드: AppKit provider 동기화
+  useEffect(() => {
+    if (role !== 'customer') return;
+    if (appKitConnected && appKitAddress) {
+      setWalletProvider(appKitWalletProvider);
+      setWallet(appKitAddress);
+      resetContractCache();
+      resetFaucetCache();
+    }
+  }, [role, appKitConnected, appKitAddress, appKitWalletProvider]);
+
   // 메뉴 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -106,15 +128,16 @@ export default function App() {
 
   // 네트워크 정보 가져오기
   const fetchNetworkInfo = useCallback(async () => {
-    if (!window.ethereum) return;
+    const prov = getWalletProvider();
+    if (!prov) return;
     try {
-      const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' });
+      const chainIdHex = await prov.request({ method: 'eth_chainId' });
       const chainIdDec = parseInt(chainIdHex, 16);
       setChainId(chainIdDec);
 
       // RPC URL 가져오기 (provider를 통해)
       const { ethers } = await import('ethers');
-      const provider = new ethers.BrowserProvider(window.ethereum);
+      const provider = new ethers.BrowserProvider(prov);
       const network = await provider.getNetwork();
 
       // Ganache Local의 경우 기본 RPC URL 사용
@@ -126,8 +149,9 @@ export default function App() {
     }
   }, []);
 
-  // MetaMask 계정 변경 감지
+  // MetaMask 계정 변경 감지 (오너 모드에서만)
   useEffect(() => {
+    if (role === 'customer') return;
     if (!window.ethereum) return;
     const handleAccountsChanged = (accounts) => {
       resetContractCache();
@@ -147,12 +171,7 @@ export default function App() {
       window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
       window.ethereum.removeListener('chainChanged', handleChainChanged);
     };
-  }, [fetchNetworkInfo]);
-
-  // GPS (데모용: 남산 위치 고정)
-  useEffect(() => {
-    setUserPos({ lat: 37.5512, lng: 126.9882 });
-  }, []);
+  }, [role, fetchNetworkInfo]);
 
   // 잔액 갱신 (TON + ETH)
   const refreshBalance = useCallback(async () => {
@@ -167,9 +186,10 @@ export default function App() {
       setBalance(bal);
 
       // ETH 잔액 (지갑)
-      if (window.ethereum) {
+      const walletProv = getWalletProvider();
+      if (walletProv) {
         const { ethers } = await import('ethers');
-        const provider = new ethers.BrowserProvider(window.ethereum);
+        const provider = new ethers.BrowserProvider(walletProv);
         const ethBal = await provider.getBalance(wallet);
         const ethFormatted = Number(ethers.formatEther(ethBal)).toFixed(4);
         console.log('ETH 잔액 (wei):', ethBal.toString());
@@ -273,8 +293,14 @@ export default function App() {
     setMessage(null);
   };
 
-  // MetaMask 연결
+  // 지갑 연결 (역할별 분기)
   const handleConnect = async () => {
+    if (role === 'customer') {
+      // 고객: WalletConnect 모달
+      openAppKit();
+      return;
+    }
+    // 오너: 기존 MetaMask 연결
     setConnecting(true);
     const address = await connectMetaMask();
     if (address) {
@@ -285,11 +311,15 @@ export default function App() {
   };
 
   // 지갑 연결 끊기
-  const handleDisconnect = () => {
+  const handleDisconnect = async () => {
+    if (role === 'customer') {
+      await disconnectAppKit();
+    }
+    setWalletProvider(null);
     setWallet(null);
     setBalance(0);
     setEthBalance(0);
-    setMessage(null); // 메시지 초기화
+    setMessage(null);
     resetContractCache();
     resetFaucetCache();
   };
@@ -472,6 +502,7 @@ export default function App() {
       {(tab === 'map' || tab === 'create') && (
         <Map
           userPos={userPos}
+          gpsStatus={gpsStatus}
           spots={spots}
           selectedSpot={selectedSpot}
           onSelectSpot={setSelectedSpot}

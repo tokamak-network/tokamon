@@ -40,9 +40,10 @@ RPC_URL=http://127.0.0.1:8999
 ADMIN_PRIVATE_KEY=<anvil_default_account_0_private_key>
 TELEGRAM_BOT_TOKEN=<your_telegram_bot_token>
 TELEGRAM_HASH_SALT=tokamon-telegram-2024
+VITE_WALLETCONNECT_PROJECT_ID=<your_reown_project_id>
 ```
 
-> `ADMIN_PRIVATE_KEY` — Use Anvil's default account #0 private key (printed when you run `npm run anvil`). This is a local testnet key with no real value. `TELEGRAM_BOT_TOKEN` — Create a bot via [@BotFather](https://t.me/BotFather).
+> `ADMIN_PRIVATE_KEY` — Use Anvil's default account #0 private key (printed when you run `npm run anvil`). This is a local testnet key with no real value. `TELEGRAM_BOT_TOKEN` — Create a bot via [@BotFather](https://t.me/BotFather). `VITE_WALLETCONNECT_PROJECT_ID` — Create a project at [cloud.reown.com](https://cloud.reown.com) and copy the Project ID. This enables WalletConnect so mobile customers can connect MetaMask via QR code. Optional — if omitted, only the MetaMask browser extension will work.
 
 ```bash
 npm run dev
