@@ -48,7 +48,7 @@ export default function App() {
   // 텔레그램 링크 페이지 라우팅 체크
   const urlParams = new URLSearchParams(window.location.search);
   const isTelegramLinkPage = window.location.pathname === '/telegram-link' || urlParams.has('token');
-  
+
   if (isTelegramLinkPage) {
     return <TelegramLinkPage />;
   }
@@ -179,7 +179,7 @@ export default function App() {
     try {
       console.log('=== 잔액 조회 시작 ===');
       console.log('지갑 주소:', wallet);
-      
+
       // TON 잔액 (컨트랙트)
       const bal = await getContractBalance(wallet);
       console.log('TON 잔액 (컨트랙트):', bal);
@@ -443,7 +443,7 @@ export default function App() {
           )}
           {wallet ? (
             <div style={{ position: 'relative' }}>
-              <div 
+              <div
                 data-wallet-trigger
                 style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '4px 8px', borderRadius: '6px', background: showWalletMenu ? '#222' : 'transparent' }}
                 onClick={() => setShowWalletMenu(!showWalletMenu)}
@@ -459,7 +459,7 @@ export default function App() {
                 </span>
                 <span style={{ color: '#888', fontSize: '10px' }}>▼</span>
               </div>
-              
+
               {showWalletMenu && (
                 <div className="wallet-menu">
                   <button className="wallet-menu-item" onClick={() => { handleGetETH(); setShowWalletMenu(false); }}>
@@ -624,7 +624,7 @@ export default function App() {
 
       {/* 설정 모달 */}
       {showSettings && (
-        <Settings 
+        <Settings
           account={wallet}
           language={language}
           onLanguageChange={changeLanguage}
@@ -633,7 +633,7 @@ export default function App() {
             if (role === 'customer') {
               refreshTelegramBalance();
             }
-          }} 
+          }}
         />
       )}
     </>

@@ -31,7 +31,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
   };
 
   // 점주의 스팟만 필터링
-  const ownerSpots = wallet 
+  const ownerSpots = wallet
     ? spots.filter(spot => {
         const match = spot.creator_address?.toLowerCase() === wallet.toLowerCase();
         if (spots.length > 0) {
@@ -45,7 +45,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
         return match;
       })
     : [];
-  
+
   // 디버깅
   if (wallet && spots.length > 0) {
     console.log('전체 스팟 수:', spots.length);
@@ -58,10 +58,10 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
     try {
       const res = await fetch(`${API}/api/contract`);
       const contractData = await res.json();
-      
+
       const artifactRes = await fetch('/Tokamon.json');
       const artifact = await artifactRes.json();
-      
+
       if (window.ethereum) {
         const provider = new ethers.BrowserProvider(window.ethereum);
         const tempContract = new ethers.Contract(
@@ -95,10 +95,10 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
         }],
       }).catch(() => {});
 
-      const accounts = await window.ethereum.request({ 
-        method: 'eth_requestAccounts' 
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts'
       });
-      
+
       setWallet(accounts[0]);
       // 메시지 제거 - 헤더에 연결 상태가 표시됨
     } catch (err) {
@@ -166,7 +166,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
 
       const balanceWei = await contract.getTelegramBalance(telegramHash);
       const balanceTon = Number(ethers.formatEther(balanceWei));
-      
+
       console.log('잔액 조회 결과:', { balanceWei: balanceWei.toString(), balanceTon });
 
       setBalance(balanceTon);
@@ -247,7 +247,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
 
       setMessage('트랜잭션 처리 중...');
       const receipt = await tx.wait();
-      
+
       console.log('트랜잭션 완료:', receipt);
 
       // 성공 후 잔액 조회 (컨트랙트에서 직접)
@@ -258,7 +258,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
       setBalance(balanceTon);
 
       setMessage(`✅ ${selectedSpot.reward} TON ${t(language, 'claimCompleted')}`);
-      
+
       // 텔레그램 알림 전송
       try {
         await fetch(`${API}/api/telegram/notify-claim`, {
@@ -276,7 +276,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
         console.error('텔레그램 알림 전송 실패 (무시):', notifyErr);
         // 알림 실패해도 클레임은 성공이므로 무시
       }
-      
+
       // 스팟 목록 새로고침
       fetchSpots();
     } catch (err) {
@@ -345,7 +345,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
                     </div>
                     <div className="spot-compact-reward">{spot.reward} TON</div>
                   </div>
-                  
+
                   <div className="spot-compact-info">
                     <div className="spot-compact-row">
                       <span className="compact-label">💰 {t(language, 'remainingBalance')}</span>
@@ -379,8 +379,8 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
         <div className="kiosk-header-content">
           <h2>{selectedSpot.name}</h2>
           <p>{t(language, 'enterTelegramToReceiveTON').replace('{amount}', selectedSpot.reward)}</p>
-          <p style={{ 
-            fontSize: '13px', 
+          <p style={{
+            fontSize: '13px',
             color: '#aaa',
             marginTop: '8px'
           }}>
@@ -439,7 +439,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
                 {wallet.slice(0, 6)}...{wallet.slice(-4)}
                 <span style={{ color: '#10b981', fontSize: '18px' }}>✓</span>
               </p>
-              <button 
+              <button
                 onClick={disconnectWallet}
                 style={{
                   padding: '8px 20px',

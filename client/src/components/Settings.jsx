@@ -14,12 +14,12 @@ export default function Settings({ onClose, account, language, onLanguageChange 
 
   const fetchLinkedTelegram = async () => {
     if (!account) return;
-    
+
     setLoading(true);
     try {
       const response = await fetch(`http://localhost:3001/api/telegram/linked/${account}`);
       const data = await response.json();
-      
+
       if (data.linked && data.telegram_hash) {
         setLinkedTelegram(data.telegram_hash);
       } else {
@@ -44,7 +44,7 @@ export default function Settings({ onClose, account, language, onLanguageChange 
         <div className="settings-content">
           <div className="settings-section">
             <h3>{t(language, 'telegramAccountLink')}</h3>
-            
+
             {account && (
               <>
                 {loading ? (
@@ -83,15 +83,15 @@ export default function Settings({ onClose, account, language, onLanguageChange 
 
           <div className="settings-section settings-section-compact">
             <h3>{t(language, 'languageSettings')}</h3>
-            
+
             <div className="language-selector-compact">
-              <button 
+              <button
                 className={`lang-btn-compact ${language === 'ko' ? 'active' : ''}`}
                 onClick={() => onLanguageChange('ko')}
               >
                 한국어
               </button>
-              <button 
+              <button
                 className={`lang-btn-compact ${language === 'en' ? 'active' : ''}`}
                 onClick={() => onLanguageChange('en')}
               >
