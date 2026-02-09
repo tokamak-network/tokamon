@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import { getContractInfo } from './api';
+import { getWalletProvider } from './walletProvider';
 
 const COORD_SCALE = 1_000_000;
 
@@ -16,6 +17,7 @@ const ABI = [
   'function claimTelegramToWallet(bytes32 telegramHash) external',
   'function nextSpotId() external view returns (uint256)',
   'event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit)',
+  'event Claimed(uint256 indexed spotId, address indexed user, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp)',
 ];
 
 let cachedContract = null;
@@ -24,9 +26,10 @@ let cachedSigner = null;
 async function getSignerAndContract() {
   if (cachedContract && cachedSigner) return { signer: cachedSigner, contract: cachedContract };
 
-  if (!window.ethereum) throw new Error('MetaMask가 설치되어 있지 않습니다');
+  const walletProv = getWalletProvider();
+  if (!walletProv) throw new Error('지갑이 연결되어 있지 않습니다');
 
-  const provider = new ethers.BrowserProvider(window.ethereum);
+  const provider = new ethers.BrowserProvider(walletProv);
   const signer = await provider.getSigner();
   const { address } = await getContractInfo();
   const contract = new ethers.Contract(address, ABI, signer);
@@ -163,7 +166,7 @@ export async function getBalance(address) {
       return 0;
     }
     
-    const provider = new ethers.BrowserProvider(window.ethereum);
+    const provider = new ethers.BrowserProvider(getWalletProvider());
     const tonTokenAbi = ['function balanceOf(address) view returns (uint256)'];
     const tonToken = new ethers.Contract(tonTokenAddress, tonTokenAbi, provider);
     
@@ -194,4 +197,22 @@ export async function claimTelegramToWallet(telegramHash) {
   const { contract } = await getSignerAndContract();
   const tx = await contract.claimTelegramToWallet(telegramHash);
   await tx.wait();
+}
+
+// 스팟별 클래임 히스토리 조회 (컨트랙트 이벤트 직접 조회)
+export async function getSpotClaimHistory(spotId) {
+  const { contract } = await getSignerAndContract();
+  const filter = contract.filters.Claimed(spotId, null);
+  const events = await contract.queryFilter(filter);
+  const history = events.map((ev) => {
+    const { user, reward, bonus, stamp, timestamp } = ev.args;
+    return {
+      user_address: user,
+      reward: Number(ethers.formatEther(reward)),
+      bonus: Number(ethers.formatEther(bonus)),
+      stamp: Number(stamp),
+      created_at: new Date(Number(timestamp) * 1000).toISOString(),
+    };
+  });
+  return history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 }

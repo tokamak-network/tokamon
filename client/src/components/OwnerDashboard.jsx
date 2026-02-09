@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { redepositSelf, updateCooldown, updateAllowDuplicateClaims } from '../contract';
+import { redepositSelf, updateCooldown, updateAllowDuplicateClaims, getSpotClaimHistory } from '../contract';
 import { t } from '../translations';
 
 export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet, onRedeposited, language = 'ko' }) {
@@ -11,6 +11,9 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
   const [updatingCooldown, setUpdatingCooldown] = useState(false);
   const [duplicateClaimsSpotId, setDuplicateClaimsSpotId] = useState(null);
   const [updatingDuplicateClaims, setUpdatingDuplicateClaims] = useState(false);
+  const [claimHistorySpotId, setClaimHistorySpotId] = useState(null);
+  const [claimHistory, setClaimHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   if (!wallet) {
     return (
@@ -83,6 +86,30 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
     } finally {
       setUpdatingDuplicateClaims(false);
     }
+  };
+
+  const handleShowClaimHistory = async (spotId) => {
+    if (claimHistorySpotId === spotId) {
+      setClaimHistorySpotId(null);
+      setClaimHistory([]);
+      return;
+    }
+    setClaimHistorySpotId(spotId);
+    setLoadingHistory(true);
+    try {
+      const history = await getSpotClaimHistory(spotId);
+      setClaimHistory(history);
+    } catch (err) {
+      alert('클레임 목록 조회 실패');
+      setClaimHistory([]);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  const shortenAddress = (addr) => {
+    if (!addr) return '';
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
 
   return (
@@ -246,17 +273,17 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                   </div>
                 </div>
               ) : (
-                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
                   <button
                     className="secondary"
-                    style={{ flex: 1, marginTop: 0 }}
+                    style={{ flex: 1, marginTop: 0, minWidth: '45%' }}
                     onClick={() => setRedepositSpotId(spot.id)}
                   >
                     TON 재예치
                   </button>
                   <button
                     className="secondary"
-                    style={{ flex: 1, marginTop: 0 }}
+                    style={{ flex: 1, marginTop: 0, minWidth: '45%' }}
                     onClick={() => {
                       setCooldownSpotId(spot.id);
                       setCooldownSeconds(spot.cooldown.toString());
@@ -266,11 +293,54 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                   </button>
                   <button
                     className="secondary"
-                    style={{ flex: 1, marginTop: 0 }}
+                    style={{ flex: 1, marginTop: 0, minWidth: '45%' }}
                     onClick={() => setDuplicateClaimsSpotId(spot.id)}
                   >
                     중복 발행 설정
                   </button>
+                  <button
+                    className="secondary"
+                    style={{ flex: 1, marginTop: 0, minWidth: '45%' }}
+                    onClick={() => handleShowClaimHistory(spot.id)}
+                  >
+                    {claimHistorySpotId === spot.id ? '목록 닫기' : '클래임 목록'}
+                  </button>
+                </div>
+              )}
+
+              {claimHistorySpotId === spot.id && (
+                <div style={{ marginTop: 8, padding: 12, background: '#1a1a1a', borderRadius: 8 }}>
+                  <div style={{ fontSize: 14, color: '#4FC3F7', marginBottom: 8, fontWeight: 'bold' }}>
+                    클래임 내역
+                  </div>
+                  {loadingHistory ? (
+                    <div style={{ color: '#888', fontSize: 13 }}>불러오는 중...</div>
+                  ) : claimHistory.length === 0 ? (
+                    <div style={{ color: '#888', fontSize: 13 }}>아직 클래임 내역이 없습니다</div>
+                  ) : (
+                    <div style={{ maxHeight: 300, overflowY: 'auto' }}>
+                      {claimHistory.map((item, idx) => (
+                        <div key={idx} style={{
+                          padding: '8px 0',
+                          borderBottom: idx < claimHistory.length - 1 ? '1px solid #333' : 'none',
+                          fontSize: 13,
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ color: '#ddd', fontFamily: 'monospace' }}>
+                              {shortenAddress(item.user_address)}
+                            </span>
+                            <span style={{ color: '#4FC3F7' }}>
+                              {item.reward} TON{item.bonus > 0 ? ` (+${item.bonus})` : ''}
+                            </span>
+                          </div>
+                          <div style={{ color: '#888', fontSize: 11, marginTop: 2 }}>
+                            {new Date(item.created_at).toLocaleString()}
+                            {item.stamp > 0 ? ` | 스탬프 ${item.stamp}회` : ''}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
