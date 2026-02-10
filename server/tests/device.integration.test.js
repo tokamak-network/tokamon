@@ -145,7 +145,7 @@ async function run() {
     assert(spotId >= 0, `createSpot 성공: spotId=${spotId}`);
 
     // 2-1. claimByDevice
-    const deviceHash = hashDeviceId('abcdef0123456789');
+    const deviceHash = hashDeviceId('aa11bb22cc33dd44');
     const claimResult = await blockchain.claimByDevice(spotId, deviceHash);
     assert(claimResult.reward === 10, `claimByDevice reward: ${claimResult.reward}`);
     assert(claimResult.balance > 0, `claimByDevice balance: ${claimResult.balance}`);
@@ -160,7 +160,7 @@ async function run() {
     assert(stampInfo.goal === 5, `getDeviceStampInfo goal: ${stampInfo.goal}`);
 
     // 2-4. 다른 기기로 클레임 (독립적)
-    const deviceHash2 = hashDeviceId('1111222233334444');
+    const deviceHash2 = hashDeviceId('ee55ff66aa77bb88');
     const claimResult2 = await blockchain.claimByDevice(spotId, deviceHash2);
     assert(claimResult2.reward === 10, `다른 기기 claimByDevice reward: ${claimResult2.reward}`);
 
