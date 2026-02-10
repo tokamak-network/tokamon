@@ -14,6 +14,10 @@ const anvilLocal = {
   rpcUrls: {
     default: { http: ['http://127.0.0.1:8999'] },
   },
+  blockExplorers: {
+    default: { name: 'Local', url: 'http://127.0.0.1:8999' },
+  },
+  testnet: true,
 };
 
 const ethersAdapter = new EthersAdapter();

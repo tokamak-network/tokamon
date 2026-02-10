@@ -3,13 +3,13 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   TextInput, Alert, ActivityIndicator,
 } from 'react-native';
-import { useAppKit, useAppKitAccount } from '@reown/appkit-react-native';
+import { useAppKit, useAccount } from '@reown/appkit-react-native';
 import { getSpots, getSpotClaimHistory, redepositSpot, updateSpotCooldown } from '../services/api';
 import { t } from '../translations';
 
 export default function OwnerDashboardScreen({ language }) {
   const { open } = useAppKit();
-  const { address, isConnected } = useAppKitAccount();
+  const { address, isConnected } = useAccount();
   const wallet = isConnected ? address : '';
   const [spots, setSpots] = useState([]);
   const [redepositSpotId, setRedepositSpotId] = useState(null);

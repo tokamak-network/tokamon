@@ -1,8 +1,10 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   SafeAreaView, View, Text, StyleSheet, StatusBar, TouchableOpacity,
-  Animated, Easing,
+  Animated, Easing, LogBox,
 } from 'react-native';
+
+LogBox.ignoreLogs(['Cannot convert null value to object']);
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppKitProvider, AppKit } from '@reown/appkit-react-native';
 import { appKit } from './src/services/wallet';

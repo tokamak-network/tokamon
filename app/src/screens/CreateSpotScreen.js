@@ -4,7 +4,7 @@ import {
   TouchableOpacity, Alert,
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { useAppKit, useAppKitAccount } from '@reown/appkit-react-native';
+import { useAppKit, useAccount } from '@reown/appkit-react-native';
 import { createSpot } from '../services/api';
 import { t } from '../translations';
 
@@ -17,7 +17,7 @@ const COOLDOWN_OPTIONS = [
 
 export default function CreateSpotScreen({ language }) {
   const { open } = useAppKit();
-  const { address, isConnected } = useAppKitAccount();
+  const { address, isConnected } = useAccount();
   const mapRef = useRef(null);
   const [selectedPos, setSelectedPos] = useState(null);
   const [name, setName] = useState('');
