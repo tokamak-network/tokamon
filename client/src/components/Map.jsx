@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { t } from '../translations';
@@ -43,7 +43,17 @@ const pinIcon = new L.DivIcon({
   iconAnchor: [9, 9],
 });
 
-function getSpotIcon(spot) {
+// 보라: 내 스팟 (점주 본인 소유)
+const mySpotIcon = new L.DivIcon({
+  className: '',
+  html: '<div style="width:48px;height:48px;background:#fff;border-radius:50%;border:3px solid #a78bfa;box-shadow:0 3px 12px rgba(167,139,250,0.7);display:flex;align-items:center;justify-content:center;padding:6px;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;filter:hue-rotate(240deg) saturate(1.5);"/></div>',
+  iconSize: [48, 48],
+  iconAnchor: [24, 24],
+});
+
+function getSpotIcon(spot, wallet) {
+  const isMine = wallet && spot.creator_address?.toLowerCase() === wallet.toLowerCase();
+  if (isMine) return mySpotIcon;
   const isExhausted = spot.remaining < spot.reward;
   if (isExhausted) return exhaustedIcon;
   if (!spot.active) return inactiveIcon;
@@ -69,6 +79,21 @@ function MapClickHandler({ createMode, onMapClick }) {
   return null;
 }
 
+// GPS 위치가 처음 잡히면 자동으로 이동
+function AutoCenter({ userPos }) {
+  const map = useMap();
+  const hasCentered = useRef(false);
+
+  useEffect(() => {
+    if (userPos && !hasCentered.current) {
+      hasCentered.current = true;
+      map.flyTo([userPos.lat, userPos.lng], 16);
+    }
+  }, [userPos, map]);
+
+  return null;
+}
+
 // 내 위치로 이동 버튼
 function LocateButton({ userPos }) {
   const map = useMap();
@@ -90,7 +115,7 @@ function LocateButton({ userPos }) {
   );
 }
 
-export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectSpot, initialCenter, createMode, pinPos, onMapClick }) {
+export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectSpot, initialCenter, createMode, pinPos, onMapClick, wallet }) {
   const center = initialCenter || { lat: 37.5665, lng: 126.978 };
 
   return (
@@ -140,6 +165,7 @@ export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectS
         />
 
         <MapClickHandler createMode={createMode} onMapClick={onMapClick} />
+        <AutoCenter userPos={userPos} />
         <LocateButton userPos={userPos} />
 
         {userPos && (
@@ -171,7 +197,7 @@ export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectS
             <Marker
               key={spot.id}
               position={[spot.lat, spot.lng]}
-              icon={getSpotIcon(spot)}
+              icon={getSpotIcon(spot, wallet)}
               eventHandlers={{ click: () => !createMode && onSelectSpot(spot) }}
             >
               <Popup>

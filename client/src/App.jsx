@@ -498,8 +498,8 @@ export default function App() {
         ))}
       </div>
 
-      {/* 지도 (고객: 지도탭 / 점주: 스팟만들기탭) */}
-      {(tab === 'map' || tab === 'create') && (
+      {/* 지도 (고객: 지도탭 / 점주: 대시보드+스팟만들기탭) */}
+      {(tab === 'map' || tab === 'owner-dashboard' || tab === 'create') && (
         <Map
           userPos={userPos}
           gpsStatus={gpsStatus}
