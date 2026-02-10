@@ -81,14 +81,13 @@ contract TokamonUnitTest is Test {
     
     function testCreateSpotSelf() public {
         uint256 depositAmount = 100 * 1e18;
-        
+
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), depositAmount);
-        tokamon.depositSelf(depositAmount);
-        
+
         vm.expectEmit(true, true, false, true);
         emit SpotCreated(0, spotCreator, 10 * 1e18, depositAmount);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             depositAmount,
             10 * 1e18,  // reward
@@ -123,18 +122,18 @@ contract TokamonUnitTest is Test {
     function testRedepositSelf() public {
         // 스팟 생성
         vm.startPrank(spotCreator);
-        tonToken.approve(address(tokamon), 200 * 1e18);
-        tokamon.depositSelf(200 * 1e18);
-        
+        tonToken.approve(address(tokamon), 100 * 1e18);
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 3600, false,
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
         );
-        
+
         // 재예치
+        tonToken.approve(address(tokamon), 100 * 1e18);
+
         vm.expectEmit(true, true, false, true);
         emit Redeposited(spotId, spotCreator, 100 * 1e18);
-        
+
         tokamon.redepositSelf(spotId, 100 * 1e18);
         vm.stopPrank();
         
@@ -148,8 +147,7 @@ contract TokamonUnitTest is Test {
         // 스팟 생성
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false,
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
@@ -176,8 +174,7 @@ contract TokamonUnitTest is Test {
     function testClaimMultipleTimes() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, true, // allowDuplicateClaims = true
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
@@ -198,8 +195,7 @@ contract TokamonUnitTest is Test {
     function testClaimOnlyAdmin() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false,
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
@@ -217,8 +213,7 @@ contract TokamonUnitTest is Test {
     function testClaimToTelegram() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false,
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
@@ -239,8 +234,7 @@ contract TokamonUnitTest is Test {
     function testClaimToTelegramOnlySpotOwner() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false,
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
@@ -274,8 +268,7 @@ contract TokamonUnitTest is Test {
         // 1. 스팟 생성 및 텔레그램으로 클레임
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false,
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
@@ -306,8 +299,7 @@ contract TokamonUnitTest is Test {
     function testCooldownPreventsDoubleClaim() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 3600, false, // cooldown = 3600
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
@@ -327,8 +319,7 @@ contract TokamonUnitTest is Test {
     function testClaimAfterCooldown() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 3600, false,
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
@@ -352,8 +343,7 @@ contract TokamonUnitTest is Test {
     function testNoDuplicateClaimTelegramThenWallet() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 3600, false,
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
@@ -376,8 +366,7 @@ contract TokamonUnitTest is Test {
     function testNoDuplicateClaimWalletThenTelegram() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 3600, false,
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
@@ -403,8 +392,7 @@ contract TokamonUnitTest is Test {
     function testAllowDuplicateClaims() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 3600,
             true,  // allowDuplicateClaims = true
@@ -427,8 +415,7 @@ contract TokamonUnitTest is Test {
     function testStampAccumulation() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 500 * 1e18);
-        tokamon.depositSelf(500 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             500 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, true, // stampGoal = 5
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
@@ -450,8 +437,7 @@ contract TokamonUnitTest is Test {
     function testStampBonusOnCompletion() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 500 * 1e18);
-        tokamon.depositSelf(500 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             500 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, true, // stampBonus = 50 TON
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
@@ -482,8 +468,7 @@ contract TokamonUnitTest is Test {
     function testRevertSpotExhausted() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 15 * 1e18);
-        tokamon.depositSelf(15 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             15 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, true,
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
@@ -501,22 +486,22 @@ contract TokamonUnitTest is Test {
     }
     
     function testRevertInsufficientBalance() public {
-        vm.prank(customer1);
+        address poorUser = makeAddr("poorUser");
+        // poorUser has 0 TON tokens
+        vm.startPrank(poorUser);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        
-        vm.prank(customer1);
-        vm.expectRevert("insufficient balance");
+        vm.expectRevert(); // will revert on transferFrom due to insufficient token balance
         tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false,
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
         );
+        vm.stopPrank();
     }
     
     function testRevertNotSpotCreator() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false,
             Tokamon.SpotMetadata("Test", "Test", 0, 0, "00:00", "23:59")
@@ -734,8 +719,7 @@ contract TokamonUnitTest is Test {
     function testRevertCreateSpotZeroReward() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         vm.expectRevert("reward must be > 0");
         tokamon.createSpotSelf(
             100 * 1e18, 0, 5, 50 * 1e18, 0, false, // reward = 0
@@ -747,8 +731,7 @@ contract TokamonUnitTest is Test {
     function testRevertCreateSpotZeroStampGoal() public {
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         vm.expectRevert("stampGoal must be > 0");
         tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 0, 50 * 1e18, 0, false, // stampGoal = 0

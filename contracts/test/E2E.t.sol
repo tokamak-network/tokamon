@@ -61,20 +61,10 @@ contract E2ETest is Test {
         console.log("   Received TON:", tonBalance / 1e18);
         assertEq(tonBalance, 100 * 1e18);
         
-        // 2. Tokamon에 입금
-        console.log("2. Cafe owner deposits TON to Tokamon");
+        // 2. 받은 TON으로 스팟 생성 (스탬프 5개 모으면 보너스)
+        console.log("2. Cafe owner creates spot with TON");
         vm.startPrank(cafeOwner);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        vm.stopPrank();
-        
-        uint256 internalBalance = tokamon.getBalance(cafeOwner);
-        console.log("   Internal balance:", internalBalance / 1e18);
-        assertEq(internalBalance, 100 * 1e18);
-        
-        // 3. 스팟 생성 (스탬프 5개 모으면 보너스)
-        console.log("3. Cafe owner creates spot");
-        vm.prank(cafeOwner);
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18,  // 총 예치금
             10 * 1e18,   // 방문당 보상
@@ -237,7 +227,6 @@ contract E2ETest is Test {
         
         vm.startPrank(cafeOwner);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
         uint256 cafeSpotId = tokamon.createSpotSelf(
             100 * 1e18, 5 * 1e18, 10, 50 * 1e18, 1800, false,
             Tokamon.SpotMetadata("Zena's Cafe", "Coffee", 37541000, 127068000, "08:00", "22:00")
@@ -250,7 +239,6 @@ contract E2ETest is Test {
         
         vm.startPrank(restaurantOwner);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
         uint256 restaurantSpotId = tokamon.createSpotSelf(
             100 * 1e18, 15 * 1e18, 5, 100 * 1e18, 3600, false,
             Tokamon.SpotMetadata("Bob's Restaurant", "Food", 37542000, 127069000, "11:00", "23:00")
@@ -301,8 +289,7 @@ contract E2ETest is Test {
         faucet.getTON();
         
         vm.startPrank(cafeOwner);
-        tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
+        tonToken.approve(address(tokamon), 30 * 1e18);
         uint256 spotId = tokamon.createSpotSelf(
             30 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, true,
             Tokamon.SpotMetadata("Cafe", "Test", 0, 0, "00:00", "23:59")
@@ -340,8 +327,10 @@ contract E2ETest is Test {
         
         // 5. 재예치
         console.log("\n4. Owner redeposits TON");
-        vm.prank(cafeOwner);
+        vm.startPrank(cafeOwner);
+        tonToken.approve(address(tokamon), 70 * 1e18);
         tokamon.redepositSelf(spotId, 70 * 1e18);
+        vm.stopPrank();
         
         (, , remaining, , , , ) = tokamon.getSpotCore(spotId);
         console.log("   After redeposit:", remaining / 1e18, "TON");
@@ -375,7 +364,6 @@ contract E2ETest is Test {
             
             vm.startPrank(owners[i]);
             tonToken.approve(address(tokamon), 100 * 1e18);
-            tokamon.depositSelf(100 * 1e18);
             tokamon.createSpotSelf(
                 100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, true,
                 Tokamon.SpotMetadata(
@@ -436,7 +424,6 @@ contract E2ETest is Test {
         // 스팟 생성
         vm.startPrank(cafeOwner);
         tonToken.approve(address(tokamon), 500 * 1e18);
-        tokamon.depositSelf(500 * 1e18);
         tokamon.createSpotSelf(
             500 * 1e18, 10 * 1e18, 5, 50 * 1e18, 3600, false,
             Tokamon.SpotMetadata("Zena's Cafe", "Coffee", 37541000, 127068000, "08:00", "22:00")

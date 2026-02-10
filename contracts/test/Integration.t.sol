@@ -55,16 +55,10 @@ contract IntegrationTest is Test {
         
         assertEq(tonToken.balanceOf(spotCreator1), 100 * 1e18);
         
-        // 2. 받은 TON으로 Tokamon에 입금
+        // 2. 받은 TON으로 스팟 생성
         vm.startPrank(spotCreator1);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        vm.stopPrank();
-        
-        assertEq(tokamon.getBalance(spotCreator1), 100 * 1e18);
-        
-        // 3. 스팟 생성
-        vm.prank(spotCreator1);
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false,
             Tokamon.SpotMetadata("Cafe", "Test", 0, 0, "00:00", "23:59")
@@ -94,14 +88,13 @@ contract IntegrationTest is Test {
         
         vm.startPrank(spotCreator1);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false,
             Tokamon.SpotMetadata("Cafe", "Test", 0, 0, "00:00", "23:59")
         );
         vm.stopPrank();
-        
+
         // 2. 고객이 클레임
         uint256 customerBalanceBefore = tonToken.balanceOf(customer1);
         
@@ -124,8 +117,7 @@ contract IntegrationTest is Test {
             
             vm.startPrank(creators[i]);
             tonToken.approve(address(tokamon), 100 * 1e18);
-            tokamon.depositSelf(100 * 1e18);
-            
+
             tokamon.createSpotSelf(
                 100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false,
                 Tokamon.SpotMetadata("Spot", "Test", 0, 0, "00:00", "23:59")
@@ -151,13 +143,12 @@ contract IntegrationTest is Test {
         
         vm.startPrank(spotCreator1);
         tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false,
             Tokamon.SpotMetadata("Cafe", "Test", 0, 0, "00:00", "23:59")
         );
-        
+
         // 2. 텔레그램으로 클레임
         bytes32 telegramHash = keccak256(abi.encodePacked("customer1_telegram"));
         tokamon.claimToTelegram(spotId, telegramHash);
@@ -190,8 +181,7 @@ contract IntegrationTest is Test {
         
         vm.startPrank(spotCreator1);
         tonToken.approve(address(tokamon), 200 * 1e18);
-        tokamon.depositSelf(200 * 1e18);
-        
+
         uint256 spotId1 = tokamon.createSpotSelf(
             100 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, false,
             Tokamon.SpotMetadata("Cafe 1", "Test", 0, 0, "00:00", "23:59")
@@ -232,8 +222,7 @@ contract IntegrationTest is Test {
         
         vm.startPrank(spotCreator1);
         tonToken.approve(address(tokamon), 600 * 1e18);
-        tokamon.depositSelf(600 * 1e18);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             600 * 1e18, 10 * 1e18, 5, 100 * 1e18, 0, true, // stampBonus = 100 TON
             Tokamon.SpotMetadata("Cafe", "Test", 0, 0, "00:00", "23:59")
@@ -267,24 +256,25 @@ contract IntegrationTest is Test {
         faucet.getTON();
         
         vm.startPrank(spotCreator1);
-        tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+        tonToken.approve(address(tokamon), 20 * 1e18);
+
         uint256 spotId = tokamon.createSpotSelf(
             20 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, true,
             Tokamon.SpotMetadata("Cafe", "Test", 0, 0, "00:00", "23:59")
         );
         vm.stopPrank();
-        
+
         // 2번 클레임 (잔액 소진 직전)
         vm.startPrank(admin);
         tokamon.claim(spotId, customer1);
         tokamon.claim(spotId, customer2);
         vm.stopPrank();
-        
+
         // 재예치
-        vm.prank(spotCreator1);
+        vm.startPrank(spotCreator1);
+        tonToken.approve(address(tokamon), 80 * 1e18);
         tokamon.redepositSelf(spotId, 80 * 1e18);
+        vm.stopPrank();
         
         // 계속 클레임 가능
         vm.prank(admin);
@@ -312,8 +302,7 @@ contract IntegrationTest is Test {
             
             vm.startPrank(creators[i]);
             tonToken.approve(address(tokamon), 200 * 1e18);
-            tokamon.depositSelf(200 * 1e18);
-            
+
             tokamon.createSpotSelf(
                 200 * 1e18, 10 * 1e18, 3, 30 * 1e18, 60, false,
                 Tokamon.SpotMetadata(
@@ -372,27 +361,28 @@ contract IntegrationTest is Test {
         faucet.getTON();
         
         vm.startPrank(spotCreator1);
-        tonToken.approve(address(tokamon), 100 * 1e18);
-        tokamon.depositSelf(100 * 1e18);
-        
+        tonToken.approve(address(tokamon), 15 * 1e18);
+
         uint256 spotId = tokamon.createSpotSelf(
             15 * 1e18, 10 * 1e18, 5, 50 * 1e18, 0, true,
             Tokamon.SpotMetadata("Cafe", "Test", 0, 0, "00:00", "23:59")
         );
         vm.stopPrank();
-        
+
         // 첫 번째 클레임 성공
         vm.prank(admin);
         tokamon.claim(spotId, customer1);
-        
+
         // 두 번째 클레임 실패 (잔액 부족)
         vm.prank(admin);
         vm.expectRevert("spot exhausted");
         tokamon.claim(spotId, customer2);
-        
+
         // 재예치
-        vm.prank(spotCreator1);
+        vm.startPrank(spotCreator1);
+        tonToken.approve(address(tokamon), 85 * 1e18);
         tokamon.redepositSelf(spotId, 85 * 1e18);
+        vm.stopPrank();
         
         // 다시 클레임 가능
         vm.prank(admin);

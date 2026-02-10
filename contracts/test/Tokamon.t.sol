@@ -44,11 +44,10 @@ contract TokamonTest is Test {
     
     function testCreateSpotAndClaimToTelegram() public {
         uint256 depositAmount = 100 * 1e18;
-        
+
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), depositAmount);
-        tokamon.depositSelf(depositAmount);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             depositAmount,
             10 * 1e18,  // reward
@@ -78,11 +77,10 @@ contract TokamonTest is Test {
     function testFullFlow() public {
         // 1. 스팟 생성
         uint256 depositAmount = 100 * 1e18;
-        
+
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), depositAmount);
-        tokamon.depositSelf(depositAmount);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             depositAmount, 10 * 1e18, 5, 50 * 1e18, 3600, false,
             Tokamon.SpotMetadata("Test Spot", "Test", 37500000, 127000000, "00:00", "23:59")
@@ -119,13 +117,12 @@ contract TokamonTest is Test {
     
     function testNoDuplicateClaimTelegramThenWallet() public {
         // 시나리오: 텔레그램으로 먼저 클레임 → 지갑 연결 → 지갑으로 또 클레임 시도
-        
+
         uint256 depositAmount = 100 * 1e18;
-        
+
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), depositAmount);
-        tokamon.depositSelf(depositAmount);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             depositAmount, 10 * 1e18, 5, 50 * 1e18, 3600, false,
             Tokamon.SpotMetadata("Test Spot", "Test", 37500000, 127000000, "00:00", "23:59")
@@ -150,13 +147,12 @@ contract TokamonTest is Test {
     
     function testNoDuplicateClaimWalletThenTelegram() public {
         // 시나리오: 지갑으로 먼저 클레임 → 나중에 텔레그램 연결 → 텔레그램으로 또 클레임 시도
-        
+
         uint256 depositAmount = 100 * 1e18;
-        
+
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), depositAmount);
-        tokamon.depositSelf(depositAmount);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             depositAmount, 10 * 1e18, 5, 50 * 1e18, 3600, false,
             Tokamon.SpotMetadata("Test Spot", "Test", 37500000, 127000000, "00:00", "23:59")
@@ -181,13 +177,12 @@ contract TokamonTest is Test {
     
     function testDuplicateClaimAfterCooldown() public {
         // 시나리오: 쿨다운 후에는 정상적으로 클레임 가능
-        
+
         uint256 depositAmount = 100 * 1e18;
-        
+
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), depositAmount);
-        tokamon.depositSelf(depositAmount);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             depositAmount, 10 * 1e18, 5, 50 * 1e18, 3600, false,
             Tokamon.SpotMetadata("Test Spot", "Test", 37500000, 127000000, "00:00", "23:59")
@@ -220,13 +215,12 @@ contract TokamonTest is Test {
     
     function testAllowDuplicateClaims() public {
         // 시나리오: allowDuplicateClaims = true인 경우 중복 허용
-        
+
         uint256 depositAmount = 100 * 1e18;
-        
+
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), depositAmount);
-        tokamon.depositSelf(depositAmount);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             depositAmount, 10 * 1e18, 5, 50 * 1e18, 3600,
             true,  // allowDuplicateClaims!
@@ -251,13 +245,12 @@ contract TokamonTest is Test {
     
     function testClaimDirectlyTransfersTON() public {
         // 시나리오: claim() 호출 시 balances가 아닌 즉시 TON 토큰이 지갑으로 전송되어야 함
-        
+
         uint256 depositAmount = 100 * 1e18;
-        
+
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), depositAmount);
-        tokamon.depositSelf(depositAmount);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             depositAmount, 10 * 1e18, 5, 50 * 1e18, 3600, false,
             Tokamon.SpotMetadata("Test Spot", "Test", 37500000, 127000000, "00:00", "23:59")
@@ -303,11 +296,10 @@ contract TokamonTest is Test {
     
     function testRevertSpotExhausted() public {
         uint256 depositAmount = 15 * 1e18;  // 10 reward + 5 여유
-        
+
         vm.startPrank(spotCreator);
         tonToken.approve(address(tokamon), depositAmount);
-        tokamon.depositSelf(depositAmount);
-        
+
         uint256 spotId = tokamon.createSpotSelf(
             depositAmount, 10 * 1e18, 5, 50 * 1e18, 0, // cooldown = 0
             true,  // allowDuplicateClaims
