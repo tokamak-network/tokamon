@@ -30,7 +30,7 @@ Tokamon is a location-based loyalty reward platform on EVM. Store owners deposit
 ```bash
 git clone https://github.com/tokamak-network/tokamon.git
 cd tokamon
-npm run install:all
+./scripts/install.sh   # Node.js, Foundry, 의존성 점검 및 설치
 ```
 
 Create a `.env` file in the project root:
@@ -56,6 +56,7 @@ Open http://localhost:5173 and connect MetaMask (Chain ID: 1337, RPC: http://127
 
 | Command | Description |
 |---------|-------------|
+| `./scripts/install.sh` | Node.js, Foundry, 의존성 점검 및 설치 |
 | `./scripts/start.sh [all\|anvil\|server\|client]` | 서비스 시작 (all은 anvil → deploy → server → client) |
 | `./scripts/stop.sh [all\|anvil\|server\|client]` | 서비스 종료 (graceful → force kill) |
 | `./scripts/status.sh` | PID, 포트, 업타임, 헬스체크, 최근 로그 |
