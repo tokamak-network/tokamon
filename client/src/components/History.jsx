@@ -61,7 +61,7 @@ export default function History({ history, balance = 0, account, language = 'ko'
         // API에서 username 조회 (화면 표시용)
         console.log('3️⃣ API에서 username 조회 중...');
         try {
-          const response = await fetch(`http://localhost:3001/api/telegram/linked/${account}`);
+          const response = await fetch(`/api/telegram/linked/${account}`);
           const data = await response.json();
           console.log('API 응답:', data);
           if (data.linked && data.telegram_username) {

@@ -14,6 +14,12 @@ import { getBalance as getContractBalance, resetContractCache } from './contract
 import { getETH, getTON, resetFaucetCache } from './faucet';
 import { t } from './translations';
 
+// RPC URL을 브라우저 접속 호스트 기준으로 결정
+function getAnvilRpcUrl() {
+  const host = window.location.hostname;
+  return `http://${host}:8999`;
+}
+
 // MetaMask 연결
 async function connectMetaMask() {
   if (!window.ethereum) {
@@ -26,8 +32,8 @@ async function connectMetaMask() {
       method: 'wallet_addEthereumChain',
       params: [{
         chainId: '0x539',
-        chainName: 'Ganache Local',
-        rpcUrls: ['http://127.0.0.1:8999'],
+        chainName: 'Tokamon Local',
+        rpcUrls: [getAnvilRpcUrl()],
         nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
       }],
     });
@@ -59,7 +65,7 @@ export default function App() {
   const [message, setMessage] = useState(null);
   const [connecting, setConnecting] = useState(false);
   const [history, setHistory] = useState([]);
-  const [rpcUrl, setRpcUrl] = useState('http://127.0.0.1:8999');
+  const [rpcUrl, setRpcUrl] = useState(getAnvilRpcUrl());
   const [chainId, setChainId] = useState(null);
 
   // 역할: null | 'customer' | 'owner'
@@ -117,9 +123,8 @@ export default function App() {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const network = await provider.getNetwork();
 
-      // Ganache Local의 경우 기본 RPC URL 사용
       if (chainIdDec === 1337) {
-        setRpcUrl('http://127.0.0.1:8999');
+        setRpcUrl(getAnvilRpcUrl());
       }
     } catch (err) {
       console.warn('네트워크 정보 조회 실패:', err.message);
@@ -579,6 +584,7 @@ export default function App() {
           pinPos={pinPos}
           wallet={wallet}
           balance={balance}
+          language={language}
           onClose={() => {
             setShowCreateForm(false);
             setPinPos(null);

@@ -32,19 +32,19 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
   const handleRedeposit = async (spotId) => {
     const amount = Number(redepositAmount);
     if (!amount || amount <= 0) {
-      alert('올바른 금액을 입력해주세요');
+      alert(t(language, 'enterValidAmount'));
       return;
     }
-    
+
     setRedepositing(true);
     try {
       await redepositSelf(spotId, amount);
       setRedepositSpotId(null);
       setRedepositAmount('');
       onRedeposited();
-      alert(`${amount} TON 재예치 완료!`);
+      alert(`${amount} TON ${t(language, 'redepositComplete')}`);
     } catch (err) {
-      alert(err.reason || err.message || '재예치 실패');
+      alert(err.reason || err.message || t(language, 'redepositFailed'));
     } finally {
       setRedepositing(false);
     }
@@ -53,19 +53,19 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
   const handleUpdateCooldownSubmit = async (spotId) => {
     const seconds = Number(cooldownSeconds);
     if (isNaN(seconds) || seconds < 0) {
-      alert('올바른 숫자를 입력해주세요');
+      alert(t(language, 'enterValidNumber'));
       return;
     }
-    
+
     setUpdatingCooldown(true);
     try {
       await updateCooldown(spotId, seconds);
       setCooldownSpotId(null);
       setCooldownSeconds('');
-      onRedeposited(); // 스팟 목록 새로고침
-      alert('쿨다운이 성공적으로 변경되었습니다');
+      onRedeposited();
+      alert(t(language, 'cooldownChanged'));
     } catch (err) {
-      alert(err.reason || err.message || '쿨다운 수정 실패');
+      alert(err.reason || err.message || t(language, 'cooldownChangeFailed'));
     } finally {
       setUpdatingCooldown(false);
     }
@@ -76,39 +76,35 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
     try {
       await updateAllowDuplicateClaims(spotId, allow);
       setDuplicateClaimsSpotId(null);
-      onRedeposited(); // 스팟 목록 새로고침
-      alert(`중복 발행 허용이 ${allow ? '활성화' : '비활성화'}되었습니다`);
+      onRedeposited();
+      alert(allow ? t(language, 'duplicateEnabled') : t(language, 'duplicateDisabled'));
     } catch (err) {
-      alert(err.reason || err.message || '중복 발행 설정 실패');
+      alert(err.reason || err.message || t(language, 'duplicateChangeFailed'));
     } finally {
       setUpdatingDuplicateClaims(false);
     }
   };
 
+  const formatCooldown = (seconds) => {
+    if (seconds >= 3600) return `${(seconds / 3600).toFixed(1)}${t(language, 'hoursUnit')}`;
+    if (seconds >= 60) return `${Math.floor(seconds / 60)}${t(language, 'minutesUnit')}`;
+    return `${seconds}${t(language, 'secondsUnit')}`;
+  };
+
   return (
     <div className="owner-dashboard">
       <div className="owner-dashboard-header">
-        내 스팟 ({mySpots.length}개)
+        {t(language, 'mySpotsCount')} ({mySpots.length})
       </div>
       {mySpots.length === 0 ? (
         <div className="spot-list-empty">
-          아직 만든 스팟이 없습니다
+          {t(language, 'noSpotsYet')}
         </div>
       ) : (
         mySpots.map((spot) => {
           const claimsLeft = spot.reward > 0 ? Math.floor(spot.remaining / spot.reward) : 0;
           const isExhausted = spot.remaining < spot.reward;
-          
-          // 쿨다운 표시 (초 단위로)
-          const cooldownSeconds = spot.cooldown || 0;
-          let cooldownDisplay = '';
-          if (cooldownSeconds >= 3600) {
-            cooldownDisplay = `${(cooldownSeconds / 3600).toFixed(1)}시간`;
-          } else if (cooldownSeconds >= 60) {
-            cooldownDisplay = `${Math.floor(cooldownSeconds / 60)}분`;
-          } else {
-            cooldownDisplay = `${cooldownSeconds}초`;
-          }
+          const cooldownDisplay = formatCooldown(spot.cooldown || 0);
 
           return (
             <div key={spot.id} className="owner-spot-card">
@@ -117,37 +113,34 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                 <span
                   className={`spot-list-item-status ${isExhausted ? 'exhausted' : spot.active ? 'active' : 'inactive'}`}
                 >
-                  {isExhausted ? '소진' : spot.active ? '활성' : '비활성'}
+                  {isExhausted ? t(language, 'exhausted') : spot.active ? t(language, 'active') : t(language, 'inactive')}
                 </span>
               </div>
               <div className="spot-list-item-detail">
-                남은 TON: {spot.remaining} | 보상: {spot.reward} TON | 남은 횟수: {claimsLeft}회
+                {t(language, 'remainingTON')}: {spot.remaining} | {t(language, 'reward')}: {spot.reward} TON | {t(language, 'remainingClaimsCount')}: {claimsLeft}{t(language, 'times')}
               </div>
               <div className="spot-list-item-detail">
-                {spot.start_time} ~ {spot.end_time} | 쿨다운 {cooldownDisplay}
+                {spot.start_time} ~ {spot.end_time} | {t(language, 'cooldown')} {cooldownDisplay}
               </div>
               <div className="spot-list-item-detail">
-                중복 발행: {spot.allow_duplicate_claims ? '허용' : '불허'}
+                {t(language, 'duplicateClaims')}: {spot.allow_duplicate_claims ? t(language, 'allowed') : t(language, 'notAllowed')}
               </div>
               {spot.stamp_goal > 0 && (
                 <div className="spot-list-item-stamp">
-                  스탬프 {spot.stamp_goal}회 달성 시 +{spot.stamp_bonus} TON
+                  {t(language, 'stampAchievement')} {spot.stamp_goal}{t(language, 'achievementAt')} +{spot.stamp_bonus} TON
                 </div>
               )}
 
               {redepositSpotId === spot.id ? (
                 <div style={{ marginTop: 8, padding: 12, background: '#1a1a1a', borderRadius: 8 }}>
                   <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#aaa' }}>
-                    추가 예치할 TON
+                    {t(language, 'additionalDeposit')}
                   </label>
                   <input
                     key={`redeposit-${spot.id}`}
                     defaultValue=""
-                    placeholder="예: 10"
-                    onChange={(e) => {
-                      console.log('재예치 입력:', e.target.value);
-                      setRedepositAmount(e.target.value);
-                    }}
+                    placeholder="e.g. 10"
+                    onChange={(e) => setRedepositAmount(e.target.value)}
                     type="text"
                     style={{
                       width: '100%',
@@ -163,7 +156,7 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                   />
                   <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                     <button className="primary" onClick={() => handleRedeposit(spot.id)} disabled={redepositing} style={{ flex: 1 }}>
-                      {redepositing ? 'MetaMask 승인 대기...' : '재예치'}
+                      {redepositing ? t(language, 'waitingForMetaMask') : t(language, 'redeposit')}
                     </button>
                     <button
                       className="secondary"
@@ -171,26 +164,20 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                       disabled={redepositing}
                       style={{ flex: 1, marginTop: 0 }}
                     >
-                      취소
+                      {t(language, 'cancel')}
                     </button>
                   </div>
                 </div>
               ) : cooldownSpotId === spot.id ? (
                 <div style={{ marginTop: 8, padding: 12, background: '#1a1a1a', borderRadius: 8 }}>
                   <label style={{ display: 'block', marginBottom: 8, fontSize: 14, color: '#aaa' }}>
-                    쿨다운 시간 (초)
+                    {t(language, 'cooldownSeconds')}
                   </label>
                   <input
                     key={`cooldown-${spot.id}`}
                     defaultValue={spot.cooldown}
-                    onChange={(e) => {
-                      console.log('입력값:', e.target.value);
-                      setCooldownSeconds(e.target.value);
-                    }}
-                    onInput={(e) => {
-                      console.log('onInput:', e.target.value);
-                      setCooldownSeconds(e.target.value);
-                    }}
+                    onChange={(e) => setCooldownSeconds(e.target.value)}
+                    onInput={(e) => setCooldownSeconds(e.target.value)}
                     type="text"
                     style={{
                       width: '100%',
@@ -205,11 +192,11 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                     }}
                   />
                   <div style={{ fontSize: '12px', color: '#888', marginTop: 4 }}>
-                    예: 1초=1, 1시간=3600, 1일=86400
+                    {t(language, 'cooldownHint')}
                   </div>
                   <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                     <button className="primary" onClick={() => handleUpdateCooldownSubmit(spot.id)} disabled={updatingCooldown} style={{ flex: 1 }}>
-                      {updatingCooldown ? 'MetaMask 승인 대기...' : '쿨다운 변경'}
+                      {updatingCooldown ? t(language, 'waitingForMetaMask') : t(language, 'changeCooldown')}
                     </button>
                     <button
                       className="secondary"
@@ -217,23 +204,23 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                       disabled={updatingCooldown}
                       style={{ flex: 1, marginTop: 0 }}
                     >
-                      취소
+                      {t(language, 'cancel')}
                     </button>
                   </div>
                 </div>
               ) : duplicateClaimsSpotId === spot.id ? (
                 <div className="redeposit-form" style={{ marginTop: 8 }}>
                   <div style={{ fontSize: '14px', color: '#ddd', marginBottom: 8 }}>
-                    중복 발행을 {spot.allow_duplicate_claims ? '비활성화' : '활성화'}하시겠습니까?
+                    {spot.allow_duplicate_claims ? t(language, 'confirmDisableDuplicate') : t(language, 'confirmEnableDuplicate')}
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button 
-                      className="primary" 
-                      onClick={() => handleUpdateDuplicateClaims(spot.id, !spot.allow_duplicate_claims)} 
-                      disabled={updatingDuplicateClaims} 
+                    <button
+                      className="primary"
+                      onClick={() => handleUpdateDuplicateClaims(spot.id, !spot.allow_duplicate_claims)}
+                      disabled={updatingDuplicateClaims}
                       style={{ flex: 1 }}
                     >
-                      {updatingDuplicateClaims ? 'MetaMask 승인 대기...' : spot.allow_duplicate_claims ? '비활성화' : '활성화'}
+                      {updatingDuplicateClaims ? t(language, 'waitingForMetaMask') : spot.allow_duplicate_claims ? t(language, 'disable') : t(language, 'enable')}
                     </button>
                     <button
                       className="secondary"
@@ -241,7 +228,7 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                       disabled={updatingDuplicateClaims}
                       style={{ flex: 1, marginTop: 0 }}
                     >
-                      취소
+                      {t(language, 'cancel')}
                     </button>
                   </div>
                 </div>
@@ -252,7 +239,7 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                     style={{ flex: 1, marginTop: 0 }}
                     onClick={() => setRedepositSpotId(spot.id)}
                   >
-                    TON 재예치
+                    {t(language, 'tonRedeposit')}
                   </button>
                   <button
                     className="secondary"
@@ -262,14 +249,14 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                       setCooldownSeconds(spot.cooldown.toString());
                     }}
                   >
-                    쿨다운 변경
+                    {t(language, 'changeCooldown')}
                   </button>
                   <button
                     className="secondary"
                     style={{ flex: 1, marginTop: 0 }}
                     onClick={() => setDuplicateClaimsSpotId(spot.id)}
                   >
-                    중복 발행 설정
+                    {t(language, 'duplicateClaimSettings')}
                   </button>
                 </div>
               )}

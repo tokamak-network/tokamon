@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API = 'http://localhost:3001';
+const API = '';
 
 export default function TelegramLinkPage() {
     const [loading, setLoading] = useState(true);
