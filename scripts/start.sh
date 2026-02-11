@@ -46,7 +46,7 @@ start_anvil() {
         return 0
     fi
     info "Starting Anvil (port 8999)..."
-    nohup anvil --port 8999 --chain-id 1337 --balance 10000 \
+    nohup anvil --host 0.0.0.0 --port 8999 --chain-id 1337 --balance 10000 \
         --state "$PROJECT_ROOT/anvil-state.json" \
         > "$LOG_DIR/anvil.log" 2>&1 &
     echo $! > "$LOG_DIR/anvil.pid"
