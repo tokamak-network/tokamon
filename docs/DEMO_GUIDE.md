@@ -8,87 +8,18 @@
 ## 1. 설치
 
 ```bash
-# 루트에서 전체 설치
 npm run install:all
-
-# Ganache 설치 (글로벌)
-npm install -g ganache
-
-# 서버 의존성 (ethers, solc 포함)
-cd server && npm install && cd ..
 ```
 
-## 2. Ganache 노드 실행
-
-Ganache는 로컬 EVM 블록체인입니다. 컨트랙트 배포/서버 실행 전에 반드시 먼저 띄워야 합니다.
+## 2. 서비스 시작
 
 ```bash
-# 터미널 1에서 실행 (이 터미널은 계속 켜두세요)
-npm run ganache
+./scripts/start.sh          # anvil → deploy → server → client
 ```
 
-실행되면 아래와 같이 10개의 테스트 계정이 표시됩니다:
+Anvil(로컬 블록체인, 포트 8999), 컨트랙트 배포, 서버(포트 3001), 클라이언트(포트 5173)가 백그라운드로 실행된다.
 
-```
-Available Accounts
-==================
-(0) 0x05e6... (10000 ETH)   ← admin (컨트랙트 배포자)
-(1) 0x029f... (10000 ETH)
-...
-
-RPC Listening on 127.0.0.1:8999
-```
-
-- 포트: **8999**
-- Chain ID: **1337**
-- account[0]이 admin으로 모든 컨트랙트 TX를 실행합니다
-- `--quiet` 옵션이 포함되어 있어 TX 로그가 생략됩니다. 로그를 보고 싶으면 직접 실행:
-  ```bash
-  npx ganache --port 8999 --defaultBalanceEther 10000
-  ```
-
-## 3. 컨트랙트 배포
-
-Ganache가 실행 중인 상태에서 **새 터미널**을 열고:
-
-```bash
-npm run deploy
-```
-
-이 명령은 내부적으로 두 가지를 수행합니다:
-1. `contracts/solidity/Tokamon.sol`을 solc로 **컴파일** → `contracts/solidity/Tokamon.json` (ABI + bytecode) 생성
-2. Ganache에 컨트랙트 **배포** → `server/contract-address.json`에 주소 저장
-
-성공하면 아래와 같이 출력됩니다:
-
-```
-컴파일 완료: .../contracts/solidity/Tokamon.json
-배포자: 0x05e63980...
-컨트랙트 배포 완료: 0x34aE33e0...
-주소 저장: .../server/contract-address.json
-```
-
-## 4. 서버 + 클라이언트 실행
-
-```bash
-# 터미널 2: 서버 (Ganache 연결 + API)
-npm run server
-
-# 터미널 3: 클라이언트 (Vite 개발 서버)
-npm run client
-```
-
-서버가 시작되면 `블록체인 연결 완료 (컨트랙트: 0x...)` 메시지가 출력됩니다.
-
-### 한 번에 실행 (권장)
-
-위 과정을 한 명령으로 실행할 수도 있습니다:
-
-```bash
-npm run dev
-```
-
-순서: Ganache 시작 → 2초 대기 → 컨트랙트 배포 → 서버 + 클라이언트 동시 실행
+상태 확인: `./scripts/status.sh`
 
 ## 5. 데모 흐름
 
@@ -136,25 +67,15 @@ npm run dev
 
 ## 6. 확인 포인트
 
-### Ganache 로그
-
-Ganache가 실행 중이면 터미널에서 트랜잭션 로그를 확인할 수 있습니다:
+### 로그 확인
 
 ```bash
-# Ganache를 --quiet 없이 실행하면 모든 TX가 출력됨
-npx ganache --port 8999 --defaultBalanceEther 10000
+./scripts/status.sh          # 각 서비스 상태 + 최근 로그
 ```
 
-### 컨트랙트 상태 확인
-
-서버 로그에서 확인 가능한 항목:
-- 컨트랙트 배포 주소
-- deposit/createSpot/claim 트랜잭션 성공 여부
-- 잔액 변동
+개별 로그 파일: `logs/anvil.log`, `logs/server.log`, `logs/client.log`
 
 ### 배포된 컨트랙트 주소
-
-배포 후 `server/contract-address.json`에서 확인:
 
 ```bash
 cat server/contract-address.json
@@ -180,7 +101,7 @@ cat server/contract-address.json
          │ ethers.js
          ↓
 ┌─────────────────────┐
-│  Ganache (EVM)       │
+│  Anvil (EVM)         │
 │  - Tokamon 컨트랙트  │
 │  - 잔액 관리         │
 │  - 클레임 중복 방지   │
@@ -192,8 +113,8 @@ cat server/contract-address.json
 
 | 문제 | 해결 |
 |------|------|
-| "contract-address.json이 없습니다" | `npm run deploy` 먼저 실행 |
-| Ganache 연결 실패 | `npm run ganache`로 Ganache가 실행 중인지 확인 |
+| "contract-address.json이 없습니다" | `./scripts/start.sh` 로 전체 시작 (deploy 포함) |
+| Anvil 연결 실패 | `./scripts/status.sh`로 Anvil 상태 확인 |
 | 잔액 부족 | "+ 충전" 버튼으로 Faucet 사용 |
-| 컨트랙트 에러 | Ganache를 재시작하고 `npm run deploy`로 재배포 |
-| DB 충돌 | `server/tokamon.db` 삭제 후 서버 재시작 |
+| 컨트랙트 에러 | `./scripts/reset.sh` 후 `./scripts/start.sh`로 재시작 |
+| DB 충돌 | `./scripts/reset.sh` 후 `./scripts/start.sh`로 재시작 |
