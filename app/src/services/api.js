@@ -1,4 +1,7 @@
-const API_URL = __DEV__ ? 'http://localhost:3001' : 'https://api.tokamon.app';
+import { Platform } from 'react-native';
+
+const DEV_HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+const API_URL = __DEV__ ? `http://${DEV_HOST}:3001` : 'https://api.tokamon.app';
 
 export async function getSpots() {
   const res = await fetch(`${API_URL}/api/spots`);

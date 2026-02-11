@@ -3,6 +3,23 @@ import {
   View, Text, StyleSheet, TouchableOpacity, Alert, Platform,
 } from 'react-native';
 import MapView, { Marker, Circle } from 'react-native-maps';
+
+class MapErrorBoundary extends React.Component {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#111' }}>
+          <Text style={{ color: '#f87171', fontSize: 16, textAlign: 'center', padding: 20 }}>
+            지도를 불러올 수 없습니다.{'\n'}Google Maps API 키를 설정해주세요.
+          </Text>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
 import { getCurrentPosition, watchPosition, clearWatch } from '../services/location';
 import { getSecurityStatus, isLocationMocked } from '../services/security';
 import { getSpots, requestDeviceClaim } from '../services/api';
@@ -107,35 +124,37 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        showsUserLocation
-        showsMyLocationButton
-        initialRegion={{
-          latitude: userPos?.lat || 37.5665,
-          longitude: userPos?.lng || 126.978,
-          latitudeDelta: 0.005,
-          longitudeDelta: 0.005,
-        }}
-      >
-        {spots.map((spot) => (
-          <React.Fragment key={spot.id}>
-            <Marker
-              coordinate={{ latitude: spot.lat, longitude: spot.lng }}
-              pinColor={spot.active ? '#4ade80' : '#f87171'}
-              onPress={() => setSelectedSpot(spot)}
-            />
-            <Circle
-              center={{ latitude: spot.lat, longitude: spot.lng }}
-              radius={COLLECT_RADIUS}
-              fillColor={spot.active ? 'rgba(74,222,128,0.1)' : 'rgba(248,113,113,0.1)'}
-              strokeColor={spot.active ? '#4ade80' : '#f87171'}
-              strokeWidth={1}
-            />
-          </React.Fragment>
-        ))}
-      </MapView>
+      <MapErrorBoundary>
+        <MapView
+          ref={mapRef}
+          style={styles.map}
+          showsUserLocation
+          showsMyLocationButton
+          initialRegion={{
+            latitude: userPos?.lat || 37.5665,
+            longitude: userPos?.lng || 126.978,
+            latitudeDelta: 0.005,
+            longitudeDelta: 0.005,
+          }}
+        >
+          {spots.map((spot) => (
+            <React.Fragment key={spot.id}>
+              <Marker
+                coordinate={{ latitude: spot.lat, longitude: spot.lng }}
+                pinColor={spot.active ? '#4ade80' : '#f87171'}
+                onPress={() => setSelectedSpot(spot)}
+              />
+              <Circle
+                center={{ latitude: spot.lat, longitude: spot.lng }}
+                radius={COLLECT_RADIUS}
+                fillColor={spot.active ? 'rgba(74,222,128,0.1)' : 'rgba(248,113,113,0.1)'}
+                strokeColor={spot.active ? '#4ade80' : '#f87171'}
+                strokeWidth={1}
+              />
+            </React.Fragment>
+          ))}
+        </MapView>
+      </MapErrorBoundary>
 
       {/* 하단 패널 */}
       <View style={styles.panel}>

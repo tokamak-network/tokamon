@@ -109,6 +109,15 @@ playwright/.cache/
 .cache/
 temp/
 
+# Forge artifacts at root (from --root flag issues)
+/cache/
+/test/
+/out/
+
+# Android SDK downloads
+cmdtools.zip
+latest/
+
 # Backup files
 *.backup
 *.bak

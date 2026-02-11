@@ -5,6 +5,23 @@ import {
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useAppKit, useAccount } from '@reown/appkit-react-native';
+
+class MapErrorBoundary extends React.Component {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#222' }}>
+          <Text style={{ color: '#f87171', fontSize: 14, textAlign: 'center' }}>
+            지도 로드 실패
+          </Text>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
 import { createSpot } from '../services/api';
 import { t } from '../translations';
 
@@ -94,22 +111,24 @@ export default function CreateSpotScreen({ language }) {
       <Text style={styles.title}>{t(language, 'createSpotTitle')}</Text>
 
       <View style={styles.mapContainer}>
-        <MapView
-          ref={mapRef}
-          style={styles.map}
-          initialRegion={{
-            latitude: 37.5665,
-            longitude: 126.978,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
-          }}
-          showsUserLocation
-          onPress={handleMapPress}
-        >
-          {selectedPos && (
-            <Marker coordinate={selectedPos} pinColor="#3b82f6" />
-          )}
-        </MapView>
+        <MapErrorBoundary>
+          <MapView
+            ref={mapRef}
+            style={styles.map}
+            initialRegion={{
+              latitude: 37.5665,
+              longitude: 126.978,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            }}
+            showsUserLocation
+            onPress={handleMapPress}
+          >
+            {selectedPos && (
+              <Marker coordinate={selectedPos} pinColor="#3b82f6" />
+            )}
+          </MapView>
+        </MapErrorBoundary>
         {!selectedPos && (
           <View style={styles.mapOverlay}>
             <Text style={styles.mapOverlayText}>{t(language, 'tapMapToSelectLocation')}</Text>
