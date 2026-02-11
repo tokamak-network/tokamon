@@ -60,6 +60,7 @@ Open http://localhost:5173 and connect MetaMask (Chain ID: 1337, RPC: http://127
 | `./scripts/stop.sh [all\|anvil\|server\|client]` | 서비스 종료 (graceful → force kill) |
 | `./scripts/status.sh` | PID, 포트, 업타임, 헬스체크, 최근 로그 |
 | `./scripts/reset.sh` | 서비스 종료 + 블록체인·DB·로그 전체 삭제 |
+| `./scripts/urls.sh` | 서비스 URL 접근 상태 확인 (Local/Internal/Public + Chain ID) |
 
 터미널을 닫아도 서비스가 유지된다. 로그와 PID 파일은 `logs/`에, Anvil 상태는 `anvil-state.json`에 저장된다.
 
