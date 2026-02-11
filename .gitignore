@@ -101,6 +101,23 @@ playwright/.cache/
 .cache/
 temp/
 
+# Forge artifacts at root (from --root flag issues)
+/cache/
+/test/
+/out/
+
+# Android SDK downloads
+cmdtools.zip
+latest/
+
+# React Native generated native folders (app/)
+app/android/
+app/ios/
+
+# Stray symlinks or misplaced packages
+/react
+/react-dom
+
 # Backup files
 *.backup
 *.bak
