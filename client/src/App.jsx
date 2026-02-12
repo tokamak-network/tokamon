@@ -309,14 +309,13 @@ export default function App() {
     setMessage(null);
     try {
       console.log('ETH 받기 시작...');
-      setMessage({ type: 'info', text: 'MetaMask에서 트랜잭션을 승인해주세요...' });
+      setMessage({ type: 'info', text: t(language, 'approveInMetaMask') });
       await getETH();
-      setMessage({ type: 'success', text: '1 ETH 받기 완료!' });
-      console.log('ETH 받기 완료');
+      setMessage({ type: 'success', text: t(language, 'getETHComplete') });
       refreshBalance();
     } catch (err) {
-      console.error('ETH 받기 에러:', err);
-      const errorMsg = err.reason || err.message || 'ETH 받기 실패';
+      console.error('ETH faucet error:', err);
+      const errorMsg = err.reason || err.message || t(language, 'getETHFailed');
       setMessage({ type: 'error', text: errorMsg });
     }
   };
@@ -331,14 +330,13 @@ export default function App() {
     setMessage(null);
     try {
       console.log('TON 받기 시작...');
-      setMessage({ type: 'info', text: 'MetaMask에서 트랜잭션을 승인해주세요...' });
+      setMessage({ type: 'info', text: t(language, 'approveInMetaMask') });
       await getTON();
-      setMessage({ type: 'success', text: '100 TON 받기 완료!' });
-      console.log('TON 받기 완료');
+      setMessage({ type: 'success', text: t(language, 'getTONComplete') });
       refreshBalance();
     } catch (err) {
-      console.error('TON 받기 에러:', err);
-      const errorMsg = err.reason || err.message || 'TON 받기 실패';
+      console.error('TON faucet error:', err);
+      const errorMsg = err.reason || err.message || t(language, 'getTONFailed');
       setMessage({ type: 'error', text: errorMsg });
     }
   };
@@ -438,13 +436,13 @@ export default function App() {
               {showWalletMenu && (
                 <div className="wallet-menu">
                   <button className="wallet-menu-item" onClick={() => { handleGetETH(); setShowWalletMenu(false); }}>
-                    <span style={{ color: '#60a5fa' }}>💧</span> ETH 받기
+                    <span style={{ color: '#60a5fa' }}>💧</span> {t(language, 'getETH')}
                   </button>
                   <button className="wallet-menu-item" onClick={() => { handleGetTON(); setShowWalletMenu(false); }}>
-                    <span style={{ color: '#10b981' }}>💧</span> TON 받기
+                    <span style={{ color: '#10b981' }}>💧</span> {t(language, 'getTON')}
                   </button>
                   <button className="wallet-menu-item disconnect" onClick={() => { handleDisconnect(); setShowWalletMenu(false); }}>
-                    <span style={{ color: '#ef4444' }}>🔌</span> 연결 끊기
+                    <span style={{ color: '#ef4444' }}>🔌</span> {t(language, 'disconnectWallet')}
                   </button>
                 </div>
               )}
@@ -563,15 +561,15 @@ export default function App() {
           wallet ? (
             <div className="points-display">
               {balance <= 0
-                ? `잔액이 부족합니다 (${Number(balance).toFixed(2)} TON) - 충전 버튼을 눌러주세요`
-                : '지도를 탭하여 스팟을 만들 위치를 선택하세요'
+                ? `${t(language, 'insufficientBalance')} (${Number(balance).toFixed(2)} TON) - ${t(language, 'pressChargeButton')}`
+                : t(language, 'tapMapToSelectLocation')
               }
             </div>
           ) : (
             <div className="wallet-connect-prompt">
-              <p>스팟을 만들려면 지갑을 연결해주세요</p>
+              <p>{t(language, 'connectWalletToCreateSpot')}</p>
               <button className="primary" onClick={handleConnect} disabled={connecting}>
-                {connecting ? '연결 중...' : '지갑 연결'}
+                {connecting ? t(language, 'connecting') : t(language, 'connectWallet')}
               </button>
             </div>
           )

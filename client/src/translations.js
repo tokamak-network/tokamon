@@ -182,6 +182,18 @@ export const translations = {
     minutesUnit: '분',
     secondsUnit: '초',
     
+    // Faucet / 지갑 메뉴
+    getETH: 'ETH 받기',
+    getTON: 'TON 받기',
+    getETHComplete: '1 ETH 받기 완료!',
+    getTONComplete: '100 TON 받기 완료!',
+    getETHFailed: 'ETH 받기 실패',
+    getTONFailed: 'TON 받기 실패',
+    disconnectWallet: '연결 끊기',
+    insufficientBalance: '잔액이 부족합니다',
+    pressChargeButton: '충전 버튼을 눌러주세요',
+    connectWalletToCreateSpot: '스팟을 만들려면 지갑을 연결해주세요',
+
     // 매장 키오스크
     storeKiosk: '매장 키오스크',
     selectSpotForReward: '리워드를 받을 스팟을 선택하세요',
@@ -390,6 +402,18 @@ export const translations = {
     minutesUnit: 'min',
     secondsUnit: 'sec',
     
+    // Faucet / Wallet Menu
+    getETH: 'Get ETH',
+    getTON: 'Get TON',
+    getETHComplete: '1 ETH received!',
+    getTONComplete: '100 TON received!',
+    getETHFailed: 'Failed to get ETH',
+    getTONFailed: 'Failed to get TON',
+    disconnectWallet: 'Disconnect',
+    insufficientBalance: 'Insufficient balance',
+    pressChargeButton: 'Press the charge button',
+    connectWalletToCreateSpot: 'Connect wallet to create a spot',
+
     // Store Kiosk
     storeKiosk: 'Store Kiosk',
     selectSpotForReward: 'Select a spot for reward',
