@@ -3,6 +3,7 @@ import { redepositSelf, updateCooldown, updateAllowDuplicateClaims, getSpotClaim
 import { t } from '../translations';
 
 export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet, onRedeposited, language = 'ko' }) {
+  const [selectedSpotId, setSelectedSpotId] = useState(null);
   const [redepositSpotId, setRedepositSpotId] = useState(null);
   const [redepositAmount, setRedepositAmount] = useState('');
   const [redepositing, setRedepositing] = useState(false);
@@ -28,8 +29,10 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
     );
   }
 
+  // creator_address 또는 creator 비교 (서버/컨트랙트 포맷 차이 대응)
+  const normalizeAddr = (addr) => (addr || '').toString().toLowerCase();
   const mySpots = spots.filter(
-    (s) => s.creator_address?.toLowerCase() === wallet?.toLowerCase()
+    (s) => normalizeAddr(s.creator_address || s.creator) === normalizeAddr(wallet)
   );
 
   const handleRedeposit = async (spotId) => {
@@ -80,6 +83,9 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
       await updateAllowDuplicateClaims(spotId, allow);
       setDuplicateClaimsSpotId(null);
       onRedeposited();
+      // 블록체인 상태 반영 대기 후 한 번 더 갱신
+      await new Promise((r) => setTimeout(r, 500));
+      onRedeposited();
       alert(allow ? t(language, 'duplicateEnabled') : t(language, 'duplicateDisabled'));
     } catch (err) {
       alert(err.reason || err.message || t(language, 'duplicateChangeFailed'));
@@ -100,7 +106,7 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
       const history = await getSpotClaimHistory(spotId);
       setClaimHistory(history);
     } catch (err) {
-      alert('클레임 목록 조회 실패');
+      alert(t(language, 'claimListFetchFailed'));
       setClaimHistory([]);
     } finally {
       setLoadingHistory(false);
@@ -118,23 +124,13 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
     return `${seconds}${t(language, 'secondsUnit')}`;
   };
 
-  return (
-    <div className="owner-dashboard">
-      <div className="owner-dashboard-header">
-        {t(language, 'mySpotsCount')} ({mySpots.length})
-      </div>
-      {mySpots.length === 0 ? (
-        <div className="spot-list-empty">
-          {t(language, 'noSpotsYet')}
-        </div>
-      ) : (
-        mySpots.map((spot) => {
-          const claimsLeft = spot.reward > 0 ? Math.floor(spot.remaining / spot.reward) : 0;
-          const isExhausted = spot.remaining < spot.reward;
-          const cooldownDisplay = formatCooldown(spot.cooldown || 0);
+  const renderSpotDetail = (spot) => {
+    const claimsLeft = spot.reward > 0 ? Math.floor(spot.remaining / spot.reward) : 0;
+    const isExhausted = spot.remaining < spot.reward;
+    const cooldownDisplay = formatCooldown(spot.cooldown || 0);
 
-          return (
-            <div key={spot.id} className="owner-spot-card">
+    return (
+      <div key={spot.id} className="owner-spot-card">
               <div className="spot-list-item-header">
                 <span className="spot-list-item-name">{spot.name}</span>
                 <span
@@ -290,7 +286,7 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                     style={{ flex: 1, marginTop: 0, minWidth: '45%' }}
                     onClick={() => handleShowClaimHistory(spot.id)}
                   >
-                    {claimHistorySpotId === spot.id ? '목록 닫기' : '클래임 목록'}
+                    {claimHistorySpotId === spot.id ? t(language, 'closeClaimList') : t(language, 'claimList')}
                   </button>
                 </div>
               )}
@@ -298,12 +294,12 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
               {claimHistorySpotId === spot.id && (
                 <div style={{ marginTop: 8, padding: 12, background: '#1a1a1a', borderRadius: 8 }}>
                   <div style={{ fontSize: 14, color: '#4FC3F7', marginBottom: 8, fontWeight: 'bold' }}>
-                    클래임 내역
+                    {t(language, 'claimDetails')}
                   </div>
                   {loadingHistory ? (
-                    <div style={{ color: '#888', fontSize: 13 }}>불러오는 중...</div>
+                    <div style={{ color: '#888', fontSize: 13 }}>{t(language, 'loadingClaims')}</div>
                   ) : claimHistory.length === 0 ? (
-                    <div style={{ color: '#888', fontSize: 13 }}>아직 클래임 내역이 없습니다</div>
+                    <div style={{ color: '#888', fontSize: 13 }}>{t(language, 'noClaimDetailsYet')}</div>
                   ) : (
                     <div style={{ maxHeight: 300, overflowY: 'auto' }}>
                       {claimHistory.map((item, idx) => (
@@ -322,7 +318,7 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                           </div>
                           <div style={{ color: '#888', fontSize: 11, marginTop: 2 }}>
                             {new Date(item.created_at).toLocaleString()}
-                            {item.stamp > 0 ? ` | 스탬프 ${item.stamp}회` : ''}
+                            {item.stamp > 0 ? ` | ${t(language, 'stampAchievement')} ${item.stamp} ${t(language, 'times')}` : ''}
                           </div>
                         </div>
                       ))}
@@ -331,8 +327,88 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                 </div>
               )}
             </div>
-          );
-        })
+    );
+  };
+
+  const selectedSpot = selectedSpotId != null ? mySpots.find((s) => s.id === selectedSpotId) : null;
+
+  return (
+    <div className="owner-dashboard">
+      <div className="owner-dashboard-header">
+        {t(language, 'mySpotsCount')} ({mySpots.length})
+      </div>
+      {mySpots.length === 0 ? (
+        <div className="spot-list-empty">
+          {t(language, 'noSpotsYet')}
+        </div>
+      ) : (
+        <>
+          <div className="owner-spot-list">
+            {mySpots.map((spot) => {
+              const claimsLeft = spot.reward > 0 ? Math.floor(spot.remaining / spot.reward) : 0;
+              const isExhausted = spot.remaining < spot.reward;
+              const isSelected = selectedSpotId === spot.id;
+              return (
+                <button
+                  key={spot.id}
+                  type="button"
+                  className={`owner-spot-list-item ${isSelected ? 'selected' : ''}`}
+                  onClick={() => {
+                    if (isSelected) {
+                      setSelectedSpotId(null);
+                      setRedepositSpotId(null);
+                      setCooldownSpotId(null);
+                      setDuplicateClaimsSpotId(null);
+                      setClaimHistorySpotId(null);
+                    } else {
+                      setSelectedSpotId(spot.id);
+                    }
+                  }}
+                >
+                  <span className="spot-list-item-name">{spot.name}</span>
+                  <span className={`spot-list-item-status ${isExhausted ? 'exhausted' : spot.active ? 'active' : 'inactive'}`}>
+                    {isExhausted ? t(language, 'exhausted') : spot.active ? t(language, 'active') : t(language, 'inactive')}
+                  </span>
+                  <span className="spot-list-item-claims">{claimsLeft}{t(language, 'times')}</span>
+                </button>
+              );
+            })}
+          </div>
+          {selectedSpot && (
+            <div
+              className="owner-spot-modal-overlay"
+              onClick={() => {
+                setSelectedSpotId(null);
+                setRedepositSpotId(null);
+                setCooldownSpotId(null);
+                setDuplicateClaimsSpotId(null);
+                setClaimHistorySpotId(null);
+              }}
+            >
+              <div className="owner-spot-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="owner-spot-modal-header">
+                  <h2>{selectedSpot.name}</h2>
+                  <button
+                    type="button"
+                    className="close-btn"
+                    onClick={() => {
+                      setSelectedSpotId(null);
+                      setRedepositSpotId(null);
+                      setCooldownSpotId(null);
+                      setDuplicateClaimsSpotId(null);
+                      setClaimHistorySpotId(null);
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="owner-spot-modal-content">
+                  {renderSpotDetail(selectedSpot)}
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

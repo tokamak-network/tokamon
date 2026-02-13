@@ -87,6 +87,16 @@ echo ""
 
 check_service "Anvil (Blockchain)"  "anvil"  8999 "http://127.0.0.1:8999"
 check_service "Server (Express)"    "server" 3001 "http://127.0.0.1:3001/api/contract"
+# 텔레그램 봇 상태 (서버 동작 시에만)
+if curl -s --max-time 2 "http://127.0.0.1:3001/api/telegram/status" 2>/dev/null | grep -q '"enabled":true'; then
+    echo -e "${BOLD}--- Telegram Bot ---${NC}"
+    echo -e "  Status:  ${GREEN}ENABLED${NC}"
+    echo ""
+elif lsof -ti:3001 > /dev/null 2>&1; then
+    echo -e "${BOLD}--- Telegram Bot ---${NC}"
+    echo -e "  Status:  ${YELLOW}DISABLED${NC} (TELEGRAM_BOT_TOKEN 미설정)"
+    echo ""
+fi
 check_service "Client (Vite)"       "client" 5173 "http://localhost:5173"
 
 echo "========================================="

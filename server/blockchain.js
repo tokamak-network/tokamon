@@ -78,6 +78,188 @@ async function init() {
 
   // 메타데이터 로드
   loadMetadata();
+
+  // SpotCreated 이벤트 구독 (클라이언트 생성 → 서버가 컨트랙트 이벤트로 수신)
+  subscribeSpotCreated();
+
+  // Redeposited 이벤트 구독 (클라이언트 redepositSelf → 서버가 이벤트 수신)
+  subscribeRedeposited();
+
+  // AllowDuplicateClaimsUpdated 이벤트 구독 (클라이언트 updateAllowDuplicateClaims → 서버가 이벤트 수신)
+  subscribeAllowDuplicateClaimsUpdated();
+
+  // Claimed 이벤트 구독 (클라이언트 claimSelf → 서버가 이벤트 수신)
+  subscribeClaimed();
+
+  console.log('[이벤트 구독] 모든 컨트랙트 이벤트 구독 완료: SpotCreated, Redeposited, AllowDuplicateClaimsUpdated, Claimed');
+}
+
+// SpotCreated 이벤트 발생 시 이벤트 데이터 + 컨트랙트 조회로 메타데이터 저장
+function subscribeSpotCreated() {
+  try {
+    contract.on('SpotCreated', async (spotId, creator, reward, deposit, name, description, lat, lng) => {
+      const id = Number(spotId);
+      console.log('[이벤트 수신] SpotCreated', JSON.stringify({
+        spotId: id,
+        creator: creator?.slice?.(0, 10) + '...',
+        reward: reward?.toString?.(),
+        deposit: deposit?.toString?.(),
+        name: name || '(없음)',
+        description: (description || '').slice(0, 50),
+        lat: lat?.toString?.(),
+        lng: lng?.toString?.(),
+      }, null, 2));
+      let meta = null;
+      meta = await fetchMetadataWithRetry(id);
+      if (meta) {
+        spotMetadata[id] = meta;
+        saveMetadata();
+        console.log('[이벤트 수신] SpotCreated 컨트랙트 조회 결과', JSON.stringify(meta, null, 2));
+      } else {
+        console.error('[이벤트 수신] SpotCreated 메타데이터 조회 실패 spotId=', id);
+      }
+    });
+    console.log('[이벤트 구독] SpotCreated 구독 시작');
+  } catch (e) {
+    console.error('[이벤트 구독] SpotCreated 구독 실패:', e.message);
+  }
+}
+
+// 컨트랙트 상태 전파 대기 후 메타데이터 조회 (재시도 포함)
+async function fetchMetadataWithRetry(spotId, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    if (i > 0) {
+      await new Promise((r) => setTimeout(r, 500 * i));
+    }
+    const meta = await fetchSpotMetadataFromContract(spotId);
+    if (meta) return meta;
+  }
+  return null;
+}
+
+// Redeposited 이벤트 발생 시 로깅 (클라이언트 redepositSelf 호출 시)
+function subscribeRedeposited() {
+  try {
+    contract.on('Redeposited', async (spotId, creator, amount) => {
+      const id = Number(spotId);
+      const amountTon = amount != null ? fromWei(amount) : 0;
+      console.log('[이벤트 수신] Redeposited', JSON.stringify({
+        spotId: id,
+        creator: creator?.slice?.(0, 10) + '...',
+        amountWei: amount?.toString?.(),
+        amountTon,
+      }, null, 2));
+      const spot = await fetchFullSpotFromContract(id);
+      if (spot) {
+        console.log('[이벤트 수신] Redeposited 컨트랙트 조회 결과 remaining:', spot.remaining, 'TON');
+      }
+    });
+    console.log('[이벤트 구독] Redeposited 구독 시작');
+  } catch (e) {
+    console.error('[이벤트 구독] Redeposited 구독 실패:', e.message);
+  }
+}
+
+// AllowDuplicateClaimsUpdated 이벤트 발생 시 로깅 및 캐시 업데이트 (클라이언트 updateAllowDuplicateClaims 호출 시)
+function subscribeAllowDuplicateClaimsUpdated() {
+  try {
+    const ev = contract.getEvent('AllowDuplicateClaimsUpdated');
+    if (!ev) {
+      console.warn('AllowDuplicateClaimsUpdated 이벤트가 ABI에 없습니다. 컨트랙트를 재배포했는지 확인하세요.');
+      return;
+    }
+    // ethers v6: 이벤트명으로 구독 (filter 사용 시 payload 객체가 전달되므로 spotId가 null 됨)
+    contract.on('AllowDuplicateClaimsUpdated', async (spotId, allow) => {
+      const id = Number(spotId);
+      console.log('[이벤트 수신] AllowDuplicateClaimsUpdated', JSON.stringify({
+        spotId: id,
+        allow_duplicate_claims: allow,
+      }, null, 2));
+      const spot = await fetchFullSpotFromContract(id);
+      if (spot) {
+        spotMetadata[id] = spot;
+        saveMetadata();
+        console.log('[이벤트 수신] AllowDuplicateClaimsUpdated 컨트랙트 조회 결과 allow_duplicate_claims:', spot.allow_duplicate_claims);
+      }
+    });
+    console.log('[이벤트 구독] AllowDuplicateClaimsUpdated 구독 시작');
+  } catch (e) {
+    console.error('[이벤트 구독] AllowDuplicateClaimsUpdated 구독 실패:', e.message);
+  }
+}
+
+// Claimed 이벤트 발생 시 로깅 (클라이언트 claimSelf 호출 시)
+function subscribeClaimed() {
+  try {
+    contract.on('Claimed', (spotId, user, reward, bonus, stamp, timestamp) => {
+      const id = Number(spotId);
+      const rewardTon = reward != null ? fromWei(reward) : 0;
+      const bonusTon = bonus != null ? fromWei(bonus) : 0;
+      console.log('[이벤트 수신] Claimed', JSON.stringify({
+        spotId: id,
+        user: user?.slice?.(0, 10) + '...',
+        rewardWei: reward?.toString?.(),
+        rewardTon,
+        bonusWei: bonus?.toString?.(),
+        bonusTon,
+        stamp: stamp?.toString?.() ?? stamp,
+        timestamp: timestamp?.toString?.(),
+      }, null, 2));
+    });
+    console.log('[이벤트 구독] Claimed 구독 시작');
+  } catch (e) {
+    console.error('[이벤트 구독] Claimed 구독 실패:', e.message);
+  }
+}
+
+// 컨트랙트에서 스팟 전체 조회 (getSpot 또는 spots 매핑)
+// Spot: creator(0), reward(1), remaining(2), stampGoal(3), stampBonus(4), cooldown(5), allowDuplicateClaims(6), name(7), description(8), lat(9), lng(10), startTime(11), endTime(12)
+async function fetchFullSpotFromContract(spotId) {
+  try {
+    const s = typeof contract.getSpot === 'function'
+      ? await contract.getSpot(spotId)
+      : await contract.spots(spotId);
+    const reward = s.reward ?? s[1];
+    if (!s || reward === 0n) return null;
+    const creator = s.creator ?? s[0];
+    const remaining = s.remaining ?? s[2];
+    const stampGoal = s.stampGoal ?? s[3];
+    const stampBonus = s.stampBonus ?? s[4];
+    const cooldown = s.cooldown ?? s[5];
+    const allowDuplicateClaims = s.allowDuplicateClaims ?? s[6];
+    const name = s.name ?? s[7];
+    const description = s.description ?? s[8];
+    const latRaw = s.lat ?? s[9];
+    const lngRaw = s.lng ?? s[10];
+    const startTime = s.startTime ?? s[11];
+    const endTime = s.endTime ?? s[12];
+    const lat = Number(latRaw) / COORD_SCALE;
+    const lng = Number(lngRaw) / COORD_SCALE;
+    if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
+    return {
+      id: spotId,
+      creator_address: creator ? toAddr(creator) : creator,
+      reward: fromWei(reward),
+      remaining: fromWei(remaining),
+      stamp_goal: Number(stampGoal),
+      stamp_bonus: fromWei(stampBonus),
+      cooldown: Number(cooldown),
+      allow_duplicate_claims: allowDuplicateClaims,
+      name: (name && String(name).trim()) || `Spot ${spotId}`,
+      description: description ? String(description) : '',
+      lat,
+      lng,
+      start_time: startTime ? String(startTime) : '00:00',
+      end_time: endTime ? String(endTime) : '23:59',
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+// 스팟 전체 정보 조회 (fetchFullSpotFromContract와 동일)
+async function fetchSpotMetadataFromContract(spotId) {
+  return fetchFullSpotFromContract(spotId);
 }
 
 // admin이 TON 토큰을 user 내부 잔액으로 입금
@@ -104,116 +286,36 @@ async function sendETH(toAddress, amountETH) {
   return amountETH;
 }
 
-// 스팟 생성 (스탬프 시스템 포함)
-async function createSpot(creatorAddress, depositTon, rewardTon, stampGoal, stampBonus, cooldown, allowDuplicateClaims, metadata) {
-  const { name, description, lat, lng, startTime, endTime } = metadata;
-
-  const scaledLat = Math.round(lat * COORD_SCALE);
-  const scaledLng = Math.round(lng * COORD_SCALE);
-
-  const meta = {
-    name,
-    description: description || '',
-    lat: scaledLat,
-    lng: scaledLng,
-    startTime,
-    endTime,
-  };
-
-  const tx = await contract.createSpot(
-    toAddr(creatorAddress),
-    toWei(depositTon),
-    toWei(rewardTon),
-    stampGoal,
-    toWei(stampBonus),
-    cooldown,
-    allowDuplicateClaims,
-    meta
-  );
-  await tx.wait();
-
-  const nextId = await contract.nextSpotId();
-  const spotId = Number(nextId) - 1;
-
-  // 메타데이터 캐시 및 저장
-  spotMetadata[spotId] = {
-    name,
-    description: description || '',
-    lat,
-    lng,
-    start_time: startTime,
-    end_time: endTime,
-  };
-  saveMetadata();
-
-  return spotId;
-}
-
-// 재예치: 기존 스팟에 TON 추가
-async function redeposit(spotId, creatorAddress, amountTon) {
-  const tx = await contract.redeposit(spotId, toAddr(creatorAddress), toWei(amountTon));
-  await tx.wait();
-
-  const spot = await getSpot(spotId);
-  const bal = await contract.getBalance(toAddr(creatorAddress));
-  return { spotRemaining: spot.remaining, balance: fromWei(bal) };
-}
-
-// 클레임 (스탬프 + 쿨다운 포함)
-async function claim(spotId, userAddress) {
-  const addr = toAddr(userAddress);
-  const tx = await contract.claim(spotId, addr);
-  const receipt = await tx.wait();
-
-  // Claimed 이벤트에서 결과 추출
-  const claimedEvent = receipt.logs
-    .map((log) => {
-      try { return contract.interface.parseLog(log); } catch (_) { return null; }
-    })
-    .find((e) => e && e.name === 'Claimed');
-
-  const bal = await contract.getBalance(addr);
-
-  if (claimedEvent) {
-    return {
-      reward: fromWei(claimedEvent.args.reward),
-      bonus: fromWei(claimedEvent.args.bonus),
-      stamp: Number(claimedEvent.args.stamp),
-      balance: fromWei(bal),
-    };
-  }
-
-  return { reward: 0, bonus: 0, stamp: 0, balance: fromWei(bal) };
-}
-
 // 잔액 조회
 async function getBalance(userAddress) {
   const bal = await contract.getBalance(toAddr(userAddress));
   return fromWei(bal);
 }
 
-// 스팟 조회 (core + 메타데이터 캐시)
+// 스팟 조회 (캐시 → 컨트랙트 전체 조회)
 async function getSpot(spotId) {
+  let cached = spotMetadata[spotId];
+  if (!cached) {
+    const full = await fetchFullSpotFromContract(spotId);
+    if (full) {
+      spotMetadata[spotId] = full;
+      saveMetadata();
+      return full;
+    }
+    cached = { name: `Spot ${spotId}`, description: '', lat: 0, lng: 0, start_time: '00:00', end_time: '23:59' };
+  }
+  // remaining, cooldown, allow_duplicate_claims는 항상 컨트랙트에서 최신 조회
   const core = await contract.getSpotCore(spotId);
-  const meta = spotMetadata[spotId] || {
-    name: `Spot ${spotId}`,
-    description: '',
-    lat: 0,
-    lng: 0,
-    start_time: '00:00',
-    end_time: '23:59',
-  };
-
   return {
+    ...cached,
     id: spotId,
-    creator_address: core.creator,
-    reward: fromWei(core.reward),
+    creator_address: cached.creator_address ?? (core.creator ? toAddr(core.creator) : core.creator),
+    reward: cached.reward ?? fromWei(core.reward),
     remaining: fromWei(core.remaining),
-    stamp_goal: Number(core.stampGoal),
-    stamp_bonus: fromWei(core.stampBonus),
+    stamp_goal: cached.stamp_goal ?? Number(core.stampGoal),
+    stamp_bonus: cached.stamp_bonus ?? fromWei(core.stampBonus),
     cooldown: Number(core.cooldown),
     allow_duplicate_claims: core.allowDuplicateClaims,
-    ...meta,
   };
 }
 
@@ -338,12 +440,8 @@ async function claimToTelegram(spotId, telegramHash) {
 // 텔레그램 잔액 조회
 async function getTelegramBalance(telegramHash) {
   const fullHash = '0x' + telegramHash;
-  console.log('getTelegramBalance 호출:', { telegramHash, fullHash });
   const bal = await contract.getTelegramBalance(fullHash);
-  console.log('컨트랙트 반환값 (wei):', bal.toString());
-  const tonAmount = fromWei(bal);
-  console.log('변환된 TON:', tonAmount);
-  return tonAmount;
+  return fromWei(bal);
 }
 
 // 텔레그램 스탬프 정보 조회
@@ -437,9 +535,6 @@ module.exports = {
   init,
   deposit,
   sendETH,
-  createSpot,
-  redeposit,
-  claim,
   getBalance,
   getSpot,
   getAllSpots,

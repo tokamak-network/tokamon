@@ -1,4 +1,6 @@
-require('dotenv').config();
+// .env 로드: 프로젝트 루트 → server/ (server/ 우선)
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');

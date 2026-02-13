@@ -1,7 +1,7 @@
 const express = require('express');
 const blockchain = require('../blockchain');
 const { hashTelegramId, isValidTelegramUsername, isValidEthAddress, haversineDistance, isWithinTimeRange } = require('../utils');
-const { sendClaimNotification, sendVerificationCode } = require('../telegram-bot');
+const { sendClaimNotification, sendVerificationCode, isBotEnabled } = require('../telegram-bot');
 
 const COLLECT_RADIUS = 50;
 
@@ -13,18 +13,23 @@ function generateVerifyCode() {
 module.exports = function(db) {
   const router = express.Router();
 
+  // GET /api/telegram/status - 봇 활성화 여부
+  router.get('/status', (req, res) => {
+    res.json({ enabled: isBotEnabled() });
+  });
+
 // POST /api/telegram/balance - 텔레그램 잔액 조회
 router.post('/balance', async (req, res) => {
   try {
     const { telegram_username } = req.body;
-    
+
     if (!telegram_username || !isValidTelegramUsername(telegram_username)) {
       return res.status(400).json({ error: '올바른 텔레그램 username을 입력해주세요' });
     }
-    
+
     const telegramHash = hashTelegramId(telegram_username);
     const balance = await blockchain.getTelegramBalance(telegramHash);
-    
+
     res.json({ balance });
   } catch (err) {
     console.error('텔레그램 잔액 조회 에러:', err.message);
@@ -36,18 +41,18 @@ router.post('/balance', async (req, res) => {
 router.post('/stamp-info', async (req, res) => {
   try {
     const { telegram_username, spot_id } = req.body;
-    
+
     if (!telegram_username || spot_id == null) {
       return res.status(400).json({ error: '필수 항목을 입력해주세요' });
     }
-    
+
     if (!isValidTelegramUsername(telegram_username)) {
       return res.status(400).json({ error: '올바른 텔레그램 username 형식이 아닙니다' });
     }
-    
+
     const telegramHash = hashTelegramId(telegram_username);
     const stampInfo = await blockchain.getTelegramStampInfo(spot_id, telegramHash);
-    
+
     res.json(stampInfo);
   } catch (err) {
     console.error('스탬프 정보 조회 에러:', err.message);
@@ -59,23 +64,23 @@ router.post('/stamp-info', async (req, res) => {
 router.post('/validate-claim', async (req, res) => {
   try {
     const { telegram_username, spot_id, lat, lng } = req.body;
-    
+
     if (!telegram_username || spot_id == null || lat == null || lng == null) {
       return res.status(400).json({ error: '필수 항목을 입력해주세요' });
     }
-    
+
     if (!isValidTelegramUsername(telegram_username)) {
       return res.status(400).json({ error: '올바른 텔레그램 username 형식이 아닙니다' });
     }
-    
+
     const telegramHash = hashTelegramId(telegram_username);
-    
+
     // 스팟 조회
     const spot = await blockchain.getSpot(spot_id);
     if (!spot || spot.reward === 0) {
       return res.status(404).json({ error: '스팟을 찾을 수 없습니다' });
     }
-    
+
     // 거리 확인
     const distance = haversineDistance(lat, lng, spot.lat, spot.lng);
     if (distance > COLLECT_RADIUS) {
@@ -84,14 +89,14 @@ router.post('/validate-claim', async (req, res) => {
         distance: Math.round(distance),
       });
     }
-    
+
     // 시간 확인
     if (!isWithinTimeRange(spot.start_time, spot.end_time)) {
       return res.status(400).json({
         error: `활성 시간이 아닙니다 (${spot.start_time}~${spot.end_time})`,
       });
     }
-    
+
     // 쿨다운 확인 (중복 발행이 허용되지 않은 경우에만)
     if (!spot.allow_duplicate_claims) {
       const stampInfo = await blockchain.getTelegramStampInfo(spot_id, telegramHash);
@@ -104,12 +109,12 @@ router.post('/validate-claim', async (req, res) => {
         });
       }
     }
-    
+
     // 잔액 확인
     if (spot.remaining < spot.reward) {
       return res.status(400).json({ error: '이 스팟의 TON이 소진되었습니다' });
     }
-    
+
     res.json({ valid: true });
   } catch (err) {
     console.error('검증 에러:', err.message);
@@ -117,109 +122,17 @@ router.post('/validate-claim', async (req, res) => {
   }
 });
 
-// POST /api/telegram/claim - 텔레그램으로 클레임 (서버가 admin으로 실행 - 레거시)
-router.post('/claim', async (req, res) => {
-  try {
-    const { telegram_username, spot_id, lat, lng } = req.body;
-    
-    if (!telegram_username || spot_id == null || lat == null || lng == null) {
-      return res.status(400).json({ error: '필수 항목을 입력해주세요' });
-    }
-    
-    if (!isValidTelegramUsername(telegram_username)) {
-      return res.status(400).json({ error: '올바른 텔레그램 username 형식이 아닙니다 (예: username 또는 @username)' });
-    }
-    
-    const telegramHash = hashTelegramId(telegram_username);
-    
-    // 스팟 조회
-    const spot = await blockchain.getSpot(spot_id);
-    if (!spot || spot.reward === 0) {
-      return res.status(404).json({ error: '스팟을 찾을 수 없습니다' });
-    }
-    
-    // 거리 확인
-    const distance = haversineDistance(lat, lng, spot.lat, spot.lng);
-    if (distance > COLLECT_RADIUS) {
-      return res.status(400).json({
-        error: `너무 멀어요 (${Math.round(distance)}m). 더 가까이 가주세요`,
-        distance: Math.round(distance),
-      });
-    }
-    
-    // 시간 확인
-    if (!isWithinTimeRange(spot.start_time, spot.end_time)) {
-      return res.status(400).json({
-        error: `활성 시간이 아닙니다 (${spot.start_time}~${spot.end_time})`,
-      });
-    }
-    
-    // 쿨다운 확인 (중복 발행이 허용되지 않은 경우에만)
-    if (!spot.allow_duplicate_claims) {
-      const stampInfo = await blockchain.getTelegramStampInfo(spot_id, telegramHash);
-      if (stampInfo.cooldown_remaining > 0) {
-        const hours = Math.floor(stampInfo.cooldown_remaining / 3600);
-        const minutes = Math.floor((stampInfo.cooldown_remaining % 3600) / 60);
-        return res.status(400).json({
-          error: `쿨다운 중입니다 (${hours}시간 ${minutes}분 남음)`,
-          cooldown_remaining: stampInfo.cooldown_remaining,
-        });
-      }
-    }
-    
-    // 잔액 확인
-    if (spot.remaining < spot.reward) {
-      return res.status(400).json({ error: '이 스팟의 TON이 소진되었습니다' });
-    }
-    
-    // 컨트랙트 클레임 실행
-    const result = await blockchain.claimToTelegram(spot_id, telegramHash);
-    
-    // 응답 구성
-    const totalPayout = result.reward + result.bonus;
-    let message;
-    if (result.bonus > 0) {
-      message = `스탬프 달성! ${totalPayout} TON 적립 완료!`;
-    } else {
-      message = `${result.reward} TON 적립 완료!`;
-    }
-    
-    // 텔레그램 알림 전송
-    const { sendClaimNotification } = require('../telegram-bot');
-    await sendClaimNotification(
-      telegram_username.replace('@', ''),
-      spot.name,
-      result.reward,
-      result.bonus,
-      result.balance
-    );
-    
-    res.json({
-      message,
-      reward: result.reward,
-      bonus: result.bonus,
-      stamp: result.stamp,
-      stamp_goal: spot.stamp_goal,
-      balance: result.balance,
-      spot_name: spot.name,
-    });
-  } catch (err) {
-    console.error('클레임 에러:', err.message);
-    res.status(500).json({ error: err.message || '클레임 실패' });
-  }
-});
-
 // POST /api/telegram/verify-token - 토큰 검증
 router.post('/verify-token', (req, res) => {
   const { token } = req.body;
-  
+
   if (!token) {
     return res.status(400).json({ error: '토큰이 필요합니다' });
   }
-  
+
   const now = Math.floor(Date.now() / 1000);
   const db = req.app.locals.db;
-  
+
   db.get(
     'SELECT * FROM telegram_link_tokens WHERE token = ? AND expires_at > ? AND used = 0',
     [token, now],
@@ -227,7 +140,7 @@ router.post('/verify-token', (req, res) => {
       if (err || !row) {
         return res.status(404).json({ error: '유효하지 않거나 만료된 토큰입니다' });
       }
-      
+
       res.json({
         valid: true,
         telegram_username: row.telegram_username,
@@ -239,18 +152,18 @@ router.post('/verify-token', (req, res) => {
 // POST /api/telegram/link-wallet - 지갑 연결 실행
 router.post('/link-wallet', async (req, res) => {
   const { token, wallet_address } = req.body;
-  
+
   if (!token || !wallet_address) {
     return res.status(400).json({ error: '필수 항목을 입력해주세요' });
   }
-  
+
   if (!isValidEthAddress(wallet_address)) {
     return res.status(400).json({ error: '올바른 이더리움 주소가 아닙니다' });
   }
-  
+
   const now = Math.floor(Date.now() / 1000);
   const db = req.app.locals.db;
-  
+
   // 토큰 조회
   db.get(
     'SELECT * FROM telegram_link_tokens WHERE token = ? AND expires_at > ? AND used = 0',
@@ -259,19 +172,19 @@ router.post('/link-wallet', async (req, res) => {
       if (err || !row) {
         return res.status(404).json({ error: '유효하지 않거나 만료된 토큰입니다' });
       }
-      
+
       try {
         // 컨트랙트에 연결
         const telegramHash = hashTelegramId(row.telegram_username);
         const result = await blockchain.linkTelegramToWallet(telegramHash, wallet_address);
-        
+
         // 토큰 사용 처리
         db.run('UPDATE telegram_link_tokens SET used = 1 WHERE token = ?', [token]);
-        
+
         // 텔레그램 알림
         const { notifyLinkComplete } = require('../telegram-bot');
         await notifyLinkComplete(row.chat_id, wallet_address, result.transferredAmount);
-        
+
         res.json({
           success: true,
           message: '지갑 연결 완료',
@@ -290,15 +203,15 @@ router.post('/link-wallet', async (req, res) => {
 router.post('/notify-claim', async (req, res) => {
   try {
     const { telegram_username, spot_name, reward, bonus = 0 } = req.body;
-    
+
     if (!telegram_username || !spot_name || reward == null) {
       return res.status(400).json({ error: '필수 항목이 누락되었습니다' });
     }
-    
+
     console.log('notify-claim 요청:', { telegram_username, spot_name, reward, bonus });
-    
+
     const username = telegram_username.replace('@', '');
-    
+
     // 현재 잔액 조회
     const telegramHash = hashTelegramId(telegram_username);
     console.log('해시 계산:', { telegram_username, username, telegramHash });
@@ -312,7 +225,7 @@ router.post('/notify-claim', async (req, res) => {
 
     // 텔레그램 알림 전송
     await sendClaimNotification(username, spot_name, reward, bonus, balance, hasLinkedWallet ? linkedWallet : null);
-    
+
     res.json({ success: true });
   } catch (err) {
     console.error('텔레그램 알림 전송 에러:', err);
@@ -324,16 +237,16 @@ router.post('/notify-claim', async (req, res) => {
 router.post('/request-code', async (req, res) => {
   try {
     const { telegram_username } = req.body;
-    
+
     if (!telegram_username || !isValidTelegramUsername(telegram_username)) {
       return res.status(400).json({ error: '올바른 텔레그램 username을 입력해주세요' });
     }
-    
+
     const username = telegram_username.replace('@', '');
     const code = generateVerifyCode();
     const now = Math.floor(Date.now() / 1000);
     const expiresAt = now + 180; // 3분 유효
-    
+
     // DB에 저장
     db.run(
       'INSERT INTO telegram_verify_codes (code, telegram_username, created_at, expires_at) VALUES (?, ?, ?, ?)',
@@ -343,16 +256,16 @@ router.post('/request-code', async (req, res) => {
           console.error('인증 코드 저장 실패:', err);
           return res.status(500).json({ error: '인증 코드 생성 실패' });
         }
-        
+
         // 텔레그램으로 코드 전송
         const sent = await sendVerificationCode(username, code);
-        
+
         if (!sent) {
-          return res.status(404).json({ 
-            error: '텔레그램 사용자를 찾을 수 없습니다. 먼저 Tokamon 봇에게 /start를 보내주세요.' 
+          return res.status(404).json({
+            error: '텔레그램 사용자를 찾을 수 없습니다. 먼저 Tokamon 봇에게 /start를 보내주세요.'
           });
         }
-        
+
         res.json({ success: true, message: '인증 코드가 텔레그램으로 전송되었습니다' });
       }
     );
@@ -366,14 +279,14 @@ router.post('/request-code', async (req, res) => {
 router.post('/verify-code', (req, res) => {
   try {
     const { telegram_username, code } = req.body;
-    
+
     if (!telegram_username || !code) {
       return res.status(400).json({ error: '필수 항목이 누락되었습니다' });
     }
-    
+
     const username = telegram_username.replace('@', '');
     const now = Math.floor(Date.now() / 1000);
-    
+
     // DB에서 코드 검증
     db.get(
       'SELECT * FROM telegram_verify_codes WHERE code = ? AND telegram_username = ? AND expires_at > ? AND verified = 0',
@@ -383,14 +296,14 @@ router.post('/verify-code', (req, res) => {
           console.error('인증 코드 검증 에러:', err);
           return res.status(500).json({ error: '인증 코드 검증 실패' });
         }
-        
+
         if (!row) {
           return res.status(400).json({ error: '인증 코드가 올바르지 않거나 만료되었습니다' });
         }
-        
+
         // 코드를 검증됨으로 표시
         db.run('UPDATE telegram_verify_codes SET verified = 1 WHERE code = ?', [code]);
-        
+
         res.json({ success: true, message: '인증 완료' });
       }
     );
@@ -404,11 +317,11 @@ router.post('/verify-code', (req, res) => {
 router.get('/linked/:wallet', async (req, res) => {
   try {
     const { wallet } = req.params;
-    
+
     if (!isValidEthAddress(wallet)) {
       return res.status(400).json({ error: '올바르지 않은 지갑 주소입니다' });
     }
-    
+
     // DB에서 지갑 주소로 해시를 찾고, 그 해시로 username 조회
     db.get(
       `SELECT twl.telegram_hash, thu.telegram_username
@@ -421,19 +334,19 @@ router.get('/linked/:wallet', async (req, res) => {
           console.error('DB 조회 에러:', err);
           return res.status(500).json({ error: 'DB 조회 실패' });
         }
-        
+
         if (!row) {
-          return res.json({ 
-            linked: false, 
-            telegram_hash: null, 
-            telegram_username: null 
+          return res.json({
+            linked: false,
+            telegram_hash: null,
+            telegram_username: null
           });
         }
-        
+
         const username = row.telegram_username ? '@' + row.telegram_username : null;
-        
-        res.json({ 
-          linked: true, 
+
+        res.json({
+          linked: true,
           telegram_hash: row.telegram_hash,
           telegram_username: username
         });
@@ -442,60 +355,6 @@ router.get('/linked/:wallet', async (req, res) => {
   } catch (err) {
     console.error('텔레그램 연결 조회 에러:', err);
     res.status(500).json({ error: err.message || '텔레그램 연결 조회 실패' });
-  }
-});
-
-// POST /api/telegram/claim-to-wallet - 텔레그램 잔액을 지갑으로 클레임
-router.post('/claim-to-wallet', async (req, res) => {
-  try {
-    const { wallet_address, telegram_hash } = req.body;
-    
-    if (!wallet_address || !telegram_hash) {
-      return res.status(400).json({ error: '필수 항목이 누락되었습니다' });
-    }
-    
-    if (!isValidEthAddress(wallet_address)) {
-      return res.status(400).json({ error: '올바른 지갑 주소가 아닙니다' });
-    }
-    
-    // 연결 확인
-    console.log('=== 클레임 연결 확인 ===');
-    console.log('요청 지갑:', wallet_address);
-    console.log('요청 해시:', telegram_hash);
-    const linkedHash = await blockchain.getWalletLinkedTelegram(wallet_address);
-    console.log('컨트랙트 조회 해시:', linkedHash);
-    
-    // 해시 정규화 (0x 제거하여 비교)
-    const normalizedRequestHash = telegram_hash.toLowerCase().replace('0x', '');
-    const normalizedLinkedHash = linkedHash.toLowerCase().replace('0x', '');
-    console.log('정규화된 요청 해시:', normalizedRequestHash);
-    console.log('정규화된 조회 해시:', normalizedLinkedHash);
-    console.log('해시 일치:', normalizedLinkedHash === normalizedRequestHash);
-    
-    if (!linkedHash || normalizedLinkedHash !== normalizedRequestHash) {
-      console.log('❌ 연결 확인 실패');
-      return res.status(400).json({ error: '지갑과 텔레그램이 연결되어 있지 않습니다' });
-    }
-    console.log('✅ 연결 확인 성공');
-    
-    // 텔레그램 잔액 확인
-    const telegramBalance = await blockchain.getTelegramBalance(telegram_hash);
-    if (telegramBalance <= 0) {
-      return res.status(400).json({ error: '텔레그램 잔액이 없습니다' });
-    }
-    
-    // linkTelegramToWallet을 다시 호출하여 잔액 이전
-    // 이미 연결되어 있으면 잔액만 이전됨
-    const result = await blockchain.linkTelegramToWallet(telegram_hash, wallet_address);
-    
-    res.json({
-      success: true,
-      message: '텔레그램 잔액이 지갑으로 이전되었습니다',
-      transferred_amount: result.transferredAmount,
-    });
-  } catch (err) {
-    console.error('텔레그램 잔액 클레임 에러:', err);
-    res.status(500).json({ error: err.message || '클레임 실패' });
   }
 });
 

@@ -112,6 +112,15 @@ start_server() {
     echo $! > "$LOG_DIR/server.pid"
     if wait_for_port 3001 10; then
         ok "Server started (PID: $(cat "$LOG_DIR/server.pid"))"
+        # 텔레그램 봇 상태 (API 응답 대기 후 조회)
+        sleep 1
+        if curl -s --max-time 2 "http://localhost:3001/api/telegram/status" 2>/dev/null | grep -q '"enabled":true'; then
+            ok "텔레그램 봇: 활성화"
+        elif [ -n "$TELEGRAM_BOT_TOKEN" ]; then
+            warn "텔레그램 봇: 초기화 중 또는 확인 실패"
+        else
+            warn "텔레그램 봇: 비활성화 (TELEGRAM_BOT_TOKEN 설정 필요)"
+        fi
     else
         err "Server failed to start — check $LOG_DIR/server.log"
         return 1
@@ -184,7 +193,12 @@ if [ "$TARGET" = "all" ] || [ "$TARGET" = "client" ]; then
     is_port_open 5173 && echo -e "  ${GREEN}웹앱:${NC}     http://localhost:5173"
 fi
 if [ "$TARGET" = "all" ] || [ "$TARGET" = "server" ]; then
-    is_port_open 3001 && echo -e "  ${GREEN}API:${NC}      http://localhost:3001"
+    if is_port_open 3001; then
+        echo -e "  ${GREEN}API:${NC}      http://localhost:3001"
+        curl -s --max-time 2 "http://127.0.0.1:3001/api/telegram/status" 2>/dev/null | grep -q '"enabled":true' \
+            && echo -e "  ${GREEN}Telegram:${NC} 봇 활성화" \
+            || echo -e "  ${YELLOW}Telegram:${NC} 봇 비활성화"
+    fi
 fi
 if ( [ "$TARGET" = "all" ] && [ "$MODE" = "local" ] ) || [ "$TARGET" = "anvil" ]; then
     is_port_open 8999 && echo -e "  ${GREEN}Anvil RPC:${NC} http://localhost:8999 (Chain ID: 1337)"

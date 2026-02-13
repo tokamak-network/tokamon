@@ -6,25 +6,25 @@ import { t } from '../translations';
 // 초록: 클레임 가능 (활성 + TON 남음) - 토카막 심볼
 const activeIcon = new L.DivIcon({
   className: '',
-  html: '<div style="width:45px;height:45px;background:#fff;border-radius:50%;border:3px solid #4FC3F7;box-shadow:0 3px 10px rgba(79,195,247,0.6);display:flex;align-items:center;justify-content:center;padding:6px;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;"/></div>',
-  iconSize: [45, 45],
-  iconAnchor: [22, 22],
+  html: '<div style="width:36px;height:36px;background:#fff;border-radius:50%;border:2px solid #4FC3F7;box-shadow:0 2px 8px rgba(79,195,247,0.5);display:flex;align-items:center;justify-content:center;padding:4px;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;"/></div>',
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
 });
 
 // 회색: TON 소진
 const exhaustedIcon = new L.DivIcon({
   className: '',
-  html: '<div style="width:40px;height:40px;background:#f5f5f5;border-radius:50%;border:2px solid #999;box-shadow:0 2px 6px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;padding:6px;opacity:0.6;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;filter:grayscale(100%);"/></div>',
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
+  html: '<div style="width:32px;height:32px;background:#f5f5f5;border-radius:50%;border:2px solid #999;box-shadow:0 2px 5px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;padding:4px;opacity:0.6;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;filter:grayscale(100%);"/></div>',
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
 });
 
 // 빨강: 비활성 (시간 밖)
 const inactiveIcon = new L.DivIcon({
   className: '',
-  html: '<div style="width:40px;height:40px;background:#fff;border-radius:50%;border:2px solid #f87171;box-shadow:0 2px 6px rgba(248,113,113,0.4);display:flex;align-items:center;justify-content:center;padding:6px;opacity:0.7;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;filter:hue-rotate(300deg);"/></div>',
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
+  html: '<div style="width:32px;height:32px;background:#fff;border-radius:50%;border:2px solid #f87171;box-shadow:0 2px 5px rgba(248,113,113,0.4);display:flex;align-items:center;justify-content:center;padding:4px;opacity:0.7;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;filter:hue-rotate(300deg);"/></div>',
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
 });
 
 // 파랑: 사용자 위치
@@ -43,17 +43,39 @@ const pinIcon = new L.DivIcon({
   iconAnchor: [9, 9],
 });
 
-// 보라: 내 스팟 (점주 본인 소유)
-const mySpotIcon = new L.DivIcon({
-  className: '',
-  html: '<div style="width:48px;height:48px;background:#fff;border-radius:50%;border:3px solid #a78bfa;box-shadow:0 3px 12px rgba(167,139,250,0.7);display:flex;align-items:center;justify-content:center;padding:6px;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;filter:hue-rotate(240deg) saturate(1.5);"/></div>',
-  iconSize: [48, 48],
-  iconAnchor: [24, 24],
+// + 스팟 추가 버튼 (핀 옆에 표시)
+const addSpotButtonIcon = new L.DivIcon({
+  className: 'add-spot-btn-marker',
+  html: '<div class="add-spot-btn" style="width:36px;height:36px;background:#10b981;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:bold;cursor:pointer;line-height:1;">+</div>',
+  iconSize: [36, 36],
+  iconAnchor: [0, 18],
 });
 
-function getSpotIcon(spot, wallet) {
-  const isMine = wallet && spot.creator_address?.toLowerCase() === wallet.toLowerCase();
-  if (isMine) return mySpotIcon;
+// 선택됨 (하단 정보 표시 중) - 두꺼운 초록 테두리 + 강한 그림자
+const selectedSpotIcon = new L.DivIcon({
+  className: 'selected-spot-marker',
+  html: '<div class="selected-spot-pin" style="width:40px;height:40px;background:#fff;border-radius:50%;border:4px solid #059669;box-shadow:0 0 0 2px #fff,0 4px 16px rgba(5,150,105,0.7);display:flex;align-items:center;justify-content:center;padding:4px;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;"/></div>',
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
+});
+
+// 내 스팟 (점주 본인 소유) - 매장관리자 로그인 시 구분용 (핑크 테두리 + 깜박임)
+const mySpotIcon = new L.DivIcon({
+  className: 'my-spot-marker',
+  html: '<div class="my-spot-pin" style="width:36px;height:36px;background:#fff;border-radius:50%;border:2px solid #ec4899;box-shadow:0 2px 8px rgba(236,72,153,0.5);display:flex;align-items:center;justify-content:center;padding:4px;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;"/></div>',
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
+});
+
+function getSpotIcon(spot, wallet, role, selectedSpot) {
+  // 고객 지도에서만: 선택된 스팟(하단 정보 표시 중)은 초록 테두리
+  if (role === 'customer' && selectedSpot && selectedSpot.id === spot.id) return selectedSpotIcon;
+  // 매장관리자일 때만 내 스팟 구분 표시, 고객 지도는 지갑 연결 여부와 관계없이 동일
+  if (role === 'owner') {
+    const normalizeAddr = (a) => (a || '').toString().toLowerCase();
+    const isMine = wallet && normalizeAddr(spot.creator_address || spot.creator) === normalizeAddr(wallet);
+    if (isMine) return mySpotIcon;
+  }
   const isExhausted = spot.remaining < spot.reward;
   if (isExhausted) return exhaustedIcon;
   if (!spot.active) return inactiveIcon;
@@ -115,7 +137,7 @@ function LocateButton({ userPos }) {
   );
 }
 
-export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectSpot, initialCenter, createMode, pinPos, onMapClick, wallet }) {
+export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectSpot, initialCenter, createMode, pinPos, onMapClick, onConfirmAddSpot, wallet, role }) {
   const center = initialCenter || { lat: 37.5665, lng: 126.978 };
 
   return (
@@ -173,19 +195,31 @@ export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectS
             <Marker position={[userPos.lat, userPos.lng]} icon={userIcon} />
             <Circle
               center={[userPos.lat, userPos.lng]}
-              radius={50}
+              radius={12}
               pathOptions={{ color: '#3b82f6', fillOpacity: 0.08, weight: 1 }}
             />
           </>
         )}
 
-        {/* 스팟 생성 모드: 선택한 위치에 핀 */}
+        {/* 스팟 생성 모드: 선택한 위치에 핀 + 추가 버튼 */}
         {pinPos && (
           <>
             <Marker position={[pinPos.lat, pinPos.lng]} icon={pinIcon} />
+            {createMode && onConfirmAddSpot && wallet && (
+              <Marker
+                position={[pinPos.lat, pinPos.lng + 0.00008]}
+                icon={addSpotButtonIcon}
+                eventHandlers={{
+                  click: (e) => {
+                    L.DomEvent.stopPropagation(e);
+                    onConfirmAddSpot();
+                  },
+                }}
+              />
+            )}
             <Circle
               center={[pinPos.lat, pinPos.lng]}
-              radius={50}
+              radius={12}
               pathOptions={{ color: '#f59e0b', fillOpacity: 0.1, weight: 2, dashArray: '5,5' }}
             />
           </>
@@ -197,8 +231,17 @@ export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectS
             <Marker
               key={spot.id}
               position={[spot.lat, spot.lng]}
-              icon={getSpotIcon(spot, wallet)}
-              eventHandlers={{ click: () => !createMode && onSelectSpot(spot) }}
+              icon={getSpotIcon(spot, wallet, role, selectedSpot)}
+              eventHandlers={{
+                click: () => {
+                  if (!createMode) {
+                    if (role === 'owner') {
+                      console.log('[매장관리자] 지도 스팟 상세정보 조회:', spot);
+                    }
+                    onSelectSpot(spot);
+                  }
+                },
+              }}
             >
               <Popup>
                 <strong>{spot.name}</strong>

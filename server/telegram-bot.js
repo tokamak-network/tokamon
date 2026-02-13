@@ -8,6 +8,7 @@ const WEB_URL = process.env.WEB_URL || 'http://localhost:5173';
 
 let bot = null;
 let db = null;
+let botEnabled = false;
 
 // chat_id 캐시 (username → chat_id)
 const chatIdCache = new Map();
@@ -24,6 +25,7 @@ function initBot(database) {
 
   db = database;
   bot = new TelegramBot(BOT_TOKEN, { polling: true });
+  botEnabled = true;
 
   console.log('✅ 텔레그램 봇 초기화 완료');
 
@@ -467,8 +469,13 @@ Please enter this code at the kiosk.
   }
 }
 
+function isBotEnabled() {
+  return botEnabled;
+}
+
 module.exports = {
   initBot,
+  isBotEnabled,
   sendClaimNotification,
   notifyLinkComplete,
   generateLinkToken,
