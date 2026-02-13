@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getStampInfo } from '../api';
-import { redepositSelf } from '../contract';
-import DinoCharacter from './DinoCharacter';
+import { redepositSelf, claimSelf } from '../contract';
 
 function haversineDistance(lat1, lng1, lat2, lng2) {
   const R = 6371000;
@@ -22,7 +21,7 @@ function formatCooldown(seconds) {
   return `${m}분`;
 }
 
-export default function SpotInfo({ spot, userPos, wallet, role, onCollect, collecting, onRedeposited, onConnectWallet }) {
+export default function SpotInfo({ spot, userPos, wallet, role, onRedeposited, onConnectWallet }) {
   const [stampInfo, setStampInfo] = useState(null);
   const [redepositAmount, setRedepositAmount] = useState('');
   const [showRedeposit, setShowRedeposit] = useState(false);
@@ -44,32 +43,36 @@ export default function SpotInfo({ spot, userPos, wallet, role, onCollect, colle
   const cooldownLeft = stampInfo?.cooldown_remaining || 0;
   const isOnCooldown = cooldownLeft > 0;
   const isExhausted = spot.remaining < spot.reward;
-  const isTooFar = distance !== null && distance > 50;
-  const canClaim = wallet && spot.active && !isTooFar && !isOnCooldown && !isExhausted;
   const isOwner = wallet && spot.creator_address?.toLowerCase() === wallet?.toLowerCase();
 
   const stamps = stampInfo?.stamps || 0;
   const stampGoal = spot.stamp_goal || 1;
   const stampPercent = Math.min((stamps / stampGoal) * 100, 100);
 
-  // Claim button text
-  let buttonText = 'TON 클레임';
-  if (!wallet) buttonText = '지갑 연결 후 클레임';
-  else if (collecting) buttonText = '클레임 중...';
-  else if (isExhausted) buttonText = 'TON 소진됨';
-  else if (!spot.active) buttonText = `${spot.start_time}에 활성화`;
-  else if (isOnCooldown) buttonText = `쿨다운 ${formatCooldown(cooldownLeft)}`;
-  else if (isTooFar) buttonText = `너무 멀어요 (${distance}m)`;
+  const [redepositing, setRedepositing] = useState(false);
+  const [claiming, setClaiming] = useState(false);
 
-  const handleClaimClick = () => {
-    if (!wallet) {
-      onConnectWallet();
+  const canClaim = wallet && !isOwner && !isExhausted && !isOnCooldown && spot.active;
+  const COLLECT_RADIUS = 50;
+
+  const handleClaim = async () => {
+    if (!canClaim || !wallet) return;
+    if (distance !== null && distance > COLLECT_RADIUS) {
+      alert(`${distance}m - 너무 멀어요. ${COLLECT_RADIUS}m 이내에서 클레임해주세요.`);
       return;
     }
-    onCollect(spot.id);
+    setClaiming(true);
+    try {
+      const result = await claimSelf(spot.id);
+      const total = result.reward + result.bonus;
+      alert(`${total} TON 적립 완료!`);
+      onRedeposited?.();
+    } catch (err) {
+      alert(err.reason || err.message || '클레임 실패');
+    } finally {
+      setClaiming(false);
+    }
   };
-
-  const [redepositing, setRedepositing] = useState(false);
 
   const handleRedeposit = async () => {
     const amount = Number(redepositAmount);
@@ -85,13 +88,6 @@ export default function SpotInfo({ spot, userPos, wallet, role, onCollect, colle
     } finally {
       setRedepositing(false);
     }
-  };
-
-  // 캐릭터 애니메이션 결정
-  const getCharacterAnimation = () => {
-    if (canClaim) return 'jump'; // 클레임 가능하면 점프
-    if (isExhausted) return 'idle'; // 소진되면 idle
-    return 'walk'; // 그 외는 걷기
   };
 
   return (
@@ -130,14 +126,18 @@ export default function SpotInfo({ spot, userPos, wallet, role, onCollect, colle
         {isExhausted ? 'TON 소진' : spot.active ? '활성중' : '비활성'}
       </div>
 
-      <button
-        className="primary"
-        style={{ marginTop: 12 }}
-        disabled={wallet ? (!canClaim || collecting) : false}
-        onClick={handleClaimClick}
-      >
-        {buttonText}
-      </button>
+      {/* 고객 클레임 버튼 - 지갑 연결, 스팟 소유자 아님, 활성, 쿨다운 아님 */}
+      {canClaim && (
+        <div style={{ marginTop: 12 }}>
+          <button
+            className="primary"
+            onClick={handleClaim}
+            disabled={claiming}
+          >
+            {claiming ? 'MetaMask 승인 대기...' : `${spot.reward} TON 받기`}
+          </button>
+        </div>
+      )}
 
       {/* Owner redeposit - only show for owner role when wallet connected and is actual owner */}
       {role === 'owner' && isOwner && (

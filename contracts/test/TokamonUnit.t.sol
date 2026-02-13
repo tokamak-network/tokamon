@@ -18,7 +18,7 @@ contract TokamonUnitTest is Test {
     address customer1;
     address customer2;
     
-    event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit);
+    event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit, string name, string description, int256 lat, int256 lng);
     event Claimed(uint256 indexed spotId, address indexed user, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
     event Redeposited(uint256 indexed spotId, address indexed creator, uint256 amount);
     event TelegramClaimed(uint256 indexed spotId, bytes32 indexed telegramHash, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
@@ -86,7 +86,7 @@ contract TokamonUnitTest is Test {
         tonToken.approve(address(tokamon), depositAmount);
 
         vm.expectEmit(true, true, false, true);
-        emit SpotCreated(0, spotCreator, 10 * 1e18, depositAmount);
+        emit SpotCreated(0, spotCreator, 10 * 1e18, depositAmount, "Test Cafe", "Coffee shop", 37500000, 127000000);
 
         uint256 spotId = tokamon.createSpotSelf(
             depositAmount,

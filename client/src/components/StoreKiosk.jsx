@@ -462,12 +462,12 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
                   e.target.style.borderColor = 'rgba(239, 68, 68, 0.3)';
                 }}
               >
-                연결 해제
+                {t(language, 'disconnectWallet')}
               </button>
             </div>
           ) : (
             <p style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-              연결 안 됨
+              {t(language, 'notConnected')}
               <span style={{ color: '#ef4444', fontSize: '18px' }}>✗</span>
             </p>
           )}

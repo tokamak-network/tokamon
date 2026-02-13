@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import './appkitConfig';  // AppKit 초기화 (사이드 이펙트)
-import { useAppKitAccount, useAppKitProvider, useAppKit, useDisconnect } from '@reown/appkit/react';
 import { setWalletProvider, getWalletProvider } from './walletProvider';
 import Map from './components/Map';
 import SpotInfo from './components/SpotInfo';
@@ -12,7 +10,7 @@ import OwnerDashboard from './components/OwnerDashboard';
 import StoreKiosk from './components/StoreKiosk';
 import TelegramLinkPage from './components/TelegramLinkPage';
 import Settings from './components/Settings';
-import { getSpots, requestClaim, getClaimHistory, getTelegramBalance } from './api';
+import { getSpots, getClaimHistory, getTelegramBalance } from './api';
 import { getBalance as getContractBalance, resetContractCache } from './contract';
 import { getETH, getTON, resetFaucetCache } from './faucet';
 import { t } from './translations';
@@ -59,12 +57,6 @@ export default function App() {
     return <TelegramLinkPage />;
   }
 
-  // AppKit hooks (WalletConnect)
-  const { walletProvider: appKitWalletProvider } = useAppKitProvider('eip155');
-  const { address: appKitAddress, isConnected: appKitConnected } = useAppKitAccount();
-  const { open: openAppKit } = useAppKit();
-  const { disconnect: disconnectAppKit } = useDisconnect();
-
   const [wallet, setWallet] = useState(null);
   const [balance, setBalance] = useState(0);
   const [ethBalance, setEthBalance] = useState(0);
@@ -72,7 +64,6 @@ export default function App() {
   const [spots, setSpots] = useState([]);
   const [selectedSpot, setSelectedSpot] = useState(null);
   const { userPos, gpsStatus } = useGeolocation();
-  const [claiming, setClaiming] = useState(false);
   const [message, setMessage] = useState(null);
   const [connecting, setConnecting] = useState(false);
   const [history, setHistory] = useState([]);
@@ -110,17 +101,6 @@ export default function App() {
     localStorage.setItem('tokamon_language', lang);
   };
 
-  // 고객 모드: AppKit provider 동기화
-  useEffect(() => {
-    if (role !== 'customer') return;
-    if (appKitConnected && appKitAddress) {
-      setWalletProvider(appKitWalletProvider);
-      setWallet(appKitAddress);
-      resetContractCache();
-      resetFaucetCache();
-    }
-  }, [role, appKitConnected, appKitAddress, appKitWalletProvider]);
-
   // 메뉴 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -154,9 +134,8 @@ export default function App() {
     }
   }, []);
 
-  // MetaMask 계정 변경 감지 (오너 모드에서만)
+  // MetaMask 계정 변경 감지
   useEffect(() => {
-    if (role === 'customer') return;
     if (!window.ethereum) return;
     const handleAccountsChanged = (accounts) => {
       resetContractCache();
@@ -176,7 +155,7 @@ export default function App() {
       window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
       window.ethereum.removeListener('chainChanged', handleChainChanged);
     };
-  }, [role, fetchNetworkInfo]);
+  }, [fetchNetworkInfo]);
 
   // 잔액 갱신 (TON + ETH)
   const refreshBalance = useCallback(async () => {
@@ -298,28 +277,22 @@ export default function App() {
     setMessage(null);
   };
 
-  // 지갑 연결 (역할별 분기)
+  // 지갑 연결 (MetaMask)
   const handleConnect = async () => {
-    if (role === 'customer') {
-      // 고객: WalletConnect 모달
-      openAppKit();
-      return;
-    }
-    // 오너: 기존 MetaMask 연결
     setConnecting(true);
-    const address = await connectMetaMask();
-    if (address) {
-      setWallet(address);
-      await fetchNetworkInfo();
+    try {
+      const address = await connectMetaMask();
+      if (address) {
+        setWallet(address);
+        await fetchNetworkInfo();
+      }
+    } finally {
+      setConnecting(false);
     }
-    setConnecting(false);
   };
 
   // 지갑 연결 끊기
   const handleDisconnect = async () => {
-    if (role === 'customer') {
-      await disconnectAppKit();
-    }
     setWalletProvider(null);
     setWallet(null);
     setBalance(0);
@@ -371,29 +344,17 @@ export default function App() {
     }
   };
 
-  // 지도 클릭 (생성 모드)
+  // 지도 클릭 (생성 모드) - 노란 핀만 표시, + 버튼으로 추가 확인
   const handleMapClick = (pos) => {
     setPinPos(pos);
-    setShowCreateForm(true);
   };
 
-  // 클레임
-  const handleClaim = async (spotId) => {
-    if (!userPos || !wallet) return;
-    setClaiming(true);
-    setMessage(null);
-
-    const result = await requestClaim(wallet, spotId, userPos.lat, userPos.lng);
-
-    if (result.error) {
-      setMessage({ type: 'error', text: result.error });
-    } else {
-      setMessage({ type: 'success', text: result.message });
-      refreshBalance();
-      refreshSpots();
-      refreshHistory();
+  const handleConfirmAddSpot = () => {
+    if (!wallet) {
+      handleConnect();
+      return;
     }
-    setClaiming(false);
+    if (pinPos) setShowCreateForm(true);
   };
 
   // 역할 미선택 → 역할 선택 화면
@@ -513,7 +474,9 @@ export default function App() {
           createMode={createMode}
           pinPos={pinPos}
           onMapClick={handleMapClick}
+          onConfirmAddSpot={handleConfirmAddSpot}
           wallet={wallet}
+          role={role}
         />
       )}
 
@@ -531,8 +494,6 @@ export default function App() {
               userPos={userPos}
               wallet={wallet}
               role={role}
-              onCollect={handleClaim}
-              collecting={claiming}
               onRedeposited={() => { refreshSpots(); refreshBalance(); }}
               onConnectWallet={handleConnect}
             />
@@ -589,7 +550,25 @@ export default function App() {
 
         {/* 점주: 스팟 만들기 탭 */}
         {tab === 'create' && !showCreateForm && (
-          wallet ? (
+          pinPos ? (
+            <div className="points-display">
+              <p style={{ marginBottom: 8 }}>{t(language, 'locationSelected')}</p>
+              {wallet ? (
+                balance <= 0 ? (
+                  <p>{t(language, 'insufficientBalance')} ({Number(balance).toFixed(2)} TON)</p>
+                ) : (
+                  <p>{t(language, 'pressAddButton')}</p>
+                )
+              ) : (
+                <div>
+                  <p style={{ marginBottom: 12 }}>{t(language, 'connectWalletToAdd')}</p>
+                  <button className="primary" onClick={handleConnect} disabled={connecting}>
+                    {connecting ? t(language, 'connecting') : t(language, 'connectWallet')}
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : wallet ? (
             <div className="points-display">
               {balance <= 0
                 ? `${t(language, 'insufficientBalance')} (${Number(balance).toFixed(2)} TON) - ${t(language, 'pressChargeButton')}`
@@ -618,9 +597,9 @@ export default function App() {
             setShowCreateForm(false);
             setPinPos(null);
           }}
-          onCreated={() => {
-            refreshSpots();
-            refreshBalance();
+          onCreated={async () => {
+            await refreshSpots();
+            await refreshBalance();
             switchTab(role === 'owner' ? 'owner-dashboard' : 'map');
           }}
         />

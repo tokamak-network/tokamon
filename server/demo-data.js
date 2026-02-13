@@ -86,44 +86,10 @@ async function createDemoData() {
     const balance = await blockchain.getBalance(creatorAddress);
     console.log(`현재 잔액: ${balance} TON\n`);
 
-    // 각 스팟 생성
-    console.log('스팟 생성 중...\n');
-    for (let i = 0; i < demoSpots.length; i++) {
-      const spot = demoSpots[i];
-
-      const spotId = await blockchain.createSpot(
-        creatorAddress,
-        spot.deposit,
-        spot.reward,
-        spot.stamp_goal,
-        spot.stamp_bonus,
-        spot.cooldown,
-        {
-          name: spot.name,
-          description: spot.description,
-          lat: spot.lat,
-          lng: spot.lng,
-          startTime: '00:00',
-          endTime: '23:59',
-        }
-      );
-
-      const cooldownHours = spot.cooldown / 3600;
-      const costPerLoyal = (spot.reward * spot.stamp_goal) + spot.stamp_bonus;
-
-      console.log(`  ${i + 1}. ${spot.name}`);
-      console.log(`     ID: ${spotId}`);
-      console.log(`     보상: ${spot.reward} TON / 스탬프: ${spot.stamp_goal}회 달성 시 +${spot.stamp_bonus} TON`);
-      console.log(`     쿨다운: ${cooldownHours}시간`);
-      console.log(`     단골 1명 비용: ${costPerLoyal} TON / 가능 단골 수: ${Math.floor(spot.deposit / costPerLoyal)}명`);
-      console.log('');
-    }
+    console.log('스팟은 클라이언트에서 createSpotSelf로 생성해주세요.\n');
 
     const finalBalance = await blockchain.getBalance(creatorAddress);
     console.log(`점주 최종 잔액: ${finalBalance} TON\n`);
-
-    const allSpots = await blockchain.getAllSpots();
-    console.log(`총 ${allSpots.length}개의 스팟이 생성되었습니다!\n`);
 
     // 테스트용 사용자에게 토큰 지급
     console.log('테스트 사용자들에게 토큰 지급 중...');

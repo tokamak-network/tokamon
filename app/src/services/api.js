@@ -17,15 +17,6 @@ export async function createSpot(data) {
   return res.json();
 }
 
-export async function requestClaim(userAddress, spotId, lat, lng) {
-  const res = await fetch(`${API_URL}/api/claim/request`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_address: userAddress, spot_id: spotId, lat, lng }),
-  });
-  return res.json();
-}
-
 export async function getClaimHistory(userAddress) {
   const res = await fetch(`${API_URL}/api/claim/history?user_address=${userAddress}`);
   return res.json();

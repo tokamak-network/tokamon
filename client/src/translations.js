@@ -30,6 +30,9 @@ export const translations = {
     mySpotManagement: '내 스팟 관리',
     createSpot: '스팟 만들기',
     tapMapToSelectLocation: '지도를 탭하여 스팟 위치를 선택하세요',
+    locationSelected: '📍 위치가 선택되었습니다',
+    pressAddButton: '지도에서 + 버튼을 눌러 스팟을 추가하세요',
+    connectWalletToAdd: '지갑 연결 후 + 버튼을 눌러 스팟을 추가하세요',
     
     // 스팟 리스트
     activeSpots: '활성 스팟',
@@ -181,6 +184,12 @@ export const translations = {
     hoursUnit: '시간',
     minutesUnit: '분',
     secondsUnit: '초',
+    claimList: '클래임 목록',
+    closeClaimList: '목록 닫기',
+    claimDetails: '클래임 내역',
+    claimListFetchFailed: '클레임 목록 조회 실패',
+    loadingClaims: '불러오는 중...',
+    noClaimDetailsYet: '아직 클래임 내역이 없습니다',
     
     // Faucet / 지갑 메뉴
     getETH: 'ETH 받기',
@@ -250,6 +259,9 @@ export const translations = {
     mySpotManagement: 'My Spots',
     createSpot: 'Create Spot',
     tapMapToSelectLocation: 'Tap the map to select spot location',
+    locationSelected: '📍 Location selected',
+    pressAddButton: 'Press the + button on the map to add spot',
+    connectWalletToAdd: 'Connect wallet then press + to add spot',
     
     // Spot List
     activeSpots: 'Active',
@@ -401,6 +413,12 @@ export const translations = {
     hoursUnit: 'hrs',
     minutesUnit: 'min',
     secondsUnit: 'sec',
+    claimList: 'Claim List',
+    closeClaimList: 'Close List',
+    claimDetails: 'Claim History',
+    claimListFetchFailed: 'Failed to fetch claim list',
+    loadingClaims: 'Loading...',
+    noClaimDetailsYet: 'No claim history yet',
     
     // Faucet / Wallet Menu
     getETH: 'Get ETH',

@@ -58,7 +58,7 @@ contract Tokamon {
     // 지갑 주소 => 연결된 텔레그램 ID 해시 (역방향 매핑)
     mapping(address => bytes32) public walletToTelegram;
 
-    event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit);
+    event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit, string name, string description, int256 lat, int256 lng);
     event Claimed(uint256 indexed spotId, address indexed user, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
     event Redeposited(uint256 indexed spotId, address indexed creator, uint256 amount);
     event TelegramClaimed(uint256 indexed spotId, bytes32 indexed telegramHash, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
@@ -118,7 +118,7 @@ contract Tokamon {
 
         nextSpotId++;
 
-        emit SpotCreated(spotId, creator, reward, depositAmt);
+        emit SpotCreated(spotId, creator, reward, depositAmt, meta.name, meta.description, meta.lat, meta.lng);
 
         return spotId;
     }
@@ -223,6 +223,15 @@ contract Tokamon {
 
     // 지갑 주소로 클레임: 서버(admin)가 위치/시간 검증 후 자동 호출
     function claim(uint256 spotId, address user) external onlyAdmin {
+        _doClaim(spotId, user);
+    }
+
+    // 지갑 주소로 클레임: 사용자가 직접 호출 (msg.sender)
+    function claimSelf(uint256 spotId) external {
+        _doClaim(spotId, msg.sender);
+    }
+
+    function _doClaim(uint256 spotId, address user) internal {
         Spot storage spot = spots[spotId];
         require(spot.reward > 0, "spot does not exist");
 
@@ -464,7 +473,7 @@ contract Tokamon {
 
         nextSpotId++;
 
-        emit SpotCreated(spotId, msg.sender, reward, depositAmt);
+        emit SpotCreated(spotId, msg.sender, reward, depositAmt, meta.name, meta.description, meta.lat, meta.lng);
 
         return spotId;
     }
@@ -524,6 +533,11 @@ contract Tokamon {
     ) {
         Spot storage s = spots[spotId];
         return (s.creator, s.reward, s.remaining, s.stampGoal, s.stampBonus, s.cooldown, s.allowDuplicateClaims);
+    }
+
+    // 스팟 전체 조회 (Spot 구조체 반환)
+    function getSpot(uint256 spotId) external view returns (Spot memory) {
+        return spots[spotId];
     }
 
     // 스탬프 현황 조회 (지갑 주소 기준 - 텔레그램 연결 고려)

@@ -64,10 +64,14 @@ event SpotCreated(
     uint256 indexed spotId,     // 생성된 스팟 ID
     address indexed creator,    // 점주 주소
     uint256 reward,             // 1회 보상
-    uint256 deposit             // 예치 금액
+    uint256 deposit,            // 예치 금액
+    string name,                // 상점 이름
+    string description,         // 상점 설명
+    int256 lat,                 // 위도 (×1e6)
+    int256 lng                  // 경도 (×1e6)
 );
 ```
-발생 시점: createSpot() 성공 시
+발생 시점: createSpot() / createSpotSelf() 성공 시
 
 ### Claimed
 ```solidity

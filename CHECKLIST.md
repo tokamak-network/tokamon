@@ -233,7 +233,6 @@
 - [ ] POST /api/telegram/balance - 잔액 조회
 - [ ] POST /api/telegram/stamp-info - 스탬프 정보
 - [ ] **POST /api/telegram/validate-claim - 클레임 검증 (allow_duplicate_claims 체크)**
-- [ ] POST /api/telegram/claim - 클레임 실행
 - [ ] POST /api/telegram/notify-claim - 알림 전송
 - [ ] POST /api/telegram/link - 지갑 연결
 

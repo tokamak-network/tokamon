@@ -143,7 +143,7 @@ Tokamon은 기존 종이 쿠폰과 포인트 시스템을 대체하는 **위치 
 **온체인 이벤트:**
 
 ```solidity
-event SpotCreated(uint256 spotId, address creator);
+event SpotCreated(uint256 spotId, address creator, uint256 reward, uint256 deposit, string name, string description, int256 lat, int256 lng);
 event TelegramClaimed(uint256 spotId, bytes32 telegramHash, uint256 amount);
 event TelegramLinked(bytes32 telegramHash, address wallet);
 event CooldownUpdated(uint256 spotId, uint256 newCooldown);

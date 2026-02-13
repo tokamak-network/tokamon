@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { registerSpotMetadata } from '../api';
 import { createSpotSelf } from '../contract';
 import { t } from '../translations';
 
@@ -71,17 +70,7 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
         }
       );
 
-      const metadataToRegister = {
-        name: form.name.trim(),
-        description: form.description.trim(),
-        lat: pinPos.lat,
-        lng: pinPos.lng,
-        start_time: form.start_time,
-        end_time: form.end_time,
-      };
-
-      await registerSpotMetadata(spotId, metadataToRegister);
-
+      // 서버는 SpotCreated 이벤트를 구독하여 컨트랙트에서 메타데이터를 자동 수집/저장
       onCreated();
       onClose();
     } catch (err) {

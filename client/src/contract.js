@@ -14,9 +14,10 @@ const ABI = [
   'function getBalance(address user) external view returns (uint256)',
   'function getTelegramBalance(bytes32 telegramHash) external view returns (uint256)',
   'function getWalletLinkedTelegram(address wallet) external view returns (bytes32)',
+  'function claimSelf(uint256 spotId) external',
   'function claimTelegramToWallet(bytes32 telegramHash) external',
   'function nextSpotId() external view returns (uint256)',
-  'event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit)',
+  'event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit, string name, string description, int256 lat, int256 lng)',
   'event Claimed(uint256 indexed spotId, address indexed user, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp)',
 ];
 
@@ -70,10 +71,20 @@ export async function depositSelf(amountTon) {
 
 // 스팟 생성: 점주가 직접 트랜잭션 서명
 export async function createSpotSelf(depositTon, rewardTon, stampGoal, stampBonus, cooldown, allowDuplicateClaims, metadata) {
+  const { name, description, lat, lng, startTime, endTime } = metadata;
+  console.log('[createSpotSelf 전송 데이터]', JSON.stringify({
+    depositTon,
+    rewardTon,
+    stampGoal,
+    stampBonus,
+    cooldown,
+    allowDuplicateClaims,
+    metadata: { name, description, lat, lng, startTime, endTime },
+  }, null, 2));
+
   const contractInfo = await getContractInfo();
   const tonTokenAddress = contractInfo.tonToken;
   const { signer, contract } = await getSignerAndContract();
-  const { name, description, lat, lng, startTime, endTime } = metadata;
 
   const depositAmount = ethers.parseEther(String(depositTon));
 
@@ -150,6 +161,7 @@ export async function updateCooldown(spotId, cooldownSeconds) {
 
 // 중복 발행 허용 여부 수정: 점주가 직접 트랜잭션 서명
 export async function updateAllowDuplicateClaims(spotId, allow) {
+  console.log('[updateAllowDuplicateClaims 전송 데이터]', JSON.stringify({ spotId, allow }, null, 2));
   const { contract } = await getSignerAndContract();
   const tx = await contract.updateAllowDuplicateClaims(spotId, allow);
   await tx.wait();
@@ -190,6 +202,26 @@ export async function getWalletLinkedTelegram(address) {
   const { contract } = await getSignerAndContract();
   const telegramHash = await contract.getWalletLinkedTelegram(address);
   return telegramHash;
+}
+
+// 스팟 클레임: 고객이 직접 호출 (지갑 기반)
+export async function claimSelf(spotId) {
+  const { contract } = await getSignerAndContract();
+  const tx = await contract.claimSelf(spotId);
+  const receipt = await tx.wait();
+  const claimedEvent = receipt.logs
+    .map((log) => {
+      try { return contract.interface.parseLog(log); } catch (_) { return null; }
+    })
+    .find((e) => e && e.name === 'Claimed');
+  if (claimedEvent) {
+    return {
+      reward: Number(ethers.formatEther(claimedEvent.args.reward)),
+      bonus: Number(ethers.formatEther(claimedEvent.args.bonus)),
+      stamp: Number(claimedEvent.args.stamp),
+    };
+  }
+  return { reward: 0, bonus: 0, stamp: 0 };
 }
 
 // 텔레그램 잔액을 지갑으로 클레임
