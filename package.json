@@ -13,12 +13,17 @@
     "stop": "pkill -f 'anvil|node server|vite' 2>/dev/null || kill $(lsof -ti:8999,3001,5173) 2>/dev/null; echo '✓ 모든 프로세스 종료 완료'",
     "clean": "cd contracts && forge clean && rm -rf out cache",
     "send-eth": "./send-eth.sh",
-    "install:all": "npm install && npm install --prefix server && npm install --prefix client"
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
+    "docker:up:local": "docker compose --profile local up -d",
+    "docker:down": "docker compose down"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "ethers": "^6.16.0",
+    "oh-my-opencode-darwin-x64": "^3.5.3",
     "solc": "^0.8.28",
     "three": "^0.182.0"
   },

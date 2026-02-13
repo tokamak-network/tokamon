@@ -90,7 +90,8 @@ check_service "Server (Express)"    "server" 3001 "http://127.0.0.1:3001/api/con
 check_service "Client (Vite)"       "client" 5173 "http://localhost:5173"
 
 echo "========================================="
-echo -e "  Start:  ${BLUE}./scripts/start.sh [all|anvil|server|client]${NC}"
+echo -e "  Start:  ${BLUE}./scripts/start.sh [local|testnet|production] [all|anvil|deploy|server|client]${NC}"
+echo -e "  Deploy: ${BLUE}./scripts/deploy.sh [local|testnet|production]${NC}"
 echo -e "  Stop:   ${BLUE}./scripts/stop.sh  [all|anvil|server|client]${NC}"
 echo "========================================="
 echo ""

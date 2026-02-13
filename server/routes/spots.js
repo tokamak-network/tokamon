@@ -41,7 +41,8 @@ router.post('/metadata', async (req, res) => {
 
     const fs = require('fs');
     const path = require('path');
-    const METADATA_PATH = path.join(__dirname, '..', 'spot-metadata.json');
+    const METADATA_PATH = process.env.METADATA_PATH ||
+      path.join(__dirname, '..', 'spot-metadata.json');
 
     let metadata = {};
     try {

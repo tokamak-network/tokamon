@@ -10,6 +10,13 @@
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 LOG_DIR="$PROJECT_ROOT/logs"
 
+# .env 로드 (DATABASE_PATH 등)
+if [ -f "$PROJECT_ROOT/.env" ]; then
+    set -a
+    source "$PROJECT_ROOT/.env"
+    set +a
+fi
+
 # Colors
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -43,10 +50,14 @@ if [ -f "$PROJECT_ROOT/anvil-state.json" ]; then
     ok "anvil-state.json 삭제"
 fi
 
-# 3. DB 삭제
-if [ -f "$PROJECT_ROOT/server/tokamon.db" ]; then
+# 3. DB 삭제 (DATABASE_PATH 환경변수 또는 기본 경로)
+DB_PATH="${DATABASE_PATH:-server/tokamon.db}"
+if [ -f "$PROJECT_ROOT/$DB_PATH" ]; then
+    rm "$PROJECT_ROOT/$DB_PATH"
+    ok "DB 삭제 ($DB_PATH)"
+elif [ -f "$PROJECT_ROOT/server/tokamon.db" ]; then
     rm "$PROJECT_ROOT/server/tokamon.db"
-    ok "tokamon.db 삭제"
+    ok "tokamon.db 삭제 (기본 경로)"
 fi
 
 # 4. 메타데이터 초기화

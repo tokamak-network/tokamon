@@ -1,14 +1,25 @@
 #!/bin/bash
 #
 # Tokamon Service Starter
-# Usage: ./scripts/start.sh [all|anvil|server|client]
+# Usage: ./scripts/start.sh [local|testnet|production] [all|anvil|deploy|server|client]
+#
+#   local      - 로컬 개발 (Anvil + 로컬 배포 + server + client) [기본값]
+#   testnet    - 테스트넷 (배포 + server + client, Anvil 없음)
+#   production - 서비스 (배포 + server + client)
+#
+#   all     - 해당 모드의 전체 구성요소 시작
+#   anvil   - [local 전용] Anvil만 시작
+#   deploy  - [testnet/production] 컨트랙트 배포만 실행
+#   server  - Express 서버만 시작
+#   client  - Vite 클라이언트만 시작
 #
 
 set -e
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 LOG_DIR="$PROJECT_ROOT/logs"
-TARGET="${1:-all}"
+MODE="${1:-local}"
+TARGET="${2:-all}"
 
 # Colors
 GREEN='\033[0;32m'
@@ -18,6 +29,13 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 mkdir -p "$LOG_DIR"
+
+# .env 로드 (존재 시)
+if [ -f "$PROJECT_ROOT/.env" ]; then
+    set -a
+    source "$PROJECT_ROOT/.env"
+    set +a
+fi
 
 info()  { echo -e "${BLUE}[INFO]${NC}  $1"; }
 ok()    { echo -e "${GREEN}[OK]${NC}    $1"; }
@@ -59,16 +77,28 @@ start_anvil() {
 }
 
 deploy_contracts() {
-    info "Deploying contracts..."
-    cd "$PROJECT_ROOT/contracts"
-    forge build 2>/dev/null || true
-    forge script script/Deploy.s.sol:DeployScript \
-        --rpc-url http://127.0.0.1:8999 \
-        --broadcast --unlocked \
-        --sender 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 \
-        >> "$LOG_DIR/deploy.log" 2>&1
-    cd "$PROJECT_ROOT"
-    ok "Contracts deployed — see $LOG_DIR/deploy.log"
+    case "$MODE" in
+        local)
+            info "Deploying contracts (local)..."
+            cd "$PROJECT_ROOT/contracts"
+            forge build 2>/dev/null || true
+            forge script script/DeployLocal.s.sol:DeployLocal \
+                --rpc-url http://127.0.0.1:8999 \
+                --broadcast --unlocked \
+                --sender 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 \
+                >> "$LOG_DIR/deploy.log" 2>&1
+            cd "$PROJECT_ROOT"
+            ;;
+        testnet|production)
+            "$PROJECT_ROOT/scripts/deploy.sh" "$MODE"
+            ;;
+        *)
+            err "Unknown mode: $MODE"
+            return 1
+            ;;
+    esac
+    ok "Contracts deployed"
+    [ "$MODE" = "local" ] && echo "  (log: $LOG_DIR/deploy.log)"
 }
 
 start_server() {
@@ -108,18 +138,30 @@ start_client() {
 echo ""
 echo "========================================="
 echo "  Tokamon Service Manager — START"
+echo "  Mode: $MODE | Target: $TARGET"
 echo "========================================="
 echo ""
 
+# testnet/production에서 anvil 요청 시 무시
+if [ "$MODE" != "local" ] && [ "$TARGET" = "anvil" ]; then
+    warn "anvil은 local 모드에서만 사용 가능합니다. 무시합니다."
+    TARGET="all"
+fi
+
 case "$TARGET" in
     all)
-        start_anvil
+        if [ "$MODE" = "local" ]; then
+            start_anvil
+        fi
         deploy_contracts
         start_server
         start_client
         ;;
     anvil)
         start_anvil
+        ;;
+    deploy)
+        deploy_contracts
         ;;
     server)
         start_server
@@ -129,11 +171,25 @@ case "$TARGET" in
         ;;
     *)
         err "Unknown target: $TARGET"
-        echo "Usage: $0 [all|anvil|server|client]"
+        echo "Usage: $0 [local|testnet|production] [all|anvil|deploy|server|client]"
         exit 1
         ;;
 esac
 
+echo ""
+echo "========================================="
+echo "  서비스 URL"
+echo "========================================="
+if [ "$TARGET" = "all" ] || [ "$TARGET" = "client" ]; then
+    is_port_open 5173 && echo -e "  ${GREEN}웹앱:${NC}     http://localhost:5173"
+fi
+if [ "$TARGET" = "all" ] || [ "$TARGET" = "server" ]; then
+    is_port_open 3001 && echo -e "  ${GREEN}API:${NC}      http://localhost:3001"
+fi
+if ( [ "$TARGET" = "all" ] && [ "$MODE" = "local" ] ) || [ "$TARGET" = "anvil" ]; then
+    is_port_open 8999 && echo -e "  ${GREEN}Anvil RPC:${NC} http://localhost:8999 (Chain ID: 1337)"
+fi
+echo "========================================="
 echo ""
 ok "Done. Use ./scripts/status.sh to check services."
 echo ""

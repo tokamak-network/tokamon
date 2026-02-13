@@ -109,7 +109,7 @@ case "$TARGET" in
         ;;
     *)
         echo -e "${RED}[ERROR]${NC} Unknown target: $TARGET"
-        echo "Usage: $0 [all|anvil|server|client]"
+        echo "Usage: $0 [all|anvil|server|client]  (모드 무관, 서비스만 종료)"
         exit 1
         ;;
 esac

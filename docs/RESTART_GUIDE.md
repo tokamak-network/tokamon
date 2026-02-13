@@ -1,9 +1,13 @@
 # 시스템 재시작 가이드
 
+> 상세 배포 절차는 [DEPLOY_GUIDE.md](DEPLOY_GUIDE.md)를 참고하세요.
+
 ## 서비스 시작
 
 ```bash
-./scripts/start.sh          # anvil → deploy → server → client 전체 시작
+./scripts/start.sh                    # local 모드 (기본): anvil → deploy → server → client
+./scripts/start.sh local all          # 위와 동일
+./scripts/start.sh testnet all        # 테스트넷 모드
 ```
 
 ## 서비스 종료

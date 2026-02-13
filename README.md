@@ -67,6 +67,27 @@ Open http://localhost:5173 and connect MetaMask (Chain ID: 1337, RPC: http://127
 
 `stop.sh`는 프로세스만 종료하며 데이터는 초기화하지 않는다. 재시작 시 이전 상태 그대로 이어지므로 개별 서비스만 올릴 수 있다. 모든 데이터를 초기화하려면 `reset.sh` 후 `start.sh`를 실행한다.
 
+## Docker
+
+```bash
+# 1. .env 설정 후 로컬 배포로 contract-address.json 생성
+./scripts/deploy.sh local
+
+# 2. Docker 실행
+docker compose up -d                    # 서비스만
+docker compose --profile local up -d   # Anvil + 서비스 (로컬 테스트)
+
+# 접속: http://localhost:3001
+```
+
+| 명령 | 설명 |
+|------|------|
+| `docker compose build` | 이미지 빌드 |
+| `docker compose up -d` | 서비스 실행 (백그라운드) |
+| `docker compose --profile local up -d` | Anvil 포함 로컬 전체 실행 |
+| `docker compose down` | 서비스 종료 |
+
+로컬 프로필 사용 시 `.env`에 `RPC_URL=http://anvil:8999` 설정.
 
 ## Tech Stack
 
@@ -93,7 +114,12 @@ cd contracts && forge test -vv
 
 ## Documentation
 
-See [docs/](docs/) for detailed specs and guides.
+| 문서 | 설명 |
+|------|------|
+| [docs/DEPLOY_GUIDE.md](docs/DEPLOY_GUIDE.md) | 로컬·테스트넷·프로덕션·Docker 배포 가이드 |
+| [docs/RESTART_GUIDE.md](docs/RESTART_GUIDE.md) | 서비스 시작/종료/초기화 |
+| [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md) | 데모 실행 흐름 |
+| [docs/dev/](docs/dev/) | 상세 스펙 (Contract, Server, User 등) |
 
 ## License
 
