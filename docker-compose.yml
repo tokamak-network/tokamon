@@ -1,0 +1,38 @@
+# Tokamon - Docker Compose
+# Usage:
+#   로컬 (Anvil + Tokamon): docker compose --profile local up -d
+#   서비스만 (테스트넷/프로덕션): docker compose up -d
+#
+# 준비:
+#   1. .env 파일 생성 (cp .env.example .env)
+#   2. contract-address.json: ./scripts/deploy.sh local 실행 후 server/ 폴더에 생성
+#
+# 로컬 프로필 사용 시: .env에 RPC_URL=http://anvil:8999 로 설정
+
+services:
+  tokamon:
+    build: .
+    ports:
+      - "${PORT:-3001}:3001"
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - DATABASE_PATH=/data/tokamon.db
+      - METADATA_PATH=/data/spot-metadata.json
+    volumes:
+      - tokamon-data:/data
+      - ./server/contract-address.json:/app/server/contract-address.json:ro
+    restart: unless-stopped
+
+  # 로컬 개발용: Anvil (profile: local 시에만 사용)
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    profiles:
+      - local
+    command: anvil --host 0.0.0.0 --port 8999 --chain-id 1337 --balance 10000
+    ports:
+      - "8999:8999"
+    restart: unless-stopped
+
+volumes:
+  tokamon-data:

@@ -26,6 +26,7 @@ export default defineConfig({
   plugins: [stubBaseOrgAccount(), react(), basicSsl()],
   envDir: path.resolve(__dirname, '..'),
   server: {
+    host: '0.0.0.0',
     port: 5173,
     host: true,
     proxy: {

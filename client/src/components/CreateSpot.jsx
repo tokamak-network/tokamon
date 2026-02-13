@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { registerSpotMetadata } from '../api';
 import { createSpotSelf } from '../contract';
+import { t } from '../translations';
 
 const MIN_DEPOSIT = 10;
 
-const COOLDOWN_OPTIONS = [
-  { label: '1시간', value: 3600 },
-  { label: '6시간', value: 21600 },
-  { label: '12시간', value: 43200 },
-  { label: '24시간', value: 86400 },
-];
+export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated, language = 'ko' }) {
+  const COOLDOWN_OPTIONS = [
+    { label: t(language, 'oneHour'), value: 3600 },
+    { label: t(language, 'sixHours'), value: 21600 },
+    { label: t(language, 'twelveHours'), value: 43200 },
+    { label: t(language, 'twentyFourHours'), value: 86400 },
+  ];
 
-export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated }) {
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -32,7 +33,6 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
   const stampGoal = Number(form.stamp_goal);
   const stampBonus = Number(form.stamp_bonus);
 
-  // 단골 1명 비용 = (방문보상 × 스탬프목표) + 스탬프보너스
   const costPerLoyal = reward > 0 && stampGoal > 0
     ? (reward * stampGoal) + stampBonus
     : 0;
@@ -44,33 +44,16 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    if (!form.name.trim()) return alert('이름을 입력해주세요');
-    if (!pinPos) return alert('지도에서 위치를 선택해주세요');
-    if (deposit < MIN_DEPOSIT) return alert(`최소 예치금은 ${MIN_DEPOSIT} TON입니다`);
-    if (balance < deposit) return alert(`잔액이 부족합니다 (${Number(balance).toFixed(2)} TON)`);
-    if (reward <= 0) return alert('방문 보상은 0보다 커야 합니다');
-    if (stampGoal < 1) return alert('스탬프 목표는 1 이상이어야 합니다');
-    if (stampBonus < 0) return alert('스탬프 보너스는 0 이상이어야 합니다');
+    if (!form.name.trim()) return alert(t(language, 'errorNameRequired'));
+    if (!pinPos) return alert(t(language, 'errorSelectLocation'));
+    if (deposit < MIN_DEPOSIT) return alert(`${t(language, 'errorMinDeposit')} ${MIN_DEPOSIT} TON`);
+    if (balance < deposit) return alert(`${t(language, 'errorInsufficientBalance')} (${Number(balance).toFixed(2)} TON)`);
+    if (reward <= 0) return alert(t(language, 'errorRewardPositive'));
+    if (stampGoal < 1) return alert(t(language, 'errorStampGoalMin'));
+    if (stampBonus < 0) return alert(t(language, 'errorBonusMin'));
 
     setSubmitting(true);
     try {
-      console.log('=== 스팟 생성 데이터 ===');
-      console.log('예치금:', deposit);
-      console.log('보상:', reward);
-      console.log('스탬프 목표:', stampGoal);
-      console.log('스탬프 보너스:', stampBonus);
-      console.log('쿨다운:', Number(form.cooldown));
-      console.log('중복 발행 허용:', form.allow_duplicate_claims);
-      console.log('메타데이터:', {
-        name: form.name.trim(),
-        description: form.description.trim(),
-        lat: pinPos.lat,
-        lng: pinPos.lng,
-        startTime: form.start_time,
-        endTime: form.end_time,
-      });
-      
-      // 컨트랙트에 직접 스팟 생성 (MetaMask 승인)
       const spotId = await createSpotSelf(
         deposit,
         reward,
@@ -87,10 +70,7 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
           endTime: form.end_time,
         }
       );
-      
-      console.log('생성된 스팟 ID:', spotId);
 
-      // 서버에 메타데이터 등록
       const metadataToRegister = {
         name: form.name.trim(),
         description: form.description.trim(),
@@ -99,15 +79,13 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
         start_time: form.start_time,
         end_time: form.end_time,
       };
-      console.log('서버에 등록할 메타데이터:', metadataToRegister);
-      
+
       await registerSpotMetadata(spotId, metadataToRegister);
-      console.log('메타데이터 등록 완료');
 
       onCreated();
       onClose();
     } catch (err) {
-      alert(err.reason || err.message || '스팟 생성 실패');
+      alert(err.reason || err.message || t(language, 'spotCreationFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -116,58 +94,58 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>스팟 만들기</h2>
+        <h2>{t(language, 'createSpotTitle')}</h2>
         <p style={{ color: '#aaa', fontSize: 13, marginBottom: 4 }}>
-          위치: {pinPos.lat.toFixed(5)}, {pinPos.lng.toFixed(5)}
+          {t(language, 'location')}: {pinPos.lat.toFixed(5)}, {pinPos.lng.toFixed(5)}
         </p>
         <p style={{ color: '#fbbf24', fontSize: 13, marginBottom: 12 }}>
-          내 잔액: {Number(balance).toFixed(2)} TON
+          {t(language, 'myBalance')}: {Number(balance).toFixed(2)} TON
         </p>
 
-        <label>매장 이름</label>
-        <input value={form.name} onChange={update('name')} placeholder="강남역 카페" />
+        <label>{t(language, 'storeName')}</label>
+        <input value={form.name} onChange={update('name')} placeholder={t(language, 'storeNamePlaceholder')} />
 
-        <label>매장 설명</label>
-        <input value={form.description} onChange={update('description')} placeholder="맛있는 커피와 디저트" />
+        <label>{t(language, 'storeDescription')}</label>
+        <input value={form.description} onChange={update('description')} placeholder={t(language, 'storeDescPlaceholder')} />
 
         <div className="time-row">
           <div>
-            <label>영업 시작</label>
+            <label>{t(language, 'openingTime')}</label>
             <input type="time" value={form.start_time} onChange={update('start_time')} />
           </div>
           <div>
-            <label>영업 종료</label>
+            <label>{t(language, 'closingTime')}</label>
             <input type="time" value={form.end_time} onChange={update('end_time')} />
           </div>
         </div>
 
         <div className="time-row">
           <div>
-            <label>총 예치 (TON)</label>
+            <label>{t(language, 'totalDeposit')}</label>
             <input type="number" value={form.deposit} onChange={update('deposit')} min={MIN_DEPOSIT} />
           </div>
           <div>
-            <label>방문 보상 (TON)</label>
+            <label>{t(language, 'visitReward')}</label>
             <input type="number" value={form.reward} onChange={update('reward')} min="0.1" step="0.1" />
           </div>
         </div>
 
         <div className="form-divider" />
 
-        <div className="form-section-title">스탬프 설정</div>
+        <div className="form-section-title">{t(language, 'stampSettings')}</div>
 
         <div className="time-row">
           <div>
-            <label>스탬프 목표 (회)</label>
+            <label>{t(language, 'stampGoal')}</label>
             <input type="number" value={form.stamp_goal} onChange={update('stamp_goal')} min="1" />
           </div>
           <div>
-            <label>달성 보너스 (TON)</label>
+            <label>{t(language, 'achievementBonus')}</label>
             <input type="number" value={form.stamp_bonus} onChange={update('stamp_bonus')} min="0" step="0.1" />
           </div>
         </div>
 
-        <label>재방문 쿨다운</label>
+        <label>{t(language, 'revisitCooldown')}</label>
         <div className="cooldown-options">
           {COOLDOWN_OPTIONS.map((opt) => (
             <button
@@ -189,33 +167,33 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
               onChange={(e) => setForm({ ...form, allow_duplicate_claims: e.target.checked })}
               style={{ width: 'auto', cursor: 'pointer' }}
             />
-            <span>같은 ID로 중복 톤 발행 허용 (쿨다운 무시)</span>
+            <span>{t(language, 'allowDuplicateClaims')}</span>
           </label>
           <p style={{ fontSize: 12, color: '#888', marginTop: 4, marginLeft: 28 }}>
-            활성화 시 같은 텔레그램 아이디가 쿨다운 없이 반복해서 톤을 받을 수 있습니다
+            {t(language, 'duplicateClaimsDesc')}
           </p>
         </div>
 
-        {/* 비용 계산 */}
+        {/* Cost Summary */}
         {deposit >= MIN_DEPOSIT && reward > 0 && (
           <div className="cost-summary">
             <div className="cost-row">
-              <span>총 지급 가능 방문</span>
-              <span>{totalVisits}회</span>
+              <span>{t(language, 'totalPossibleVisits')}</span>
+              <span>{totalVisits}{t(language, 'visits')}</span>
             </div>
             <div className="cost-row">
-              <span>단골 1명 비용</span>
-              <span>{costPerLoyal} TON ({stampGoal}회 × {reward} + 보너스 {stampBonus})</span>
+              <span>{t(language, 'costPerLoyal')}</span>
+              <span>{costPerLoyal} TON ({stampGoal}{t(language, 'visits')} × {reward} + {t(language, 'bonus')} {stampBonus})</span>
             </div>
             <div className="cost-row highlight">
-              <span>육성 가능 단골 수</span>
-              <span>{loyalCount}명</span>
+              <span>{t(language, 'possibleLoyalCustomers')}</span>
+              <span>{loyalCount}{t(language, 'people')}</span>
             </div>
           </div>
         )}
         {deposit < MIN_DEPOSIT && (
           <p style={{ color: '#f87171', fontSize: 13, marginTop: 8 }}>
-            최소 예치금: {MIN_DEPOSIT} TON
+            {t(language, 'minimumDeposit')}: {MIN_DEPOSIT} TON
           </p>
         )}
 
@@ -225,10 +203,10 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
           onClick={handleSubmit}
           disabled={deposit < MIN_DEPOSIT || balance < deposit || submitting}
         >
-          {submitting ? 'MetaMask 승인 대기 중...' : `${deposit} TON 예치 + 스팟 생성`}
+          {submitting ? t(language, 'waitingForMetaMask') : `${deposit} ${t(language, 'depositAndCreateSpot')}`}
         </button>
         <button className="secondary" onClick={onClose}>
-          취소
+          {t(language, 'cancel')}
         </button>
       </div>
     </div>

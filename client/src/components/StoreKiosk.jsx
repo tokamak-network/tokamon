@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { t } from '../translations';
 
-const API = 'http://localhost:3001';
+const API = '';
 
 export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
   const [telegramUsername, setTelegramUsername] = useState('');
@@ -85,12 +85,13 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
 
     try {
       // 체인 추가/전환
+      const rpcUrl = `http://${window.location.hostname}:8999`;
       await window.ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [{
           chainId: '0x539',
-          chainName: 'Ganache Local',
-          rpcUrls: ['http://127.0.0.1:8999'],
+          chainName: 'Tokamon Local',
+          rpcUrls: [rpcUrl],
           nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
         }],
       }).catch(() => {});

@@ -17,7 +17,7 @@ export default function Settings({ onClose, account, language, onLanguageChange 
 
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3001/api/telegram/linked/${account}`);
+      const response = await fetch(`/api/telegram/linked/${account}`);
       const data = await response.json();
 
       if (data.linked && data.telegram_hash) {

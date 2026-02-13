@@ -137,7 +137,7 @@ GET  /api/claim/history       클레임 이력
 
 ```bash
 npm run install:all    # 의존성 설치
-npm run dev            # Ganache + 배포 + 서버 + 클라이언트
+./scripts/start.sh     # anvil → deploy → server → client
 ```
 
-상세한 데모 흐름은 [DEMO_GUIDE.md](./DEMO_GUIDE.md) 참조.
+상세한 데모 흐름은 [DEMO_GUIDE.md](../DEMO_GUIDE.md) 참조.

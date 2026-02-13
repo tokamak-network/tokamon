@@ -20,8 +20,12 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// SQLite DB 초기화
-const DB_PATH = path.join(__dirname, 'tokamon.db');
+// SQLite DB 초기화 (경로: DATABASE_PATH 환경변수 또는 기본값 server/tokamon.db)
+const DB_PATH = process.env.DATABASE_PATH
+  ? path.isAbsolute(process.env.DATABASE_PATH)
+    ? process.env.DATABASE_PATH
+    : path.join(__dirname, '..', process.env.DATABASE_PATH)
+  : path.join(__dirname, 'tokamon.db');
 const db = new sqlite3.Database(DB_PATH);
 
 // 텔레그램 링크 토큰 테이블 생성
@@ -82,7 +86,7 @@ db.serialize(() => {
     )
   `);
   
-  console.log('✅ DB 초기화 완료');
+  console.log('✅ DB 초기화 완료:', DB_PATH);
 });
 
 // 만료된 토큰 자동 삭제 (10분마다)
@@ -109,8 +113,8 @@ app.get('/api/contract', (req, res) => {
       tokamon: data.tokamon || data.address,
       tonToken: data.tonToken, // ERC20 TON 토큰 컨트랙트 주소 (EVM)
       tonContract: data.tonContract || null, // TON 블록체인 컨트랙트 주소 (EQ...)
-      faucet: data.faucet,
-      chainId: 1337
+      faucet: data.faucet || null,
+      chainId: data.chainId ?? 1337
     });
   } catch (err) {
     res.status(500).json({ error: '컨트랙트 주소를 찾을 수 없습니다' });
@@ -125,6 +129,13 @@ app.use('/api/stamps', stampRoutes);
 app.use('/api/kiosk', kioskRoutes);
 app.use('/api/device', deviceRoutes);
 app.use('/api/telegram', telegramRoutesFactory(db));
+
+// 프로덕션: 빌드된 클라이언트 정적 파일 서빙 (API 라우트 이후)
+const clientDist = path.join(__dirname, '..', 'client', 'dist');
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get('*', (req, res) => res.sendFile(path.join(clientDist, 'index.html')));
+}
 
 async function start() {
   await blockchain.init();

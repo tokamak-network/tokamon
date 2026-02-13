@@ -118,6 +118,20 @@ temp/
 cmdtools.zip
 latest/
 
+# React Native generated native folders (app/)
+app/android/
+app/ios/
+
+# Stray symlinks or misplaced packages
+/react
+/react-dom
+
+# Service logs & PID files
+logs/
+
+# Anvil state persistence
+anvil-state.json
+
 # Backup files
 *.backup
 *.bak

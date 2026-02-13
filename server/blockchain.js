@@ -6,7 +6,8 @@ const RPC_URL = process.env.RPC_URL || 'http://127.0.0.1:8999';
 const ARTIFACT_PATH = path.join(__dirname, '..', 'contracts', 'out', 'Tokamon.sol', 'Tokamon.json');
 const TON_ARTIFACT_PATH = path.join(__dirname, '..', 'contracts', 'out', 'TONToken.sol', 'TONToken.json');
 const ADDRESS_PATH = path.join(__dirname, 'contract-address.json');
-const METADATA_PATH = path.join(__dirname, 'spot-metadata.json');
+const METADATA_PATH = process.env.METADATA_PATH ||
+  path.join(__dirname, 'spot-metadata.json');
 
 const COORD_SCALE = 1_000_000; // 좌표 스케일 (1e6)
 
