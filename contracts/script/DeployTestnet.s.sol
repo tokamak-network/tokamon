@@ -3,7 +3,6 @@ pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
-import {TONToken} from "../src/TONToken.sol";
 import {Tokamon} from "../src/Tokamon.sol";
 import {Faucet} from "../src/Faucet.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
@@ -19,34 +18,27 @@ contract DeployTestnet is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        console.log("\n=== [Testnet] Deploying TON Token ===");
-        TONToken tonToken = new TONToken();
-        console.log("TON Token deployed at:", address(tonToken));
-
         console.log("\n=== [Testnet] Deploying Tokamon (UUPS Proxy) ===");
         Tokamon implementation = new Tokamon();
         ERC1967Proxy proxy = new ERC1967Proxy(
             address(implementation),
-            abi.encodeCall(Tokamon.initialize, (address(tonToken)))
+            abi.encodeCall(Tokamon.initialize, ())
         );
-        Tokamon tokamon = Tokamon(address(proxy));
+        Tokamon tokamon = Tokamon(payable(address(proxy)));
         console.log("Tokamon proxy deployed at:", address(tokamon));
         console.log("Tokamon implementation at:", address(implementation));
 
         uint256 faucetEth = vm.envOr("FAUCET_ETH", uint256(1 ether));
         console.log("\n=== [Testnet] Deploying Faucet (ETH:", faucetEth / 1 ether, ") ===");
-        Faucet faucet = new Faucet{value: faucetEth}(address(tokamon), address(tonToken));
-        uint256 faucetTon = vm.envOr("FAUCET_TON", uint256(10_000 * 1e18));
-        require(tonToken.transfer(address(faucet), faucetTon), "TON transfer failed");
-        console.log("Faucet deployed at:", address(faucet), "TON:", faucetTon / 1e18);
+        Faucet faucet = new Faucet{value: faucetEth}();
+        console.log("Faucet deployed at:", address(faucet));
 
         vm.stopBroadcast();
 
-        _writeAddresses(address(tonToken), address(tokamon), address(faucet), chainId);
+        _writeAddresses(address(tokamon), address(faucet), chainId);
     }
 
     function _writeAddresses(
-        address tonToken,
         address tokamon,
         address faucet,
         uint256 chainId
@@ -54,11 +46,9 @@ contract DeployTestnet is Script {
         string memory addresses = string(
             abi.encodePacked(
                 '{\n',
-                '  "tonToken": "', vm.toString(tonToken), '",\n',
                 '  "tokamon": "', vm.toString(tokamon), '",\n',
                 '  "faucet": "', vm.toString(faucet), '",\n',
                 '  "address": "', vm.toString(tokamon), '",\n',
-                '  "tonContract": null,\n',
                 '  "chainId": ', vm.toString(chainId), '\n',
                 '}'
             )

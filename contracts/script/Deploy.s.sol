@@ -3,7 +3,6 @@ pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
-import {TONToken} from "../src/TONToken.sol";
 import {Tokamon} from "../src/Tokamon.sol";
 import {Faucet} from "../src/Faucet.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
@@ -14,28 +13,20 @@ contract DeployScript is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        console.log("\n=== Deploying TON Token ===");
-        TONToken tonToken = new TONToken();
-        console.log("TON Token deployed at:", address(tonToken));
-        console.log("Initial supply:", tonToken.totalSupply() / 1e18, "TON");
-
         console.log("\n=== Deploying Tokamon (UUPS Proxy) ===");
         Tokamon implementation = new Tokamon();
         ERC1967Proxy proxy = new ERC1967Proxy(
             address(implementation),
-            abi.encodeCall(Tokamon.initialize, (address(tonToken)))
+            abi.encodeCall(Tokamon.initialize, ())
         );
-        Tokamon tokamon = Tokamon(address(proxy));
+        Tokamon tokamon = Tokamon(payable(address(proxy)));
         console.log("Tokamon proxy deployed at:", address(tokamon));
         console.log("Tokamon implementation at:", address(implementation));
 
         console.log("\n=== Deploying Faucet ===");
-        Faucet faucet = new Faucet{value: 1000 ether}(address(tokamon), address(tonToken));
+        Faucet faucet = new Faucet{value: 1000 ether}();
         console.log("Faucet deployed at:", address(faucet));
         console.log("Faucet ETH balance:", faucet.getBalance() / 1 ether, "ETH");
-
-        require(tonToken.transfer(address(faucet), 100_000 * 1e18), "TON transfer failed");
-        console.log("Faucet TON balance:", tonToken.balanceOf(address(faucet)) / 1e18, "TON");
 
         console.log("\n=== Sending initial ETH to test accounts ===");
         address testAccount1 = 0x70997970C51812dc3A010C7d01b50e0d17dc79C8;
@@ -51,11 +42,9 @@ contract DeployScript is Script {
 
         string memory addresses = string(abi.encodePacked(
             '{\n',
-            '  "tonToken": "', vm.toString(address(tonToken)), '",\n',
             '  "tokamon": "', vm.toString(address(tokamon)), '",\n',
             '  "faucet": "', vm.toString(address(faucet)), '",\n',
             '  "address": "', vm.toString(address(tokamon)), '",\n',
-            '  "tonContract": null,\n',
             '  "chainId": 1337\n',
             '}'
         ));

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.22;
 
-import {IERC20} from "./interfaces/IERC20.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 
@@ -26,7 +25,6 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     address public admin;
     address public pendingAdmin;
     uint256 public nextSpotId;
-    IERC20 public TON_TOKEN;
 
     struct Spot {
         address creator;            // ─┐
@@ -88,9 +86,8 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         _disableInitializers();
     }
 
-    function initialize(address _tonToken) external initializer {
+    function initialize() external initializer {
         admin = msg.sender;
-        TON_TOKEN = IERC20(_tonToken);
     }
 
     function _authorizeUpgrade(address) internal override onlyAdmin {}
@@ -108,16 +105,14 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     }
 
     // ── Deposit ──
-    function deposit(address user, uint256 amount) external onlyAdmin {
-        if (amount == 0) revert InvalidInput();
-        if (!TON_TOKEN.transferFrom(msg.sender, address(this), amount)) revert TransferFailed();
-        balances[user] += amount;
+    function deposit(address user) external payable onlyAdmin {
+        if (msg.value == 0) revert InvalidInput();
+        balances[user] += msg.value;
     }
 
-    function depositSelf(uint256 amount) external {
-        if (amount == 0) revert InvalidInput();
-        if (!TON_TOKEN.transferFrom(msg.sender, address(this), amount)) revert TransferFailed();
-        balances[msg.sender] += amount;
+    function depositSelf() external payable {
+        if (msg.value == 0) revert InvalidInput();
+        balances[msg.sender] += msg.value;
     }
 
     // ── Spot creation ──
@@ -137,16 +132,15 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     }
 
     function createSpotSelf(
-        uint256 depositAmt,
         uint256 reward,
         uint128 stampGoal,
         uint128 stampBonus,
         uint48 cooldown,
         bool allowDuplicateClaims,
         SpotMetadata calldata meta
-    ) external returns (uint256) {
-        if (!TON_TOKEN.transferFrom(msg.sender, address(this), depositAmt)) revert TransferFailed();
-        return _createSpot(msg.sender, depositAmt, reward, stampGoal, stampBonus, cooldown, allowDuplicateClaims, meta);
+    ) external payable returns (uint256) {
+        if (msg.value == 0) revert InvalidInput();
+        return _createSpot(msg.sender, msg.value, reward, stampGoal, stampBonus, cooldown, allowDuplicateClaims, meta);
     }
 
     function _createSpot(
@@ -190,9 +184,9 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         _redeposit(spotId, creator, amount);
     }
 
-    function redepositSelf(uint256 spotId, uint256 amount) external {
-        if (!TON_TOKEN.transferFrom(msg.sender, address(this), amount)) revert TransferFailed();
-        _redeposit(spotId, msg.sender, amount);
+    function redepositSelf(uint256 spotId) external payable {
+        if (msg.value == 0) revert InvalidInput();
+        _redeposit(spotId, msg.sender, msg.value);
     }
 
     function _redeposit(uint256 spotId, address creator, uint256 amount) internal {
@@ -302,7 +296,8 @@ contract Tokamon is Initializable, UUPSUpgradeable {
 
         (uint256 payout, uint256 bonus, uint256 newStamp) = _calcAndDeductPayout(spotId, recordHash, currentStamps);
 
-        if (!TON_TOKEN.transfer(user, payout)) revert TransferFailed();
+        (bool ok, ) = payable(user).call{value: payout}("");
+        if (!ok) revert TransferFailed();
         emit Claimed(spotId, user, payout - bonus, bonus, newStamp, block.timestamp);
     }
 
@@ -393,7 +388,8 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         if (amount == 0) revert NoBalance();
 
         telegramBalances[telegramHash] = 0;
-        if (!TON_TOKEN.transfer(msg.sender, amount)) revert TransferFailed();
+        (bool ok, ) = payable(msg.sender).call{value: amount}("");
+        if (!ok) revert TransferFailed();
     }
 
     function linkTelegramToWallet(bytes32 telegramHash, address wallet) external onlyAdmin {
@@ -474,6 +470,8 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         }
         return (_getStampCountForWallet(spotId, user), s.stampGoal, last, remaining);
     }
+
+    receive() external payable {}
 
     uint256[48] private __gap;
 }

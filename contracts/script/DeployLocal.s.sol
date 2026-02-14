@@ -3,7 +3,6 @@ pragma solidity ^0.8.22;
 
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
-import {TONToken} from "../src/TONToken.sol";
 import {Tokamon} from "../src/Tokamon.sol";
 import {Faucet} from "../src/Faucet.sol";
 import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
@@ -23,23 +22,18 @@ contract DeployLocal is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        console.log("\n=== [Local] Deploying TON Token ===");
-        TONToken tonToken = new TONToken();
-        console.log("TON Token deployed at:", address(tonToken));
-
         console.log("\n=== [Local] Deploying Tokamon (UUPS Proxy) ===");
         Tokamon implementation = new Tokamon();
         ERC1967Proxy proxy = new ERC1967Proxy(
             address(implementation),
-            abi.encodeCall(Tokamon.initialize, (address(tonToken)))
+            abi.encodeCall(Tokamon.initialize, ())
         );
-        Tokamon tokamon = Tokamon(address(proxy));
+        Tokamon tokamon = Tokamon(payable(address(proxy)));
         console.log("Tokamon proxy deployed at:", address(tokamon));
         console.log("Tokamon implementation at:", address(implementation));
 
         console.log("\n=== [Local] Deploying Faucet ===");
-        Faucet faucet = new Faucet{value: 1000 ether}(address(tokamon), address(tonToken));
-        require(tonToken.transfer(address(faucet), 100_000 * 1e18), "TON transfer failed");
+        Faucet faucet = new Faucet{value: 1000 ether}();
         console.log("Faucet deployed at:", address(faucet));
 
         address testAccount1 = 0x70997970C51812dc3A010C7d01b50e0d17dc79C8;
@@ -50,11 +44,10 @@ contract DeployLocal is Script {
 
         vm.stopBroadcast();
 
-        _writeAddresses(address(tonToken), address(tokamon), address(faucet), CHAIN_ID);
+        _writeAddresses(address(tokamon), address(faucet), CHAIN_ID);
     }
 
     function _writeAddresses(
-        address tonToken,
         address tokamon,
         address faucet,
         uint256 chainId
@@ -62,11 +55,9 @@ contract DeployLocal is Script {
         string memory addresses = string(
             abi.encodePacked(
                 '{\n',
-                '  "tonToken": "', vm.toString(tonToken), '",\n',
                 '  "tokamon": "', vm.toString(tokamon), '",\n',
                 '  "faucet": "', vm.toString(faucet), '",\n',
                 '  "address": "', vm.toString(tokamon), '",\n',
-                '  "tonContract": null,\n',
                 '  "chainId": ', vm.toString(chainId), '\n',
                 '}'
             )
