@@ -1,0 +1,23 @@
+{
+  "name": "firebase-test",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "client",
+    "listener-server"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w client",
+    "build": "npm run build -w client",
+    "emulators": "JAVA_HOME=/usr/local/opt/openjdk@21 PATH=/usr/local/opt/openjdk@21/bin:$PATH firebase emulators:start --project demo-tokamon",
+    "listener": "FIRESTORE_EMULATOR_HOST=localhost:8080 npm run start -w listener-server",
+    "listener:prod": "npm run start -w listener-server",
+    "copy-contracts": "node scripts/copy-contracts.js",
+    "deploy": "npm run build && firebase deploy",
+    "serve": "npm run build && firebase serve"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // spot_metadata: 누구나 읽기 가능, 쓰기는 Admin SDK만 (listener-server)
+    match /spot_metadata/{spotId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // claim_events: 누구나 읽기 가능, 쓰기는 Admin SDK만 (listener-server)
+    match /claim_events/{eventId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // config: 누구나 읽기 가능, 쓰기는 Admin SDK만
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 그 외 모든 문서: 접근 차단
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
