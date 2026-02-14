@@ -22,7 +22,7 @@ export function getTokamonContract() {
  */
 export async function getBalance(userAddress) {
   if (!tokamonContract) return 0n;
-  return tokamonContract.getBalance(userAddress);
+  return tokamonContract.runner.provider.getBalance(userAddress);
 }
 
 /**
@@ -63,17 +63,6 @@ export async function claimSelf(signer, spotId) {
   if (!tokamonContract) throw new Error('Tokamon이 초기화되지 않았습니다.');
   const contractWithSigner = tokamonContract.connect(signer);
   const tx = await contractWithSigner.claimSelf(spotId);
-  await tx.wait();
-}
-
-/**
- * @param {ethers.Signer} signer
- * @param {bigint|string} amountWei
- */
-export async function depositSelf(signer, amountWei) {
-  if (!tokamonContract) throw new Error('Tokamon이 초기화되지 않았습니다.');
-  const contractWithSigner = tokamonContract.connect(signer);
-  const tx = await contractWithSigner.depositSelf({ value: amountWei });
   await tx.wait();
 }
 

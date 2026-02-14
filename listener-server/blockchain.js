@@ -363,7 +363,7 @@ async function getAllSpots() {
 // ─── 잔액/스탬프 조회 ───
 
 async function getBalance(userAddress) {
-  const bal = await contract.getBalance(toAddr(userAddress));
+  const bal = await provider.getBalance(toAddr(userAddress));
   return fromWei(bal);
 }
 
@@ -405,14 +405,6 @@ async function getClaimHistory(userAddress) {
 }
 
 // ─── Faucet ───
-
-async function deposit(userAddress, amountTon) {
-  const amount = toWei(amountTon);
-  const tx = await contract.deposit(toAddr(userAddress), { value: amount });
-  await tx.wait();
-  const bal = await contract.getBalance(toAddr(userAddress));
-  return fromWei(bal);
-}
 
 async function sendETH(toAddress, amountETH) {
   const tx = await signer.sendTransaction({
@@ -520,7 +512,6 @@ module.exports = {
   getBalance,
   getStampInfo,
   getClaimHistory,
-  deposit,
   sendETH,
   getTelegramBalance,
   getTelegramStampInfo,

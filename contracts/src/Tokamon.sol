@@ -7,9 +7,9 @@ import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeab
 contract Tokamon is Initializable, UUPSUpgradeable {
     // ── Errors ──
     error OnlyAdmin();
+    error OnlyClaimManager();
     error SpotNotFound();
     error NotSpotCreator();
-    error InsufficientBalance();
     error SpotExhausted();
     error CooldownNotElapsed();
     error InvalidInput();
@@ -20,11 +20,16 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     error NoTelegramLinked();
     error HashMismatch();
     error NoBalance();
+    error Locked();
+    error DeviceAlreadyLinked();
+    error NoDeviceLinked();
 
     // ── State ──
     address public admin;
     address public pendingAdmin;
+    address public claimManager;
     uint256 public nextSpotId;
+    uint256 private _locked;
 
     struct Spot {
         address creator;            // ─┐
@@ -52,13 +57,14 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     }
 
     mapping(uint256 => Spot) public spots;
-    mapping(address => uint256) public balances;
     mapping(bytes32 => uint256) public telegramBalances;
     mapping(bytes32 => uint256) public deviceBalances;
     mapping(bytes32 => mapping(uint256 => uint256)) public claimStampCount;
     mapping(bytes32 => mapping(uint256 => uint256)) public claimLastTime;
     mapping(bytes32 => address) public telegramToWallet;
     mapping(address => bytes32) public walletToTelegram;
+    mapping(bytes32 => address) public deviceToWallet;
+    mapping(address => bytes32) public walletToDevice;
 
     // ── Events ──
     event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit, string name, string description, int96 lat, int96 lng);
@@ -67,8 +73,10 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     event TelegramClaimed(uint256 indexed spotId, bytes32 indexed telegramHash, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
     event TelegramLinked(bytes32 indexed telegramHash, address indexed oldWallet, address indexed newWallet, uint256 transferredAmount);
     event DeviceClaimed(uint256 indexed spotId, bytes32 indexed deviceHash, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
+    event DeviceLinked(bytes32 indexed deviceHash, address indexed oldWallet, address indexed newWallet);
     event CooldownUpdated(uint256 indexed spotId, uint48 newCooldown);
     event AllowDuplicateClaimsUpdated(uint256 indexed spotId, bool allow);
+    event SpotUpdated(uint256 indexed spotId);
 
     // ── Modifiers ──
     modifier onlyAdmin() {
@@ -80,6 +88,26 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         if (msg.sender != admin) revert OnlyAdmin();
     }
 
+    modifier onlyClaimManager() {
+        _onlyClaimManager();
+        _;
+    }
+
+    function _onlyClaimManager() internal view {
+        if (msg.sender != claimManager) revert OnlyClaimManager();
+    }
+
+    modifier nonReentrant() {
+        _nonReentrantBefore();
+        _;
+        _locked = 0;
+    }
+
+    function _nonReentrantBefore() internal {
+        if (_locked == 1) revert Locked();
+        _locked = 1;
+    }
+
     // ── Initialization ──
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -88,6 +116,7 @@ contract Tokamon is Initializable, UUPSUpgradeable {
 
     function initialize() external initializer {
         admin = msg.sender;
+        claimManager = msg.sender;
     }
 
     function _authorizeUpgrade(address) internal override onlyAdmin {}
@@ -104,33 +133,13 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         pendingAdmin = address(0);
     }
 
-    // ── Deposit ──
-    function deposit(address user) external payable onlyAdmin {
-        if (msg.value == 0) revert InvalidInput();
-        balances[user] += msg.value;
-    }
-
-    function depositSelf() external payable {
-        if (msg.value == 0) revert InvalidInput();
-        balances[msg.sender] += msg.value;
+    // ── Claim manager ──
+    function setClaimManager(address _claimManager) external onlyAdmin {
+        if (_claimManager == address(0)) revert ZeroAddress();
+        claimManager = _claimManager;
     }
 
     // ── Spot creation ──
-    function createSpot(
-        address creator,
-        uint256 depositAmt,
-        uint256 reward,
-        uint128 stampGoal,
-        uint128 stampBonus,
-        uint48 cooldown,
-        bool allowDuplicateClaims,
-        SpotMetadata calldata meta
-    ) external onlyAdmin returns (uint256) {
-        if (balances[creator] < depositAmt) revert InsufficientBalance();
-        unchecked { balances[creator] -= depositAmt; }
-        return _createSpot(creator, depositAmt, reward, stampGoal, stampBonus, cooldown, allowDuplicateClaims, meta);
-    }
-
     function createSpotSelf(
         uint256 reward,
         uint128 stampGoal,
@@ -178,23 +187,12 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     }
 
     // ── Redeposit ──
-    function redeposit(uint256 spotId, address creator, uint256 amount) external onlyAdmin {
-        if (balances[creator] < amount) revert InsufficientBalance();
-        unchecked { balances[creator] -= amount; }
-        _redeposit(spotId, creator, amount);
-    }
-
     function redepositSelf(uint256 spotId) external payable {
         if (msg.value == 0) revert InvalidInput();
-        _redeposit(spotId, msg.sender, msg.value);
-    }
-
-    function _redeposit(uint256 spotId, address creator, uint256 amount) internal {
         Spot storage spot = spots[spotId];
         if (spot.reward == 0) revert SpotNotFound();
-        if (spot.creator != creator) revert NotSpotCreator();
-        spot.remaining += amount;
-        emit Redeposited(spotId, creator, amount);
+        spot.remaining += msg.value;
+        emit Redeposited(spotId, msg.sender, msg.value);
     }
 
     // ── Internal helpers ──
@@ -202,7 +200,8 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         /// @solidity memory-safe-assembly
         assembly {
             let ptr := mload(0x40)
-            mstore(ptr, or(shl(0xc8, 0x77616c6c65743a), user))
+            mstore(ptr, shl(0xc8, 0x77616c6c65743a))
+            mstore(add(ptr, 7), shl(96, user))
             hash := keccak256(ptr, 27)
         }
     }
@@ -266,7 +265,15 @@ contract Tokamon is Initializable, UUPSUpgradeable {
             newStamp = 0;
         }
 
-        if (spot.remaining < payout) revert SpotExhausted();
+        if (spot.remaining < payout) {
+            if (bonus > 0 && spot.remaining >= spot.reward) {
+                payout = spot.reward;
+                bonus = 0;
+                newStamp = currentStamps + 1;
+            } else {
+                revert SpotExhausted();
+            }
+        }
         unchecked { spot.remaining -= payout; }
 
         claimStampCount[claimKey][spotId] = newStamp;
@@ -274,11 +281,11 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     }
 
     // ── Claims ──
-    function claim(uint256 spotId, address user) external onlyAdmin {
+    function claim(uint256 spotId, address user) external onlyClaimManager nonReentrant {
         _doClaim(spotId, user);
     }
 
-    function claimSelf(uint256 spotId) external {
+    function claimSelf(uint256 spotId) external nonReentrant {
         _doClaim(spotId, msg.sender);
     }
 
@@ -317,7 +324,7 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         emit TelegramClaimed(spotId, telegramHash, payout - bonus, bonus, newStamp, block.timestamp);
     }
 
-    function claimByDevice(uint256 spotId, bytes32 deviceHash) external onlyAdmin {
+    function claimByDevice(uint256 spotId, bytes32 deviceHash) external onlyClaimManager {
         Spot storage spot = spots[spotId];
         if (spot.reward == 0) revert SpotNotFound();
 
@@ -379,10 +386,11 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         return walletToTelegram[wallet];
     }
 
-    function claimTelegramToWallet(bytes32 telegramHash) external {
+    function claimTelegramToWallet(bytes32 telegramHash) external nonReentrant {
         bytes32 linkedHash = walletToTelegram[msg.sender];
         if (linkedHash == bytes32(0)) revert NoTelegramLinked();
         if (linkedHash != telegramHash) revert HashMismatch();
+        if (telegramToWallet[telegramHash] != msg.sender) revert HashMismatch();
 
         uint256 amount = telegramBalances[telegramHash];
         if (amount == 0) revert NoBalance();
@@ -392,7 +400,7 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         if (!ok) revert TransferFailed();
     }
 
-    function linkTelegramToWallet(bytes32 telegramHash, address wallet) external onlyAdmin {
+    function linkTelegramToWallet(bytes32 telegramHash, address wallet) external onlyClaimManager {
         if (wallet == address(0)) revert ZeroAddress();
         if (telegramHash == bytes32(0)) revert InvalidInput();
 
@@ -415,7 +423,75 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         return deviceBalances[deviceHash];
     }
 
+    function getDeviceLinkedWallet(bytes32 deviceHash) external view returns (address) {
+        return deviceToWallet[deviceHash];
+    }
+
+    function getWalletLinkedDevice(address wallet) external view returns (bytes32) {
+        return walletToDevice[wallet];
+    }
+
+    function linkDeviceToWallet(bytes32 deviceHash, address wallet) external onlyClaimManager {
+        if (wallet == address(0)) revert ZeroAddress();
+        if (deviceHash == bytes32(0)) revert InvalidInput();
+
+        bytes32 existingDevice = walletToDevice[wallet];
+        if (existingDevice != bytes32(0) && existingDevice != deviceHash) revert DeviceAlreadyLinked();
+
+        address oldWallet = deviceToWallet[deviceHash];
+        if (oldWallet != address(0) && oldWallet != wallet) {
+            delete walletToDevice[oldWallet];
+        }
+
+        deviceToWallet[deviceHash] = wallet;
+        walletToDevice[wallet] = deviceHash;
+
+        emit DeviceLinked(deviceHash, oldWallet, wallet);
+    }
+
+    function claimDeviceToWallet(bytes32 deviceHash) external nonReentrant {
+        bytes32 linkedHash = walletToDevice[msg.sender];
+        if (linkedHash == bytes32(0)) revert NoDeviceLinked();
+        if (linkedHash != deviceHash) revert HashMismatch();
+
+        uint256 amount = deviceBalances[deviceHash];
+        if (amount == 0) revert NoBalance();
+
+        deviceBalances[deviceHash] = 0;
+        (bool ok, ) = payable(msg.sender).call{value: amount}("");
+        if (!ok) revert TransferFailed();
+    }
+
     // ── Spot management ──
+    function updateSpot(
+        uint256 spotId,
+        uint256 reward,
+        uint128 stampGoal,
+        uint128 stampBonus,
+        uint48 cooldown,
+        bool allowDuplicateClaims,
+        SpotMetadata calldata meta
+    ) external {
+        Spot storage spot = spots[spotId];
+        if (spot.reward == 0) revert SpotNotFound();
+        if (spot.creator != msg.sender) revert NotSpotCreator();
+        if (reward == 0 || stampGoal == 0) revert InvalidInput();
+
+        spot.reward = reward;
+        spot.stampGoal = stampGoal;
+        spot.stampBonus = stampBonus;
+        spot.cooldown = cooldown;
+        spot.allowDuplicateClaims = allowDuplicateClaims;
+        spot.name = meta.name;
+        spot.description = meta.description;
+        spot.lat = meta.lat;
+        spot.lng = meta.lng;
+        spot.startTime = meta.startTime;
+        spot.endTime = meta.endTime;
+
+        emit SpotUpdated(spotId);
+    }
+
     function updateCooldown(uint256 spotId, uint48 newCooldown) external {
         Spot storage spot = spots[spotId];
         if (spot.reward == 0) revert SpotNotFound();
@@ -433,10 +509,6 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     }
 
     // ── View ──
-    function getBalance(address user) external view returns (uint256) {
-        return balances[user];
-    }
-
     function getSpotCore(uint256 spotId) external view returns (
         address creator,
         uint256 reward,
@@ -470,8 +542,6 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         }
         return (_getStampCountForWallet(spotId, user), s.stampGoal, last, remaining);
     }
-
-    receive() external payable {}
 
     uint256[48] private __gap;
 }

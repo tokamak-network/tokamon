@@ -6,12 +6,10 @@ const COORD_SCALE = 1_000_000;
 
 // 최소 ABI — 클라이언트에서 호출할 함수만 포함
 const ABI = [
-  'function depositSelf() payable',
   'function createSpotSelf(uint256 reward, uint128 stampGoal, uint128 stampBonus, uint48 cooldown, bool allowDuplicateClaims, tuple(string name, string description, int96 lat, int96 lng, uint64 startTime, uint64 endTime) meta) payable returns (uint256)',
   'function redepositSelf(uint256 spotId) payable',
   'function updateCooldown(uint256 spotId, uint48 newCooldown) external',
   'function updateAllowDuplicateClaims(uint256 spotId, bool allow) external',
-  'function getBalance(address user) external view returns (uint256)',
   'function getTelegramBalance(bytes32 telegramHash) external view returns (uint256)',
   'function getWalletLinkedTelegram(address wallet) external view returns (bytes32)',
   'function claimSelf(uint256 spotId) external',
@@ -45,14 +43,6 @@ async function getSignerAndContract() {
 export function resetContractCache() {
   cachedContract = null;
   cachedSigner = null;
-}
-
-// 충전: 사용자가 직접 네이티브 TON 전송
-export async function depositSelf(amountTon) {
-  const { contract } = await getSignerAndContract();
-  const amount = ethers.parseEther(String(amountTon));
-  const tx = await contract.depositSelf({ value: amount });
-  await tx.wait();
 }
 
 // 스팟 생성: 점주가 직접 트랜잭션 서명
