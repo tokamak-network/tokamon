@@ -59,7 +59,6 @@ packages/contracts/artifacts/
 contracts/build/
 contracts/out/
 contracts/cache/
-contracts/solidity/*.json
 contracts/artifacts/
 contracts/broadcast/
 

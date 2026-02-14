@@ -4,9 +4,20 @@ pragma solidity ^0.8.19;
 import "./interfaces/IERC20.sol";
 
 contract Tokamon {
+    // Custom errors (gas-efficient)
+    error OnlyAdmin();
+    error SpotNotFound();
+    error NotSpotCreator();
+    error InsufficientBalance();
+    error SpotExhausted();
+    error CooldownNotElapsed();
+    error CooldownNotElapsedTelegram();
+    error CooldownNotElapsedWallet();
+    error InvalidInput();
+
     address public admin;
     uint256 public nextSpotId;
-    IERC20 public tonToken;
+    IERC20 public immutable tonToken;
 
     struct Spot {
         address creator;
@@ -66,7 +77,7 @@ contract Tokamon {
     event DeviceClaimed(uint256 indexed spotId, bytes32 indexed deviceHash, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
 
     modifier onlyAdmin() {
-        require(msg.sender == admin, "only admin");
+        if (msg.sender != admin) revert OnlyAdmin();
         _;
     }
 
@@ -77,8 +88,8 @@ contract Tokamon {
 
     // Faucet: admin이 TON 토큰을 전송하면 user의 내부 잔액 증가
     function deposit(address user, uint256 amount) external onlyAdmin {
-        require(amount > 0, "must deposit TON");
-        require(tonToken.transferFrom(msg.sender, address(this), amount), "TON transfer failed");
+        if (amount == 0) revert InvalidInput();
+        if (!tonToken.transferFrom(msg.sender, address(this), amount)) revert InvalidInput();
         balances[user] += amount;
     }
 
@@ -93,10 +104,8 @@ contract Tokamon {
         bool allowDuplicateClaims,
         SpotMetadata calldata meta
     ) external onlyAdmin returns (uint256) {
-        require(reward > 0, "reward must be > 0");
-        require(depositAmt >= reward, "deposit must be >= reward");
-        require(balances[creator] >= depositAmt, "insufficient balance");
-        require(stampGoal > 0, "stampGoal must be > 0");
+        if (reward == 0 || depositAmt < reward || stampGoal == 0) revert InvalidInput();
+        if (balances[creator] < depositAmt) revert InsufficientBalance();
 
         balances[creator] -= depositAmt;
 
@@ -116,7 +125,7 @@ contract Tokamon {
         s.startTime = meta.startTime;
         s.endTime = meta.endTime;
 
-        nextSpotId++;
+        unchecked { nextSpotId++; }
 
         emit SpotCreated(spotId, creator, reward, depositAmt, meta.name, meta.description, meta.lat, meta.lng);
 
@@ -126,9 +135,9 @@ contract Tokamon {
     // 재예치: 기존 스팟에 TON 추가
     function redeposit(uint256 spotId, address creator, uint256 amount) external onlyAdmin {
         Spot storage spot = spots[spotId];
-        require(spot.reward > 0, "spot does not exist");
-        require(spot.creator == creator, "not spot creator");
-        require(balances[creator] >= amount, "insufficient balance");
+        if (spot.reward == 0) revert SpotNotFound();
+        if (spot.creator != creator) revert NotSpotCreator();
+        if (balances[creator] < amount) revert InsufficientBalance();
 
         balances[creator] -= amount;
         spot.remaining += amount;
@@ -147,12 +156,7 @@ contract Tokamon {
     function _checkCooldown(uint256 spotId, bytes32 telegramHash, uint256 cooldown) internal view {
         // 텔레그램 해시 쿨다운 체크 (첫 클레임이면 통과)
         uint256 lastTelegram = claimLastTime[telegramHash][spotId];
-        if (lastTelegram > 0) {
-            require(
-                block.timestamp >= lastTelegram + cooldown,
-                "cooldown not elapsed"
-            );
-        }
+        if (lastTelegram > 0 && block.timestamp < lastTelegram + cooldown) revert CooldownNotElapsed();
         
         // 연결된 지갑이 있으면 지갑 해시도 체크 (연결 전 지갑으로 클레임한 경우 대비)
         address linkedWallet = telegramToWallet[telegramHash];
@@ -471,7 +475,7 @@ contract Tokamon {
         s.startTime = meta.startTime;
         s.endTime = meta.endTime;
 
-        nextSpotId++;
+        unchecked { nextSpotId++; }
 
         emit SpotCreated(spotId, msg.sender, reward, depositAmt, meta.name, meta.description, meta.lat, meta.lng);
 

@@ -71,14 +71,14 @@
 
 ## 모듈별 역할
 
-### 1. 컨트랙트 (contracts/solidity/)
-- `Tokamon.sol` — Solidity 스마트 컨트랙트
-  - `deposit()` — Faucet용 ETH 예치 (내부 잔액 증가)
-  - `createSpot()` — 스팟 생성 (내부 잔액에서 차감)
-  - `claim()` — 클레임 (hasClaimed 체크 + 잔액 이동)
+### 1. 컨트랙트 (contracts/src/)
+- `Tokamon.sol` — Solidity 스마트 컨트랙트 (Forge 빌드)
+  - `deposit()` / `depositSelf()` — TON 예치 (내부 잔액 증가)
+  - `createSpot()` / `createSpotSelf()` — 스팟 생성
+  - `claim()` / `claimSelf()` — 클레임 (지갑/텔레그램/기기)
   - `getBalance()` / `getSpot()` — 조회
-- `compile.js` — solc로 ABI + bytecode 생성
-- `deploy.js` — Ganache에 배포 → contract-address.json 저장
+- `forge build` — ABI + bytecode 생성 (contracts/out/)
+- `forge script` — 배포 → contract-address.json 저장
 
 ### 2. 서버 (server/)
 - `blockchain.js` — ethers.js로 컨트랙트 상호작용

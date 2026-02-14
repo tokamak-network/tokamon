@@ -294,14 +294,13 @@
 - [ ] 브라우저 콘솔 에러 확인
 
 ### ABI 동기화 확인
-- [ ] contracts/solidity/Tokamon.json 최신 컴파일
-- [ ] contracts/out/Tokamon.sol/Tokamon.json 복사 확인
+- [ ] forge build (contracts/out/Tokamon.sol/Tokamon.json 생성)
 - [ ] client/public/Tokamon.json 복사 확인
 - [ ] 서버 재시작
 - [ ] 클라이언트 새로고침
 
 ### 컨트랙트 재배포 후
-- [ ] 옵티마이저 활성화 확인 (compile.js)
+- [ ] forge build (foundry.toml optimizer 설정 확인)
 - [ ] 컨트랙트 주소 업데이트 (contract-address.json)
 - [ ] 메타데이터 삭제 (spot-metadata.json)
 - [ ] 서버/클라이언트 재시작
