@@ -1,0 +1,236 @@
+// 다국어 번역 객체
+export const translations = {
+  ko: {
+    // 공통
+    close: '닫기',
+    save: '저장',
+    delete: '삭제',
+    cancel: '취소',
+    confirm: '확인',
+
+    // 헤더
+    appName: 'Tokamon',
+
+    // 탭
+    map: '지도',
+    spotList: '스팟 목록',
+    myTokamon: '내역',
+    settings: '설정',
+
+    // 스팟 리스트
+    activeSpots: '활성 스팟',
+    allSpots: '전체',
+    noSpotsRegistered: '등록된 스팟이 없습니다',
+    noActiveSpots: '활성 스팟이 없습니다',
+    exhausted: '소진',
+    active: '활성',
+    inactive: '비활성',
+    reward: '보상',
+    remainingClaims: '남은 횟수',
+    times: '회',
+    cooldown: '쿨다운',
+    hours: '시간',
+    stampGoalAchievement: '스탬프',
+    stampGoalAchievement2: '회 달성 시',
+
+    // 지갑 연결
+    connectWallet: '지갑 연결',
+    connecting: '연결 중...',
+    connectWalletPrompt: '내 토카몬을 보려면 지갑을 연결해주세요',
+    disconnect: '연결 해제',
+
+    // 내 토카몬
+    walletAddress: '지갑 주소',
+    telegramAccount: '텔레그램 계정',
+    telegramName: '텔레그램 이름',
+    telegramConnected: '연결됨',
+    telegramNotConnected: '연결 안됨',
+    notConfigured: ': 설정안됨',
+    tonBalance: 'TON 보유량',
+    claimToWallet: '지갑으로 클레임',
+    processing: '처리중...',
+    holdingTON: '보유 TON',
+    claimHistory: '클레임 기록',
+    noClaimHistory: '아직 클레임 기록이 없습니다',
+
+    // 텔레그램 연결 안내
+    telegramLinkGuide: '지갑 계정과 텔레그램 아이디 연결 방법',
+    telegramStep1: '텔레그램에서',
+    telegramStep2: '입력 (최초 1회)',
+    telegramStep3: '입력',
+    telegramStep4: '이 지갑 주소 입력:',
+    telegramNote: '연결 후 매장에서 TON을 받을 수 있습니다!',
+
+    // 설정
+    myTelegramId: '내 텔레그램 아이디',
+    telegramUsernameDesc: '텔레그램 username을 저장하면 매번 입력하지 않아도 됩니다.',
+    telegramUsername: '텔레그램 Username',
+    saved: '저장되었습니다',
+    walletConnectionInfo: '지갑 연결 정보',
+    walletConnectionDesc: '현재 지갑에 연결된 텔레그램 계정입니다.',
+    linkedTelegramHash: '연결된 텔레그램 해시:',
+    telegramBalanceNote: '이 지갑으로 텔레그램 TON 잔액을 사용할 수 있습니다.',
+    noTelegramLinked: '연결된 텔레그램 계정이 없습니다.',
+    linkViaTelegramBot: '텔레그램 봇에서 /link 명령어로 연결하세요.',
+    languageSettings: '언어 설정',
+    languageDesc: '앱에서 사용할 언어를 선택하세요.',
+    korean: '한국어',
+    english: 'English',
+    information: '정보',
+    version: '버전',
+    network: '네트워크',
+    myWallet: '내 지갑',
+    loading: '조회 중...',
+    telegramAccountLink: '텔레그램 계정 연결',
+    connected: '연결됨',
+    notConnected: '연결 안됨',
+    connectionGuide: '연결 방법',
+    guideStep1: '텔레그램에서',
+    guideStep1_2: '검색',
+    guideStep2: '입력',
+    guideStep3: '입력',
+    guideStep4: '지갑 주소 입력:',
+    walletRequired: '지갑 연결 필요',
+
+    // 스팟 상세
+    spotDetail: '스팟 상세',
+    distanceAway: '{distance}m 거리',
+    alwaysOpen: '항상',
+    claimReward: '{amount} TON 받기',
+    tooFar: '너무 멀어요 ({distance}m). {radius}m 이내에서 클레임해주세요.',
+    claimSuccess: '{amount} TON 적립 완료!',
+    claimFailed: '클레임 실패',
+    waitingApproval: '승인 대기 중...',
+    stampProgress: '스탬프 {current}/{goal}',
+    stampBonusLabel: '달성 시 +{bonus} TON',
+    nextClaimIn: '다음 클레임까지 {time}',
+    tonExhausted: 'TON 소진',
+    activeStatus: '활성중',
+    inactiveStatus: '비활성',
+    remainingTON: '남은 TON',
+
+    // GPS
+    gpsLoading: '위치를 찾고 있습니다...',
+    gpsDenied: '위치 권한이 거부되었습니다. 설정에서 위치 권한을 허용해주세요.',
+    gpsUnavailable: '위치 서비스를 사용할 수 없습니다.',
+  },
+  en: {
+    // Common
+    close: 'Close',
+    save: 'Save',
+    delete: 'Delete',
+    cancel: 'Cancel',
+    confirm: 'Confirm',
+
+    // Header
+    appName: 'Tokamon',
+
+    // Tabs
+    map: 'Map',
+    spotList: 'Spots',
+    myTokamon: 'History',
+    settings: 'Settings',
+
+    // Spot List
+    activeSpots: 'Active',
+    allSpots: 'All',
+    noSpotsRegistered: 'No spots registered',
+    noActiveSpots: 'No active spots',
+    exhausted: 'Exhausted',
+    active: 'Active',
+    inactive: 'Inactive',
+    reward: 'Reward',
+    remainingClaims: 'Remaining',
+    times: 'times',
+    cooldown: 'Cooldown',
+    hours: 'hrs',
+    stampGoalAchievement: 'Stamp',
+    stampGoalAchievement2: 'times bonus',
+
+    // Wallet Connection
+    connectWallet: 'Connect Wallet',
+    connecting: 'Connecting...',
+    connectWalletPrompt: 'Please connect your wallet to view history',
+    disconnect: 'Disconnect',
+
+    // My Tokamon
+    walletAddress: 'Wallet Address',
+    telegramAccount: 'Telegram Account',
+    telegramName: 'Telegram Name',
+    telegramConnected: 'Connected',
+    telegramNotConnected: 'Not Connected',
+    notConfigured: ': Not configured',
+    tonBalance: 'TON Balance',
+    claimToWallet: 'Claim to Wallet',
+    processing: 'Processing...',
+    holdingTON: 'Holding TON',
+    claimHistory: 'Claim History',
+    noClaimHistory: 'No claim history yet',
+
+    // Telegram Link Guide
+    telegramLinkGuide: 'How to Link Wallet and Telegram',
+    telegramStep1: 'Search for',
+    telegramStep2: 'Send (first time only)',
+    telegramStep3: 'Send',
+    telegramStep4: 'Enter this wallet address:',
+    telegramNote: 'After linking, you can receive TON at stores!',
+
+    // Settings
+    myTelegramId: 'My Telegram ID',
+    telegramUsernameDesc: 'Save your Telegram username so you don\'t have to enter it every time.',
+    telegramUsername: 'Telegram Username',
+    saved: 'Saved',
+    walletConnectionInfo: 'Wallet Connection Info',
+    walletConnectionDesc: 'Telegram account linked to this wallet.',
+    linkedTelegramHash: 'Linked Telegram Hash:',
+    telegramBalanceNote: 'You can use Telegram TON balance with this wallet.',
+    noTelegramLinked: 'No Telegram account linked.',
+    linkViaTelegramBot: 'Link via /link command in Telegram bot.',
+    languageSettings: 'Language Settings',
+    languageDesc: 'Select the language to use in the app.',
+    korean: '한국어',
+    english: 'English',
+    information: 'Information',
+    version: 'Version',
+    network: 'Network',
+    myWallet: 'My Wallet',
+    loading: 'Loading...',
+    telegramAccountLink: 'Telegram Account Link',
+    connected: 'Connected',
+    notConnected: 'Not Connected',
+    connectionGuide: 'How to Link',
+    guideStep1: 'Search',
+    guideStep1_2: 'in Telegram',
+    guideStep2: 'Send (first time)',
+    guideStep3: 'Send',
+    guideStep4: 'Enter wallet address:',
+    walletRequired: 'Connect wallet first',
+
+    // Spot Detail
+    spotDetail: 'Spot Detail',
+    distanceAway: '{distance}m away',
+    alwaysOpen: 'Always',
+    claimReward: 'Claim {amount} TON',
+    tooFar: 'Too far ({distance}m). Please claim within {radius}m.',
+    claimSuccess: '{amount} TON claimed!',
+    claimFailed: 'Claim failed',
+    waitingApproval: 'Waiting for approval...',
+    stampProgress: 'Stamp {current}/{goal}',
+    stampBonusLabel: 'Bonus +{bonus} TON',
+    nextClaimIn: 'Next claim in {time}',
+    tonExhausted: 'TON Exhausted',
+    activeStatus: 'Active',
+    inactiveStatus: 'Inactive',
+    remainingTON: 'Remaining TON',
+
+    // GPS
+    gpsLoading: 'Finding your location...',
+    gpsDenied: 'Location permission denied. Please enable it in settings.',
+    gpsUnavailable: 'Location services unavailable.',
+  }
+};
+
+// 번역 함수
+export const t = (language, key) => {
+  return translations[language]?.[key] || translations['ko'][key] || key;
+};
