@@ -73,7 +73,7 @@ export async function claimSelf(signer, spotId) {
 export async function depositSelf(signer, amountWei) {
   if (!tokamonContract) throw new Error('Tokamon이 초기화되지 않았습니다.');
   const contractWithSigner = tokamonContract.connect(signer);
-  const tx = await contractWithSigner.depositSelf(amountWei);
+  const tx = await contractWithSigner.depositSelf({ value: amountWei });
   await tx.wait();
 }
 
@@ -94,13 +94,13 @@ export async function createSpotSelf(signer, params) {
   };
   const contractWithSigner = tokamonContract.connect(signer);
   const tx = await contractWithSigner.createSpotSelf(
-    params.depositAmt,
     params.reward,
     params.stampGoal,
     params.stampBonus,
     params.cooldown ?? 60,
     params.allowDuplicateClaims ?? false,
-    meta
+    meta,
+    { value: params.depositAmt },
   );
   await tx.wait();
   return spotIdBefore;

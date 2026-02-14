@@ -2,7 +2,6 @@ import { hasMetaMask, connectWallet, getConnectedAddress, onAccountChange } from
 import {
   initFaucet,
   requestEth,
-  requestTon,
 } from './faucet.js';
 import {
   initTokamon,
@@ -57,7 +56,6 @@ export function renderApp() {
             <h2>🧪 Faucet</h2>
             <div class="faucet-buttons">
               <button id="faucet-eth" class="btn">ETH 받기</button>
-              <button id="faucet-ton" class="btn">TON 받기</button>
             </div>
           </section>
         `;
@@ -161,18 +159,6 @@ export function renderApp() {
         try {
           await requestEth(signer);
           alert('ETH를 받았습니다.');
-          render(resolvedAddress);
-        } catch (err) {
-          alert(err.message || '요청 실패');
-        }
-        this.disabled = false;
-      });
-
-      document.getElementById('faucet-ton')?.addEventListener('click', async function () {
-        this.disabled = true;
-        try {
-          await requestTon(signer);
-          alert('TON을 받았습니다.');
           render(resolvedAddress);
         } catch (err) {
           alert(err.message || '요청 실패');

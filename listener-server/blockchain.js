@@ -5,7 +5,6 @@ const { syncSpotToFirestore, saveClaimEvent, getTelegramUsernameByHash } = requi
 
 const RPC_URL = process.env.RPC_URL || 'http://127.0.0.1:8999';
 const ARTIFACT_PATH = path.join(__dirname, '..', 'contracts', 'out', 'Tokamon.sol', 'Tokamon.json');
-const TON_ARTIFACT_PATH = path.join(__dirname, '..', 'contracts', 'out', 'TONToken.sol', 'TONToken.json');
 const ADDRESS_PATH = path.join(__dirname, 'contract-address.json');
 const METADATA_PATH = process.env.METADATA_PATH ||
   path.join(__dirname, 'spot-metadata.json');
@@ -17,7 +16,6 @@ const COORD_SCALE = 1_000_000;
 let provider;
 let signer;
 let contract;
-let tonToken;
 
 // TelegramClaimed 이벤트 알림 콜백
 let telegramClaimedCallback = null;
@@ -113,13 +111,6 @@ async function init() {
 
   contract = new ethers.Contract(address, abi, signer);
   console.log('[Blockchain] 연결 완료:', address);
-
-  // TON 토큰 컨트랙트 로드
-  if (addressData.tonToken && fs.existsSync(TON_ARTIFACT_PATH)) {
-    const tonArtifact = JSON.parse(fs.readFileSync(TON_ARTIFACT_PATH, 'utf8'));
-    tonToken = new ethers.Contract(addressData.tonToken, tonArtifact.abi, signer);
-    console.log(`[Blockchain] TON 토큰 연결 완료 (${addressData.tonToken})`);
-  }
 
   // 메타데이터 로드
   loadMetadata();
@@ -417,11 +408,7 @@ async function getClaimHistory(userAddress) {
 
 async function deposit(userAddress, amountTon) {
   const amount = toWei(amountTon);
-  if (tonToken) {
-    const approveTx = await tonToken.approve(await contract.getAddress(), amount);
-    await approveTx.wait();
-  }
-  const tx = await contract.deposit(toAddr(userAddress), amount);
+  const tx = await contract.deposit(toAddr(userAddress), { value: amount });
   await tx.wait();
   const bal = await contract.getBalance(toAddr(userAddress));
   return fromWei(bal);

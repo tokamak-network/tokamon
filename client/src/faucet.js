@@ -27,7 +27,7 @@ async function ensureFaucetInited(provider) {
 /** tokamon App.jsx 호환: 캐시 초기화 (no-op) */
 export function resetFaucetCache() {}
 
-/** tokamon App.jsx 호환: ETH 받기 (지갑 연결 후 signer로 requestEth 호출) */
+/** tokamon App.jsx 호환: ETH(네이티브 TON) 받기 */
 export async function getETH() {
   const prov = getWalletProvider();
   if (!prov) throw new Error('지갑이 연결되어 있지 않습니다');
@@ -36,17 +36,6 @@ export async function getETH() {
   if (!faucetContract) throw new Error('Faucet 주소가 설정되지 않았습니다. contract-address.json을 확인하세요.');
   const signer = await provider.getSigner();
   await requestEth(signer);
-}
-
-/** tokamon App.jsx 호환: TON 받기 */
-export async function getTON() {
-  const prov = getWalletProvider();
-  if (!prov) throw new Error('지갑이 연결되어 있지 않습니다');
-  const provider = new ethers.BrowserProvider(prov);
-  await ensureFaucetInited(provider);
-  if (!faucetContract) throw new Error('Faucet 주소가 설정되지 않았습니다. contract-address.json을 확인하세요.');
-  const signer = await provider.getSigner();
-  await requestTon(signer);
 }
 
 /**
@@ -72,14 +61,3 @@ export async function requestEth(signer) {
   const tx = await contractWithSigner.getEth();
   await tx.wait();
 }
-
-/**
- * @param {ethers.Signer} signer
- */
-export async function requestTon(signer) {
-  if (!faucetContract) throw new Error('Faucet이 초기화되지 않았습니다.');
-  const contractWithSigner = faucetContract.connect(signer);
-  const tx = await contractWithSigner.getTon();
-  await tx.wait();
-}
-

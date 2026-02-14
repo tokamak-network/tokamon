@@ -12,7 +12,7 @@ import TelegramLinkPage from './components/TelegramLinkPage';
 import Settings from './components/Settings';
 import { getSpots, getClaimHistory, getTelegramBalance } from './api';
 import { getBalance as getContractBalance, resetContractCache } from './contract';
-import { getETH, getTON, resetFaucetCache } from './faucet';
+import { getETH, resetFaucetCache } from './faucet';
 import { t } from './translations';
 import useGeolocation from './hooks/useGeolocation';
 
@@ -311,27 +311,6 @@ export default function App() {
     }
   };
 
-  // TON 받기 (Faucet 컨트랙트)
-  const handleGetTON = async () => {
-    if (!wallet) {
-      await handleConnect();
-      return;
-    }
-
-    setMessage(null);
-    try {
-      console.log('TON 받기 시작...');
-      setMessage({ type: 'info', text: t(language, 'approveInMetaMask') });
-      await getTON();
-      setMessage({ type: 'success', text: t(language, 'getTONComplete') });
-      refreshBalance();
-    } catch (err) {
-      console.error('TON faucet error:', err);
-      const errorMsg = err.reason || err.message || t(language, 'getTONFailed');
-      setMessage({ type: 'error', text: errorMsg });
-    }
-  };
-
   // 지도 클릭 (생성 모드) - 노란 핀만 표시, + 버튼으로 추가 확인
   const handleMapClick = (pos) => {
     setPinPos(pos);
@@ -416,9 +395,6 @@ export default function App() {
                 <div className="wallet-menu">
                   <button className="wallet-menu-item" onClick={() => { handleGetETH(); setShowWalletMenu(false); }}>
                     <span style={{ color: '#60a5fa' }}>💧</span> {t(language, 'getETH')}
-                  </button>
-                  <button className="wallet-menu-item" onClick={() => { handleGetTON(); setShowWalletMenu(false); }}>
-                    <span style={{ color: '#10b981' }}>💧</span> {t(language, 'getTON')}
                   </button>
                   <button className="wallet-menu-item disconnect" onClick={() => { handleDisconnect(); setShowWalletMenu(false); }}>
                     <span style={{ color: '#ef4444' }}>🔌</span> {t(language, 'disconnectWallet')}
