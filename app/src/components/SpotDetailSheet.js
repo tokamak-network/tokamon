@@ -7,6 +7,7 @@ import {
   Animated,
   Dimensions,
   PanResponder,
+  Platform,
 } from 'react-native';
 import { getStampInfo } from '../services/api';
 import StampProgress from './StampProgress';
@@ -14,7 +15,7 @@ import ClaimButton from './ClaimButton';
 import { t } from '../utils/translations';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const SHEET_HEIGHT = 340;
+const SHEET_HEIGHT = 380;
 
 function haversineDistance(lat1, lng1, lat2, lng2) {
   const R = 6371000;
@@ -85,8 +86,14 @@ export default function SpotDetailSheet({ spot, userPos, wallet, onClose, onClai
 
   const stamps = stampInfo?.stamps || 0;
   const stampGoal = spot.stamp_goal || 1;
-
   const claimsLeft = spot.reward > 0 ? Math.floor(spot.remaining / spot.reward) : 0;
+
+  const statusColor = isExhausted ? '#6b7280' : spot.active ? '#059669' : '#ef4444';
+  const statusLabel = isExhausted
+    ? t(language, 'tonExhausted')
+    : spot.active
+    ? t(language, 'activeStatus')
+    : t(language, 'inactiveStatus');
 
   return (
     <Animated.View
@@ -100,59 +107,46 @@ export default function SpotDetailSheet({ spot, userPos, wallet, onClose, onClai
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.name}>{spot.name}</Text>
+        <View style={styles.headerLeft}>
+          <Text style={styles.name} numberOfLines={1}>{spot.name}</Text>
+          <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
+            <Text style={styles.statusText}>{statusLabel}</Text>
+          </View>
+        </View>
         <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-          <Text style={styles.closeBtnText}>{t(language, 'close')}</Text>
+          <Text style={styles.closeBtnText}>✕</Text>
         </TouchableOpacity>
       </View>
 
       {spot.description ? (
-        <Text style={styles.description}>{spot.description}</Text>
+        <Text style={styles.description} numberOfLines={2}>{spot.description}</Text>
       ) : null}
 
-      {/* Info row */}
+      {/* Info cards */}
       <View style={styles.infoRow}>
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>{t(language, 'reward')}</Text>
+        <View style={styles.infoCard}>
+          <Text style={styles.infoIcon}>💰</Text>
           <Text style={styles.infoValue}>{spot.reward} TON</Text>
+          <Text style={styles.infoLabel}>{t(language, 'reward')}</Text>
         </View>
-        <View style={styles.infoItem}>
+        <View style={styles.infoCard}>
+          <Text style={styles.infoIcon}>🎯</Text>
+          <Text style={styles.infoValue}>{claimsLeft}</Text>
           <Text style={styles.infoLabel}>{t(language, 'remainingClaims')}</Text>
-          <Text style={styles.infoValue}>{claimsLeft}{t(language, 'times')}</Text>
         </View>
         {distance !== null && (
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Distance</Text>
+          <View style={styles.infoCard}>
+            <Text style={styles.infoIcon}>📍</Text>
             <Text style={styles.infoValue}>{distance}m</Text>
+            <Text style={styles.infoLabel}>Distance</Text>
           </View>
         )}
       </View>
 
-      {/* Status */}
-      <View style={styles.statusRow}>
-        <View
-          style={[
-            styles.statusBadge,
-            {
-              backgroundColor: isExhausted
-                ? '#6b7280'
-                : spot.active
-                ? '#059669'
-                : '#ef4444',
-            },
-          ]}
-        >
-          <Text style={styles.statusText}>
-            {isExhausted
-              ? t(language, 'tonExhausted')
-              : spot.active
-              ? t(language, 'activeStatus')
-              : t(language, 'inactiveStatus')}
-          </Text>
-        </View>
-        <Text style={styles.remainingText}>
-          {t(language, 'remainingTON')}: {spot.remaining?.toFixed(2)} TON
-        </Text>
+      {/* Remaining TON bar */}
+      <View style={styles.remainingBar}>
+        <Text style={styles.remainingLabel}>{t(language, 'remainingTON')}</Text>
+        <Text style={styles.remainingValue}>{spot.remaining?.toFixed(2)} TON</Text>
       </View>
 
       {/* Stamp Progress */}
@@ -167,9 +161,12 @@ export default function SpotDetailSheet({ spot, userPos, wallet, onClose, onClai
 
       {/* Cooldown */}
       {isOnCooldown && (
-        <Text style={styles.cooldownText}>
-          {t(language, 'nextClaimIn').replace('{time}', formatCooldown(cooldownLeft))}
-        </Text>
+        <View style={styles.cooldownBanner}>
+          <Text style={styles.cooldownIcon}>⏳</Text>
+          <Text style={styles.cooldownText}>
+            {t(language, 'nextClaimIn').replace('{time}', formatCooldown(cooldownLeft))}
+          </Text>
+        </View>
       )}
 
       {/* Claim Button */}
@@ -193,94 +190,147 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#1a1a2e',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: '#12122a',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     paddingHorizontal: 20,
-    paddingBottom: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 10,
+    paddingBottom: Platform.OS === 'ios' ? 36 : 24,
+    shadowColor: '#a78bfa',
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 15,
     maxHeight: SHEET_HEIGHT,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(167,139,250,0.15)',
   },
   handleBar: {
     alignItems: 'center',
-    paddingTop: 8,
-    paddingBottom: 4,
+    paddingTop: 10,
+    paddingBottom: 6,
   },
   handle: {
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#555',
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginTop: 4,
+  },
+  headerLeft: {
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    gap: 10,
+    marginRight: 12,
   },
   name: {
     color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '800',
     flex: 1,
+    letterSpacing: -0.3,
+  },
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  statusText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
   },
   closeBtn: {
-    padding: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   closeBtnText: {
     color: '#888',
     fontSize: 14,
   },
   description: {
-    color: '#aaa',
+    color: 'rgba(255,255,255,0.5)',
     fontSize: 13,
-    marginTop: 4,
+    marginTop: 6,
+    lineHeight: 18,
   },
   infoRow: {
     flexDirection: 'row',
-    marginTop: 12,
-    gap: 16,
+    marginTop: 14,
+    gap: 10,
   },
-  infoItem: {
+  infoCard: {
     flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  infoIcon: {
+    fontSize: 16,
+    marginBottom: 4,
   },
   infoLabel: {
-    color: '#888',
-    fontSize: 11,
-    marginBottom: 2,
+    color: '#666',
+    fontSize: 10,
+    marginTop: 2,
+    fontWeight: '500',
   },
   infoValue: {
     color: '#fbbf24',
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '700',
   },
-  statusRow: {
+  remainingBar: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 10,
-    gap: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 8,
   },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  remainingText: {
+  remainingLabel: {
     color: '#888',
     fontSize: 12,
+    fontWeight: '500',
+  },
+  remainingValue: {
+    color: '#ccc',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  cooldownBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(245,158,11,0.1)',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(245,158,11,0.2)',
+    marginTop: 6,
+  },
+  cooldownIcon: {
+    fontSize: 14,
   },
   cooldownText: {
     color: '#f59e0b',
     fontSize: 13,
-    marginTop: 4,
+    fontWeight: '600',
   },
 });

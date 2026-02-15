@@ -7,6 +7,8 @@ import {
   StyleSheet,
   RefreshControl,
   Alert,
+  ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { getClaimHistory } from '../services/api';
 import { getTelegramLinked } from '../services/api';
@@ -116,11 +118,16 @@ export default function HistoryScreen({ wallet, language = 'ko', onBalanceChange
   if (!wallet) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyIcon}>🔗</Text>
-        <Text style={styles.emptyText}>{t(language, 'connectWalletPrompt')}</Text>
+        <View style={styles.emptyCard}>
+          <Text style={styles.emptyIcon}>🔗</Text>
+          <Text style={styles.emptyTitle}>{t(language, 'connectWalletPrompt')}</Text>
+          <Text style={styles.emptySubtext}>Connect your wallet to view claim history</Text>
+        </View>
       </View>
     );
   }
+
+  const totalEarned = history.reduce((sum, h) => sum + (h.reward || 0) + (h.bonus || 0), 0);
 
   const renderHistoryItem = ({ item, index }) => {
     const hasBonus = item.bonus && item.bonus > 0;
@@ -128,25 +135,35 @@ export default function HistoryScreen({ wallet, language = 'ko', onBalanceChange
 
     return (
       <View style={styles.historyItem}>
-        <View style={styles.historyTop}>
-          <Text style={styles.historyName} numberOfLines={1}>
-            {item.spot_name || `Spot #${item.spot_id}`}
-          </Text>
-          <Text style={styles.historyAmount}>+{totalReward} TON</Text>
-        </View>
-        <View style={styles.historyBottom}>
-          <Text style={styles.historyTime}>{formatTime(item.timestamp)}</Text>
-          {item.stamp !== undefined && (
-            <Text style={styles.historyStamp}>
-              {t(language, 'stampGoalAchievement')} {item.stamp}/{item.stamp_goal || '?'}
-            </Text>
+        <View style={styles.historyLeftAccent} />
+        <View style={styles.historyBody}>
+          <View style={styles.historyTop}>
+            <View style={styles.historyNameRow}>
+              <Text style={styles.historyDot}>●</Text>
+              <Text style={styles.historyName} numberOfLines={1}>
+                {item.spot_name || `Spot #${item.spot_id}`}
+              </Text>
+            </View>
+            <Text style={styles.historyAmount}>+{totalReward} TON</Text>
+          </View>
+          <View style={styles.historyBottom}>
+            <Text style={styles.historyTime}>{formatTime(item.timestamp)}</Text>
+            {item.stamp !== undefined && (
+              <View style={styles.stampBadge}>
+                <Text style={styles.historyStamp}>
+                  ⭐ {item.stamp}/{item.stamp_goal || '?'}
+                </Text>
+              </View>
+            )}
+          </View>
+          {hasBonus && (
+            <View style={styles.bonusBadge}>
+              <Text style={styles.historyBonus}>
+                🎉 Stamp bonus +{item.bonus} TON
+              </Text>
+            </View>
           )}
         </View>
-        {hasBonus && (
-          <Text style={styles.historyBonus}>
-            Stamp bonus +{item.bonus} TON
-          </Text>
-        )}
       </View>
     );
   };
@@ -167,28 +184,38 @@ export default function HistoryScreen({ wallet, language = 'ko', onBalanceChange
         }
         ListHeaderComponent={
           <View>
-            {/* Wallet address */}
+            {/* Wallet address card */}
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>{t(language, 'walletAddress')}</Text>
-              <Text style={styles.walletAddress} numberOfLines={1}>
-                {wallet}
-              </Text>
+              <View style={styles.sectionHeaderRow}>
+                <Text style={styles.sectionIcon}>👛</Text>
+                <Text style={styles.sectionLabel}>{t(language, 'walletAddress')}</Text>
+              </View>
+              <View style={styles.walletBox}>
+                <Text style={styles.walletAddress} numberOfLines={1}>
+                  {wallet}
+                </Text>
+              </View>
             </View>
 
             {/* Telegram section */}
             <View style={styles.section}>
-              <View style={styles.telegramHeader}>
-                <Text style={styles.telegramIcon}>💬</Text>
+              <View style={styles.sectionHeaderRow}>
+                <Text style={styles.sectionIcon}>💬</Text>
                 <Text style={styles.sectionLabel}>{t(language, 'telegramAccount')}</Text>
               </View>
 
               {loading ? (
-                <Text style={styles.loadingText}>{t(language, 'loading')}</Text>
+                <View style={styles.loadingRow}>
+                  <ActivityIndicator size="small" color="#4FC3F7" />
+                  <Text style={styles.loadingText}>{t(language, 'loading')}</Text>
+                </View>
               ) : linkedTelegram ? (
                 <View>
                   <View style={styles.linkedRow}>
-                    <Text style={styles.checkIcon}>✅</Text>
-                    <Text style={styles.linkedText}>{linkedTelegram}</Text>
+                    <View style={styles.linkedBadge}>
+                      <Text style={styles.checkIcon}>✅</Text>
+                      <Text style={styles.linkedText}>{linkedTelegram}</Text>
+                    </View>
                   </View>
 
                   {/* Telegram balance */}
@@ -200,15 +227,23 @@ export default function HistoryScreen({ wallet, language = 'ko', onBalanceChange
                       </Text>
                       {telegramBalance > 0 && (
                         <TouchableOpacity
-                          style={styles.claimBtn}
+                          style={[styles.claimBtn, claiming && styles.claimBtnDisabled]}
                           onPress={handleClaimToWallet}
                           disabled={claiming}
+                          activeOpacity={0.7}
                         >
-                          <Text style={styles.claimBtnText}>
-                            {claiming
-                              ? t(language, 'processing')
-                              : t(language, 'claimToWallet')}
-                          </Text>
+                          {claiming ? (
+                            <View style={styles.claimBtnInner}>
+                              <ActivityIndicator size="small" color="#fff" />
+                              <Text style={styles.claimBtnText}>
+                                {t(language, 'processing')}
+                              </Text>
+                            </View>
+                          ) : (
+                            <Text style={styles.claimBtnText}>
+                              {t(language, 'claimToWallet')}
+                            </Text>
+                          )}
                         </TouchableOpacity>
                       )}
                     </View>
@@ -216,14 +251,18 @@ export default function HistoryScreen({ wallet, language = 'ko', onBalanceChange
                 </View>
               ) : (
                 <View>
-                  <Text style={styles.notLinkedText}>
-                    {t(language, 'notConfigured')}
-                  </Text>
+                  <View style={styles.notLinkedBadge}>
+                    <Text style={styles.notLinkedIcon}>⚠️</Text>
+                    <Text style={styles.notLinkedText}>
+                      {t(language, 'notConfigured')}
+                    </Text>
+                  </View>
                   {/* Link guide */}
                   <View style={styles.guideBox}>
                     <Text style={styles.guideTitle}>
                       💡 {t(language, 'telegramLinkGuide')}
                     </Text>
+                    <View style={styles.guideDivider} />
                     <Text style={styles.guideStep}>
                       1. {t(language, 'telegramStep1')} @TokamonBot
                     </Text>
@@ -236,9 +275,11 @@ export default function HistoryScreen({ wallet, language = 'ko', onBalanceChange
                     <Text style={styles.guideStep}>
                       4. {t(language, 'telegramStep4')}
                     </Text>
-                    <Text style={styles.guideWallet} numberOfLines={1}>
-                      {wallet}
-                    </Text>
+                    <View style={styles.guideWalletBox}>
+                      <Text style={styles.guideWallet} numberOfLines={1}>
+                        {wallet}
+                      </Text>
+                    </View>
                     <Text style={styles.guideNote}>
                       {t(language, 'telegramNote')}
                     </Text>
@@ -247,8 +288,28 @@ export default function HistoryScreen({ wallet, language = 'ko', onBalanceChange
               )}
             </View>
 
+            {/* Earnings Summary */}
+            {history.length > 0 && (
+              <View style={styles.earningsCard}>
+                <Text style={styles.earningsLabel}>{t(language, 'claimHistory')}</Text>
+                <View style={styles.earningsRow}>
+                  <View style={styles.earningsStat}>
+                    <Text style={styles.earningsValue}>{history.length}</Text>
+                    <Text style={styles.earningsUnit}>claims</Text>
+                  </View>
+                  <View style={styles.earningsDivider} />
+                  <View style={styles.earningsStat}>
+                    <Text style={styles.earningsValue}>{totalEarned.toFixed(2)}</Text>
+                    <Text style={styles.earningsUnit}>TON earned</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
             {/* Claim History Header */}
-            <Text style={styles.historyHeader}>{t(language, 'claimHistory')}</Text>
+            {history.length === 0 && (
+              <Text style={styles.historyHeader}>{t(language, 'claimHistory')}</Text>
+            )}
           </View>
         }
         ListEmptyComponent={
@@ -264,7 +325,7 @@ export default function HistoryScreen({ wallet, language = 'ko', onBalanceChange
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f0f0f',
+    backgroundColor: '#0a0a1a',
   },
   listContent: {
     paddingHorizontal: 16,
@@ -272,77 +333,141 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    backgroundColor: '#0f0f0f',
+    backgroundColor: '#0a0a1a',
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 32,
+  },
+  emptyCard: {
+    backgroundColor: '#12122a',
+    borderRadius: 20,
+    padding: 32,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(167,139,250,0.1)',
+    width: '100%',
   },
   emptyIcon: {
     fontSize: 48,
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    color: '#ccc',
+    fontSize: 16,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    color: '#666',
+    fontSize: 13,
+    textAlign: 'center',
   },
   emptyText: {
-    color: '#888',
+    color: '#666',
     fontSize: 15,
     textAlign: 'center',
   },
   section: {
-    backgroundColor: '#1a1a2e',
-    borderRadius: 12,
+    backgroundColor: '#12122a',
+    borderRadius: 16,
     padding: 16,
     marginTop: 12,
     borderWidth: 1,
-    borderColor: '#2a2a3e',
+    borderColor: 'rgba(167,139,250,0.08)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  sectionLabel: {
-    color: '#888',
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  walletAddress: {
-    color: '#ccc',
-    fontSize: 13,
-    fontFamily: 'monospace',
-  },
-  telegramHeader: {
+  sectionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 8,
+    gap: 8,
+    marginBottom: 10,
   },
-  telegramIcon: {
-    fontSize: 18,
+  sectionIcon: {
+    fontSize: 16,
+  },
+  sectionLabel: {
+    color: '#999',
+    fontSize: 13,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  walletBox: {
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  walletAddress: {
+    color: '#bbb',
+    fontSize: 12,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  loadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 8,
   },
   loadingText: {
     color: '#888',
     fontSize: 13,
   },
   linkedRow: {
+    marginBottom: 4,
+  },
+  linkedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    backgroundColor: 'rgba(16,185,129,0.1)',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
   },
   checkIcon: {
-    fontSize: 16,
+    fontSize: 14,
   },
   linkedText: {
     color: '#10b981',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  notLinkedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(248,113,113,0.1)',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  notLinkedIcon: {
+    fontSize: 14,
   },
   notLinkedText: {
     color: '#f87171',
     fontSize: 13,
+    fontWeight: '600',
   },
   balanceSection: {
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#2a2a3e',
+    borderTopColor: 'rgba(255,255,255,0.06)',
   },
   balanceLabel: {
     color: '#888',
     fontSize: 12,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   balanceRow: {
     flexDirection: 'row',
@@ -351,102 +476,207 @@ const styles = StyleSheet.create({
   },
   balanceAmount: {
     color: '#fbbf24',
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: -0.3,
   },
   claimBtn: {
     backgroundColor: '#10b981',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 12,
+    shadowColor: '#10b981',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  claimBtnDisabled: {
+    backgroundColor: '#333',
+    shadowColor: 'transparent',
+  },
+  claimBtnInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   claimBtnText: {
     color: '#fff',
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   guideBox: {
-    backgroundColor: '#111122',
-    borderRadius: 8,
-    padding: 12,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 12,
+    padding: 14,
     marginTop: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(251,191,36,0.1)',
   },
   guideTitle: {
     color: '#fbbf24',
     fontSize: 13,
-    fontWeight: '600',
-    marginBottom: 8,
+    fontWeight: '700',
+  },
+  guideDivider: {
+    height: 1,
+    backgroundColor: 'rgba(251,191,36,0.1)',
+    marginVertical: 8,
   },
   guideStep: {
-    color: '#ccc',
+    color: '#bbb',
     fontSize: 12,
-    marginBottom: 3,
+    marginBottom: 4,
+    lineHeight: 18,
+  },
+  guideWalletBox: {
+    backgroundColor: 'rgba(79,195,247,0.08)',
+    borderRadius: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    marginTop: 4,
+    marginBottom: 6,
   },
   guideWallet: {
     color: '#4FC3F7',
     fontSize: 11,
-    fontFamily: 'monospace',
-    marginTop: 2,
-    marginBottom: 6,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
   guideNote: {
     color: '#10b981',
     fontSize: 12,
     marginTop: 4,
+    fontWeight: '500',
+  },
+  earningsCard: {
+    backgroundColor: '#12122a',
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(16,185,129,0.15)',
+  },
+  earningsLabel: {
+    color: '#999',
+    fontSize: 13,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 12,
+  },
+  earningsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  earningsStat: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  earningsValue: {
+    color: '#10b981',
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  earningsUnit: {
+    color: '#666',
+    fontSize: 11,
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  earningsDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
   historyHeader: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
     marginTop: 20,
     marginBottom: 8,
+    letterSpacing: -0.2,
   },
   historyItem: {
-    backgroundColor: '#1a1a2e',
-    borderRadius: 10,
-    padding: 14,
+    backgroundColor: '#12122a',
+    borderRadius: 12,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#2a2a3e',
+    borderColor: 'rgba(167,139,250,0.06)',
+    flexDirection: 'row',
+    overflow: 'hidden',
+  },
+  historyLeftAccent: {
+    width: 3,
+    backgroundColor: '#10b981',
+  },
+  historyBody: {
+    flex: 1,
+    padding: 14,
   },
   historyTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  historyName: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+  historyNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     flex: 1,
     marginRight: 8,
+  },
+  historyDot: {
+    color: '#4FC3F7',
+    fontSize: 6,
+  },
+  historyName: {
+    color: '#e0e0e0',
+    fontSize: 14,
+    fontWeight: '700',
+    flex: 1,
   },
   historyAmount: {
     color: '#10b981',
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   historyBottom: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
-    gap: 10,
+    marginTop: 6,
+    gap: 8,
   },
   historyTime: {
-    color: '#888',
+    color: '#666',
     fontSize: 12,
+  },
+  stampBadge: {
+    backgroundColor: 'rgba(251,191,36,0.1)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
   historyStamp: {
     color: '#fbbf24',
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  bonusBadge: {
+    marginTop: 6,
+    backgroundColor: 'rgba(251,191,36,0.08)',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
   },
   historyBonus: {
     color: '#fbbf24',
     fontSize: 12,
-    marginTop: 3,
+    fontWeight: '600',
   },
   historyEmpty: {
     alignItems: 'center',
-    paddingTop: 30,
+    paddingTop: 40,
   },
 });
