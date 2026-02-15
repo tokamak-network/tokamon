@@ -77,6 +77,7 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     event CooldownUpdated(uint256 indexed spotId, uint48 newCooldown);
     event AllowDuplicateClaimsUpdated(uint256 indexed spotId, bool allow);
     event SpotUpdated(uint256 indexed spotId);
+    event TelegramUnlinked(bytes32 indexed telegramHash, address indexed wallet);
 
     // ── Modifiers ──
     modifier onlyAdmin() {
@@ -100,12 +101,16 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     modifier nonReentrant() {
         _nonReentrantBefore();
         _;
-        _locked = 0;
+        _nonReentrantAfter();
     }
 
     function _nonReentrantBefore() internal {
         if (_locked == 1) revert Locked();
         _locked = 1;
+    }
+
+    function _nonReentrantAfter() internal {
+        _locked = 0;
     }
 
     // ── Initialization ──
@@ -400,6 +405,14 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         if (!ok) revert TransferFailed();
     }
 
+    function unlinkTelegram() external {
+        bytes32 linkedHash = walletToTelegram[msg.sender];
+        if (linkedHash == bytes32(0)) revert NoTelegramLinked();
+        delete telegramToWallet[linkedHash];
+        delete walletToTelegram[msg.sender];
+        emit TelegramUnlinked(linkedHash, msg.sender);
+    }
+
     function linkTelegramToWallet(bytes32 telegramHash, address wallet) external onlyClaimManager {
         if (wallet == address(0)) revert ZeroAddress();
         if (telegramHash == bytes32(0)) revert InvalidInput();
@@ -543,5 +556,5 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         return (_getStampCountForWallet(spotId, user), s.stampGoal, last, remaining);
     }
 
-    uint256[48] private __gap;
+    uint256[48] private _gap;
 }
