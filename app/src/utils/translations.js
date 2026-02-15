@@ -3,6 +3,7 @@ export const translations = {
   ko: {
     // 공통
     close: '닫기',
+    distance: '거리',
     save: '저장',
     delete: '삭제',
     cancel: '취소',
@@ -117,6 +118,7 @@ export const translations = {
   en: {
     // Common
     close: 'Close',
+    distance: 'Distance',
     save: 'Save',
     delete: 'Delete',
     cancel: 'Cancel',

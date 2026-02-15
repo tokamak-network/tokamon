@@ -129,8 +129,10 @@ export default function SpotDetailSheet({ spot, userPos, wallet, onClose, onClai
         {distance !== null && (
           <View style={styles.infoCard}>
             <Text style={styles.infoIcon}>📍</Text>
-            <Text style={styles.infoValue}>{distance}m</Text>
-            <Text style={styles.infoLabel}>Distance</Text>
+            <Text style={styles.infoValue}>
+              {distance >= 1000 ? `${(distance / 1000).toFixed(1)}km` : `${distance}m`}
+            </Text>
+            <Text style={styles.infoLabel}>{t(language, 'distance')}</Text>
           </View>
         )}
       </View>

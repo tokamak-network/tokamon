@@ -25,6 +25,9 @@ tokamon/
 | Foundry (forge, anvil) | [설치 가이드](https://book.getfoundry.sh/getting-started/installation) |
 | Firebase CLI | `npm install -g firebase-tools` |
 | MetaMask | 브라우저 지갑 (클라이언트 연동) |
+| Expo CLI | `npx expo` (앱 실행 시 필요, npm에 포함) |
+| Android Studio | Android 에뮬레이터 (앱 개발 시) |
+| Xcode | iOS 시뮬레이터 (macOS, 앱 개발 시) |
 
 ```bash
 # Foundry 설치 (미설치 시)
@@ -51,6 +54,7 @@ npm install -g firebase-tools
 | Firestore | `localhost:8080` | Firestore 에뮬레이터 |
 | Vite Dev Server | `http://localhost:5173` | 클라이언트 개발 서버 (HMR) |
 | Anvil RPC | `http://localhost:8999` | 로컬 블록체인 (Chain ID: 1337) |
+| Expo Dev Server | `http://localhost:8081` | 모바일 앱 개발 서버 |
 
 ### 전체 로컬 개발 흐름
 
@@ -66,6 +70,68 @@ npm install -g firebase-tools
 - **`npm run emulators`**: Hosting(5002) + Functions(5001) + Firestore(8080) + Emulator UI(4000) 를 한꺼번에 시작합니다. `--project demo-tokamon`으로 실행되므로 실제 Firebase 프로젝트에 영향을 주지 않습니다.
 - **`npm run dev`**: Vite HMR 개발 서버(5173). 코드 수정 시 빠른 반영을 위해 사용합니다.
 - **`npm run listener`**: 리스너 서버가 `FIRESTORE_EMULATOR_HOST=localhost:8080`으로 Firestore 에뮬레이터에 자동 연결됩니다.
+
+### 모바일 앱 실행 (Android / iOS)
+
+`app/` 디렉토리는 **Expo + React Native** 기반 모바일 앱입니다. 위의 로컬 백엔드(Anvil, Firebase Emulators 등)가 실행된 상태에서 앱을 시작합니다.
+
+#### 사전 요구사항
+
+| 항목 | Android | iOS |
+|------|---------|-----|
+| 런타임 | [Android Studio](https://developer.android.com/studio) + Android Emulator | [Xcode](https://developer.apple.com/xcode/) (macOS 전용) |
+| 실물 디바이스 | USB 디버깅 활성화 | Apple 개발자 계정 (무료 가능) |
+| Expo Go (선택) | Play Store에서 설치 | App Store에서 설치 |
+
+#### 1. 의존성 설치
+
+```bash
+cd app
+npm install
+```
+
+#### 2. API 주소 설정
+
+`app/src/utils/constants.js`의 `API_BASE`를 로컬 서버 주소로 변경합니다.
+
+```js
+// 에뮬레이터에서 접근 시
+export const API_BASE = 'http://10.0.2.2:5001/demo-tokamon/us-central1/api';  // Android Emulator
+export const API_BASE = 'http://localhost:5001/demo-tokamon/us-central1/api';  // iOS Simulator
+
+// 실물 디바이스에서 접근 시 (같은 Wi-Fi 네트워크)
+export const API_BASE = 'http://<내-PC-IP>:5001/demo-tokamon/us-central1/api';
+```
+
+> **참고**: Android Emulator에서 호스트 머신의 `localhost`에 접근하려면 `10.0.2.2`를 사용해야 합니다. iOS Simulator는 `localhost`를 그대로 사용할 수 있습니다.
+
+#### 3. 앱 실행
+
+```bash
+cd app
+
+# Expo 개발 서버 시작
+npx expo start
+
+# Android 에뮬레이터에서 직접 실행
+npx expo start --android
+
+# iOS 시뮬레이터에서 직접 실행 (macOS 전용)
+npx expo start --ios
+```
+
+#### 실행 방법 비교
+
+| 방법 | 명령 | 설명 |
+|------|------|------|
+| Expo Go | `npx expo start` → QR 코드 스캔 | 빠른 테스트, 네이티브 모듈 제한 있음 |
+| Android Emulator | `npx expo start --android` | Android Studio 에뮬레이터 필요 |
+| iOS Simulator | `npx expo start --ios` | Xcode 필요, macOS 전용 |
+| Development Build | `npx expo run:android` / `npx expo run:ios` | 네이티브 코드 포함 빌드, 전체 기능 지원 |
+
+> **Development Build**: `react-native-maps` 등 네이티브 모듈을 사용하므로 Expo Go에서 일부 기능이 제한될 수 있습니다. 전체 기능을 테스트하려면 `npx expo run:android` 또는 `npx expo run:ios`로 Development Build를 사용하세요.
+
+---
 
 ### Anvil 기본 계정 (각 10,000 ETH)
 
