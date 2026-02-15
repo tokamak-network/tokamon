@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { redepositSelf, updateCooldown, updateAllowDuplicateClaims, getSpotClaimHistory } from '../contract';
+import { Spinner } from './Spinner';
 import { t } from '../translations';
 
-export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet, onRedeposited, language = 'ko' }) {
+export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet, onRedeposited, language = 'ko', showToast }) {
   const [selectedSpotId, setSelectedSpotId] = useState(null);
   const [redepositSpotId, setRedepositSpotId] = useState(null);
   const [redepositAmount, setRedepositAmount] = useState('');
@@ -38,7 +39,7 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
   const handleRedeposit = async (spotId) => {
     const amount = Number(redepositAmount);
     if (!amount || amount <= 0) {
-      alert(t(language, 'enterValidAmount'));
+      showToast?.('warning', t(language, 'enterValidAmount'));
       return;
     }
 
@@ -48,9 +49,9 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
       setRedepositSpotId(null);
       setRedepositAmount('');
       onRedeposited();
-      alert(`${amount} TON ${t(language, 'redepositComplete')}`);
+      showToast?.('success', `${amount} TON ${t(language, 'redepositComplete')}`);
     } catch (err) {
-      alert(err.reason || err.message || t(language, 'redepositFailed'));
+      showToast?.('error', err.reason || err.message || t(language, 'redepositFailed'));
     } finally {
       setRedepositing(false);
     }
@@ -59,7 +60,7 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
   const handleUpdateCooldownSubmit = async (spotId) => {
     const seconds = Number(cooldownSeconds);
     if (isNaN(seconds) || seconds < 0) {
-      alert(t(language, 'enterValidNumber'));
+      showToast?.('warning', t(language, 'enterValidNumber'));
       return;
     }
 
@@ -69,9 +70,9 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
       setCooldownSpotId(null);
       setCooldownSeconds('');
       onRedeposited();
-      alert(t(language, 'cooldownChanged'));
+      showToast?.('success', t(language, 'cooldownChanged'));
     } catch (err) {
-      alert(err.reason || err.message || t(language, 'cooldownChangeFailed'));
+      showToast?.('error', err.reason || err.message || t(language, 'cooldownChangeFailed'));
     } finally {
       setUpdatingCooldown(false);
     }
@@ -86,9 +87,9 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
       // 블록체인 상태 반영 대기 후 한 번 더 갱신
       await new Promise((r) => setTimeout(r, 500));
       onRedeposited();
-      alert(allow ? t(language, 'duplicateEnabled') : t(language, 'duplicateDisabled'));
+      showToast?.('success', allow ? t(language, 'duplicateEnabled') : t(language, 'duplicateDisabled'));
     } catch (err) {
-      alert(err.reason || err.message || t(language, 'duplicateChangeFailed'));
+      showToast?.('error', err.reason || err.message || t(language, 'duplicateChangeFailed'));
     } finally {
       setUpdatingDuplicateClaims(false);
     }
@@ -106,7 +107,7 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
       const history = await getSpotClaimHistory(spotId);
       setClaimHistory(history);
     } catch (err) {
-      alert(t(language, 'claimListFetchFailed'));
+      showToast?.('error', t(language, 'claimListFetchFailed'));
       setClaimHistory([]);
     } finally {
       setLoadingHistory(false);
@@ -180,7 +181,8 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                     }}
                   />
                   <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                    <button className="primary" onClick={() => handleRedeposit(spot.id)} disabled={redepositing} style={{ flex: 1 }}>
+                    <button className="primary btn-with-spinner" onClick={() => handleRedeposit(spot.id)} disabled={redepositing} style={{ flex: 1 }}>
+                      {redepositing && <Spinner size={16} />}
                       {redepositing ? t(language, 'waitingForMetaMask') : t(language, 'redeposit')}
                     </button>
                     <button
@@ -220,7 +222,8 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                     {t(language, 'cooldownHint')}
                   </div>
                   <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                    <button className="primary" onClick={() => handleUpdateCooldownSubmit(spot.id)} disabled={updatingCooldown} style={{ flex: 1 }}>
+                    <button className="primary btn-with-spinner" onClick={() => handleUpdateCooldownSubmit(spot.id)} disabled={updatingCooldown} style={{ flex: 1 }}>
+                      {updatingCooldown && <Spinner size={16} />}
                       {updatingCooldown ? t(language, 'waitingForMetaMask') : t(language, 'changeCooldown')}
                     </button>
                     <button
@@ -240,11 +243,12 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button
-                      className="primary"
+                      className="primary btn-with-spinner"
                       onClick={() => handleUpdateDuplicateClaims(spot.id, !spot.allow_duplicate_claims)}
                       disabled={updatingDuplicateClaims}
                       style={{ flex: 1 }}
                     >
+                      {updatingDuplicateClaims && <Spinner size={16} />}
                       {updatingDuplicateClaims ? t(language, 'waitingForMetaMask') : spot.allow_duplicate_claims ? t(language, 'disable') : t(language, 'enable')}
                     </button>
                     <button
@@ -299,7 +303,7 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                     {t(language, 'claimDetails')}
                   </div>
                   {loadingHistory ? (
-                    <div style={{ color: '#888', fontSize: 13 }}>{t(language, 'loadingClaims')}</div>
+                    <div style={{ color: '#888', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}><Spinner size={14} /> {t(language, 'loadingClaims')}</div>
                   ) : claimHistory.length === 0 ? (
                     <div style={{ color: '#888', fontSize: 13 }}>{t(language, 'noClaimDetailsYet')}</div>
                   ) : (

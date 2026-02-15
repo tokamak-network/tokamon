@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { createSpotSelf } from '../contract';
+import { Spinner } from './Spinner';
 import { t } from '../translations';
 
 const MIN_DEPOSIT = 10;
 
-export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated, language = 'ko' }) {
+export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated, language = 'ko', showToast }) {
   const COOLDOWN_OPTIONS = [
     { label: t(language, 'oneHour'), value: 3600 },
     { label: t(language, 'sixHours'), value: 21600 },
@@ -12,11 +13,20 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
     { label: t(language, 'twentyFourHours'), value: 86400 },
   ];
 
+  // 기본값: 지금부터 24시간
+  const toLocalDatetime = (date) => {
+    const d = new Date(date);
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
+  };
+  const now = new Date();
+  const tomorrow = new Date(now.getTime() + 86400000);
+
   const [form, setForm] = useState({
     name: '',
     description: '',
-    start_time: '',
-    end_time: '',
+    start_time: toLocalDatetime(now),
+    end_time: toLocalDatetime(tomorrow),
     deposit: '30',
     reward: '0.5',
     stamp_goal: '10',
@@ -43,13 +53,13 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    if (!form.name.trim()) return alert(t(language, 'errorNameRequired'));
-    if (!pinPos) return alert(t(language, 'errorSelectLocation'));
-    if (deposit < MIN_DEPOSIT) return alert(`${t(language, 'errorMinDeposit')} ${MIN_DEPOSIT} TON`);
-    if (balance < deposit) return alert(`${t(language, 'errorInsufficientBalance')} (${Number(balance).toFixed(2)} TON)`);
-    if (reward <= 0) return alert(t(language, 'errorRewardPositive'));
-    if (stampGoal < 1) return alert(t(language, 'errorStampGoalMin'));
-    if (stampBonus < 0) return alert(t(language, 'errorBonusMin'));
+    if (!form.name.trim()) return showToast('warning', t(language, 'errorNameRequired'));
+    if (!pinPos) return showToast('warning', t(language, 'errorSelectLocation'));
+    if (deposit < MIN_DEPOSIT) return showToast('warning', `${t(language, 'errorMinDeposit')} ${MIN_DEPOSIT} TON`);
+    if (balance < deposit) return showToast('warning', `${t(language, 'errorInsufficientBalance')} (${Number(balance).toFixed(2)} TON)`);
+    if (reward <= 0) return showToast('warning', t(language, 'errorRewardPositive'));
+    if (stampGoal < 1) return showToast('warning', t(language, 'errorStampGoalMin'));
+    if (stampBonus < 0) return showToast('warning', t(language, 'errorBonusMin'));
 
     setSubmitting(true);
     try {
@@ -71,10 +81,11 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
       );
 
       // 서버는 SpotCreated 이벤트를 구독하여 컨트랙트에서 메타데이터를 자동 수집/저장
+      showToast('success', t(language, 'spotCreationSuccess') || '스팟이 생성되었습니다!');
       onCreated();
       onClose();
     } catch (err) {
-      alert(err.reason || err.message || t(language, 'spotCreationFailed'));
+      showToast('error', err.reason || err.message || t(language, 'spotCreationFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -187,11 +198,12 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
         )}
 
         <button
-          className="primary"
+          className="primary btn-with-spinner"
           style={{ marginTop: 20 }}
           onClick={handleSubmit}
           disabled={deposit < MIN_DEPOSIT || balance < deposit || submitting}
         >
+          {submitting && <Spinner size={16} />}
           {submitting ? t(language, 'waitingForMetaMask') : `${deposit} ${t(language, 'depositAndCreateSpot')}`}
         </button>
         <button className="secondary" onClick={onClose}>

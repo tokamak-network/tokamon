@@ -55,7 +55,7 @@ export function renderApp() {
           <section class="card">
             <h2>🧪 Faucet</h2>
             <div class="faucet-buttons">
-              <button id="faucet-eth" class="btn">ETH 받기</button>
+              <button id="faucet-eth" class="btn">TON 받기</button>
             </div>
           </section>
         `;
@@ -158,7 +158,7 @@ export function renderApp() {
         this.disabled = true;
         try {
           await requestEth(signer);
-          alert('ETH를 받았습니다.');
+          alert('TON을 받았습니다.');
           render(resolvedAddress);
         } catch (err) {
           alert(err.message || '요청 실패');

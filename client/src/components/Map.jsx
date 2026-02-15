@@ -82,11 +82,11 @@ function getSpotIcon(spot, wallet, role, selectedSpot) {
   return activeIcon;
 }
 
-function getSpotStatus(spot) {
+function getSpotStatus(spot, language) {
   const isExhausted = spot.remaining < spot.reward;
-  if (isExhausted) return 'TON 소진';
-  if (!spot.active) return '비활성';
-  return '활성';
+  if (isExhausted) return t(language, 'tonExhausted');
+  if (!spot.active) return t(language, 'inactive');
+  return t(language, 'active');
 }
 
 // 지도 클릭 이벤트 핸들러
@@ -102,6 +102,16 @@ function MapClickHandler({ createMode, onMapClick }) {
 }
 
 // GPS 위치가 처음 잡히면 자동으로 이동
+function MapResizeHandler() {
+  const map = useMap();
+  useEffect(() => {
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
+  return null;
+}
+
 function AutoCenter({ userPos }) {
   const map = useMap();
   const hasCentered = useRef(false);
@@ -130,21 +140,21 @@ function LocateButton({ userPos }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         cursor: 'pointer', fontSize: '18px', padding: 0,
       }}
-      title="내 위치로"
+      title=""
     >
       ◎
     </button>
   );
 }
 
-export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectSpot, initialCenter, createMode, pinPos, onMapClick, onConfirmAddSpot, wallet, role }) {
+export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectSpot, initialCenter, createMode, pinPos, onMapClick, onConfirmAddSpot, wallet, role, language = 'ko' }) {
   const center = initialCenter || { lat: 37.5665, lng: 126.978 };
 
   return (
     <div className="map-container">
       {createMode && (
         <div className="create-mode-banner">
-          지도를 탭하여 스팟 위치를 선택하세요
+          {t(language, 'tapMapToSelectLocation')}
         </div>
       )}
       {gpsStatus === 'loading' && (
@@ -154,7 +164,7 @@ export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectS
           fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px',
         }}>
           <span style={{ display: 'inline-block', width: '12px', height: '12px', border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-          위치를 찾고 있습니다...
+          {t(language, 'findingLocation')}
         </div>
       )}
       {gpsStatus === 'denied' && (
@@ -163,7 +173,7 @@ export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectS
           background: '#ef4444', color: '#fff', padding: '8px 16px', borderRadius: '20px',
           fontSize: '13px',
         }}>
-          위치 권한이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해주세요.
+          {t(language, 'locationDenied')}
         </div>
       )}
       {gpsStatus === 'unavailable' && (
@@ -172,7 +182,7 @@ export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectS
           background: '#f59e0b', color: '#fff', padding: '8px 16px', borderRadius: '20px',
           fontSize: '13px',
         }}>
-          위치 서비스를 사용할 수 없습니다.
+          {t(language, 'locationUnavailable')}
         </div>
       )}
       <MapContainer
@@ -186,6 +196,7 @@ export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectS
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        <MapResizeHandler />
         <MapClickHandler createMode={createMode} onMapClick={onMapClick} />
         <AutoCenter userPos={userPos} />
         <LocateButton userPos={userPos} />
@@ -246,9 +257,9 @@ export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectS
               <Popup>
                 <strong>{spot.name}</strong>
                 <br />
-                {spot.reward} TON · {getSpotStatus(spot)}
+                {spot.reward} TON · {getSpotStatus(spot, language)}
                 <br />
-                남은 횟수: {claimsLeft}회
+                {t(language, 'popupRemaining')}: {claimsLeft}{t(language, 'times')}
               </Popup>
             </Marker>
           );

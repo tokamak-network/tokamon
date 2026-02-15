@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getStampInfo } from '../api';
 import { redepositSelf, claimSelf } from '../contract';
+import { Spinner } from './Spinner';
+import { t } from '../translations';
 
 function haversineDistance(lat1, lng1, lat2, lng2) {
   const R = 6371000;
@@ -13,15 +15,15 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function formatCooldown(seconds) {
+function formatCooldown(seconds, language) {
   if (seconds <= 0) return null;
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  if (h > 0) return `${h}시간 ${m}분`;
-  return `${m}분`;
+  if (h > 0) return `${h}${t(language, 'hoursUnit')} ${m}${t(language, 'minutesUnit')}`;
+  return `${m}${t(language, 'minutesUnit')}`;
 }
 
-export default function SpotInfo({ spot, userPos, wallet, role, onRedeposited, onConnectWallet }) {
+export default function SpotInfo({ spot, userPos, wallet, role, language = 'ko', onRedeposited, onConnectWallet, showToast }) {
   const [stampInfo, setStampInfo] = useState(null);
   const [redepositAmount, setRedepositAmount] = useState('');
   const [showRedeposit, setShowRedeposit] = useState(false);
@@ -58,17 +60,17 @@ export default function SpotInfo({ spot, userPos, wallet, role, onRedeposited, o
   const handleClaim = async () => {
     if (!canClaim || !wallet) return;
     if (distance !== null && distance > COLLECT_RADIUS) {
-      alert(`${distance}m - 너무 멀어요. ${COLLECT_RADIUS}m 이내에서 클레임해주세요.`);
+      showToast?.('warning', `${distance}m - ${t(language, 'tooFarToClaim').replace('{radius}', COLLECT_RADIUS)}`);
       return;
     }
     setClaiming(true);
     try {
       const result = await claimSelf(spot.id);
       const total = result.reward + result.bonus;
-      alert(`${total} TON 적립 완료!`);
+      showToast?.('success', `${total} ${t(language, 'claimSuccess')}`);
       onRedeposited?.();
     } catch (err) {
-      alert(err.reason || err.message || '클레임 실패');
+      showToast?.('error', err.reason || err.message || t(language, 'claimFailed'));
     } finally {
       setClaiming(false);
     }
@@ -80,11 +82,12 @@ export default function SpotInfo({ spot, userPos, wallet, role, onRedeposited, o
     setRedepositing(true);
     try {
       await redepositSelf(spot.id, amount);
+      showToast?.('success', `${amount} ${t(language, 'redepositDone')}`);
       setShowRedeposit(false);
       setRedepositAmount('');
       onRedeposited();
     } catch (err) {
-      alert(err.reason || err.message || '재예치 실패');
+      showToast?.('error', err.reason || err.message || t(language, 'redepositFail'));
     } finally {
       setRedepositing(false);
     }
@@ -97,20 +100,20 @@ export default function SpotInfo({ spot, userPos, wallet, role, onRedeposited, o
       <div className="detail">
         {spot.start_time || spot.end_time
           ? `${spot.start_time ? new Date(spot.start_time * 1000).toLocaleString() : ''} ~ ${spot.end_time ? new Date(spot.end_time * 1000).toLocaleString() : ''}`
-          : '항상'}
+          : t(language, 'alwaysActive')}
         {distance !== null && ` | ${distance}m`}
       </div>
       <div className="detail" style={{ color: '#fbbf24' }}>
-        보상: {spot.reward} TON | 남은 TON: {spot.remaining}
+        {t(language, 'rewardLabel')}: {spot.reward} TON | {t(language, 'remainingTONLabel')}: {spot.remaining}
       </div>
 
       {/* Stamp progress - only show when wallet connected */}
       {wallet && (
         <div className="stamp-section">
           <div className="stamp-label">
-            스탬프 {stamps}/{stampGoal}
+            {t(language, 'stampProgress')} {stamps}/{stampGoal}
             {spot.stamp_bonus > 0 && (
-              <span className="stamp-bonus-label"> (달성 시 +{spot.stamp_bonus} TON)</span>
+              <span className="stamp-bonus-label"> ({t(language, 'stampBonusOnGoal')} +{spot.stamp_bonus} TON)</span>
             )}
           </div>
           <div className="stamp-bar">
@@ -118,25 +121,26 @@ export default function SpotInfo({ spot, userPos, wallet, role, onRedeposited, o
           </div>
           {isOnCooldown && (
             <div className="cooldown-text">
-              다음 클레임까지 {formatCooldown(cooldownLeft)}
+              {t(language, 'nextClaimIn')} {formatCooldown(cooldownLeft, language)}
             </div>
           )}
         </div>
       )}
 
       <div className={`status ${spot.active && !isExhausted ? 'active' : 'inactive'}`}>
-        {isExhausted ? 'TON 소진' : spot.active ? '활성중' : '비활성'}
+        {isExhausted ? t(language, 'tonExhausted') : spot.active ? t(language, 'activeStatus') : t(language, 'inactive')}
       </div>
 
       {/* 고객 클레임 버튼 - 지갑 연결, 스팟 소유자 아님, 활성, 쿨다운 아님 */}
       {canClaim && (
         <div style={{ marginTop: 12 }}>
           <button
-            className="primary"
+            className="primary btn-with-spinner"
             onClick={handleClaim}
             disabled={claiming}
           >
-            {claiming ? 'MetaMask 승인 대기...' : `${spot.reward} TON 받기`}
+            {claiming && <Spinner size={16} />}
+            {claiming ? t(language, 'waitingForMetaMask') : `${spot.reward} ${t(language, 'getTONButton')}`}
           </button>
         </div>
       )}
@@ -146,24 +150,25 @@ export default function SpotInfo({ spot, userPos, wallet, role, onRedeposited, o
         <div style={{ marginTop: 12 }}>
           {!showRedeposit ? (
             <button className="secondary" onClick={() => setShowRedeposit(true)}>
-              TON 재예치
+              {t(language, 'redepositTON')}
             </button>
           ) : (
             <div className="redeposit-form">
               <input
                 type="number"
-                placeholder="추가 예치할 TON"
+                placeholder={t(language, 'additionalTON')}
                 value={redepositAmount}
                 onChange={(e) => setRedepositAmount(e.target.value)}
                 min="0.1"
                 step="0.1"
               />
               <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                <button className="primary" onClick={handleRedeposit} disabled={redepositing} style={{ flex: 1 }}>
-                  {redepositing ? 'MetaMask 승인 대기...' : '재예치'}
+                <button className="primary btn-with-spinner" onClick={handleRedeposit} disabled={redepositing} style={{ flex: 1 }}>
+                  {redepositing && <Spinner size={16} />}
+                  {redepositing ? t(language, 'waitingForMetaMask') : t(language, 'redeposit')}
                 </button>
                 <button className="secondary" onClick={() => setShowRedeposit(false)} disabled={redepositing} style={{ flex: 1, marginTop: 0 }}>
-                  취소
+                  {t(language, 'cancel')}
                 </button>
               </div>
             </div>

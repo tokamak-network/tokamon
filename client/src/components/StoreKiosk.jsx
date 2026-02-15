@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { t } from '../translations';
+import useToast from '../hooks/useToast';
+import Toast from './Toast';
+import { Spinner } from './Spinner';
 
 const API = '';
 
 export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
+  const { toasts, showToast, removeToast } = useToast();
   const [telegramUsername, setTelegramUsername] = useState('');
   const [balance, setBalance] = useState(null);
   const [spots, setSpots] = useState([]);
@@ -13,6 +17,8 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
   const [loading, setLoading] = useState(false);
   const [wallet, setWallet] = useState(null);
   const [contract, setContract] = useState(null);
+  const [stampCount, setStampCount] = useState(null);
+  const [cachedHash, setCachedHash] = useState(null);
 
   // 스팟 목록 로드
   useEffect(() => {
@@ -74,7 +80,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
           chainId: '0x539',
           chainName: 'Tokamon Local',
           rpcUrls: [rpcUrl],
-          nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+          nativeCurrency: { name: 'TON', symbol: 'TON', decimals: 18 },
         }],
       }).catch(() => {});
 
@@ -88,7 +94,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
       await initContract();
     } catch (err) {
       console.error('지갑 연결 실패:', err);
-      alert(t(language, 'walletConnectionFailed') + ': ' + err.message);
+      showToast('error', t(language, 'walletConnectionFailed') + ': ' + err.message);
     }
   };
 
@@ -109,6 +115,9 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
       value = '@' + value;
     }
     setTelegramUsername(value);
+    setStampCount(null);
+    setCachedHash(null);
+    setBalance(null);
   };
 
   // 초기화
@@ -117,6 +126,8 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
     setBalance(null);
     setSelectedSpot(null);
     setMessage('');
+    setStampCount(null);
+    setCachedHash(null);
   };
 
   // 잔액 확인 (컨트랙트에서 직접 조회)
@@ -156,7 +167,16 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
       const balanceTon = Number(ethers.formatEther(balanceWei));
 
       setBalance(balanceTon);
+      setCachedHash(telegramHash);
       setMessage('');
+
+      // 스탬프 정보 조회
+      if (selectedSpot) {
+        try {
+          const info = await contract.getTelegramStampInfo(selectedSpot.id, telegramHash);
+          setStampCount(Number(info[0]));
+        } catch (_) {}
+      }
     } catch (err) {
       console.error('잔액 조회 에러:', err);
       setMessage('잔액 조회 실패: ' + err.message);
@@ -230,20 +250,47 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
         telegramHash
       );
 
-      setMessage('트랜잭션 처리 중...');
+      setMessage(t(language, 'txProcessing'));
       const receipt = await tx.wait();
+
+      // TelegramClaimed 이벤트에서 stamp 정보 파싱
+      let bonusText = '';
+      for (const log of receipt.logs) {
+        try {
+          const parsed = contract.interface.parseLog(log);
+          if (parsed && parsed.name === 'TelegramClaimed') {
+            const stamp = Number(parsed.args.stamp);
+            const bonus = Number(ethers.formatEther(parsed.args.bonus));
+            setStampCount(stamp);
+            if (bonus > 0) {
+              bonusText = ` 🎉 +${bonus} TON ${t(language, 'stampBonusEarned')}`;
+            }
+          }
+        } catch (_) {}
+      }
 
       // 성공 후 잔액 조회 (컨트랙트에서 직접)
       const balanceWei = await contract.getTelegramBalance(telegramHash);
       const balanceTon = Number(ethers.formatEther(balanceWei));
       setBalance(balanceTon);
 
-      setMessage(`✅ ${selectedSpot.reward} TON ${t(language, 'claimCompleted')}`);
+      setMessage(`✅ ${selectedSpot.reward} TON ${t(language, 'claimCompleted')}${bonusText}`);
 
-      // 텔레그램 알림은 listener-server가 TelegramClaimed 이벤트로 자동 전송
-
-      // 스팟 목록 새로고침
-      fetchSpots();
+      // 컨트랙트에서 직접 최신 remaining 조회 (Firestore 동기화 지연 방지)
+      try {
+        const spotData = await contract.getSpot(selectedSpot.id);
+        const freshRemaining = Number(ethers.formatEther(spotData.remaining ?? spotData[6]));
+        const updatedSpot = { ...selectedSpot, remaining: freshRemaining };
+        setSelectedSpot(updatedSpot);
+        setSpots(prev => prev.map(s => s.id === selectedSpot.id ? { ...s, remaining: freshRemaining } : s));
+      } catch (_) {
+        // 컨트랙트 조회 실패 시 API로 대체
+        const res = await fetch(`${API}/api/spots`);
+        const freshSpots = await res.json();
+        setSpots(freshSpots);
+        const updated = freshSpots.find(s => s.id === selectedSpot.id);
+        if (updated) setSelectedSpot(updated);
+      }
     } catch (err) {
       console.error('클레임 에러:', err);
       const errorMsg = err.reason || err.message || '클레임 실패';
@@ -258,6 +305,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
     // 1단계: 스팟 선택
     return (
       <div className="store-kiosk">
+        <Toast toasts={toasts} onRemove={removeToast} />
         <div className="kiosk-topbar">
           <h1 className="kiosk-topbar-title">{t(language, 'storeKiosk')}</h1>
           <div className="kiosk-topbar-right">
@@ -314,7 +362,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
                   <div className="spot-compact-info">
                     <div className="spot-compact-row">
                       <span className="compact-label">💰 {t(language, 'remainingBalance')}</span>
-                      <span className="compact-value">{spot.remaining} TON ({Math.floor(spot.remaining / spot.reward)}{t(language, 'visits')})</span>
+                      <span className="compact-value">{parseFloat(spot.remaining.toFixed(4))} TON ({Math.floor(spot.remaining / spot.reward)}{t(language, 'visits')})</span>
                     </div>
                     <div className="spot-compact-row">
                       <span className="compact-label">🕐 {t(language, 'businessHours')}</span>
@@ -339,6 +387,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
   // 2단계: 텔레그램 입력 및 클레임
   return (
     <div className="store-kiosk">
+      <Toast toasts={toasts} onRemove={removeToast} />
       <div className="kiosk-header-with-back">
         <button className="back-button" onClick={() => setSelectedSpot(null)}>
           ← {t(language, 'back')}
@@ -382,6 +431,23 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
           </div>
         )}
 
+        {stampCount !== null && selectedSpot && (
+          <div className="kiosk-stamp-progress">
+            <div className="kiosk-stamp-label">
+              🎯 {t(language, 'stamp')} {stampCount}/{selectedSpot.stamp_goal}
+              {selectedSpot.stamp_bonus > 0 && (
+                <span className="kiosk-stamp-bonus"> (+{selectedSpot.stamp_bonus} TON)</span>
+              )}
+            </div>
+            <div className="kiosk-stamp-bar">
+              <div
+                className="kiosk-stamp-fill"
+                style={{ width: `${Math.min((stampCount / (selectedSpot.stamp_goal || 1)) * 100, 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
+
         <div className="action-buttons">
           <button
             className="btn-secondary"
@@ -391,10 +457,11 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
             {t(language, 'checkBalance')}
           </button>
           <button
-            className="btn-primary"
+            className="btn-primary btn-with-spinner"
             onClick={handleClaim}
             disabled={loading || !wallet || telegramUsername.replace('@', '').length < 5}
           >
+            {loading && <Spinner size={18} />}
             {loading ? t(language, 'processing') : `${selectedSpot.reward} TON ${t(language, 'receive')}`}
           </button>
         </div>

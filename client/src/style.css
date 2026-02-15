@@ -207,6 +207,14 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* 지도 없는 탭 (리스트, 히스토리): 전체 높이 사용 */
+.bottom-panel.full-height {
+  flex: 1;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+}
+
 .spot-info {
   margin-bottom: 12px;
 }
@@ -469,7 +477,7 @@ button.secondary {
 
 /* 스팟 목록 */
 .spot-list {
-  max-height: 45dvh;
+  flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -852,6 +860,29 @@ button.secondary {
   cursor: not-allowed;
 }
 
+.unlink-telegram-btn {
+  padding: 3px 8px;
+  background: transparent;
+  color: #f87171;
+  border: 1px solid #f87171;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  margin-left: 8px;
+}
+
+.unlink-telegram-btn:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.unlink-telegram-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .history-list {
   padding-bottom: 0;
 }
@@ -1065,6 +1096,14 @@ button.secondary {
   background-clip: text;
   letter-spacing: -0.02em;
   animation: gradientShift 3s ease infinite, textFloat 2s ease-in-out infinite;
+}
+
+.main-title-img {
+  width: 320px;
+  height: auto;
+  margin: 0 0 8px 0;
+  filter: drop-shadow(0 4px 12px rgba(167, 139, 250, 0.3));
+  animation: textFloat 2s ease-in-out infinite;
 }
 
 @keyframes gradientShift {
@@ -1637,6 +1676,9 @@ button.secondary {
   flex-direction: column;
   gap: 6px;
   margin-bottom: 12px;
+  max-height: 15dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .owner-spot-list-item {
@@ -2742,6 +2784,41 @@ button.secondary {
   box-shadow: 0 12px 40px rgba(167, 139, 250, 0.35);
 }
 
+.kiosk-stamp-progress {
+  margin: 16px 0;
+  padding: 14px 18px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 12px;
+}
+
+.kiosk-stamp-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fbbf24;
+  margin-bottom: 8px;
+}
+
+.kiosk-stamp-bonus {
+  font-size: 13px;
+  font-weight: 500;
+  color: #a78bfa;
+}
+
+.kiosk-stamp-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.kiosk-stamp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
 .kiosk-footer {
   text-align: center;
   padding: 28px;
@@ -2858,6 +2935,10 @@ button.secondary {
     font-size: 36px;
   }
 
+  .main-title-img {
+    width: 240px;
+  }
+
   .logo-image {
     width: 100px;
     height: 100px;
@@ -2887,4 +2968,155 @@ button.secondary {
   .role-select-label {
     font-size: 18px;
   }
+}
+
+/* ===== Toast 알림 ===== */
+.toast-container {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 90%;
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  pointer-events: auto;
+  animation: toastSlideIn 0.3s ease-out;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast-success {
+  background: rgba(22, 101, 52, 0.95);
+  border: 1px solid #4ade80;
+  color: #bbf7d0;
+}
+
+.toast-error {
+  background: rgba(127, 29, 29, 0.95);
+  border: 1px solid #f87171;
+  color: #fecaca;
+}
+
+.toast-warning {
+  background: rgba(120, 53, 15, 0.95);
+  border: 1px solid #f59e0b;
+  color: #fde68a;
+}
+
+.toast-info {
+  background: rgba(30, 58, 138, 0.95);
+  border: 1px solid #60a5fa;
+  color: #bfdbfe;
+}
+
+.toast-icon {
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+}
+
+.toast-message {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.toast-close {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.toast-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ===== Spinner ===== */
+.spinner-inline {
+  display: inline-block;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.spinner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 8000;
+  backdrop-filter: blur(4px);
+}
+
+.spinner-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.spinner-large {
+  display: block;
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #a78bfa;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner-text {
+  color: #ccc;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* 버튼 내 스피너 레이아웃 */
+.btn-with-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { t } from '../translations';
-import { getTelegramBalance, getWalletLinkedTelegram, claimTelegramToWallet } from '../contract';
+import { getTelegramBalance, getWalletLinkedTelegram, claimTelegramToWallet, unlinkTelegram } from '../contract';
+import { Spinner } from './Spinner';
 
 function formatTime(timestamp) {
   if (!timestamp) return '';
@@ -12,12 +13,13 @@ function formatTime(timestamp) {
   return `${month}/${day} ${hours}:${minutes}`;
 }
 
-export default function History({ history, balance = 0, account, language = 'ko', onBalanceChange }) {
+export default function History({ history, balance = 0, account, language = 'ko', onBalanceChange, showToast }) {
   const [linkedTelegram, setLinkedTelegram] = useState(null);
   const [telegramHash, setTelegramHash] = useState(null);
   const [telegramBalance, setTelegramBalance] = useState(0);
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(false);
+  const [unlinking, setUnlinking] = useState(false);
 
   // 연결된 텔레그램 ID 조회
   useEffect(() => {
@@ -39,16 +41,18 @@ export default function History({ history, balance = 0, account, language = 'ko'
       if (isLinked) {
         setTelegramHash(hash);
 
+        // hash로 직접 username 조회 (0x 제거)
+        const hashHex = hash.startsWith('0x') ? hash.slice(2) : hash;
         try {
-          const response = await fetch(`/api/telegram/linked/${account}`);
+          const response = await fetch(`/api/telegram/username/${hashHex}`);
           const data = await response.json();
-          if (data.linked && data.telegram_username) {
+          if (data.telegram_username) {
             setLinkedTelegram(data.telegram_username);
           } else {
-            setLinkedTelegram('연결됨');
+            setLinkedTelegram(null);
           }
         } catch (err) {
-          setLinkedTelegram('연결됨');
+          setLinkedTelegram(null);
         }
 
         await fetchTelegramBalance(hash);
@@ -83,15 +87,36 @@ export default function History({ history, balance = 0, account, language = 'ko'
     setClaiming(true);
     try {
       await claimTelegramToWallet(telegramHash);
-      alert(`${telegramBalance.toFixed(4)} TON이 지갑으로 전송되었습니다!`);
+      showToast?.('success', `${telegramBalance.toFixed(4)} ${t(language, 'claimToWalletSuccess')}`);
 
       // 잔액 갱신
       await fetchLinkedTelegram();
       if (onBalanceChange) onBalanceChange();
     } catch (err) {
-      alert(err.message || '클레임 중 오류가 발생했습니다');
+      showToast?.('error', err.message || t(language, 'claimToWalletError'));
     } finally {
       setClaiming(false);
+    }
+  };
+
+  const handleUnlinkTelegram = async () => {
+    if (telegramBalance > 0) {
+      showToast?.('error', t(language, 'unlinkClaimFirst'));
+      return;
+    }
+    if (!window.confirm(t(language, 'unlinkConfirm'))) return;
+
+    setUnlinking(true);
+    try {
+      await unlinkTelegram();
+      showToast?.('success', t(language, 'unlinkSuccess'));
+      setLinkedTelegram(null);
+      setTelegramHash(null);
+      setTelegramBalance(0);
+    } catch (err) {
+      showToast?.('error', err.message || t(language, 'unlinkError'));
+    } finally {
+      setUnlinking(false);
     }
   };
 
@@ -118,11 +143,19 @@ export default function History({ history, balance = 0, account, language = 'ko'
             <div className="telegram-account-info">
               <div className="telegram-label">{t(language, 'telegramName')}</div>
               {loading ? (
-                <div className="telegram-value">{t(language, 'loading')}</div>
+                <div className="telegram-value" style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Spinner size={14} /> {t(language, 'loading')}</div>
               ) : linkedTelegram ? (
                 <div className="telegram-value telegram-linked">
                   <span className="telegram-icon">✅</span>
                   <span className="telegram-username">{linkedTelegram}</span>
+                  <button
+                    className="unlink-telegram-btn btn-with-spinner"
+                    onClick={handleUnlinkTelegram}
+                    disabled={unlinking}
+                  >
+                    {unlinking && <Spinner size={12} />}
+                    {unlinking ? t(language, 'processing') : t(language, 'unlinkTelegram')}
+                  </button>
                 </div>
               ) : (
                 <div className="telegram-not-linked-container">
@@ -151,11 +184,12 @@ export default function History({ history, balance = 0, account, language = 'ko'
               <div className="balance-amount-section">
                 <div className="balance-amount">{linkedTelegram ? telegramBalance.toFixed(4) : '0.0000'} TON</div>
                 {linkedTelegram && telegramBalance > 0 && (
-                  <button 
-                    className="claim-to-wallet-btn"
+                  <button
+                    className="claim-to-wallet-btn btn-with-spinner"
                     onClick={handleClaimToWallet}
                     disabled={claiming}
                   >
+                    {claiming && <Spinner size={14} />}
                     {claiming ? t(language, 'processing') : t(language, 'claimToWallet')}
                   </button>
                 )}

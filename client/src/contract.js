@@ -14,6 +14,7 @@ const ABI = [
   'function getWalletLinkedTelegram(address wallet) external view returns (bytes32)',
   'function claimSelf(uint256 spotId) external',
   'function claimTelegramToWallet(bytes32 telegramHash) external',
+  'function unlinkTelegram() external',
   'function nextSpotId() external view returns (uint256)',
   'function getSpot(uint256) view returns (tuple(address creator, bool allowDuplicateClaims, uint48 cooldown, uint128 stampGoal, uint128 stampBonus, uint256 reward, uint256 remaining, int96 lat, int96 lng, uint64 startTime, uint64 endTime, string name, string description))',
   'event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit, string name, string description, int96 lat, int96 lng)',
@@ -201,6 +202,13 @@ export async function claimSelf(spotId) {
 export async function claimTelegramToWallet(telegramHash) {
   const { contract } = await getSignerAndContract();
   const tx = await contract.claimTelegramToWallet(telegramHash);
+  await tx.wait();
+}
+
+// 텔레그램 연결 해제
+export async function unlinkTelegram() {
+  const { contract } = await getSignerAndContract();
+  const tx = await contract.unlinkTelegram();
   await tx.wait();
 }
 

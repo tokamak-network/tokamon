@@ -10,11 +10,14 @@ import OwnerDashboard from './components/OwnerDashboard';
 import StoreKiosk from './components/StoreKiosk';
 import TelegramLinkPage from './components/TelegramLinkPage';
 import Settings from './components/Settings';
+import Toast from './components/Toast';
+import { Spinner } from './components/Spinner';
 import { getSpots, getClaimHistory, getTelegramBalance } from './api';
 import { getBalance as getContractBalance, resetContractCache } from './contract';
 import { getETH, resetFaucetCache } from './faucet';
 import { t } from './translations';
 import useGeolocation from './hooks/useGeolocation';
+import useToast from './hooks/useToast';
 
 // RPC URL을 브라우저 접속 호스트 기준으로 결정
 function getAnvilRpcUrl() {
@@ -23,9 +26,9 @@ function getAnvilRpcUrl() {
 }
 
 // MetaMask 연결 (오너 모드용)
-async function connectMetaMask() {
+async function connectMetaMask(showToast) {
   if (!window.ethereum) {
-    alert('MetaMask가 설치되어 있지 않습니다');
+    showToast?.('error', 'MetaMask가 설치되어 있지 않습니다');
     return null;
   }
 
@@ -36,7 +39,7 @@ async function connectMetaMask() {
         chainId: '0x539',
         chainName: 'Tokamon Local',
         rpcUrls: [getAnvilRpcUrl()],
-        nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+        nativeCurrency: { name: 'TON', symbol: 'TON', decimals: 18 },
       }],
     });
   } catch (e) {
@@ -57,11 +60,13 @@ export default function App() {
     return <TelegramLinkPage />;
   }
 
+  const { toasts, showToast, removeToast } = useToast();
   const [wallet, setWallet] = useState(null);
   const [balance, setBalance] = useState(0);
   const [ethBalance, setEthBalance] = useState(0);
   const [telegramBalance, setTelegramBalance] = useState(null);
   const [spots, setSpots] = useState([]);
+  const [spotsLoading, setSpotsLoading] = useState(false);
   const [selectedSpot, setSelectedSpot] = useState(null);
   const { userPos, gpsStatus } = useGeolocation();
   const [message, setMessage] = useState(null);
@@ -196,8 +201,13 @@ export default function App() {
 
   // 스팟 목록
   const refreshSpots = useCallback(async () => {
-    const data = await getSpots();
-    if (Array.isArray(data)) setSpots(data);
+    setSpotsLoading(true);
+    try {
+      const data = await getSpots();
+      if (Array.isArray(data)) setSpots(data);
+    } finally {
+      setSpotsLoading(false);
+    }
   }, []);
 
   // 히스토리
@@ -269,7 +279,7 @@ export default function App() {
   const handleConnect = async () => {
     setConnecting(true);
     try {
-      const address = await connectMetaMask();
+      const address = await connectMetaMask(showToast);
       if (address) {
         setWallet(address);
         await fetchNetworkInfo();
@@ -300,14 +310,14 @@ export default function App() {
     setMessage(null);
     try {
       console.log('ETH 받기 시작...');
-      setMessage({ type: 'info', text: t(language, 'approveInMetaMask') });
+      showToast('info', t(language, 'approveInMetaMask'));
       await getETH();
-      setMessage({ type: 'success', text: t(language, 'getETHComplete') });
+      showToast('success', t(language, 'getETHComplete'));
       refreshBalance();
     } catch (err) {
       console.error('ETH faucet error:', err);
       const errorMsg = err.reason || err.message || t(language, 'getETHFailed');
-      setMessage({ type: 'error', text: errorMsg });
+      showToast('error', errorMsg);
     }
   };
 
@@ -333,6 +343,7 @@ export default function App() {
   if (role === 'store') {
     return (
       <>
+        <Toast toasts={toasts} onRemove={removeToast} />
         <div className="header">
           <h1 onClick={() => setRole(null)} style={{ cursor: 'pointer' }}>Tokamon</h1>
         </div>
@@ -358,6 +369,7 @@ export default function App() {
 
   return (
     <>
+      <Toast toasts={toasts} onRemove={removeToast} />
       {/* 헤더 */}
       <div className="header">
         <h1 onClick={() => setRole(null)} style={{ cursor: 'pointer' }}>Tokamon</h1>
@@ -382,11 +394,8 @@ export default function App() {
                 <span style={{ color: '#888', fontSize: '12px' }}>
                   {wallet.slice(0, 6)}...{wallet.slice(-4)}
                 </span>
-                <span style={{ color: '#fbbf24', fontSize: '14px', fontWeight: '600' }}>
-                  {Number(balance).toFixed(2)} TON
-                </span>
                 <span style={{ color: '#60a5fa', fontSize: '14px', fontWeight: '600' }}>
-                  {ethBalance} ETH
+                  {ethBalance} TON
                 </span>
                 <span style={{ color: '#888', fontSize: '10px' }}>▼</span>
               </div>
@@ -403,7 +412,8 @@ export default function App() {
               )}
             </div>
           ) : (
-            <button className="faucet-btn" onClick={handleConnect} disabled={connecting}>
+            <button className="faucet-btn btn-with-spinner" onClick={handleConnect} disabled={connecting}>
+              {connecting && <Spinner size={14} />}
               {connecting ? t(language, 'connecting') : t(language, 'connectWallet')}
             </button>
           )}
@@ -441,11 +451,12 @@ export default function App() {
           onConfirmAddSpot={handleConfirmAddSpot}
           wallet={wallet}
           role={role}
+          language={language}
         />
       )}
 
       {/* 하단 패널 */}
-      <div className="bottom-panel">
+      <div className={`bottom-panel${tab === 'list' || tab === 'history' ? ' full-height' : ''}`}>
         {message && (
           <div className={`message ${message.type}`}>{message.text}</div>
         )}
@@ -458,12 +469,17 @@ export default function App() {
               userPos={userPos}
               wallet={wallet}
               role={role}
+              language={language}
               onRedeposited={() => { refreshSpots(); refreshBalance(); }}
               onConnectWallet={handleConnect}
+              showToast={showToast}
             />
           ) : (
             <div className="points-display">
-              지도에서 스팟을 선택하세요 ({spots.filter(s => s.remaining > 0).length}개 활성 스팟)
+              {spotsLoading
+                ? <span className="btn-with-spinner"><Spinner size={14} /> {t(language, 'loadingSpots')}</span>
+                : `${t(language, 'selectSpotOnMap')} (${spots.filter(s => s.remaining > 0).length}${t(language, 'activeSpotsCount')})`
+              }
             </div>
           )
         )}
@@ -489,11 +505,13 @@ export default function App() {
               account={wallet}
               language={language}
               onBalanceChange={refreshBalance}
+              showToast={showToast}
             />
           ) : (
             <div className="wallet-connect-prompt">
               <p>{t(language, 'connectWalletPrompt')}</p>
-              <button className="primary" onClick={handleConnect} disabled={connecting}>
+              <button className="primary btn-with-spinner" onClick={handleConnect} disabled={connecting}>
+                {connecting && <Spinner size={16} />}
                 {connecting ? t(language, 'connecting') : t(language, 'connectWallet')}
               </button>
             </div>
@@ -509,6 +527,7 @@ export default function App() {
             onConnectWallet={handleConnect}
             onRedeposited={() => { refreshSpots(); refreshBalance(); }}
             language={language}
+            showToast={showToast}
           />
         )}
 
@@ -557,14 +576,17 @@ export default function App() {
           wallet={wallet}
           balance={balance}
           language={language}
+          showToast={showToast}
           onClose={() => {
             setShowCreateForm(false);
             setPinPos(null);
           }}
           onCreated={async () => {
-            await refreshSpots();
             await refreshBalance();
             switchTab(role === 'owner' ? 'owner-dashboard' : 'map');
+            // 리스너가 이벤트 수신 → Firestore 저장 완료까지 대기 후 새로고침
+            await new Promise(r => setTimeout(r, 2000));
+            await refreshSpots();
           }}
         />
       )}
