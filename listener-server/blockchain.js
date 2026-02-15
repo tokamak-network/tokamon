@@ -1,9 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const { ethers } = require('ethers');
+console.log('[Blockchain] ethers 버전:', ethers.version, '| 경로:', require.resolve('ethers'));
 const { syncSpotToFirestore, saveClaimEvent, getTelegramUsernameByHash } = require('./firebase-admin');
 
 const RPC_URL = process.env.RPC_URL || 'http://127.0.0.1:8999';
+const WS_URL = process.env.WS_URL || RPC_URL.replace(/^http/, 'ws');
 const ARTIFACT_PATH = path.join(__dirname, '..', 'contracts', 'out', 'Tokamon.sol', 'Tokamon.json');
 const ADDRESS_PATH = path.join(__dirname, 'contract-address.json');
 const METADATA_PATH = process.env.METADATA_PATH ||
@@ -15,7 +17,8 @@ const COORD_SCALE = 1_000_000;
 
 let provider;
 let signer;
-let contract;
+let contract;        // WS provider (이벤트 구독 + 읽기)
+let writeContract;   // HTTP signer (트랜잭션 전송)
 
 // TelegramClaimed 이벤트 알림 콜백
 let telegramClaimedCallback = null;
@@ -92,11 +95,15 @@ async function init() {
     throw new Error('contract-address.json이 없거나 address/tokamon이 없습니다. 컨트랙트 배포 후 npm run copy-contracts를 실행하세요.');
   }
 
-  provider = new ethers.JsonRpcProvider(RPC_URL);
-
-  // 로컬 노드에서 admin signer 가져오기
-  const accounts = await provider.listAccounts();
+  // WebSocket 구독 방식 (실시간 이벤트 수신)
+  // 트랜잭션 전송용 HTTP provider (signer 획득)
+  const httpProvider = new ethers.JsonRpcProvider(RPC_URL);
+  const accounts = await httpProvider.listAccounts();
   signer = accounts[0];
+
+  // 이벤트 구독용 WebSocket provider
+  provider = new ethers.WebSocketProvider(WS_URL);
+  console.log('[Blockchain] WebSocket 연결:', WS_URL);
 
   // ABI: 아티팩트 우선, 없으면 최소 ABI
   let abi;
@@ -109,8 +116,11 @@ async function init() {
     console.log('[Blockchain] 최소 ABI 사용 (아티팩트 없음)');
   }
 
-  contract = new ethers.Contract(address, abi, signer);
-  console.log('[Blockchain] 연결 완료:', address);
+  // 이벤트 구독용 (WebSocket) + 읽기
+  contract = new ethers.Contract(address, abi, provider);
+  // 트랜잭션 전송용 (HTTP signer)
+  writeContract = new ethers.Contract(address, abi, signer);
+  console.log('[Blockchain] 연결 완료:', address, '(WS 구독 + HTTP 트랜잭션)');
 
   // 메타데이터 로드
   loadMetadata();
@@ -168,9 +178,11 @@ async function init() {
   saveLastBlock(currentBlock);
 
   // 이벤트 구독 (실시간) — 블록 번호도 함께 저장
+  console.log('[이벤트 등록] SpotCreated 리스너 등록');
   contract.on('SpotCreated', async (spotId, creator, reward, deposit, name, description, lat, lng, ev) => {
     const id = Number(spotId);
-    console.log('[이벤트] SpotCreated', id);
+    const blockNum = ev?.log?.blockNumber ?? '?';
+    console.log(`[이벤트 수신] SpotCreated | spotId=${id} creator=${String(creator).slice(0,10)}... reward=${fromWei(reward)} deposit=${fromWei(deposit)} name="${name}" block=${blockNum}`);
     const meta = await fetchFullSpotFromContract(id);
     if (meta) {
       spotMetadata[id] = meta;
@@ -180,9 +192,11 @@ async function init() {
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
   });
 
+  console.log('[이벤트 등록] Redeposited 리스너 등록');
   contract.on('Redeposited', async (spotId, creator, amount, ev) => {
     const id = Number(spotId);
-    console.log('[이벤트] Redeposited', id);
+    const blockNum = ev?.log?.blockNumber ?? '?';
+    console.log(`[이벤트 수신] Redeposited | spotId=${id} creator=${String(creator).slice(0,10)}... amount=${fromWei(amount)} block=${blockNum}`);
     const meta = await fetchFullSpotFromContract(id);
     if (meta) {
       spotMetadata[id] = meta;
@@ -192,9 +206,11 @@ async function init() {
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
   });
 
+  console.log('[이벤트 등록] CooldownUpdated 리스너 등록');
   contract.on('CooldownUpdated', async (spotId, newCooldown, ev) => {
     const id = Number(spotId);
-    console.log('[이벤트] CooldownUpdated', id, Number(newCooldown));
+    const blockNum = ev?.log?.blockNumber ?? '?';
+    console.log(`[이벤트 수신] CooldownUpdated | spotId=${id} cooldown=${Number(newCooldown)} block=${blockNum}`);
     const meta = await fetchFullSpotFromContract(id);
     if (meta) {
       spotMetadata[id] = meta;
@@ -204,9 +220,11 @@ async function init() {
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
   });
 
+  console.log('[이벤트 등록] AllowDuplicateClaimsUpdated 리스너 등록');
   contract.on('AllowDuplicateClaimsUpdated', async (spotId, allow, ev) => {
     const id = Number(spotId);
-    console.log('[이벤트] AllowDuplicateClaimsUpdated', id, allow);
+    const blockNum = ev?.log?.blockNumber ?? '?';
+    console.log(`[이벤트 수신] AllowDuplicateClaimsUpdated | spotId=${id} allow=${allow} block=${blockNum}`);
     const meta = await fetchFullSpotFromContract(id);
     if (meta) {
       spotMetadata[id] = meta;
@@ -216,9 +234,11 @@ async function init() {
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
   });
 
+  console.log('[이벤트 등록] Claimed 리스너 등록');
   contract.on('Claimed', async (spotId, user, reward, bonus, stamp, timestamp, ev) => {
     const id = Number(spotId);
-    console.log('[이벤트] Claimed', id, String(user).slice(0, 10) + '...');
+    const blockNum = ev?.log?.blockNumber ?? '?';
+    console.log(`[이벤트 수신] Claimed | spotId=${id} user=${String(user).slice(0,10)}... reward=${fromWei(reward)} bonus=${fromWei(bonus)} stamp=${Number(stamp)} block=${blockNum}`);
     await saveClaimEvent({
       spotId: id,
       user,
@@ -236,10 +256,20 @@ async function init() {
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
   });
 
+  console.log('[이벤트 등록] TelegramClaimed 리스너 등록');
   contract.on('TelegramClaimed', async (spotId, telegramHash, reward, bonus, stamp, timestamp, ev) => {
     const id = Number(spotId);
     const hashHex = telegramHash.slice(2); // 0x 제거
-    console.log('[이벤트] TelegramClaimed', id, hashHex.slice(0, 10) + '...');
+    const blockNum = ev?.log?.blockNumber ?? '?';
+    console.log(`[이벤트 수신] TelegramClaimed | spotId=${id} hash=${hashHex.slice(0,10)}... reward=${fromWei(reward)} bonus=${fromWei(bonus)} stamp=${Number(stamp)} block=${blockNum}`);
+
+    // 스팟 메타데이터 갱신 (remaining 등 최신 상태 반영)
+    const meta = await fetchFullSpotFromContract(id);
+    if (meta) {
+      spotMetadata[id] = meta;
+      saveMetadata();
+      await syncSpotToFirestore(id, meta);
+    }
 
     if (telegramClaimedCallback) {
       try {
@@ -266,7 +296,7 @@ async function init() {
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
   });
 
-  console.log('[이벤트 구독] SpotCreated, Redeposited, CooldownUpdated, AllowDuplicateClaimsUpdated, Claimed, TelegramClaimed');
+  console.log('[이벤트 등록 완료] 6개 이벤트 리스너 등록됨');
 }
 
 // ─── 컨트랙트 조회 함수들 ───
@@ -439,7 +469,7 @@ async function getTelegramLinkedWallet(telegramHash) {
 }
 
 async function linkTelegramToWallet(telegramHash, walletAddress) {
-  const tx = await contract.linkTelegramToWallet('0x' + telegramHash, toAddr(walletAddress));
+  const tx = await writeContract.linkTelegramToWallet('0x' + telegramHash, toAddr(walletAddress));
   const receipt = await tx.wait();
 
   const event = receipt.logs
@@ -457,7 +487,7 @@ async function linkTelegramToWallet(telegramHash, walletAddress) {
 }
 
 async function claimToTelegram(spotId, telegramHash) {
-  const tx = await contract.claimToTelegram(spotId, '0x' + telegramHash);
+  const tx = await writeContract.claimToTelegram(spotId, '0x' + telegramHash);
   const receipt = await tx.wait();
 
   const event = receipt.logs
@@ -499,7 +529,7 @@ async function getPhoneStampInfo(spotId, phoneHash) {
 // ─── 스팟 설정 ───
 
 async function updateAllowDuplicateClaims(spotId, allow) {
-  const tx = await contract.updateAllowDuplicateClaims(spotId, allow);
+  const tx = await writeContract.updateAllowDuplicateClaims(spotId, allow);
   await tx.wait();
 }
 

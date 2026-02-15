@@ -82,10 +82,24 @@ async function saveTelegramHashMap(hash, username) {
   }
 }
 
+async function saveWalletTelegramLink(walletAddress, telegramHash) {
+  if (!db) return;
+  try {
+    await db.collection('telegram_wallet_links').doc(walletAddress.toLowerCase()).set({
+      telegram_hash: telegramHash,
+      updated_at: new Date().toISOString(),
+    }, { merge: true });
+    console.log('[Firestore] telegram_wallet_links 저장:', walletAddress.slice(0, 10) + '...');
+  } catch (e) {
+    console.error('[Firestore] telegram_wallet_links 저장 실패:', e.message);
+  }
+}
+
 module.exports = {
   db,
   syncSpotToFirestore,
   saveClaimEvent,
   getTelegramUsernameByHash,
   saveTelegramHashMap,
+  saveWalletTelegramLink,
 };

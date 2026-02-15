@@ -1,5 +1,5 @@
-require('dotenv').config();
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
@@ -7,6 +7,7 @@ const { init, onTelegramClaimed } = require('./blockchain');
 const blockchain = require('./blockchain');
 const { initBot, sendClaimNotification } = require('./telegram-bot');
 const { hashTelegramId, isValidTelegramUsername } = require('./utils');
+const { saveWalletTelegramLink, saveTelegramHashMap } = require('./firebase-admin');
 
 const DB_PATH = process.env.DATABASE_PATH
   ? path.isAbsolute(process.env.DATABASE_PATH)
@@ -146,11 +147,41 @@ function startHttpServer() {
   });
 }
 
+async function syncTelegramDataToFirestore(db) {
+  return new Promise((resolve) => {
+    let count = 0;
+    // 1. wallet → hash 매핑
+    db.all('SELECT wallet_address, telegram_hash FROM telegram_wallet_links', async (err, rows) => {
+      if (!err && rows && rows.length > 0) {
+        for (const row of rows) {
+          await saveWalletTelegramLink(row.wallet_address, row.telegram_hash);
+          count++;
+        }
+      }
+      // 2. hash → username 매핑
+      db.all('SELECT telegram_hash, telegram_username FROM telegram_hash_username', async (err2, rows2) => {
+        if (!err2 && rows2 && rows2.length > 0) {
+          for (const row of rows2) {
+            await saveTelegramHashMap(row.telegram_hash, row.telegram_username);
+            count++;
+          }
+        }
+        if (count > 0) console.log(`[동기화] SQLite → Firestore: ${count}건 동기화 완료`);
+        resolve();
+      });
+    });
+  });
+}
+
 async function main() {
   console.log('[Listener] 블록체인 이벤트 리스너 시작');
   try {
     const db = await initTelegramDb();
     await init();
+
+    // SQLite → Firestore 동기화 (에뮬레이터 재시작 시 데이터 복구)
+    await syncTelegramDataToFirestore(db);
+
     initBot(db);
 
     // TelegramClaimed 이벤트 → 텔레그램 알림 자동 전송

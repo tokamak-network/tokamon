@@ -2,7 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const crypto = require('crypto');
 const blockchain = require('./blockchain');
 const { hashTelegramId, isValidEthAddress } = require('./utils');
-const { saveTelegramHashMap } = require('./firebase-admin');
+const { saveTelegramHashMap, saveWalletTelegramLink } = require('./firebase-admin');
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const WEB_URL = process.env.WEB_URL || 'http://localhost:5173';
@@ -220,6 +220,9 @@ Please try again or type /cancel to cancel.
             console.log(`✅ 지갑-해시 매핑 저장: ${address} <-> ${telegramHash}`);
           }
         });
+
+        // Firestore에도 저장
+        await saveWalletTelegramLink(address, telegramHash);
 
         // 2. 텔레그램 해시 <-> username 매핑
         db.run(`
