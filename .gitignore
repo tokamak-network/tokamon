@@ -128,3 +128,23 @@ anvil-state.json
 *.backup
 *.bak
 *~
+
+# Firebase Emulator logs
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Listener-server runtime/generated files
+listener-server/contract-address.json
+listener-server/last-block.json
+listener-server/spot-metadata.json
+listener-server/firebase-debug.log
+
+# Old/backup HTML
+client/index_old.html
+
+# Root-level forge-std (duplicate of contracts/lib)
+/lib/
+
+# Project status (local notes)
+STATUS.md
