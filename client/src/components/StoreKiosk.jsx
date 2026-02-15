@@ -276,20 +276,16 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
 
       setMessage(`✅ ${selectedSpot.reward} TON ${t(language, 'claimCompleted')}${bonusText}`);
 
-      // 컨트랙트에서 직접 최신 remaining 조회 (Firestore 동기화 지연 방지)
+      // 컨트랙트에서 직접 최신 remaining 조회
       try {
         const spotData = await contract.getSpot(selectedSpot.id);
         const freshRemaining = Number(ethers.formatEther(spotData.remaining ?? spotData[6]));
+        console.log('[Kiosk] getSpot 성공 | remaining:', freshRemaining, '(이전:', selectedSpot.remaining, ')');
         const updatedSpot = { ...selectedSpot, remaining: freshRemaining };
         setSelectedSpot(updatedSpot);
         setSpots(prev => prev.map(s => s.id === selectedSpot.id ? { ...s, remaining: freshRemaining } : s));
-      } catch (_) {
-        // 컨트랙트 조회 실패 시 API로 대체
-        const res = await fetch(`${API}/api/spots`);
-        const freshSpots = await res.json();
-        setSpots(freshSpots);
-        const updated = freshSpots.find(s => s.id === selectedSpot.id);
-        if (updated) setSelectedSpot(updated);
+      } catch (err) {
+        console.error('[Kiosk] getSpot 실패:', err);
       }
     } catch (err) {
       console.error('클레임 에러:', err);

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getStampInfo } from '../api';
-import { redepositSelf, claimSelf } from '../contract';
+import { redepositSelf, claimSelf, getStampInfoFromContract } from '../contract';
 import { Spinner } from './Spinner';
 import { t } from '../translations';
 
@@ -33,7 +32,9 @@ export default function SpotInfo({ spot, userPos, wallet, role, language = 'ko',
       setStampInfo(null);
       return;
     }
-    getStampInfo(spot.id, wallet).then(setStampInfo).catch(() => {});
+    getStampInfoFromContract(spot.id, wallet).then(setStampInfo).catch((err) => {
+      console.error('[SpotInfo] getStampInfo 실패:', err);
+    });
   }, [spot, wallet]);
 
   if (!spot) return null;
@@ -55,7 +56,7 @@ export default function SpotInfo({ spot, userPos, wallet, role, language = 'ko',
   const [claiming, setClaiming] = useState(false);
 
   const canClaim = wallet && !isOwner && !isExhausted && !isOnCooldown && spot.active;
-  const COLLECT_RADIUS = 50;
+  const COLLECT_RADIUS = 10;
 
   const handleClaim = async () => {
     if (!canClaim || !wallet) return;
@@ -101,10 +102,10 @@ export default function SpotInfo({ spot, userPos, wallet, role, language = 'ko',
         {spot.start_time || spot.end_time
           ? `${spot.start_time ? new Date(spot.start_time * 1000).toLocaleString() : ''} ~ ${spot.end_time ? new Date(spot.end_time * 1000).toLocaleString() : ''}`
           : t(language, 'alwaysActive')}
-        {distance !== null && ` | ${distance}m`}
       </div>
       <div className="detail" style={{ color: '#fbbf24' }}>
         {t(language, 'rewardLabel')}: {spot.reward} TON | {t(language, 'remainingTONLabel')}: {spot.remaining}
+        {distance !== null && <span style={{ color: '#94a3b8', marginLeft: 8 }}>📍 {distance}m</span>}
       </div>
 
       {/* Stamp progress - only show when wallet connected */}
@@ -119,11 +120,6 @@ export default function SpotInfo({ spot, userPos, wallet, role, language = 'ko',
           <div className="stamp-bar">
             <div className="stamp-fill" style={{ width: `${stampPercent}%` }} />
           </div>
-          {isOnCooldown && (
-            <div className="cooldown-text">
-              {t(language, 'nextClaimIn')} {formatCooldown(cooldownLeft, language)}
-            </div>
-          )}
         </div>
       )}
 

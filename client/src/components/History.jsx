@@ -100,10 +100,6 @@ export default function History({ history, balance = 0, account, language = 'ko'
   };
 
   const handleUnlinkTelegram = async () => {
-    if (telegramBalance > 0) {
-      showToast?.('error', t(language, 'unlinkClaimFirst'));
-      return;
-    }
     if (!window.confirm(t(language, 'unlinkConfirm'))) return;
 
     setUnlinking(true);
@@ -114,7 +110,9 @@ export default function History({ history, balance = 0, account, language = 'ko'
       setTelegramHash(null);
       setTelegramBalance(0);
     } catch (err) {
-      showToast?.('error', err.message || t(language, 'unlinkError'));
+      console.error('[Unlink] 실패:', err);
+      console.error('[Unlink] reason:', err.reason, '| code:', err.code, '| data:', err.data);
+      showToast?.('error', err.reason || err.message || t(language, 'unlinkError'));
     } finally {
       setUnlinking(false);
     }
@@ -199,44 +197,6 @@ export default function History({ history, balance = 0, account, language = 'ko'
         </div>
       </div>
 
-      {/* 클레임 기록 */}
-      <div className="history-list">
-        {(!history || history.length === 0) ? (
-          <div className="history-empty">
-            {t(language, 'noClaimHistory')}
-          </div>
-        ) : (
-          <>
-            {history.map((item, idx) => {
-              const hasBonus = item.bonus && item.bonus > 0;
-              const totalReward = (item.reward || 0) + (item.bonus || 0);
-              return (
-                <div key={idx} className="history-item">
-                  <div className="history-item-top">
-                    <span className="history-item-name">{item.spot_name || `스팟 #${item.spot_id}`}</span>
-                    <span className="history-item-amount">
-                      +{totalReward} TON
-                    </span>
-                  </div>
-                  <div className="history-item-detail">
-                    {formatTime(item.timestamp)}
-                    {item.stamp !== undefined && (
-                      <span className="history-item-stamp">
-                        스탬프 {item.stamp}/{item.stamp_goal || '?'}
-                      </span>
-                    )}
-                  </div>
-                  {hasBonus && (
-                    <div className="history-item-bonus">
-                      스탬프 달성 보너스 +{item.bonus} TON
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </>
-        )}
-      </div>
     </div>
   );
 }

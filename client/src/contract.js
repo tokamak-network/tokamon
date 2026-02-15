@@ -17,6 +17,7 @@ const ABI = [
   'function unlinkTelegram() external',
   'function nextSpotId() external view returns (uint256)',
   'function getSpot(uint256) view returns (tuple(address creator, bool allowDuplicateClaims, uint48 cooldown, uint128 stampGoal, uint128 stampBonus, uint256 reward, uint256 remaining, int96 lat, int96 lng, uint64 startTime, uint64 endTime, string name, string description))',
+  'function getStampInfo(uint256 spotId, address user) view returns (uint256 stamps, uint256 goal, uint256 lastClaim, uint256 cooldownRemaining)',
   'event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit, string name, string description, int96 lat, int96 lng)',
   'event Claimed(uint256 indexed spotId, address indexed user, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp)',
 ];
@@ -210,6 +211,18 @@ export async function unlinkTelegram() {
   const { contract } = await getSignerAndContract();
   const tx = await contract.unlinkTelegram();
   await tx.wait();
+}
+
+// 스탬프 정보 조회 (컨트랙트에서 직접)
+export async function getStampInfoFromContract(spotId, userAddress) {
+  const { contract } = await getSignerAndContract();
+  const info = await contract.getStampInfo(spotId, userAddress);
+  return {
+    stamps: Number(info.stamps),
+    goal: Number(info.goal),
+    last_claim: Number(info.lastClaim),
+    cooldown_remaining: Number(info.cooldownRemaining),
+  };
 }
 
 // 스팟별 클래임 히스토리 조회 (컨트랙트 이벤트 직접 조회)

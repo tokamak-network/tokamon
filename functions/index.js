@@ -221,7 +221,7 @@ app.get('/api/stamps/:spotId', async (req, res) => {
 
 const crypto = require('crypto');
 
-const COLLECT_RADIUS = 50; // 클레임 허용 거리 (미터)
+const COLLECT_RADIUS = 10; // 클레임 허용 거리 (미터)
 
 // [#4] salt를 환경변수에서 읽기 (하드코딩 제거)
 function hashTelegramId(username) {
