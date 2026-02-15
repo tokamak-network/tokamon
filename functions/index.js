@@ -12,10 +12,7 @@ const fs = require('fs');
 
 admin.initializeApp();
 
-// 필수 환경변수 검증
-if (!process.env.TELEGRAM_HASH_SALT) {
-  console.error('❌ TELEGRAM_HASH_SALT 환경변수가 설정되지 않았습니다.');
-}
+// TELEGRAM_HASH_SALT는 hashTelegramId() 호출 시 검증됨
 
 const app = express();
 
@@ -404,6 +401,55 @@ app.post('/api/telegram/hash', async (req, res) => {
   } catch (err) {
     console.error('해시 생성 에러:', err.message);
     res.status(500).json({ error: '해시 생성에 실패했습니다.' });
+  }
+});
+
+// GET /api/telegram/username/:hash — 텔레그램 해시로 username 조회
+app.get('/api/telegram/username/:hash', async (req, res) => {
+  try {
+    const { hash } = req.params;
+    if (!hash || !/^[0-9a-fA-F]{64}$/.test(hash)) {
+      return res.status(400).json({ error: '올바르지 않은 해시입니다' });
+    }
+
+    const doc = await db.collection('telegram_hash_map').doc(hash).get();
+    if (!doc.exists) {
+      return res.json({ telegram_username: null });
+    }
+
+    res.json({ telegram_username: '@' + doc.data().username });
+  } catch (err) {
+    console.error('텔레그램 username 조회 에러:', err.message);
+    res.status(500).json({ error: '조회에 실패했습니다.' });
+  }
+});
+
+// GET /api/telegram/linked/:wallet — 지갑에 연결된 텔레그램 계정 조회
+app.get('/api/telegram/linked/:wallet', async (req, res) => {
+  try {
+    const { wallet } = req.params;
+    if (!wallet || !/^0x[0-9a-fA-F]{40}$/.test(wallet)) {
+      return res.status(400).json({ error: '올바르지 않은 지갑 주소입니다' });
+    }
+
+    const linkDoc = await db.collection('telegram_wallet_links').doc(wallet.toLowerCase()).get();
+    if (!linkDoc.exists) {
+      return res.json({ linked: false, telegram_hash: null, telegram_username: null });
+    }
+
+    const { telegram_hash } = linkDoc.data();
+    let username = null;
+    if (telegram_hash) {
+      const hashDoc = await db.collection('telegram_hash_map').doc(telegram_hash).get();
+      if (hashDoc.exists) {
+        username = '@' + hashDoc.data().username;
+      }
+    }
+
+    res.json({ linked: true, telegram_hash, telegram_username: username });
+  } catch (err) {
+    console.error('텔레그램 연결 조회 에러:', err.message);
+    res.status(500).json({ error: '조회에 실패했습니다.' });
   }
 });
 
