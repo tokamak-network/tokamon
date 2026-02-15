@@ -22,7 +22,7 @@ const DEFAULT_REGION = {
   longitudeDelta: 0.01,
 };
 
-export default function MapScreen({ wallet, language = 'ko', onRefreshSpots }) {
+export default function MapScreen({ route, wallet, language = 'ko', onRefreshSpots }) {
   const { userPos, gpsStatus } = useLocation();
   const [spots, setSpots] = useState([]);
   const [selectedSpot, setSelectedSpot] = useState(null);
@@ -77,6 +77,20 @@ export default function MapScreen({ wallet, language = 'ko', onRefreshSpots }) {
       }, 1000);
     }
   }, [spots, userPos]);
+
+  // Handle selectedSpot from SpotListScreen navigation
+  useEffect(() => {
+    const incoming = route?.params?.selectedSpot;
+    if (incoming && mapRef.current) {
+      setSelectedSpot(incoming);
+      mapRef.current.animateToRegion({
+        latitude: incoming.lat,
+        longitude: incoming.lng,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      }, 500);
+    }
+  }, [route?.params?.selectedSpot]);
 
   const handleSpotPress = (spot) => {
     setSelectedSpot(spot);
@@ -157,6 +171,7 @@ export default function MapScreen({ wallet, language = 'ko', onRefreshSpots }) {
         showsUserLocation={true}
         showsMyLocationButton={false}
         showsCompass={true}
+        userInterfaceStyle="light"
       >
         {/* User radius circle */}
         {userPos && (
