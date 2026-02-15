@@ -15,7 +15,7 @@ export const translations = {
     // 탭
     map: '지도',
     spotList: '스팟 목록',
-    myTokamon: '내역',
+    myTokamon: '나의 토카몬',
     settings: '설정',
 
     // 스팟 리스트
@@ -110,6 +110,17 @@ export const translations = {
     inactiveStatus: '비활성',
     remainingTON: '남은 TON',
 
+    // 디바이스 클레임
+    deviceBalance: '기기 적립금',
+    enterVerificationCode: '인증번호를 입력하세요',
+    requestingCode: '인증번호 요청 중...',
+    verify: '확인',
+    linkDevice: '기기 연결',
+    deviceLinked: '기기 연결됨',
+    connectWalletToWithdraw: '지갑을 연결하면 적립금을 출금할 수 있습니다',
+    claimWithoutWallet: '지갑 없이 클레임',
+    tooFarShort: '너무 멀어요',
+
     // GPS
     gpsLoading: '위치를 찾고 있습니다...',
     gpsDenied: '위치 권한이 거부되었습니다. 설정에서 위치 권한을 허용해주세요.',
@@ -130,7 +141,7 @@ export const translations = {
     // Tabs
     map: 'Map',
     spotList: 'Spots',
-    myTokamon: 'History',
+    myTokamon: 'My Tokamon',
     settings: 'Settings',
 
     // Spot List
@@ -224,6 +235,17 @@ export const translations = {
     activeStatus: 'Active',
     inactiveStatus: 'Inactive',
     remainingTON: 'Remaining TON',
+
+    // Device Claim
+    deviceBalance: 'Device Balance',
+    enterVerificationCode: 'Enter verification code',
+    requestingCode: 'Requesting code...',
+    verify: 'Verify',
+    linkDevice: 'Link Device',
+    deviceLinked: 'Device Linked',
+    connectWalletToWithdraw: 'Connect wallet to withdraw your balance',
+    claimWithoutWallet: 'Claim without wallet',
+    tooFarShort: 'Too far',
 
     // GPS
     gpsLoading: 'Finding your location...',

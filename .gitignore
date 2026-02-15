@@ -78,6 +78,7 @@ client/nohup.out
 **/*.key
 **/secrets.json
 **/credentials.json
+**/serviceAccountKey.json
 
 # Database files
 *.db

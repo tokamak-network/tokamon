@@ -95,6 +95,44 @@ async function saveWalletTelegramLink(walletAddress, telegramHash) {
   }
 }
 
+async function sendPushNotification(fcmToken, title, body, data = {}) {
+  if (!admin.apps.length) {
+    console.warn('[FCM] Firebase Admin 미초기화 - 푸시 전송 불가');
+    return false;
+  }
+  try {
+    const message = {
+      token: fcmToken,
+      notification: { title, body },
+      data: Object.fromEntries(
+        Object.entries(data).map(([k, v]) => [k, String(v)])
+      ),
+    };
+    const result = await admin.messaging().send(message);
+    console.log('[FCM] 푸시 전송 성공:', result);
+    return true;
+  } catch (e) {
+    console.error('[FCM] 푸시 전송 실패:', e.message);
+    return false;
+  }
+}
+
+async function saveDeviceClaimEvent(event) {
+  if (!db) return;
+  try {
+    await db.collection('device_claim_events').add({
+      spot_id: event.spotId,
+      device_hash: event.deviceHash,
+      reward: event.reward,
+      bonus: event.bonus,
+      stamp: event.stamp,
+      created_at: new Date().toISOString(),
+    });
+  } catch (e) {
+    console.error('[Firestore] device_claim_events 저장 실패:', e.message);
+  }
+}
+
 module.exports = {
   db,
   syncSpotToFirestore,
@@ -102,4 +140,6 @@ module.exports = {
   getTelegramUsernameByHash,
   saveTelegramHashMap,
   saveWalletTelegramLink,
+  sendPushNotification,
+  saveDeviceClaimEvent,
 };

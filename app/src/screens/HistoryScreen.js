@@ -10,21 +10,58 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
-import { getTelegramLinked } from '../services/api';
+import { getTelegramLinked, getDeviceBalance as getDeviceBalanceApi, linkDeviceToWallet as linkDeviceToWalletApi } from '../services/api';
 import {
   getWalletLinkedTelegram,
   getTelegramBalanceContract,
   claimTelegramToWallet,
+  getDeviceBalanceContract,
+  getWalletLinkedDevice,
+  claimDeviceToWalletContract,
 } from '../services/contract';
 import { t } from '../utils/translations';
 
-export default function HistoryScreen({ wallet, language = 'ko', onBalanceChange }) {
+export default function HistoryScreen({ wallet, pushToken, language = 'ko', onBalanceChange }) {
   const [refreshing, setRefreshing] = useState(false);
+  // Telegram state
   const [linkedTelegram, setLinkedTelegram] = useState(null);
   const [telegramHash, setTelegramHash] = useState(null);
   const [telegramBalance, setTelegramBalance] = useState(0);
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(false);
+  // Device state
+  const [deviceBalance, setDeviceBalance] = useState(0);
+  const [deviceHash, setDeviceHash] = useState(null);
+  const [deviceLinked, setDeviceLinked] = useState(false);
+  const [deviceLoading, setDeviceLoading] = useState(false);
+  const [deviceClaiming, setDeviceClaiming] = useState(false);
+  const [deviceLinking, setDeviceLinking] = useState(false);
+
+  const fetchDeviceInfo = useCallback(async () => {
+    if (!pushToken) return;
+    setDeviceLoading(true);
+    try {
+      const data = await getDeviceBalanceApi(pushToken);
+      setDeviceBalance(data.balance || 0);
+      setDeviceHash(data.device_hash || null);
+
+      // 지갑이 연결되어 있으면 디바이스 연결 상태 확인
+      if (wallet) {
+        try {
+          const linked = await getWalletLinkedDevice(wallet);
+          const zeroHash = '0x0000000000000000000000000000000000000000000000000000000000000000';
+          setDeviceLinked(linked && linked !== zeroHash);
+        } catch {
+          setDeviceLinked(false);
+        }
+      }
+    } catch {
+      setDeviceBalance(0);
+      setDeviceHash(null);
+    } finally {
+      setDeviceLoading(false);
+    }
+  }, [pushToken, wallet]);
 
   const fetchLinkedTelegram = useCallback(async () => {
     if (!wallet) return;
@@ -69,11 +106,12 @@ export default function HistoryScreen({ wallet, language = 'ko', onBalanceChange
 
   useEffect(() => {
     fetchLinkedTelegram();
-  }, [fetchLinkedTelegram]);
+    fetchDeviceInfo();
+  }, [fetchLinkedTelegram, fetchDeviceInfo]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchLinkedTelegram();
+    await Promise.all([fetchLinkedTelegram(), fetchDeviceInfo()]);
     setRefreshing(false);
   };
 
@@ -91,6 +129,82 @@ export default function HistoryScreen({ wallet, language = 'ko', onBalanceChange
       setClaiming(false);
     }
   };
+
+  // 디바이스 → 지갑 연결
+  const handleLinkDevice = async () => {
+    if (!pushToken || !wallet) return;
+    setDeviceLinking(true);
+    try {
+      await linkDeviceToWalletApi(pushToken, wallet);
+      Alert.alert('', t(language, 'deviceLinked'));
+      setDeviceLinked(true);
+      await fetchDeviceInfo();
+      onBalanceChange?.();
+    } catch (err) {
+      Alert.alert('Error', err.message || 'Link failed');
+    } finally {
+      setDeviceLinking(false);
+    }
+  };
+
+  // 디바이스 잔액 → 지갑으로 출금
+  const handleDeviceClaimToWallet = async () => {
+    if (!deviceHash || deviceBalance <= 0) return;
+    setDeviceClaiming(true);
+    try {
+      await claimDeviceToWalletContract('0x' + deviceHash);
+      Alert.alert('', `${deviceBalance.toFixed(4)} TON transferred to wallet!`);
+      await fetchDeviceInfo();
+      onBalanceChange?.();
+    } catch (err) {
+      Alert.alert('Error', err.message || 'Claim failed');
+    } finally {
+      setDeviceClaiming(false);
+    }
+  };
+
+  // 지갑 미연결이지만 디바이스 토큰이 있는 경우
+  if (!wallet && pushToken) {
+    return (
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4FC3F7" />
+        }
+      >
+        {/* Device balance section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionIcon}>📱</Text>
+            <Text style={styles.sectionLabel}>{t(language, 'deviceBalance')}</Text>
+          </View>
+          {deviceLoading ? (
+            <View style={styles.loadingRow}>
+              <ActivityIndicator size="small" color="#4FC3F7" />
+              <Text style={styles.loadingText}>{t(language, 'loading')}</Text>
+            </View>
+          ) : (
+            <View>
+              <View style={styles.balanceSection}>
+                <Text style={styles.balanceLabel}>{t(language, 'tonBalance')}</Text>
+                <View style={styles.balanceRow}>
+                  <Text style={styles.balanceAmount}>
+                    {deviceBalance.toFixed(4)} TON
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.connectWalletGuide}>
+                <Text style={styles.connectWalletText}>
+                  {t(language, 'connectWalletToWithdraw')}
+                </Text>
+              </View>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    );
+  }
 
   if (!wallet) {
     return (
@@ -128,6 +242,78 @@ export default function HistoryScreen({ wallet, language = 'ko', onBalanceChange
           </Text>
         </View>
       </View>
+
+      {/* Device balance section */}
+      {pushToken && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionIcon}>📱</Text>
+            <Text style={styles.sectionLabel}>{t(language, 'deviceBalance')}</Text>
+          </View>
+
+          {deviceLoading ? (
+            <View style={styles.loadingRow}>
+              <ActivityIndicator size="small" color="#4FC3F7" />
+              <Text style={styles.loadingText}>{t(language, 'loading')}</Text>
+            </View>
+          ) : (
+            <View>
+              <View style={styles.balanceSection}>
+                <Text style={styles.balanceLabel}>{t(language, 'tonBalance')}</Text>
+                <View style={styles.balanceRow}>
+                  <Text style={styles.balanceAmount}>
+                    {deviceBalance.toFixed(4)} TON
+                  </Text>
+                </View>
+              </View>
+
+              {/* Link device + Withdraw buttons */}
+              <View style={styles.deviceActions}>
+                {!deviceLinked ? (
+                  <TouchableOpacity
+                    style={[styles.claimBtn, styles.linkBtn, deviceLinking && styles.claimBtnDisabled]}
+                    onPress={handleLinkDevice}
+                    disabled={deviceLinking}
+                    activeOpacity={0.7}
+                  >
+                    {deviceLinking ? (
+                      <View style={styles.claimBtnInner}>
+                        <ActivityIndicator size="small" color="#fff" />
+                        <Text style={styles.claimBtnText}>{t(language, 'processing')}</Text>
+                      </View>
+                    ) : (
+                      <Text style={styles.claimBtnText}>{t(language, 'linkDevice')}</Text>
+                    )}
+                  </TouchableOpacity>
+                ) : (
+                  <View style={styles.linkedBadge}>
+                    <Text style={styles.checkIcon}>✅</Text>
+                    <Text style={styles.linkedText}>{t(language, 'deviceLinked')}</Text>
+                  </View>
+                )}
+
+                {deviceLinked && deviceBalance > 0 && (
+                  <TouchableOpacity
+                    style={[styles.claimBtn, deviceClaiming && styles.claimBtnDisabled]}
+                    onPress={handleDeviceClaimToWallet}
+                    disabled={deviceClaiming}
+                    activeOpacity={0.7}
+                  >
+                    {deviceClaiming ? (
+                      <View style={styles.claimBtnInner}>
+                        <ActivityIndicator size="small" color="#fff" />
+                        <Text style={styles.claimBtnText}>{t(language, 'processing')}</Text>
+                      </View>
+                    ) : (
+                      <Text style={styles.claimBtnText}>{t(language, 'claimToWallet')}</Text>
+                    )}
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          )}
+        </View>
+      )}
 
       {/* Telegram section */}
       <View style={styles.section}>
@@ -264,11 +450,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
   },
-  emptyText: {
-    color: '#666',
-    fontSize: 15,
-    textAlign: 'center',
-  },
   section: {
     backgroundColor: '#12122a',
     borderRadius: 16,
@@ -381,6 +562,10 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: -0.3,
   },
+  deviceActions: {
+    marginTop: 12,
+    gap: 8,
+  },
   claimBtn: {
     backgroundColor: '#10b981',
     paddingVertical: 10,
@@ -391,6 +576,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 4,
+  },
+  linkBtn: {
+    backgroundColor: '#3b82f6',
+    shadowColor: '#3b82f6',
   },
   claimBtnDisabled: {
     backgroundColor: '#333',
@@ -405,6 +594,22 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 13,
     fontWeight: '700',
+    textAlign: 'center',
+  },
+  connectWalletGuide: {
+    marginTop: 12,
+    backgroundColor: 'rgba(251,191,36,0.08)',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(251,191,36,0.15)',
+  },
+  connectWalletText: {
+    color: '#fbbf24',
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   guideBox: {
     backgroundColor: 'rgba(255,255,255,0.03)',

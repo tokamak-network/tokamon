@@ -22,9 +22,15 @@ let writeContract;   // HTTP signer (트랜잭션 전송)
 
 // TelegramClaimed 이벤트 알림 콜백
 let telegramClaimedCallback = null;
+// DeviceClaimed 이벤트 알림 콜백
+let deviceClaimedCallback = null;
 
 function onTelegramClaimed(callback) {
   telegramClaimedCallback = callback;
+}
+
+function onDeviceClaimed(callback) {
+  deviceClaimedCallback = callback;
 }
 
 // 스팟 메타데이터 캐시
@@ -296,7 +302,47 @@ async function init() {
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
   });
 
-  console.log('[이벤트 등록 완료] 6개 이벤트 리스너 등록됨');
+  console.log('[이벤트 등록] DeviceClaimed 리스너 등록');
+  contract.on('DeviceClaimed', async (spotId, deviceHash, reward, bonus, stamp, timestamp, ev) => {
+    const id = Number(spotId);
+    const hashHex = deviceHash.slice(2);
+    const blockNum = ev?.log?.blockNumber ?? '?';
+    console.log(`[이벤트 수신] DeviceClaimed | spotId=${id} hash=${hashHex.slice(0,10)}... reward=${fromWei(reward)} bonus=${fromWei(bonus)} stamp=${Number(stamp)} block=${blockNum}`);
+
+    const meta = await fetchFullSpotFromContract(id);
+    if (meta) {
+      spotMetadata[id] = meta;
+      saveMetadata();
+      await syncSpotToFirestore(id, meta);
+    }
+
+    if (deviceClaimedCallback) {
+      try {
+        const spot = spotMetadata[id] || {};
+        await deviceClaimedCallback({
+          spotId: id,
+          spotName: spot.name || `Spot ${id}`,
+          deviceHash: hashHex,
+          reward: fromWei(reward),
+          bonus: fromWei(bonus),
+          stamp: Number(stamp),
+        });
+      } catch (e) {
+        console.error('[DeviceClaimed] 콜백 실패:', e.message);
+      }
+    }
+    if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
+  });
+
+  console.log('[이벤트 등록] DeviceLinked 리스너 등록');
+  contract.on('DeviceLinked', async (deviceHash, oldWallet, newWallet, ev) => {
+    const hashHex = deviceHash.slice(2);
+    const blockNum = ev?.log?.blockNumber ?? '?';
+    console.log(`[이벤트 수신] DeviceLinked | hash=${hashHex.slice(0,10)}... wallet=${String(newWallet).slice(0,10)}... oldWallet=${String(oldWallet).slice(0,10)}... block=${blockNum}`);
+    if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
+  });
+
+  console.log('[이벤트 등록 완료] 8개 이벤트 리스너 등록됨');
 }
 
 // ─── 컨트랙트 조회 함수들 ───
@@ -526,6 +572,67 @@ async function getPhoneStampInfo(spotId, phoneHash) {
   };
 }
 
+// ─── 디바이스 관련 ───
+
+async function claimByDevice(spotId, deviceHash) {
+  const fullHash = '0x' + deviceHash;
+  const tx = await writeContract.claimByDevice(spotId, fullHash);
+  const receipt = await tx.wait();
+
+  const event = receipt.logs
+    .map((log) => {
+      try { return contract.interface.parseLog(log); } catch (_) { return null; }
+    })
+    .find((e) => e && e.name === 'DeviceClaimed');
+
+  const bal = await contract.getDeviceBalance(fullHash);
+
+  if (event) {
+    return {
+      reward: fromWei(event.args.reward),
+      bonus: fromWei(event.args.bonus),
+      stamp: Number(event.args.stamp),
+      balance: fromWei(bal),
+    };
+  }
+  return { reward: 0, bonus: 0, stamp: 0, balance: fromWei(bal) };
+}
+
+async function getDeviceBalance(deviceHash) {
+  const fullHash = '0x' + deviceHash;
+  const bal = await contract.getDeviceBalance(fullHash);
+  return fromWei(bal);
+}
+
+async function getDeviceStampInfo(spotId, deviceHash) {
+  const fullHash = '0x' + deviceHash;
+  const info = await contract.getDeviceStampInfo(spotId, fullHash);
+  return {
+    stamps: Number(info.stamps),
+    goal: Number(info.goal),
+    last_claim: Number(info.lastClaim),
+    cooldown_remaining: Number(info.cooldownRemaining),
+  };
+}
+
+async function linkDeviceToWallet(deviceHash, walletAddress) {
+  const fullHash = '0x' + deviceHash;
+  const tx = await writeContract.linkDeviceToWallet(fullHash, toAddr(walletAddress));
+  const receipt = await tx.wait();
+
+  const event = receipt.logs
+    .map((log) => {
+      try { return contract.interface.parseLog(log); } catch (_) { return null; }
+    })
+    .find((e) => e && e.name === 'DeviceLinked');
+
+  return {
+    deviceHash,
+    wallet: walletAddress,
+    oldWallet: event ? event.args.oldWallet : null,
+  };
+}
+
 // ─── 스팟 설정 ───
 
 async function updateAllowDuplicateClaims(spotId, allow) {
@@ -536,6 +643,7 @@ async function updateAllowDuplicateClaims(spotId, allow) {
 module.exports = {
   init,
   onTelegramClaimed,
+  onDeviceClaimed,
   fetchSpotFromContract: fetchFullSpotFromContract,
   getSpot,
   getAllSpots,
@@ -550,5 +658,9 @@ module.exports = {
   claimToTelegram,
   getPhoneBalance,
   getPhoneStampInfo,
+  claimByDevice,
+  getDeviceBalance,
+  getDeviceStampInfo,
+  linkDeviceToWallet,
   updateAllowDuplicateClaims,
 };

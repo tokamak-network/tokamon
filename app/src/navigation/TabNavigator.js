@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import MapScreen from '../screens/MapScreen';
 import SpotListScreen from '../screens/SpotListScreen';
 import HistoryScreen from '../screens/HistoryScreen';
@@ -10,30 +11,32 @@ import { t } from '../utils/translations';
 const Tab = createBottomTabNavigator();
 
 const TAB_ICONS = {
-  MapTab: { icon: '🗺️', activeIcon: '🗺️' },
-  Spots: { icon: '📍', activeIcon: '📍' },
-  History: { icon: '📋', activeIcon: '📋' },
-  Settings: { icon: '⚙️', activeIcon: '⚙️' },
+  MapTab: { icon: 'map-outline', activeIcon: 'map' },
+  Spots: { icon: 'location-outline', activeIcon: 'location' },
+  History: { icon: 'person-outline', activeIcon: 'person' },
+  Settings: { icon: 'settings-outline', activeIcon: 'settings' },
 };
 
-function TabIcon({ routeName, focused }) {
-  const config = TAB_ICONS[routeName] || { icon: '•', activeIcon: '•' };
+function TabIcon({ routeName, focused, color }) {
+  const config = TAB_ICONS[routeName] || { icon: 'ellipse-outline', activeIcon: 'ellipse' };
 
   return (
     <View style={styles.tabIconContainer}>
       {focused && <View style={styles.activeIndicator} />}
-      <Text style={[styles.tabIcon, focused && styles.tabIconActive]}>
-        {focused ? config.activeIcon : config.icon}
-      </Text>
+      <Ionicons
+        name={focused ? config.activeIcon : config.icon}
+        size={focused ? 24 : 22}
+        color={color}
+      />
     </View>
   );
 }
 
-export default function TabNavigator({ wallet, language, onLanguageChange, onWalletDisconnect }) {
+export default function TabNavigator({ wallet, pushToken, language, onLanguageChange, onWalletDisconnect }) {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused }) => <TabIcon routeName={route.name} focused={focused} />,
+        tabBarIcon: ({ focused, color }) => <TabIcon routeName={route.name} focused={focused} color={color} />,
         tabBarActiveTintColor: '#4FC3F7',
         tabBarInactiveTintColor: '#666',
         tabBarStyle: {
@@ -81,6 +84,7 @@ export default function TabNavigator({ wallet, language, onLanguageChange, onWal
           <MapScreen
             {...props}
             wallet={wallet}
+            pushToken={pushToken}
             language={language}
           />
         )}
@@ -112,6 +116,7 @@ export default function TabNavigator({ wallet, language, onLanguageChange, onWal
           <HistoryScreen
             {...props}
             wallet={wallet}
+            pushToken={pushToken}
             language={language}
           />
         )}
@@ -151,13 +156,5 @@ const styles = StyleSheet.create({
     height: 3,
     borderRadius: 1.5,
     backgroundColor: '#4FC3F7',
-  },
-  tabIcon: {
-    fontSize: 20,
-    opacity: 0.5,
-  },
-  tabIconActive: {
-    fontSize: 22,
-    opacity: 1,
   },
 });

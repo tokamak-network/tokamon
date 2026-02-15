@@ -3,9 +3,10 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
-const { init, onTelegramClaimed } = require('./blockchain');
+const { init, onTelegramClaimed, onDeviceClaimed } = require('./blockchain');
 const blockchain = require('./blockchain');
 const { initBot, sendClaimNotification } = require('./telegram-bot');
+const deviceRoutes = require('./routes/device');
 const { hashTelegramId, isValidTelegramUsername } = require('./utils');
 const { saveWalletTelegramLink, saveTelegramHashMap } = require('./firebase-admin');
 
@@ -66,7 +67,18 @@ function initTelegramDb() {
             updated_at INTEGER NOT NULL
           )
         `);
-        console.log('✅ 텔레그램 DB 초기화 완료:', DB_PATH);
+        db.run(`
+          CREATE TABLE IF NOT EXISTS device_verify_codes (
+            code TEXT PRIMARY KEY,
+            device_hash TEXT NOT NULL,
+            spot_id INTEGER NOT NULL,
+            created_at INTEGER NOT NULL,
+            expires_at INTEGER NOT NULL,
+            verified BOOLEAN DEFAULT 0
+          )
+        `);
+        db.run(`CREATE INDEX IF NOT EXISTS idx_device_codes_expires ON device_verify_codes(expires_at)`);
+        console.log('✅ DB 초기화 완료:', DB_PATH);
         resolve(db);
       });
     });
@@ -81,21 +93,22 @@ if (!process.env.TELEGRAM_HASH_SALT) {
 
 const LISTENER_PORT = process.env.LISTENER_PORT || 3001;
 
-function startHttpServer() {
+function startHttpServer(db) {
   const app = express();
 
-  // [#5] CORS를 허용된 오리진으로 제한
+  // [#5] CORS 설정 (모바일 앱 + 허용된 오리진)
   const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '').split(',').filter(Boolean);
   app.use(cors({
     origin: allowedOrigins.length > 0
       ? (origin, cb) => {
-          if (origin && allowedOrigins.includes(origin)) {
+          // 모바일 앱은 origin이 없으므로 허용
+          if (!origin || allowedOrigins.includes(origin)) {
             cb(null, true);
           } else {
             cb(new Error('CORS 차단'));
           }
         }
-      : false, // 오리진 미설정 시 CORS 차단 (서버간 통신만 허용)
+      : true, // 오리진 미설정 시 모든 요청 허용 (개발 환경)
   }));
 
   // 보안 헤더
@@ -141,6 +154,9 @@ function startHttpServer() {
   });
 
   // (notify-claim은 블록체인 이벤트 기반으로 이동 — API 삭제됨)
+
+  // 디바이스 클레임 라우트
+  app.use('/api/device', deviceRoutes(db));
 
   app.listen(LISTENER_PORT, () => {
     console.log(`[Listener HTTP] 포트 ${LISTENER_PORT}에서 실행 중`);
@@ -194,7 +210,7 @@ async function main() {
       console.log(`[알림] @${username}에게 텔레그램 알림 전송 완료`);
     });
 
-    startHttpServer();
+    startHttpServer(db);
     console.log('[Listener] 실행 중... (체인 리스너 + 텔레그램 봇 + HTTP, Ctrl+C 종료)');
   } catch (err) {
     console.error('[Listener] 시작 실패:', err.message);

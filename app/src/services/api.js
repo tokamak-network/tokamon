@@ -1,4 +1,4 @@
-import { API_BASE } from '../utils/constants';
+import { API_BASE, LISTENER_API_BASE } from '../utils/constants';
 
 async function parseJson(res) {
   const contentType = res.headers.get('content-type') || '';
@@ -55,5 +55,43 @@ export async function getTelegramBalance(telegramUsername) {
 
 export async function getTelegramLinked(account) {
   const res = await fetch(`${API_BASE}/telegram/linked/${account}`);
+  return parseJson(res);
+}
+
+// ─── Device API (listener-server direct) ───
+
+export async function requestDeviceCode(fcmToken, spotId, lat, lng) {
+  const res = await fetch(`${LISTENER_API_BASE}/api/device/request-code`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fcm_token: fcmToken, spot_id: spotId, lat, lng }),
+  });
+  return parseJson(res);
+}
+
+export async function verifyAndClaimDevice(fcmToken, spotId, code) {
+  const res = await fetch(`${LISTENER_API_BASE}/api/device/verify-and-claim`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fcm_token: fcmToken, spot_id: spotId, code }),
+  });
+  return parseJson(res);
+}
+
+export async function getDeviceBalance(fcmToken) {
+  const res = await fetch(`${LISTENER_API_BASE}/api/device/balance`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fcm_token: fcmToken }),
+  });
+  return parseJson(res);
+}
+
+export async function linkDeviceToWallet(fcmToken, walletAddress) {
+  const res = await fetch(`${LISTENER_API_BASE}/api/device/link-wallet`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fcm_token: fcmToken, wallet_address: walletAddress }),
+  });
   return parseJson(res);
 }

@@ -110,6 +110,27 @@ export async function getStampInfoContract(spotId, userAddress) {
   };
 }
 
+// Get device balance via contract
+export async function getDeviceBalanceContract(deviceHash) {
+  const contract = await getSignerAndContract();
+  const bal = await contract.getDeviceBalance(deviceHash);
+  return Number(ethers.formatEther(bal));
+}
+
+// Get linked device hash for wallet
+export async function getWalletLinkedDevice(address) {
+  const contract = await getSignerAndContract();
+  const deviceHash = await contract.getWalletLinkedDevice(address);
+  return deviceHash;
+}
+
+// Claim device balance to wallet
+export async function claimDeviceToWalletContract(deviceHash) {
+  const contract = await getSignerAndContract();
+  const tx = await contract.claimDeviceToWallet(deviceHash);
+  await tx.wait();
+}
+
 // Get spots from chain (fallback when API unavailable)
 export async function getSpotsFromChain() {
   try {
