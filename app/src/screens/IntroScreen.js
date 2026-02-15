@@ -65,6 +65,7 @@ export default function IntroScreen({ onFinish }) {
   const logoScale = useRef(new Animated.Value(0.2)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const logoRotate = useRef(new Animated.Value(-0.05)).current;
+  const logoBounce = useRef(new Animated.Value(0)).current;
   const titleOpacity = useRef(new Animated.Value(0)).current;
   const titleTranslateY = useRef(new Animated.Value(20)).current;
   const subtitleOpacity = useRef(new Animated.Value(0)).current;
@@ -74,8 +75,18 @@ export default function IntroScreen({ onFinish }) {
   const fadeOut = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    // Bouncing loop animation
+    const bounceLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(logoBounce, { toValue: -18, duration: 280, useNativeDriver: true }),
+        Animated.timing(logoBounce, { toValue: 0, duration: 200, useNativeDriver: true }),
+        Animated.timing(logoBounce, { toValue: -10, duration: 220, useNativeDriver: true }),
+        Animated.timing(logoBounce, { toValue: 0, duration: 180, useNativeDriver: true }),
+        Animated.delay(300),
+      ]),
+    );
+
     Animated.sequence([
-      // Small delay for smooth start
       Animated.delay(200),
       // Glow appears first
       Animated.timing(glowOpacity, {
@@ -103,49 +114,27 @@ export default function IntroScreen({ onFinish }) {
           useNativeDriver: true,
         }),
       ]),
-      // Title slides up and fades in
-      Animated.parallel([
-        Animated.timing(titleOpacity, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-        Animated.spring(titleTranslateY, {
-          toValue: 0,
-          tension: 50,
-          friction: 8,
-          useNativeDriver: true,
-        }),
-      ]),
-      // Subtitle slides up
-      Animated.parallel([
-        Animated.timing(subtitleOpacity, {
-          toValue: 1,
-          duration: 350,
-          useNativeDriver: true,
-        }),
-        Animated.spring(subtitleTranslateY, {
-          toValue: 0,
-          tension: 50,
-          friction: 8,
-          useNativeDriver: true,
-        }),
-      ]),
-      // Tagline fades in
-      Animated.timing(taglineOpacity, {
-        toValue: 0.5,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      // Hold
-      Animated.delay(600),
-      // Fade out everything
-      Animated.timing(fadeOut, {
-        toValue: 0,
-        duration: 500,
-        useNativeDriver: true,
-      }),
     ]).start(() => {
+      // Start bounce after logo appears
+      bounceLoop.start();
+    });
+
+    // Title, subtitle, tagline, then fade out
+    Animated.sequence([
+      Animated.delay(1400),
+      Animated.parallel([
+        Animated.timing(titleOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.spring(titleTranslateY, { toValue: 0, tension: 50, friction: 8, useNativeDriver: true }),
+      ]),
+      Animated.parallel([
+        Animated.timing(subtitleOpacity, { toValue: 1, duration: 350, useNativeDriver: true }),
+        Animated.spring(subtitleTranslateY, { toValue: 0, tension: 50, friction: 8, useNativeDriver: true }),
+      ]),
+      Animated.timing(taglineOpacity, { toValue: 0.5, duration: 300, useNativeDriver: true }),
+      Animated.delay(1200),
+      Animated.timing(fadeOut, { toValue: 0, duration: 500, useNativeDriver: true }),
+    ]).start(() => {
+      bounceLoop.stop();
       onFinish();
     });
   }, []);
@@ -182,7 +171,7 @@ export default function IntroScreen({ onFinish }) {
           styles.logoContainer,
           {
             opacity: logoOpacity,
-            transform: [{ scale: logoScale }, { rotate }],
+            transform: [{ scale: logoScale }, { rotate }, { translateY: logoBounce }],
           },
         ]}
       >
@@ -251,8 +240,8 @@ const styles = StyleSheet.create({
     borderRadius: width * 0.4,
   },
   logoContainer: {
-    width: width * 0.42,
-    height: width * 0.42,
+    width: width * 0.6,
+    height: width * 0.6,
     marginBottom: 28,
     alignItems: 'center',
     justifyContent: 'center',

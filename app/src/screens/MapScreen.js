@@ -16,10 +16,10 @@ import SpotDetailSheet from '../components/SpotDetailSheet';
 import { t } from '../utils/translations';
 
 const DEFAULT_REGION = {
-  latitude: 37.5665,
-  longitude: 126.978,
-  latitudeDelta: 0.015,
-  longitudeDelta: 0.015,
+  latitude: 37.495,
+  longitude: 127.063,
+  latitudeDelta: 0.01,
+  longitudeDelta: 0.01,
 };
 
 export default function MapScreen({ wallet, language = 'ko', onRefreshSpots }) {
@@ -33,6 +33,7 @@ export default function MapScreen({ wallet, language = 'ko', onRefreshSpots }) {
   const fetchSpots = useCallback(async () => {
     try {
       const data = await getSpots();
+      console.log('[MapScreen] spots loaded:', data.length, JSON.stringify(data.map(s => ({ id: s.id, name: s.name, lat: s.lat, lng: s.lng }))));
       setSpots(data);
     } catch (err) {
       console.warn('Failed to fetch spots:', err.message);
@@ -49,8 +50,10 @@ export default function MapScreen({ wallet, language = 'ko', onRefreshSpots }) {
 
   // Auto-center on first GPS fix
   useEffect(() => {
+    console.log('[MapScreen] userPos:', userPos, 'gpsStatus:', gpsStatus);
     if (userPos && !hasCentered.current && mapRef.current) {
       hasCentered.current = true;
+      console.log('[MapScreen] auto-centering to GPS:', userPos.lat, userPos.lng);
       mapRef.current.animateToRegion({
         latitude: userPos.lat,
         longitude: userPos.lng,
@@ -59,6 +62,21 @@ export default function MapScreen({ wallet, language = 'ko', onRefreshSpots }) {
       }, 1000);
     }
   }, [userPos]);
+
+  // Auto-center to first spot if no GPS after loading spots
+  useEffect(() => {
+    if (!hasCentered.current && !userPos && spots.length > 0 && mapRef.current) {
+      hasCentered.current = true;
+      const firstSpot = spots[0];
+      console.log('[MapScreen] no GPS, centering to first spot:', firstSpot.lat, firstSpot.lng);
+      mapRef.current.animateToRegion({
+        latitude: firstSpot.lat,
+        longitude: firstSpot.lng,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }, 1000);
+    }
+  }, [spots, userPos]);
 
   const handleSpotPress = (spot) => {
     setSelectedSpot(spot);
@@ -144,7 +162,7 @@ export default function MapScreen({ wallet, language = 'ko', onRefreshSpots }) {
         {userPos && (
           <Circle
             center={{ latitude: userPos.lat, longitude: userPos.lng }}
-            radius={50}
+            radius={10}
             strokeColor="rgba(79,195,247,0.4)"
             fillColor="rgba(79,195,247,0.08)"
             strokeWidth={1.5}

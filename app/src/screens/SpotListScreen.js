@@ -48,7 +48,6 @@ export default function SpotListScreen({ navigation, language = 'ko' }) {
   const renderSpotCard = ({ item: spot }) => {
     const isExhausted = spot.remaining < spot.reward;
     const claimsLeft = spot.reward > 0 ? Math.floor(spot.remaining / spot.reward) : 0;
-    const cooldownHours = spot.cooldown ? spot.cooldown / 3600 : 0;
     const statusColor = isExhausted ? '#6b7280' : spot.active ? '#059669' : '#ef4444';
 
     return (
@@ -85,12 +84,12 @@ export default function SpotListScreen({ navigation, language = 'ko' }) {
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <Text style={styles.statIcon}>🎯</Text>
-              <Text style={styles.statValue}>{claimsLeft}{t(language, 'times')}</Text>
+              <Text style={styles.statValue}>{claimsLeft} {t(language, 'times')}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statIcon}>⏱️</Text>
-              <Text style={styles.statValue}>{cooldownHours}{t(language, 'hours')}</Text>
+              <Text style={styles.statIcon}>💎</Text>
+              <Text style={styles.statValue}>{parseFloat(spot.remaining.toFixed(2))} TON</Text>
             </View>
           </View>
 

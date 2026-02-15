@@ -1,9 +1,10 @@
 export const COORD_SCALE = 1_000_000;
-export const COLLECT_RADIUS = 50; // meters
+export const COLLECT_RADIUS = 10; // meters
 export const MIN_DEPOSIT = 10;
 
-// API base URL - change to your server address
-export const API_BASE = 'https://your-server.com/api';
+// API base URL - Firebase Hosting emulator (rewrites /api/** to Functions)
+// Android emulator accesses host localhost via 10.0.2.2
+export const API_BASE = 'http://10.0.2.2:5002/api';
 
 // WalletConnect project ID - get one at https://cloud.walletconnect.com
 export const WALLETCONNECT_PROJECT_ID = 'YOUR_WALLETCONNECT_PROJECT_ID';

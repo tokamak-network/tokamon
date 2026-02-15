@@ -28,14 +28,6 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function formatCooldown(seconds) {
-  if (seconds <= 0) return null;
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
-}
-
 export default function SpotDetailSheet({ spot, userPos, wallet, onClose, onClaimed, language = 'ko' }) {
   const [stampInfo, setStampInfo] = useState(null);
   const translateY = useState(new Animated.Value(SHEET_HEIGHT))[0];
@@ -157,16 +149,6 @@ export default function SpotDetailSheet({ spot, userPos, wallet, onClose, onClai
           bonus={spot.stamp_bonus || 0}
           language={language}
         />
-      )}
-
-      {/* Cooldown */}
-      {isOnCooldown && (
-        <View style={styles.cooldownBanner}>
-          <Text style={styles.cooldownIcon}>⏳</Text>
-          <Text style={styles.cooldownText}>
-            {t(language, 'nextClaimIn').replace('{time}', formatCooldown(cooldownLeft))}
-          </Text>
-        </View>
       )}
 
       {/* Claim Button */}
@@ -310,26 +292,6 @@ const styles = StyleSheet.create({
   },
   remainingValue: {
     color: '#ccc',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  cooldownBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(245,158,11,0.1)',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(245,158,11,0.2)',
-    marginTop: 6,
-  },
-  cooldownIcon: {
-    fontSize: 14,
-  },
-  cooldownText: {
-    color: '#f59e0b',
     fontSize: 13,
     fontWeight: '600',
   },
