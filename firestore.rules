@@ -2,19 +2,56 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // spot_metadata: 누구나 읽기 가능, 쓰기는 Admin SDK만 (listener-server)
+    // ─── 멀티체인 구조: networks/{networkId}/collection ───
+
+    // networks/{networkId}/spot_metadata: 누구나 읽기 가능, 쓰기는 Admin SDK만 (listener-server)
+    match /networks/{networkId}/spot_metadata/{spotId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // networks/{networkId}/claim_events: 누구나 읽기 가능, 쓰기는 Admin SDK만 (listener-server)
+    match /networks/{networkId}/claim_events/{eventId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // networks/{networkId}/config: 누구나 읽기 가능, 쓰기는 Admin SDK만
+    match /networks/{networkId}/config/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // networks/{networkId}/telegram_hash_map: Admin SDK만
+    match /networks/{networkId}/telegram_hash_map/{hashId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // networks/{networkId}/telegram_wallet_links: Admin SDK만
+    match /networks/{networkId}/telegram_wallet_links/{walletId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // networks/{networkId}/device_claim_events: Admin SDK만
+    match /networks/{networkId}/device_claim_events/{eventId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ─── 하위호환: 기존 flat 컬렉션 (마이그레이션 완료 후 제거 가능) ───
+
     match /spot_metadata/{spotId} {
       allow read: if true;
       allow write: if false;
     }
 
-    // claim_events: 누구나 읽기 가능, 쓰기는 Admin SDK만 (listener-server)
     match /claim_events/{eventId} {
       allow read: if true;
       allow write: if false;
     }
 
-    // config: 누구나 읽기 가능, 쓰기는 Admin SDK만
     match /config/{docId} {
       allow read: if true;
       allow write: if false;

@@ -1,18 +1,21 @@
 /**
  * Firebase Cloud Functions = API 서버 역할 (tokamon Express 라우터 대체)
- * - /api/contract: 컨트랙트 주소 (Firestore → functions/contract-address.json → env)
- * - /api/spots: 스팟 목록 (Firestore spot_metadata, listener-server가 동기화)
- * - /api/claim/history: 클레임 히스토리 (Firestore claim_events)
+ *
+ * 멀티체인 지원: 모든 API에 ?network= 쿼리 파라미터로 네트워크 지정 (기본: local)
+ *
+ * - /api/networks: 사용 가능한 네트워크 목록
+ * - /api/contract?network=local: 컨트랙트 주소
+ * - /api/spots?network=local: 스팟 목록 (Firestore, listener-server가 동기화)
+ * - /api/claim/history?network=local&user_address=0x...: 클레임 히스토리
  */
 const functions = require('firebase-functions');
 const express = require('express');
 const admin = require('firebase-admin');
 const path = require('path');
 const fs = require('fs');
+const { collectionPath, DEFAULT_NETWORK, listNetworks, getNetwork, getContracts } = require('./shared/networks');
 
 admin.initializeApp();
-
-// TELEGRAM_HASH_SALT는 hashTelegramId() 호출 시 검증됨
 
 const app = express();
 
@@ -62,6 +65,26 @@ setInterval(() => {
 
 app.use(rateLimit);
 
+// ─── 네트워크 미들웨어 ───
+// 모든 API 요청에서 ?network= 파라미터를 파싱하여 req.networkId 설정
+function resolveNetwork(req, res, next) {
+  const networkId = req.query.network || DEFAULT_NETWORK;
+  try {
+    getNetwork(networkId); // 유효성 검증
+  } catch (e) {
+    return res.status(400).json({ error: e.message });
+  }
+  req.networkId = networkId;
+  next();
+}
+
+app.use(resolveNetwork);
+
+// 네트워크별 Firestore 컬렉션 경로 헬퍼
+function col(req, collection) {
+  return collectionPath(req.networkId, collection);
+}
+
 // ─── [#7] 이더리움 주소 검증 ───
 function isValidEthAddress(address) {
   return typeof address === 'string' && /^0x[a-fA-F0-9]{40}$/.test(address.trim());
@@ -78,37 +101,65 @@ function readContractAddressFromFile() {
   }
 }
 
-// GET /api/contract — Firestore config → functions/contract-address.json → env
+// GET /api/networks — 사용 가능한 네트워크 목록
+app.get('/api/networks', (req, res) => {
+  res.json(listNetworks());
+});
+
+// GET /api/contract — Firestore config → shared/networks.js → contract-address.json → env
 app.get('/api/contract', async (req, res) => {
   try {
-    const snap = await db.collection('config').doc('contract').get();
+    // 1. Firestore config (네트워크별)
+    const snap = await db.collection(col(req, 'config')).doc('contract').get();
     if (snap.exists) {
-      return res.json(snap.data());
+      return res.json({ ...snap.data(), network: req.networkId });
     }
-    const fromFile = readContractAddressFromFile();
-    if (fromFile && (fromFile.address || fromFile.tokamon)) {
-      return res.json({
-        address: fromFile.address || fromFile.tokamon,
-        tokamon: fromFile.tokamon || fromFile.address,
-        tonToken: fromFile.tonToken || null,
-        faucet: fromFile.faucet || null,
-        tonContract: fromFile.tonContract || null,
-        chainId: fromFile.chainId != null ? Number(fromFile.chainId) : 1337,
-      });
+
+    // 2. shared/networks.js contracts
+    try {
+      const networkContracts = getContracts(req.networkId);
+      const networkInfo = getNetwork(req.networkId);
+      if (networkContracts.tokamon) {
+        return res.json({
+          address: networkContracts.tokamon,
+          tokamon: networkContracts.tokamon,
+          faucet: networkContracts.faucet || null,
+          chainId: networkInfo.chainId,
+          network: req.networkId,
+        });
+      }
+    } catch (_) {}
+
+    // 3. contract-address.json 파일 (하위호환, local 네트워크만)
+    if (req.networkId === 'local') {
+      const fromFile = readContractAddressFromFile();
+      if (fromFile && (fromFile.address || fromFile.tokamon)) {
+        return res.json({
+          address: fromFile.address || fromFile.tokamon,
+          tokamon: fromFile.tokamon || fromFile.address,
+          tonToken: fromFile.tonToken || null,
+          faucet: fromFile.faucet || null,
+          tonContract: fromFile.tonContract || null,
+          chainId: fromFile.chainId != null ? Number(fromFile.chainId) : 1337,
+          network: req.networkId,
+        });
+      }
     }
+
+    // 4. 환경변수 (하위호환)
     const env = {
       address: process.env.CONTRACT_ADDRESS || process.env.TOKAMON_ADDRESS,
       tokamon: process.env.TOKAMON_ADDRESS || process.env.CONTRACT_ADDRESS,
       tonToken: process.env.TON_TOKEN_ADDRESS || null,
       faucet: process.env.FAUCET_ADDRESS || null,
       chainId: process.env.CHAIN_ID ? Number(process.env.CHAIN_ID) : 1337,
+      network: req.networkId,
     };
     if (env.address || env.tokamon) {
       return res.json(env);
     }
-    res.status(404).json({ error: '컨트랙트 정보가 없습니다. npm run copy-contracts 후 배포하거나, Firestore config/contract 또는 환경변수를 설정하세요.' });
+    res.status(404).json({ error: '컨트랙트 정보가 없습니다. npm run copy-contracts 후 배포하거나, shared/networks.js에 주소를 설정하세요.' });
   } catch (e) {
-    // [#6] 내부 에러 메시지 숨김
     console.error(e);
     res.status(500).json({ error: '서버 내부 오류가 발생했습니다.' });
   }
@@ -128,7 +179,7 @@ function isWithinTimeRange(startTime, endTime) {
 // GET /api/spots — 스팟 목록 + active (listener-server 호환)
 app.get('/api/spots', async (req, res) => {
   try {
-    const snap = await db.collection('spot_metadata').get();
+    const snap = await db.collection(col(req, 'spot_metadata')).get();
     const spots = snap.docs
       .map((d) => ({ ...d.data(), id: Number(d.id) || d.data().id }))
       .filter((s) => s.id != null)
@@ -158,11 +209,10 @@ app.get('/api/claim/history', async (req, res) => {
     if (!userAddress) {
       return res.status(400).json({ error: 'user_address가 필요합니다' });
     }
-    // [#7] 주소 형식 검증
     if (!isValidEthAddress(userAddress)) {
       return res.status(400).json({ error: '올바른 이더리움 주소 형식이 아닙니다 (0x + 40자 hex)' });
     }
-    const snap = await db.collection('claim_events')
+    const snap = await db.collection(col(req, 'claim_events'))
       .where('user_address', '==', userAddress)
       .limit(100)
       .get();
@@ -184,18 +234,15 @@ app.get('/api/stamps/:spotId', async (req, res) => {
     if (!userAddress) {
       return res.status(400).json({ error: 'user_address가 필요합니다' });
     }
-    // [#7] 주소 형식 검증
     if (!isValidEthAddress(userAddress)) {
       return res.status(400).json({ error: '올바른 이더리움 주소 형식이 아닙니다 (0x + 40자 hex)' });
     }
-    // claim_events에서 해당 유저의 스팟별 클레임 수 계산
-    const snap = await db.collection('claim_events')
+    const snap = await db.collection(col(req, 'claim_events'))
       .where('spot_id', '==', Number(spotId))
       .where('user_address', '==', userAddress)
       .get();
 
-    // 스팟 정보에서 stamp_goal 조회
-    const spotSnap = await db.collection('spot_metadata').doc(String(spotId)).get();
+    const spotSnap = await db.collection(col(req, 'spot_metadata')).doc(String(spotId)).get();
     const spotData = spotSnap.exists ? spotSnap.data() : {};
     const goal = spotData.stamp_goal || 10;
 
@@ -223,7 +270,6 @@ const crypto = require('crypto');
 
 const COLLECT_RADIUS = 15; // 클레임 허용 거리 (미터)
 
-// [#4] salt를 환경변수에서 읽기 (하드코딩 제거)
 function hashTelegramId(username) {
   const cleaned = (username || '').replace('@', '').toLowerCase().trim();
   const salt = process.env.TELEGRAM_HASH_SALT;
@@ -249,7 +295,6 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// [#2] 위도/경도 유효성 검증
 function isValidLatLng(lat, lng) {
   return typeof lat === 'number' && typeof lng === 'number' &&
     isFinite(lat) && isFinite(lng) &&
@@ -270,19 +315,16 @@ app.post('/api/telegram/validate-claim', async (req, res) => {
       return res.status(400).json({ error: '올바른 텔레그램 username 형식이 아닙니다' });
     }
 
-    // [#2] lat/lng 범위 검증
     if (!isValidLatLng(Number(lat), Number(lng))) {
       return res.status(400).json({ error: '올바른 위도/경도 값이 아닙니다' });
     }
 
-    // Firestore에서 스팟 조회
-    const spotSnap = await db.collection('spot_metadata').doc(String(spot_id)).get();
+    const spotSnap = await db.collection(col(req, 'spot_metadata')).doc(String(spot_id)).get();
     if (!spotSnap.exists) {
       return res.status(404).json({ error: '스팟을 찾을 수 없습니다' });
     }
     const spot = spotSnap.data();
 
-    // 거리 확인
     const distance = haversineDistance(Number(lat), Number(lng), spot.lat, spot.lng);
     if (distance > COLLECT_RADIUS) {
       return res.status(400).json({
@@ -291,7 +333,6 @@ app.post('/api/telegram/validate-claim', async (req, res) => {
       });
     }
 
-    // 시간 확인
     if (!isWithinTimeRange(spot.start_time, spot.end_time)) {
       const fmt = (ts) => ts ? new Date(ts * 1000).toLocaleString() : '-';
       return res.status(400).json({
@@ -299,7 +340,6 @@ app.post('/api/telegram/validate-claim', async (req, res) => {
       });
     }
 
-    // 잔액 확인
     if ((spot.remaining || 0) < (spot.reward || 0)) {
       return res.status(400).json({ error: '이 스팟의 TON이 소진되었습니다' });
     }
@@ -322,8 +362,7 @@ app.post('/api/telegram/balance', async (req, res) => {
 
     const telegramHash = hashTelegramId(telegram_username);
 
-    // Firestore에서 해당 텔레그램 해시의 클레임 합산
-    const snap = await db.collection('claim_events')
+    const snap = await db.collection(col(req, 'claim_events'))
       .where('telegram_hash', '==', telegramHash)
       .get();
 
@@ -351,12 +390,12 @@ app.post('/api/telegram/stamp-info', async (req, res) => {
 
     const telegramHash = hashTelegramId(telegram_username);
 
-    const snap = await db.collection('claim_events')
+    const snap = await db.collection(col(req, 'claim_events'))
       .where('telegram_hash', '==', telegramHash)
       .where('spot_id', '==', Number(spot_id))
       .get();
 
-    const spotSnap = await db.collection('spot_metadata').doc(String(spot_id)).get();
+    const spotSnap = await db.collection(col(req, 'spot_metadata')).doc(String(spot_id)).get();
     const spotData = spotSnap.exists ? spotSnap.data() : {};
     const goal = spotData.stamp_goal || 10;
 
@@ -378,7 +417,7 @@ app.post('/api/telegram/stamp-info', async (req, res) => {
 });
 
 
-// [#4] POST /api/telegram/hash — 서버에서 텔레그램 해시 생성 (클라이언트 salt 노출 방지)
+// POST /api/telegram/hash — 서버에서 텔레그램 해시 생성
 app.post('/api/telegram/hash', async (req, res) => {
   try {
     const { telegram_username } = req.body;
@@ -387,11 +426,10 @@ app.post('/api/telegram/hash', async (req, res) => {
     }
     const hash = hashTelegramId(telegram_username);
 
-    // hash→username 매핑이 없으면 등록
-    const doc = await db.collection('telegram_hash_map').doc(hash).get();
+    const doc = await db.collection(col(req, 'telegram_hash_map')).doc(hash).get();
     if (!doc.exists) {
       const cleaned = (telegram_username || '').replace('@', '').toLowerCase().trim();
-      await db.collection('telegram_hash_map').doc(hash).set({
+      await db.collection(col(req, 'telegram_hash_map')).doc(hash).set({
         username: cleaned,
         updated_at: new Date().toISOString(),
       });
@@ -412,7 +450,7 @@ app.get('/api/telegram/username/:hash', async (req, res) => {
       return res.status(400).json({ error: '올바르지 않은 해시입니다' });
     }
 
-    const doc = await db.collection('telegram_hash_map').doc(hash).get();
+    const doc = await db.collection(col(req, 'telegram_hash_map')).doc(hash).get();
     if (!doc.exists) {
       return res.json({ telegram_username: null });
     }
@@ -432,7 +470,7 @@ app.get('/api/telegram/linked/:wallet', async (req, res) => {
       return res.status(400).json({ error: '올바르지 않은 지갑 주소입니다' });
     }
 
-    const linkDoc = await db.collection('telegram_wallet_links').doc(wallet.toLowerCase()).get();
+    const linkDoc = await db.collection(col(req, 'telegram_wallet_links')).doc(wallet.toLowerCase()).get();
     if (!linkDoc.exists) {
       return res.json({ linked: false, telegram_hash: null, telegram_username: null });
     }
@@ -440,7 +478,7 @@ app.get('/api/telegram/linked/:wallet', async (req, res) => {
     const { telegram_hash } = linkDoc.data();
     let username = null;
     if (telegram_hash) {
-      const hashDoc = await db.collection('telegram_hash_map').doc(telegram_hash).get();
+      const hashDoc = await db.collection(col(req, 'telegram_hash_map')).doc(telegram_hash).get();
       if (hashDoc.exists) {
         username = '@' + hashDoc.data().username;
       }

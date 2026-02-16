@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { getSelectedNetwork } from '../networkStore';
 
 const API = '';
+
+function withNetwork(url) {
+  const networkId = getSelectedNetwork();
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}network=${networkId}`;
+}
 
 export default function TelegramLinkPage() {
     const [loading, setLoading] = useState(true);
@@ -23,7 +30,7 @@ export default function TelegramLinkPage() {
             return;
         }
         
-        fetch(`${API}/api/telegram/verify-token`, {
+        fetch(withNetwork(`${API}/api/telegram/verify-token`), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token }),
@@ -63,7 +70,7 @@ export default function TelegramLinkPage() {
         setMessage('');
         
         try {
-            const res = await fetch(`${API}/api/telegram/link-wallet`, {
+            const res = await fetch(withNetwork(`${API}/api/telegram/link-wallet`), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

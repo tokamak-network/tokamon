@@ -1,12 +1,16 @@
 const admin = require('firebase-admin');
 const path = require('path');
 const fs = require('fs');
+const { collectionPath, DEFAULT_NETWORK } = require('../shared/networks');
 
 const serviceAccountPath =
   process.env.SERVICE_ACCOUNT_PATH ||
   path.join(__dirname, 'serviceAccountKey.json');
 
 let db = null;
+
+// 현재 네트워크 ID (NETWORK 환경변수, 기본: local)
+const NETWORK_ID = process.env.NETWORK || DEFAULT_NETWORK;
 
 // Firestore 초기화 우선순위:
 // 1. 에뮬레이터 (FIRESTORE_EMULATOR_HOST)
@@ -36,12 +40,19 @@ if (process.env.FIRESTORE_EMULATOR_HOST) {
   console.warn('[Firebase] 운영 환경: GOOGLE_APPLICATION_CREDENTIALS 또는 FIREBASE_PROJECT_ID를 설정하세요.');
 }
 
+console.log(`[Firebase] 네트워크: ${NETWORK_ID} (Firestore 경로: networks/${NETWORK_ID}/...)`);
+
+// 네트워크별 컬렉션 경로 헬퍼
+function col(collection) {
+  return collectionPath(NETWORK_ID, collection);
+}
+
 async function syncSpotToFirestore(spotId, meta) {
   if (!db) {
     console.log('[Firestore] DB 미연결 - 시뮬레이션:', spotId, meta.name);
     return;
   }
-  await db.collection('spot_metadata').doc(String(spotId)).set(meta, {
+  await db.collection(col('spot_metadata')).doc(String(spotId)).set(meta, {
     merge: true,
   });
   console.log('[Firestore] spot_metadata 업데이트:', spotId, meta.name);
@@ -49,7 +60,7 @@ async function syncSpotToFirestore(spotId, meta) {
 
 async function saveClaimEvent(event) {
   if (!db) return;
-  await db.collection('claim_events').add({
+  await db.collection(col('claim_events')).add({
     spot_id: event.spotId,
     user_address: event.user,
     reward: event.reward,
@@ -62,7 +73,7 @@ async function saveClaimEvent(event) {
 async function getTelegramUsernameByHash(hash) {
   if (!db) return null;
   try {
-    const doc = await db.collection('telegram_hash_map').doc(hash).get();
+    const doc = await db.collection(col('telegram_hash_map')).doc(hash).get();
     return doc.exists ? doc.data().username : null;
   } catch (e) {
     console.error('[Firestore] telegram_hash_map 조회 실패:', e.message);
@@ -73,7 +84,7 @@ async function getTelegramUsernameByHash(hash) {
 async function saveTelegramHashMap(hash, username) {
   if (!db) return;
   try {
-    await db.collection('telegram_hash_map').doc(hash).set({
+    await db.collection(col('telegram_hash_map')).doc(hash).set({
       username,
       updated_at: new Date().toISOString(),
     }, { merge: true });
@@ -85,7 +96,7 @@ async function saveTelegramHashMap(hash, username) {
 async function saveWalletTelegramLink(walletAddress, telegramHash) {
   if (!db) return;
   try {
-    await db.collection('telegram_wallet_links').doc(walletAddress.toLowerCase()).set({
+    await db.collection(col('telegram_wallet_links')).doc(walletAddress.toLowerCase()).set({
       telegram_hash: telegramHash,
       updated_at: new Date().toISOString(),
     }, { merge: true });
@@ -120,7 +131,7 @@ async function sendPushNotification(fcmToken, title, body, data = {}) {
 async function saveDeviceClaimEvent(event) {
   if (!db) return;
   try {
-    await db.collection('device_claim_events').add({
+    await db.collection(col('device_claim_events')).add({
       spot_id: event.spotId,
       device_hash: event.deviceHash,
       reward: event.reward,
@@ -135,6 +146,8 @@ async function saveDeviceClaimEvent(event) {
 
 module.exports = {
   db,
+  NETWORK_ID,
+  col,
   syncSpotToFirestore,
   saveClaimEvent,
   getTelegramUsernameByHash,

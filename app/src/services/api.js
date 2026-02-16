@@ -1,4 +1,12 @@
 import { API_BASE, LISTENER_API_BASE } from '../utils/constants';
+import { getSelectedNetwork } from '../utils/networkStore';
+
+// 현재 선택된 네트워크를 쿼리 파라미터로 추가
+function withNetwork(url) {
+  const networkId = getSelectedNetwork();
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}network=${networkId}`;
+}
 
 async function parseJson(res) {
   const contentType = res.headers.get('content-type') || '';
@@ -12,7 +20,7 @@ async function parseJson(res) {
 }
 
 export async function getSpots() {
-  const res = await fetch(`${API_BASE}/spots`, {
+  const res = await fetch(withNetwork(`${API_BASE}/spots`), {
     cache: 'no-store',
     headers: { 'Cache-Control': 'no-cache' },
   });
@@ -20,18 +28,18 @@ export async function getSpots() {
 }
 
 export async function getClaimHistory(userAddress) {
-  const res = await fetch(`${API_BASE}/claim/history?user_address=${userAddress}`);
+  const res = await fetch(withNetwork(`${API_BASE}/claim/history?user_address=${userAddress}`));
   return parseJson(res);
 }
 
 export async function getStampInfo(spotId, userAddress) {
-  const res = await fetch(`${API_BASE}/stamps/${spotId}?user_address=${userAddress}`);
+  const res = await fetch(withNetwork(`${API_BASE}/stamps/${spotId}?user_address=${userAddress}`));
   return parseJson(res);
 }
 
 export async function getContractInfo() {
   try {
-    const res = await fetch(`${API_BASE}/contract`, { cache: 'no-store' });
+    const res = await fetch(withNetwork(`${API_BASE}/contract`), { cache: 'no-store' });
     if (res.ok) {
       const contentType = res.headers.get('content-type') || '';
       if (contentType.includes('application/json')) {
@@ -45,7 +53,7 @@ export async function getContractInfo() {
 }
 
 export async function getTelegramBalance(telegramUsername) {
-  const res = await fetch(`${API_BASE}/telegram/balance`, {
+  const res = await fetch(withNetwork(`${API_BASE}/telegram/balance`), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ telegram_username: telegramUsername }),
@@ -54,7 +62,7 @@ export async function getTelegramBalance(telegramUsername) {
 }
 
 export async function getTelegramLinked(account) {
-  const res = await fetch(`${API_BASE}/telegram/linked/${account}`);
+  const res = await fetch(withNetwork(`${API_BASE}/telegram/linked/${account}`));
   return parseJson(res);
 }
 

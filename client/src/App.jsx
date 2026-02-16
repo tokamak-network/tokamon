@@ -18,11 +18,17 @@ import { getETH, resetFaucetCache } from './faucet';
 import { t } from './translations';
 import useGeolocation from './hooks/useGeolocation';
 import useToast from './hooks/useToast';
+import { getNetworkConfig, getSelectedNetwork, setSelectedNetwork, getAllNetworks, onNetworkChange } from './networkStore';
 
-// RPC URL을 브라우저 접속 호스트 기준으로 결정
-function getAnvilRpcUrl() {
-  const host = window.location.hostname;
-  return `http://${host}:8999`;
+// RPC URL을 현재 네트워크 설정에서 가져오기
+function getRpcUrl() {
+  const config = getNetworkConfig();
+  // local 네트워크일 때 브라우저 호스트 기준
+  if (config.id === 'local') {
+    const host = window.location.hostname;
+    return `http://${host}:8999`;
+  }
+  return config.rpcUrl;
 }
 
 // MetaMask 연결 (오너 모드용)
@@ -32,14 +38,17 @@ async function connectMetaMask(showToast) {
     return null;
   }
 
+  const config = getNetworkConfig();
+  const chainIdHex = '0x' + config.chainId.toString(16);
+
   try {
     await window.ethereum.request({
       method: 'wallet_addEthereumChain',
       params: [{
-        chainId: '0x539',
-        chainName: 'Tokamon Local',
-        rpcUrls: [getAnvilRpcUrl()],
-        nativeCurrency: { name: 'TON', symbol: 'TON', decimals: 18 },
+        chainId: chainIdHex,
+        chainName: config.name,
+        rpcUrls: [getRpcUrl()],
+        nativeCurrency: config.nativeCurrency,
       }],
     });
   } catch (e) {
@@ -72,8 +81,9 @@ export default function App() {
   const [message, setMessage] = useState(null);
   const [connecting, setConnecting] = useState(false);
   const [history, setHistory] = useState([]);
-  const [rpcUrl, setRpcUrl] = useState(getAnvilRpcUrl());
+  const [rpcUrl, setRpcUrl] = useState(getRpcUrl());
   const [chainId, setChainId] = useState(null);
+  const [networkId, setNetworkId] = useState(getSelectedNetwork());
 
   // 역할: null | 'customer' | 'owner'
   const [role, setRole] = useState(null);
@@ -88,6 +98,9 @@ export default function App() {
 
   // 설정 모달
   const [showSettings, setShowSettings] = useState(false);
+
+  // 네트워크 메뉴 드롭다운
+  const [showNetworkMenu, setShowNetworkMenu] = useState(false);
 
   // 지갑 메뉴 드롭다운
   const [showWalletMenu, setShowWalletMenu] = useState(false);
@@ -112,10 +125,33 @@ export default function App() {
       if (showWalletMenu && !e.target.closest('.wallet-menu') && !e.target.closest('[data-wallet-trigger]')) {
         setShowWalletMenu(false);
       }
+      if (showNetworkMenu && !e.target.closest('.network-menu') && !e.target.closest('[data-network-trigger]')) {
+        setShowNetworkMenu(false);
+      }
     };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [showWalletMenu]);
+  }, [showWalletMenu, showNetworkMenu]);
+
+  // 네트워크 변경 시 데이터 새로고침
+  const handleNetworkSwitch = useCallback((newNetworkId) => {
+    setSelectedNetwork(newNetworkId);
+    setNetworkId(newNetworkId);
+    setRpcUrl(getRpcUrl());
+    setSpots([]);
+    setHistory([]);
+    setSelectedSpot(null);
+    resetContractCache();
+    resetFaucetCache();
+  }, []);
+
+  // 네트워크 변경 리스너
+  useEffect(() => {
+    return onNetworkChange((id) => {
+      setNetworkId(id);
+      setRpcUrl(getRpcUrl());
+    });
+  }, []);
 
   // 네트워크 정보 가져오기
   const fetchNetworkInfo = useCallback(async () => {
@@ -125,15 +161,7 @@ export default function App() {
       const chainIdHex = await prov.request({ method: 'eth_chainId' });
       const chainIdDec = parseInt(chainIdHex, 16);
       setChainId(chainIdDec);
-
-      // RPC URL 가져오기 (provider를 통해)
-      const { ethers } = await import('ethers');
-      const provider = new ethers.BrowserProvider(prov);
-      const network = await provider.getNetwork();
-
-      if (chainIdDec === 1337) {
-        setRpcUrl(getAnvilRpcUrl());
-      }
+      setRpcUrl(getRpcUrl());
     } catch (err) {
       console.warn('네트워크 정보 조회 실패:', err.message);
     }
@@ -417,6 +445,36 @@ export default function App() {
               {connecting ? t(language, 'connecting') : t(language, 'connectWallet')}
             </button>
           )}
+          <div style={{ position: 'relative' }}>
+            <button
+              className="network-badge"
+              data-network-trigger
+              onClick={() => setShowNetworkMenu(!showNetworkMenu)}
+            >
+              <span className="network-dot-indicator" />
+              {getNetworkConfig().name}
+              <span style={{ fontSize: '8px', marginLeft: '2px' }}>▼</span>
+            </button>
+            {showNetworkMenu && (
+              <div className="network-menu">
+                {getAllNetworks().map((net) => (
+                  <button
+                    key={net.id}
+                    className={`network-menu-item ${networkId === net.id ? 'active' : ''}`}
+                    onClick={() => {
+                      handleNetworkSwitch(net.id);
+                      setShowNetworkMenu(false);
+                      refreshSpots();
+                    }}
+                  >
+                    <span className={`network-dot-indicator ${networkId === net.id ? '' : 'inactive'}`} />
+                    {net.name}
+                    {networkId === net.id && <span style={{ marginLeft: 'auto', fontSize: '12px' }}>✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button className="settings-btn" onClick={() => setShowSettings(true)}>
             ⚙️
           </button>
@@ -597,6 +655,11 @@ export default function App() {
           account={wallet}
           language={language}
           onLanguageChange={changeLanguage}
+          onNetworkChange={(id) => {
+            handleNetworkSwitch(id);
+            setShowSettings(false);
+            refreshSpots();
+          }}
           onClose={() => {
             setShowSettings(false);
             if (role === 'customer') {

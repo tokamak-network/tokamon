@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import { FAUCET_ABI } from './abi/faucet.js';
 import { getWalletProvider } from './walletProvider.js';
+import { getSelectedNetwork } from './networkStore.js';
 
 let faucetContract = null;
 
@@ -14,7 +15,7 @@ async function ensureFaucetInited(provider) {
     faucetAddress = config.faucet || null;
   } catch {
     try {
-      const apiRes = await fetch('/api/contract');
+      const apiRes = await fetch(`/api/contract?network=${getSelectedNetwork()}`);
       const apiConfig = await apiRes.json();
       faucetAddress = apiConfig.faucet || null;
     } catch {

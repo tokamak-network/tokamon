@@ -1,4 +1,13 @@
+import { getSelectedNetwork } from './networkStore';
+
 const API = '/api';
+
+// 현재 선택된 네트워크를 쿼리 파라미터로 추가
+function withNetwork(url) {
+  const networkId = getSelectedNetwork();
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}network=${networkId}`;
+}
 
 async function parseJson(res) {
   const contentType = res.headers.get('content-type') || '';
@@ -11,13 +20,18 @@ async function parseJson(res) {
   return res.json();
 }
 
+export async function getNetworks() {
+  const res = await fetch(`${API}/networks`, { cache: 'no-store' });
+  return parseJson(res);
+}
+
 export async function getSpots() {
-  const res = await fetch(`${API}/spots`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+  const res = await fetch(withNetwork(`${API}/spots`), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
   return parseJson(res);
 }
 
 export async function createSpot(data) {
-  const res = await fetch(`${API}/spots`, {
+  const res = await fetch(withNetwork(`${API}/spots`), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -26,7 +40,7 @@ export async function createSpot(data) {
 }
 
 export async function redepositSpot(spotId, creatorAddress, amount) {
-  const res = await fetch(`${API}/spots/${spotId}/redeposit`, {
+  const res = await fetch(withNetwork(`${API}/spots/${spotId}/redeposit`), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ creator_address: creatorAddress, amount }),
@@ -35,18 +49,18 @@ export async function redepositSpot(spotId, creatorAddress, amount) {
 }
 
 export async function getClaimHistory(userAddress) {
-  const res = await fetch(`${API}/claim/history?user_address=${userAddress}`);
+  const res = await fetch(withNetwork(`${API}/claim/history?user_address=${userAddress}`));
   return parseJson(res);
 }
 
 export async function getStampInfo(spotId, userAddress) {
-  const res = await fetch(`${API}/stamps/${spotId}?user_address=${userAddress}`);
+  const res = await fetch(withNetwork(`${API}/stamps/${spotId}?user_address=${userAddress}`));
   return parseJson(res);
 }
 
 export async function getContractInfo() {
   try {
-    const res = await fetch(`${API}/contract`, { cache: 'no-store' });
+    const res = await fetch(withNetwork(`${API}/contract`), { cache: 'no-store' });
     if (res.ok) {
       const contentType = res.headers.get('content-type') || '';
       if (contentType.includes('application/json')) {
@@ -63,7 +77,7 @@ export async function getContractInfo() {
 }
 
 export async function getTelegramBalance(telegramUsername) {
-  const res = await fetch(`${API}/telegram/balance`, {
+  const res = await fetch(withNetwork(`${API}/telegram/balance`), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ telegram_username: telegramUsername }),

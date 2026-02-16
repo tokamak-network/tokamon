@@ -44,7 +44,7 @@ forge script script/DeployLocal.s.sol:DeployLocal \
 ```bash
 export PRIVATE_KEY=0x...
 export RPC_URL=https://...
-export CHAIN_ID=11124  # Titan Testnet
+export CHAIN_ID=111551119090  # Thanos Sepolia
 
 forge script script/DeployTestnet.s.sol:DeployTestnet \
   --rpc-url $RPC_URL \
@@ -56,7 +56,7 @@ forge script script/DeployTestnet.s.sol:DeployTestnet \
 ```bash
 export PRIVATE_KEY=0x...
 export RPC_URL=https://...
-export CHAIN_ID=55004
+export CHAIN_ID=111551119090
 
 forge script script/DeployProduction.s.sol:DeployProduction \
   --rpc-url $RPC_URL \

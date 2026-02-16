@@ -197,7 +197,7 @@ npm run copy-contracts
 
 ### 6.2 테스트넷 (testnet)
 
-Sepolia, Titan Testnet 등. Faucet 포함.
+Thanos Sepolia 등. Faucet 포함.
 
 ```bash
 # .env에 RPC_URL, PRIVATE_KEY, CHAIN_ID 설정

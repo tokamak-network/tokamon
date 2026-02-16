@@ -4,8 +4,15 @@ import { t } from '../translations';
 import useToast from '../hooks/useToast';
 import Toast from './Toast';
 import { Spinner } from './Spinner';
+import { getSelectedNetwork, getNetworkConfig } from '../networkStore';
 
 const API = '';
+
+function withNetwork(url) {
+  const networkId = getSelectedNetwork();
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}network=${networkId}`;
+}
 
 export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
   const { toasts, showToast, removeToast } = useToast();
@@ -27,7 +34,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
 
   const fetchSpots = async () => {
     try {
-      const res = await fetch(`${API}/api/spots`);
+      const res = await fetch(withNetwork(`${API}/api/spots`));
       const data = await res.json();
       setSpots(data);
     } catch (err) {
@@ -44,7 +51,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
   // 컨트랙트 초기화 (MetaMask를 통해 연결)
   const initContract = async () => {
     try {
-      const res = await fetch(`${API}/api/contract`);
+      const res = await fetch(withNetwork(`${API}/api/contract`));
       const contractData = await res.json();
 
       const artifactRes = await fetch('/Tokamon.json');
@@ -72,15 +79,17 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
     }
 
     try {
-      // 체인 추가/전환
-      const rpcUrl = `http://${window.location.hostname}:8999`;
+      // 체인 추가/전환 (현재 선택된 네트워크 사용)
+      const config = getNetworkConfig();
+      const rpcUrl = config.id === 'local' ? `http://${window.location.hostname}:8999` : config.rpcUrl;
+      const chainIdHex = '0x' + config.chainId.toString(16);
       await window.ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [{
-          chainId: '0x539',
-          chainName: 'Tokamon Local',
+          chainId: chainIdHex,
+          chainName: config.name,
           rpcUrls: [rpcUrl],
-          nativeCurrency: { name: 'TON', symbol: 'TON', decimals: 18 },
+          nativeCurrency: config.nativeCurrency,
         }],
       }).catch(() => {});
 
@@ -143,7 +152,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
 
     try {
       // 서버에서 텔레그램 해시 받기 (salt 클라이언트 노출 방지)
-      const hashRes = await fetch(`${API}/api/telegram/hash`, {
+      const hashRes = await fetch(withNetwork(`${API}/api/telegram/hash`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ telegram_username: username }),
@@ -208,7 +217,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
 
     try {
       // 서버에서 텔레그램 해시 받기 (salt 클라이언트 노출 방지)
-      const hashRes = await fetch(`${API}/api/telegram/hash`, {
+      const hashRes = await fetch(withNetwork(`${API}/api/telegram/hash`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ telegram_username: username }),
@@ -222,7 +231,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
       const { telegram_hash: telegramHash } = await hashRes.json();
 
       // 서버에서 검증 먼저 수행 (키오스크는 매장 내에 있으므로 스팟 위치 사용)
-      const validateRes = await fetch(`${API}/api/telegram/validate-claim`, {
+      const validateRes = await fetch(withNetwork(`${API}/api/telegram/validate-claim`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

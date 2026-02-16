@@ -2,16 +2,24 @@ const fs = require('fs');
 const path = require('path');
 const { ethers } = require('ethers');
 console.log('[Blockchain] ethers 버전:', ethers.version, '| 경로:', require.resolve('ethers'));
-const { syncSpotToFirestore, saveClaimEvent, getTelegramUsernameByHash } = require('./firebase-admin');
+const { syncSpotToFirestore, saveClaimEvent, getTelegramUsernameByHash, NETWORK_ID } = require('./firebase-admin');
+const { getNetwork, getContracts, DEFAULT_NETWORK } = require('../shared/networks');
 
-const RPC_URL = process.env.RPC_URL || 'http://127.0.0.1:8999';
+// 네트워크 설정: NETWORK 환경변수 → shared/networks.js에서 로드
+const networkId = process.env.NETWORK || DEFAULT_NETWORK;
+const networkConfig = getNetwork(networkId);
+const networkContracts = getContracts(networkId);
+
+const RPC_URL = process.env.RPC_URL || networkConfig.rpcUrl;
 const WS_URL = process.env.WS_URL || RPC_URL.replace(/^http/, 'ws');
 const ARTIFACT_PATH = path.join(__dirname, '..', 'contracts', 'out', 'Tokamon.sol', 'Tokamon.json');
 const ADDRESS_PATH = path.join(__dirname, 'contract-address.json');
 const METADATA_PATH = process.env.METADATA_PATH ||
-  path.join(__dirname, 'spot-metadata.json');
+  path.join(__dirname, `spot-metadata-${networkId}.json`);
 const LAST_BLOCK_PATH = process.env.LAST_BLOCK_PATH ||
-  path.join(__dirname, 'last-block.json');
+  path.join(__dirname, `last-block-${networkId}.json`);
+
+console.log(`[Blockchain] 네트워크: ${networkConfig.name} (${networkId}, chainId=${networkConfig.chainId})`);
 
 const COORD_SCALE = 1_000_000;
 
@@ -87,18 +95,23 @@ function normalizeAddress(value) {
 }
 
 async function init() {
-  // contract-address.json 우선, 없으면 환경변수
-  let address = null;
+  // 컨트랙트 주소 우선순위:
+  // 1. 환경변수 CONTRACT_ADDRESS
+  // 2. contract-address.json 파일
+  // 3. shared/networks.js의 contracts 설정
+  let address = normalizeAddress(process.env.CONTRACT_ADDRESS);
   let addressData = {};
-  if (fs.existsSync(ADDRESS_PATH)) {
+  if (!address && fs.existsSync(ADDRESS_PATH)) {
     try {
       addressData = JSON.parse(fs.readFileSync(ADDRESS_PATH, 'utf8'));
       address = normalizeAddress(addressData.address || addressData.tokamon);
     } catch (_) {}
   }
-  if (!address) address = normalizeAddress(process.env.CONTRACT_ADDRESS);
+  if (!address && networkContracts.tokamon) {
+    address = normalizeAddress(networkContracts.tokamon);
+  }
   if (!address) {
-    throw new Error('contract-address.json이 없거나 address/tokamon이 없습니다. 컨트랙트 배포 후 npm run copy-contracts를 실행하세요.');
+    throw new Error(`[${networkId}] 컨트랙트 주소를 찾을 수 없습니다. CONTRACT_ADDRESS 환경변수, contract-address.json, 또는 shared/networks.js에 설정하세요.`);
   }
 
   // WebSocket 구독 방식 (실시간 이벤트 수신)

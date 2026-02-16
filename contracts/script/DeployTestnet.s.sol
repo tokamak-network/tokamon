@@ -9,7 +9,7 @@ import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.s
 
 /**
  * @title DeployTestnet
- * @notice 테스트넷 배포 (Sepolia, Titan Testnet 등). Faucet 포함. PRIVATE_KEY·RPC_URL 필수.
+ * @notice 테스트넷 배포 (Thanos Sepolia 등). Faucet 포함. PRIVATE_KEY·RPC_URL 필수.
  */
 contract DeployTestnet is Script {
     function run() external {

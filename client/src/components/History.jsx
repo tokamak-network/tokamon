@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { t } from '../translations';
 import { getTelegramBalance, getWalletLinkedTelegram, claimTelegramToWallet, unlinkTelegram } from '../contract';
 import { Spinner } from './Spinner';
+import { getSelectedNetwork } from '../networkStore';
 
 function formatTime(timestamp) {
   if (!timestamp) return '';
@@ -44,7 +45,7 @@ export default function History({ history, balance = 0, account, language = 'ko'
         // hash로 직접 username 조회 (0x 제거)
         const hashHex = hash.startsWith('0x') ? hash.slice(2) : hash;
         try {
-          const response = await fetch(`/api/telegram/username/${hashHex}`);
+          const response = await fetch(`/api/telegram/username/${hashHex}?network=${getSelectedNetwork()}`);
           const data = await response.json();
           if (data.telegram_username) {
             setLinkedTelegram(data.telegram_username);

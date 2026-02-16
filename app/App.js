@@ -7,6 +7,7 @@ import TabNavigator from './src/navigation/TabNavigator';
 import IntroScreen from './src/screens/IntroScreen';
 import { initWallet, onWalletChange } from './src/services/wallet';
 import { registerForPushNotifications, setupNotificationListener } from './src/services/notifications';
+import { initNetwork } from './src/utils/networkStore';
 
 export default function App() {
   const [showIntro, setShowIntro] = useState(true);
@@ -20,6 +21,7 @@ export default function App() {
       if (lang) setLanguage(lang);
     });
 
+    initNetwork();
     initWallet();
 
     const unsub = onWalletChange((address) => {
@@ -89,6 +91,7 @@ export default function App() {
         language={language}
         onLanguageChange={handleLanguageChange}
         onWalletDisconnect={handleWalletDisconnect}
+        onNetworkChange={() => {/* 네트워크 변경 시 데이터 자동 새로고침됨 */}}
       />
     </NavigationContainer>
   );

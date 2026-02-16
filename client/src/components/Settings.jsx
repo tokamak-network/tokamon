@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { t } from '../translations';
+import { getSelectedNetwork, setSelectedNetwork, getAllNetworks } from '../networkStore';
 
-export default function Settings({ onClose, account, language, onLanguageChange }) {
+function withNetwork(url) {
+  const networkId = getSelectedNetwork();
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}network=${networkId}`;
+}
+
+export default function Settings({ onClose, account, language, onLanguageChange, onNetworkChange }) {
   const [linkedTelegram, setLinkedTelegram] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -17,7 +24,7 @@ export default function Settings({ onClose, account, language, onLanguageChange 
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/telegram/linked/${account}`);
+      const response = await fetch(withNetwork(`/api/telegram/linked/${account}`));
       const data = await response.json();
 
       if (data.linked && data.telegram_hash) {
@@ -101,6 +108,23 @@ export default function Settings({ onClose, account, language, onLanguageChange 
           </div>
 
           <div className="settings-section">
+            <h3>{t(language, 'network')}</h3>
+            <div className="network-selector">
+              {getAllNetworks().map((net) => (
+                <button
+                  key={net.id}
+                  className={`lang-btn-compact ${getSelectedNetwork() === net.id ? 'active' : ''}`}
+                  onClick={() => {
+                    if (onNetworkChange) onNetworkChange(net.id);
+                  }}
+                >
+                  {net.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="settings-section">
             <h3>{t(language, 'information')}</h3>
             <div className="settings-info">
               <div className="info-row">
@@ -109,7 +133,7 @@ export default function Settings({ onClose, account, language, onLanguageChange 
               </div>
               <div className="info-row">
                 <span>{t(language, 'network')}</span>
-                <span>Ganache Local (Chain ID: 1337)</span>
+                <span>{getAllNetworks().find(n => n.id === getSelectedNetwork())?.name || getSelectedNetwork()}</span>
               </div>
               {account && (
                 <div className="info-row">

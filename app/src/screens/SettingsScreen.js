@@ -13,10 +13,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getTelegramLinked } from '../services/api';
 import { disconnectWallet } from '../services/wallet';
 import { t } from '../utils/translations';
+import { getSelectedNetwork, setSelectedNetwork, getAllNetworks, getNetworkConfig } from '../utils/networkStore';
 
-export default function SettingsScreen({ wallet, language, onLanguageChange, onWalletDisconnect }) {
+export default function SettingsScreen({ wallet, language, onLanguageChange, onWalletDisconnect, onNetworkChange }) {
   const [linkedTelegram, setLinkedTelegram] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [currentNetworkId, setCurrentNetworkId] = useState(getSelectedNetwork());
 
   useEffect(() => {
     if (wallet) {
@@ -44,6 +46,12 @@ export default function SettingsScreen({ wallet, language, onLanguageChange, onW
   const handleLanguageChange = async (lang) => {
     await AsyncStorage.setItem('language', lang);
     onLanguageChange(lang);
+  };
+
+  const handleNetworkChange = async (networkId) => {
+    await setSelectedNetwork(networkId);
+    setCurrentNetworkId(networkId);
+    onNetworkChange?.(networkId);
   };
 
   const handleDisconnect = () => {
@@ -166,6 +174,36 @@ export default function SettingsScreen({ wallet, language, onLanguageChange, onW
         </View>
       </View>
 
+      {/* Network Selection */}
+      <View style={styles.section}>
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitleIcon}>🌐</Text>
+          <Text style={styles.sectionTitle}>{t(language, 'network')}</Text>
+        </View>
+        <View style={styles.networkRow}>
+          {getAllNetworks().map((net) => (
+            <TouchableOpacity
+              key={net.id}
+              style={[styles.networkBtn, currentNetworkId === net.id && styles.networkBtnActive]}
+              onPress={() => handleNetworkChange(net.id)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.networkDot, currentNetworkId === net.id ? styles.networkDotActive : styles.networkDotInactive]} />
+              <Text
+                style={[
+                  styles.networkBtnText,
+                  currentNetworkId === net.id && styles.networkBtnTextActive,
+                ]}
+                numberOfLines={1}
+              >
+                {net.name}
+              </Text>
+              {currentNetworkId === net.id && <Text style={styles.networkCheck}>✓</Text>}
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
       {/* Information */}
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
@@ -181,8 +219,8 @@ export default function SettingsScreen({ wallet, language, onLanguageChange, onW
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>{t(language, 'network')}</Text>
           <View style={[styles.infoValueBadge, styles.infoValueNetwork]}>
-            <View style={styles.networkDot} />
-            <Text style={[styles.infoValue, styles.infoValueGreen]}>Tokamak L2</Text>
+            <View style={[styles.networkDot, styles.networkDotActive]} />
+            <Text style={[styles.infoValue, styles.infoValueGreen]}>{getNetworkConfig().name}</Text>
           </View>
         </View>
         {wallet && (
@@ -420,11 +458,49 @@ const styles = StyleSheet.create({
   infoValueNetwork: {
     backgroundColor: 'rgba(16,185,129,0.08)',
   },
+  networkRow: {
+    gap: 8,
+  },
+  networkBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  networkBtnActive: {
+    backgroundColor: 'rgba(16,185,129,0.12)',
+    borderColor: 'rgba(16,185,129,0.35)',
+  },
+  networkBtnText: {
+    color: '#777',
+    fontSize: 14,
+    fontWeight: '600',
+    flex: 1,
+  },
+  networkBtnTextActive: {
+    color: '#10b981',
+    fontWeight: '700',
+  },
+  networkCheck: {
+    color: '#10b981',
+    fontSize: 14,
+    fontWeight: '800',
+  },
   networkDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  networkDotActive: {
     backgroundColor: '#10b981',
+  },
+  networkDotInactive: {
+    backgroundColor: '#555',
   },
   infoValue: {
     color: '#ccc',

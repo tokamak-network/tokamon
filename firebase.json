@@ -8,7 +8,10 @@
     ]
   },
   "functions": {
-    "source": "functions"
+    "source": "functions",
+    "predeploy": [
+      "cp shared/networks.js functions/shared/networks.js"
+    ]
   },
   "firestore": {
     "rules": "firestore.rules"
