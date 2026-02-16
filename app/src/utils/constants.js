@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 
 export const COORD_SCALE = 1_000_000;
-export const COLLECT_RADIUS = 10; // meters
+export const COLLECT_RADIUS = 15; // meters
 export const MIN_DEPOSIT = 10;
 
 // API base URL - Firebase Hosting emulator (rewrites /api/** to Functions)

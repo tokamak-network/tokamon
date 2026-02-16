@@ -22,7 +22,7 @@ const DEFAULT_REGION = {
   longitudeDelta: 0.01,
 };
 
-export default function MapScreen({ route, wallet, pushToken, language = 'ko', onRefreshSpots }) {
+export default function MapScreen({ route, wallet, pushToken, receivedCode, language = 'ko', onRefreshSpots }) {
   const { userPos, gpsStatus } = useLocation();
   const [spots, setSpots] = useState([]);
   const [selectedSpot, setSelectedSpot] = useState(null);
@@ -233,6 +233,7 @@ export default function MapScreen({ route, wallet, pushToken, language = 'ko', o
         userPos={userPos}
         wallet={wallet}
         pushToken={pushToken}
+        receivedCode={receivedCode}
         onClose={() => setSelectedSpot(null)}
         onClaimed={handleClaimed}
         language={language}

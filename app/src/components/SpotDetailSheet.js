@@ -28,7 +28,7 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-export default function SpotDetailSheet({ spot, userPos, wallet, pushToken, onClose, onClaimed, language = 'ko' }) {
+export default function SpotDetailSheet({ spot, userPos, wallet, pushToken, receivedCode, onClose, onClaimed, language = 'ko' }) {
   const [stampInfo, setStampInfo] = useState(null);
   const translateY = useState(new Animated.Value(SHEET_HEIGHT))[0];
 
@@ -157,8 +157,10 @@ export default function SpotDetailSheet({ spot, userPos, wallet, pushToken, onCl
       <ClaimButton
         spot={spot}
         distance={distance}
+        userPos={userPos}
         wallet={wallet}
         pushToken={pushToken}
+        receivedCode={receivedCode}
         isOwner={isOwner}
         isExhausted={isExhausted}
         isOnCooldown={isOnCooldown}

@@ -4,7 +4,7 @@ const blockchain = require('../blockchain');
 const { isValidEthAddress, haversineDistance, isWithinTimeRange } = require('../utils');
 const { sendPushNotification, saveDeviceClaimEvent } = require('../firebase-admin');
 
-const COLLECT_RADIUS = 50;
+const COLLECT_RADIUS = 15;
 const CODE_EXPIRY_SECONDS = 180; // 3분
 
 function generateVerifyCode() {

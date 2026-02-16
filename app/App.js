@@ -6,13 +6,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import TabNavigator from './src/navigation/TabNavigator';
 import IntroScreen from './src/screens/IntroScreen';
 import { initWallet, onWalletChange } from './src/services/wallet';
-import { registerForPushNotifications } from './src/services/notifications';
+import { registerForPushNotifications, setupNotificationListener } from './src/services/notifications';
 
 export default function App() {
   const [showIntro, setShowIntro] = useState(true);
   const [wallet, setWallet] = useState(null);
   const [language, setLanguage] = useState('ko');
   const [pushToken, setPushToken] = useState(null);
+  const [receivedCode, setReceivedCode] = useState(null);
 
   useEffect(() => {
     AsyncStorage.getItem('language').then((lang) => {
@@ -36,7 +37,15 @@ export default function App() {
         setPushToken(fallback);
       });
 
-    return unsub;
+    // FCM 알림 수신 리스너 (인증번호 자동 채우기)
+    const cleanupNotifications = setupNotificationListener((code, spotId) => {
+      setReceivedCode({ code, spotId, timestamp: Date.now() });
+    });
+
+    return () => {
+      unsub();
+      cleanupNotifications();
+    };
   }, []);
 
   const handleLanguageChange = (lang) => {
@@ -76,6 +85,7 @@ export default function App() {
       <TabNavigator
         wallet={wallet}
         pushToken={pushToken}
+        receivedCode={receivedCode}
         language={language}
         onLanguageChange={handleLanguageChange}
         onWalletDisconnect={handleWalletDisconnect}

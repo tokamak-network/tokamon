@@ -6,8 +6,8 @@ import { COLLECT_RADIUS } from '../utils/constants';
 import { t } from '../utils/translations';
 
 export default function ClaimButton({
-  spot, distance, wallet, pushToken, isOwner, isExhausted, isOnCooldown,
-  onClaimed, onCodeReceived, language = 'ko',
+  spot, distance, userPos, wallet, pushToken, receivedCode, isOwner, isExhausted, isOnCooldown,
+  onClaimed, language = 'ko',
 }) {
   const [claiming, setClaiming] = useState(false);
   const [claimPhase, setClaimPhase] = useState('idle'); // idle → requesting → code_input → verifying
@@ -21,12 +21,12 @@ export default function ClaimButton({
 
   console.log('[ClaimButton]', { hasWallet, hasDevice, pushToken: pushToken?.slice(0,15), isOwner, isExhausted, isOnCooldown, active: spot.active, canClaim });
 
-  // 외부에서 코드 수신 시 자동 채우기
+  // FCM 푸시 알림에서 인증번호 수신 시 자동 채우기
   useEffect(() => {
-    if (onCodeReceived && claimPhase === 'code_input') {
-      // onCodeReceived는 부모에서 전달하는 코드값
+    if (receivedCode && claimPhase === 'code_input' && receivedCode.spotId === String(spot.id)) {
+      setVerifyCode(receivedCode.code);
     }
-  }, [onCodeReceived, claimPhase]);
+  }, [receivedCode, claimPhase, spot.id]);
 
   if (!canClaim) return null;
 
@@ -53,13 +53,17 @@ export default function ClaimButton({
 
   // 디바이스 클레임 - 인증 코드 요청
   const handleRequestCode = async () => {
+    if (!userPos) {
+      Alert.alert('', t(language, 'gpsRequired') || 'GPS 위치를 확인할 수 없습니다');
+      return;
+    }
     if (distance !== null && distance > COLLECT_RADIUS) {
       Alert.alert('', t(language, 'tooFar').replace('{distance}', distance).replace('{radius}', COLLECT_RADIUS));
       return;
     }
     setClaimPhase('requesting');
     try {
-      const result = await requestDeviceCode(pushToken, spot.id, spot.lat, spot.lng);
+      const result = await requestDeviceCode(pushToken, spot.id, userPos.lat, userPos.lng);
       setClaimPhase('code_input');
       // 디버그 코드가 있으면 (FCM 미지원 환경) 자동 채우기
       if (result.debug_code) {
@@ -89,15 +93,6 @@ export default function ClaimButton({
     } catch (err) {
       Alert.alert(t(language, 'claimFailed'), err.message || '');
       setClaimPhase('code_input');
-    }
-  };
-
-  // 코드 자동 채우기 (푸시 알림에서)
-  const autoFillCode = (code) => {
-    setVerifyCode(code);
-    // 자동으로 검증 시도
-    if (code.length === 6 && claimPhase === 'code_input') {
-      setTimeout(() => handleVerifyAndClaim(), 500);
     }
   };
 
@@ -201,9 +196,6 @@ export default function ClaimButton({
     </View>
   );
 }
-
-// Export autoFillCode for parent component
-ClaimButton.autoFillCode = null;
 
 const styles = StyleSheet.create({
   button: {

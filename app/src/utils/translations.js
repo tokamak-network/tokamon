@@ -125,6 +125,7 @@ export const translations = {
     gpsLoading: '위치를 찾고 있습니다...',
     gpsDenied: '위치 권한이 거부되었습니다. 설정에서 위치 권한을 허용해주세요.',
     gpsUnavailable: '위치 서비스를 사용할 수 없습니다.',
+    gpsRequired: 'GPS 위치를 확인할 수 없습니다. 위치 권한을 허용해주세요.',
   },
   en: {
     // Common
@@ -251,6 +252,7 @@ export const translations = {
     gpsLoading: 'Finding your location...',
     gpsDenied: 'Location permission denied. Please enable it in settings.',
     gpsUnavailable: 'Location services unavailable.',
+    gpsRequired: 'Cannot determine GPS location. Please allow location access.',
   }
 };
 
