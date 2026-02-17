@@ -26,7 +26,7 @@ export const translations = {
     // 탭
     map: '지도',
     spotList: '스팟 목록',
-    myTokamon: '내 토카몬',
+    myTokamon: '월렛',
     mySpotManagement: '내 스팟 관리',
     createSpot: '스팟 만들기',
     tapMapToSelectLocation: '지도를 탭하여 스팟 위치를 선택하세요',
@@ -59,7 +59,7 @@ export const translations = {
     
     // 내 토카몬
     walletAddress: '지갑 주소',
-    telegramAccount: '텔레그램 사용자이름',
+    telegramAccount: 'Linked Telegram Username',
     telegramName: '텔레그램 이름',
     telegramConnected: '연결됨',
     telegramNotConnected: '연결 안됨',
@@ -78,6 +78,20 @@ export const translations = {
     claimHistory: '클레임 기록',
     noClaimHistory: '아직 클레임 기록이 없습니다',
     
+    // 기기 (Device)
+    deviceAccount: '연결된 기기',
+    deviceName: '기기',
+    deviceHash: '기기 해시',
+    deviceBalance: 'TON 보유량',
+    deviceNotLinked: ': 연결된 기기 없음',
+    deviceClaimToWallet: '지갑으로 클레임',
+    deviceClaimSuccess: '기기 TON이 지갑으로 전송되었습니다!',
+    deviceLinkGuide: '앱에서 기기를 지갑에 연결하세요',
+    unlinkDevice: '연결 해제',
+    unlinkDeviceConfirm: '기기 연결을 해제하시겠습니까? 잔액은 유지되지만, 재연결 전까지 클레임할 수 없습니다.',
+    unlinkDeviceSuccess: '기기 연결이 해제되었습니다',
+    unlinkDeviceError: '기기 연결 해제 중 오류가 발생했습니다',
+
     // 텔레그램 연결 안내
     telegramLinkGuide: '지갑 계정과 텔레그램 아이디 연결 방법',
     telegramStep1: '텔레그램에서',
@@ -296,7 +310,7 @@ export const translations = {
     // Tabs
     map: 'Map',
     spotList: 'Spot List',
-    myTokamon: 'My Tokamon',
+    myTokamon: 'Wallet',
     mySpotManagement: 'My Spots',
     createSpot: 'Create Spot',
     tapMapToSelectLocation: 'Tap the map to select spot location',
@@ -329,7 +343,7 @@ export const translations = {
     
     // My Tokamon
     walletAddress: 'Wallet Address',
-    telegramAccount: 'Telegram Username',
+    telegramAccount: 'Linked Telegram Username',
     telegramName: 'Telegram Name',
     telegramConnected: 'Connected',
     telegramNotConnected: 'Not Connected',
@@ -348,6 +362,20 @@ export const translations = {
     claimHistory: 'Claim History',
     noClaimHistory: 'No claim history yet',
     
+    // Device
+    deviceAccount: 'Linked Device',
+    deviceName: 'Device',
+    deviceHash: 'Device Hash',
+    deviceBalance: 'TON Balance',
+    deviceNotLinked: ': No device linked',
+    deviceClaimToWallet: 'Claim to Wallet',
+    deviceClaimSuccess: 'Device TON transferred to wallet!',
+    deviceLinkGuide: 'Link your device via the mobile app',
+    unlinkDevice: 'Unlink',
+    unlinkDeviceConfirm: 'Unlink device? Balance will be kept, but you cannot claim until re-linked.',
+    unlinkDeviceSuccess: 'Device unlinked',
+    unlinkDeviceError: 'Error unlinking device',
+
     // Telegram Link Guide
     telegramLinkGuide: 'How to Link Wallet and Telegram',
     telegramStep1: 'Search for',

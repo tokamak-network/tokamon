@@ -65,7 +65,7 @@ export const translations = {
     // 설정
     myTelegramId: '내 텔레그램 아이디',
     telegramUsernameDesc: '텔레그램 username을 저장하면 매번 입력하지 않아도 됩니다.',
-    telegramUsername: '텔레그램 Username',
+    telegramUsername: 'Linked Telegram Username',
     saved: '저장되었습니다',
     walletConnectionInfo: '지갑 연결 정보',
     walletConnectionDesc: '현재 지갑에 연결된 텔레그램 계정입니다.',
@@ -111,7 +111,7 @@ export const translations = {
     remainingTON: '남은 TON',
 
     // 디바이스 클레임
-    deviceBalance: '기기 적립금',
+    deviceBalance: 'TON 적립금',
     enterVerificationCode: '인증번호를 입력하세요',
     requestingCode: '인증번호 요청 중...',
     waitingCode: '인증번호 대기 중...',
@@ -122,6 +122,17 @@ export const translations = {
     connectWalletToWithdraw: '지갑을 연결하면 적립금을 출금할 수 있습니다',
     claimWithoutWallet: '지갑 없이 클레임',
     tooFarShort: '너무 멀어요',
+
+    // 기기 지갑 등록
+    deviceWalletLink: '기기 지갑 등록',
+    enterWalletToLink: '이 기기에 연결할 지갑 주소를 입력하세요',
+    registerWallet: '지갑 등록',
+    walletLinked: '지갑 연결됨',
+    walletLinkSuccess: '지갑이 연결되었습니다!',
+    invalidWalletAddress: '올바른 이더리움 주소를 입력해주세요 (0x...)',
+    sameWalletError: '이미 연결된 주소와 동일합니다',
+    claimViaWebGuide: '적립된 TON을 지갑으로 받으려면 웹 고객페이지의 월렛 메뉴에서 지갑을 연결하고 클레임하세요.',
+    openWebWallet: '웹 월렛 페이지 열기',
 
     // GPS
     gpsLoading: '위치를 찾고 있습니다...',
@@ -194,7 +205,7 @@ export const translations = {
     // Settings
     myTelegramId: 'My Telegram ID',
     telegramUsernameDesc: 'Save your Telegram username so you don\'t have to enter it every time.',
-    telegramUsername: 'Telegram Username',
+    telegramUsername: 'Linked Telegram Username',
     saved: 'Saved',
     walletConnectionInfo: 'Wallet Connection Info',
     walletConnectionDesc: 'Telegram account linked to this wallet.',
@@ -240,7 +251,7 @@ export const translations = {
     remainingTON: 'Remaining TON',
 
     // Device Claim
-    deviceBalance: 'Device Balance',
+    deviceBalance: 'TON Balance',
     enterVerificationCode: 'Enter verification code',
     requestingCode: 'Requesting code...',
     waitingCode: 'Waiting for code...',
@@ -251,6 +262,17 @@ export const translations = {
     connectWalletToWithdraw: 'Connect wallet to withdraw your balance',
     claimWithoutWallet: 'Claim without wallet',
     tooFarShort: 'Too far',
+
+    // Device Wallet Registration
+    deviceWalletLink: 'Device Wallet Registration',
+    enterWalletToLink: 'Enter wallet address to link to this device',
+    registerWallet: 'Register Wallet',
+    walletLinked: 'Wallet Linked',
+    walletLinkSuccess: 'Wallet linked successfully!',
+    invalidWalletAddress: 'Please enter a valid Ethereum address (0x...)',
+    sameWalletError: 'Same as the currently linked address',
+    claimViaWebGuide: 'To claim your TON to wallet, connect your wallet and claim from the Wallet menu on the web customer page.',
+    openWebWallet: 'Open Web Wallet Page',
 
     // GPS
     gpsLoading: 'Finding your location...',
