@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
+  TextInput,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
@@ -9,36 +10,31 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  Linking,
 } from 'react-native';
 import * as Location from 'expo-location';
-import { useWalletConnectModal } from '@walletconnect/modal-react-native';
 import {
   getDeviceBalance as getDeviceBalanceApi,
   getDeviceBalanceByListenerUrl,
-  linkDeviceToWallet as linkDeviceToWalletApi,
+  requestWalletLinkCode,
+  verifyAndLinkWallet,
 } from '../services/api';
-import {
-  getWalletLinkedDevice,
-  claimDeviceToWalletContract,
-} from '../services/contract';
-import { disconnectWallet, setWalletFromWC } from '../services/wallet';
-import { getAllNetworks, getNetworkConfig, getSelectedNetwork } from '../utils/networkStore';
-import NetworkSelector from '../components/NetworkSelector';
+import { getAllNetworks, getSelectedNetwork } from '../utils/networkStore';
+import { WEB_CLIENT_URL } from '../utils/constants';
 import { t } from '../utils/translations';
 
-export default function WalletScreen({ wallet, pushToken, language = 'ko', networkId, onNetworkChange }) {
-  const { open, isConnected: wcConnected, provider: wcProvider } = useWalletConnectModal();
+export default function WalletScreen({ pushToken, receivedCode, language = 'ko', networkId, onNetworkChange }) {
   const [refreshing, setRefreshing] = useState(false);
   const [networkBalances, setNetworkBalances] = useState({});
   const [balancesLoading, setBalancesLoading] = useState(false);
   const [deviceHash, setDeviceHash] = useState(null);
-  const [deviceLinked, setDeviceLinked] = useState(false);
-  const [deviceClaiming, setDeviceClaiming] = useState(false);
-  const [deviceLinking, setDeviceLinking] = useState(false);
   const [userPos, setUserPos] = useState(null);
+  const [linkedWallet, setLinkedWallet] = useState(null);
+  const [walletInput, setWalletInput] = useState('');
+  const [linkPhase, setLinkPhase] = useState('idle'); // idle | requesting | waiting_code | verifying
+  const [walletInputError, setWalletInputError] = useState('');
 
   const networks = getAllNetworks();
-  const currentNetwork = getNetworkConfig();
 
   // GPS 위치 가져오기
   useEffect(() => {
@@ -50,54 +46,6 @@ export default function WalletScreen({ wallet, pushToken, language = 'ko', netwo
     })();
   }, []);
 
-  // WalletConnect 연결 완료 시 signer 설정 + 네트워크 자동 추가
-  useEffect(() => {
-    console.log('[Wallet] wcConnected:', wcConnected, 'wcProvider:', !!wcProvider);
-    if (wcConnected && wcProvider) {
-      setWalletFromWC(wcProvider)
-        .then((address) => {
-          console.log('[Wallet] Connected:', address);
-          // 현재 선택된 네트워크를 MetaMask에 자동 추가/전환
-          const net = getNetworkConfig();
-          const chainHex = '0x' + net.chainId.toString(16);
-          console.log('[Wallet] Adding network:', net.name, 'chainId:', chainHex, 'rpc:', net.rpcUrl);
-          return wcProvider.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: chainHex,
-              chainName: net.name,
-              rpcUrls: [net.rpcUrl],
-              nativeCurrency: net.nativeCurrency || { name: 'TON', symbol: 'TON', decimals: 18 },
-            }],
-          });
-        })
-        .then(() => {
-          console.log('[Wallet] Network added successfully');
-        })
-        .catch((err) => {
-          console.warn('[Wallet] Error:', err.message || err);
-          // addEthereumChain 실패 시 switchEthereumChain 시도
-          if (wcProvider) {
-            const net = getNetworkConfig();
-            const chainHex = '0x' + net.chainId.toString(16);
-            wcProvider.request({
-              method: 'wallet_switchEthereumChain',
-              params: [{ chainId: chainHex }],
-            }).catch((e) => console.warn('[Wallet] Switch also failed:', e.message || e));
-          }
-        });
-    }
-  }, [wcConnected, wcProvider]);
-
-  // WalletConnect로 연결
-  const handleWalletConnect = async () => {
-    try {
-      await open();
-    } catch (err) {
-      Alert.alert('WalletConnect', err.message || 'Connection failed');
-    }
-  };
-
   // 모든 네트워크의 잔액 조회
   const fetchAllBalances = useCallback(async () => {
     if (!pushToken) return;
@@ -108,9 +56,12 @@ export default function WalletScreen({ wallet, pushToken, language = 'ko', netwo
         try {
           const data = await getDeviceBalanceByListenerUrl(pushToken, net.listenerUrl);
           balances[net.id] = data.balance || 0;
-          // 현재 네트워크의 device_hash 저장
+          // 현재 네트워크의 device_hash + linked_wallet 저장
           if (net.id === getSelectedNetwork()) {
             setDeviceHash(data.device_hash || null);
+            if (data.linked_wallet) {
+              setLinkedWallet(data.linked_wallet);
+            }
           }
         } catch {
           balances[net.id] = 0;
@@ -118,18 +69,8 @@ export default function WalletScreen({ wallet, pushToken, language = 'ko', netwo
       })
     );
     setNetworkBalances(balances);
-
-    if (wallet) {
-      try {
-        const linked = await getWalletLinkedDevice(wallet);
-        const zeroHash = '0x0000000000000000000000000000000000000000000000000000000000000000';
-        setDeviceLinked(linked && linked !== zeroHash);
-      } catch {
-        setDeviceLinked(false);
-      }
-    }
     setBalancesLoading(false);
-  }, [pushToken, wallet, networkId]);
+  }, [pushToken, networkId]);
 
   useEffect(() => {
     fetchAllBalances();
@@ -141,45 +82,62 @@ export default function WalletScreen({ wallet, pushToken, language = 'ko', netwo
     setRefreshing(false);
   };
 
+  // FCM 자동 인증: wallet_link 코드 수신 시 자동으로 verify-and-link 호출
+  useEffect(() => {
+    if (
+      receivedCode &&
+      receivedCode.spotId === 'wallet_link' &&
+      linkPhase === 'waiting_code' &&
+      walletInput
+    ) {
+      handleVerifyLink(receivedCode.code);
+    }
+  }, [receivedCode]);
+
+  const handleRequestLinkCode = async () => {
+    const addr = walletInput.trim();
+    if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) {
+      setWalletInputError(t(language, 'invalidWalletAddress'));
+      return;
+    }
+    if (linkedWallet && addr.toLowerCase() === linkedWallet.toLowerCase()) {
+      setWalletInputError(t(language, 'sameWalletError'));
+      return;
+    }
+    setWalletInputError('');
+    setLinkPhase('requesting');
+    try {
+      const result = await requestWalletLinkCode(pushToken, addr);
+      if (result.debug_code) {
+        // FCM 전송 실패 시 debug_code로 자동 인증
+        setLinkPhase('verifying');
+        await handleVerifyLink(result.debug_code);
+      } else {
+        setLinkPhase('waiting_code');
+      }
+    } catch (err) {
+      Alert.alert('Error', err.message || 'Request failed');
+      setLinkPhase('idle');
+    }
+  };
+
+  const handleVerifyLink = async (code) => {
+    setLinkPhase('verifying');
+    try {
+      const result = await verifyAndLinkWallet(pushToken, walletInput.trim(), code);
+      if (result.success) {
+        setLinkedWallet(walletInput.trim());
+        setWalletInput('');
+        Alert.alert('', t(language, 'walletLinkSuccess'));
+      }
+    } catch (err) {
+      Alert.alert('Error', err.message || 'Verification failed');
+    } finally {
+      setLinkPhase('idle');
+    }
+  };
+
   const totalBalance = Object.values(networkBalances).reduce((sum, b) => sum + b, 0);
-  const currentBalance = networkBalances[networkId] || 0;
-
-  // 지갑 연결 해제
-  const handleDisconnect = async () => {
-    await disconnectWallet();
-    setDeviceLinked(false);
-  };
-
-  // 디바이스 → 지갑 연결
-  const handleLinkDevice = async () => {
-    if (!pushToken || !wallet) return;
-    setDeviceLinking(true);
-    try {
-      await linkDeviceToWalletApi(pushToken, wallet);
-      Alert.alert('', t(language, 'deviceLinked'));
-      setDeviceLinked(true);
-      await fetchAllBalances();
-    } catch (err) {
-      Alert.alert('Error', err.message || 'Link failed');
-    } finally {
-      setDeviceLinking(false);
-    }
-  };
-
-  // 디바이스 잔액 → 지갑으로 출금
-  const handleDeviceClaimToWallet = async () => {
-    if (!deviceHash || currentBalance <= 0) return;
-    setDeviceClaiming(true);
-    try {
-      await claimDeviceToWalletContract('0x' + deviceHash);
-      Alert.alert('', `${currentBalance.toFixed(4)} TON ${t(language, 'claimToWalletSuccess')}`);
-      await fetchAllBalances();
-    } catch (err) {
-      Alert.alert('Error', err.message || 'Claim failed');
-    } finally {
-      setDeviceClaiming(false);
-    }
-  };
 
   return (
     <ScrollView
@@ -192,7 +150,12 @@ export default function WalletScreen({ wallet, pushToken, language = 'ko', netwo
       {/* Total Balance Card */}
       {pushToken && (
         <View style={styles.totalBalanceCard}>
-          <Text style={styles.totalBalanceLabel}>{t(language, 'deviceBalance')}</Text>
+          <View style={styles.balanceHeaderRow}>
+            <Text style={styles.totalBalanceLabel}>{t(language, 'deviceBalance')}</Text>
+            <TouchableOpacity style={styles.refreshBtn} onPress={fetchAllBalances} activeOpacity={0.7}>
+              <Text style={styles.refreshBtnText}>↻</Text>
+            </TouchableOpacity>
+          </View>
           {balancesLoading ? (
             <View style={styles.loadingRow}>
               <ActivityIndicator size="small" color="#4FC3F7" />
@@ -234,7 +197,7 @@ export default function WalletScreen({ wallet, pushToken, language = 'ko', netwo
                   <Text style={[styles.networkBalanceName, isActive && styles.networkBalanceNameActive]}>
                     {net.name}
                   </Text>
-                  <Text style={styles.networkBalanceChain}>Chain {net.chainId}</Text>
+                  <Text style={styles.networkBalanceChain}>Chain ID: {net.chainId} (0x{net.chainId.toString(16)})</Text>
                 </View>
                 {balancesLoading ? (
                   <ActivityIndicator size="small" color="#666" />
@@ -249,100 +212,81 @@ export default function WalletScreen({ wallet, pushToken, language = 'ko', netwo
         </View>
       )}
 
-      {/* Wallet Section */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionIcon}>👛</Text>
-          <Text style={styles.sectionLabel}>{t(language, 'walletAddress')}</Text>
-        </View>
-
-        {/* Current Network */}
-        <View style={styles.currentNetworkRow}>
-          <NetworkSelector currentNetworkId={networkId} onNetworkChange={onNetworkChange} />
-        </View>
-
-        {wallet ? (
-          <View>
-            <View style={styles.walletBox}>
-              <Text style={styles.walletAddress} numberOfLines={1}>{wallet}</Text>
-            </View>
-            <TouchableOpacity onPress={handleDisconnect} style={styles.disconnectBtn}>
-              <Text style={styles.disconnectBtnText}>{t(language, 'disconnect')}</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity
-            style={styles.wcBtn}
-            onPress={handleWalletConnect}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.wcBtnIcon}>🔗</Text>
-            <View style={styles.wcBtnInfo}>
-              <Text style={styles.wcBtnTitle}>WalletConnect</Text>
-              <Text style={styles.wcBtnDesc}>MetaMask, Trust Wallet...</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Device → Wallet Actions */}
-      {wallet && pushToken && (
+      {/* Device Wallet Registration */}
+      {pushToken && (
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionIcon}>📱</Text>
-            <Text style={styles.sectionLabel}>{t(language, 'claimToWallet')}</Text>
+            <Text style={styles.sectionIcon}>🔐</Text>
+            <Text style={styles.sectionLabel}>{t(language, 'deviceWalletLink')}</Text>
           </View>
 
-          {!deviceLinked ? (
+          {linkedWallet ? (
             <View>
-              <Text style={styles.guideText}>
-                {t(language, 'connectWalletToWithdraw')}
-              </Text>
+              <View style={styles.linkedBadge}>
+                <Text style={styles.linkedText}>{t(language, 'walletLinked')}</Text>
+              </View>
+              <View style={styles.walletBox}>
+                <Text style={styles.walletAddress} numberOfLines={1}>{linkedWallet}</Text>
+              </View>
+              <View style={styles.claimGuideBox}>
+                <Text style={styles.claimGuideText}>{t(language, 'claimViaWebGuide')}</Text>
+                <Text
+                  style={styles.claimGuideUrl}
+                  onPress={() => Linking.openURL(WEB_CLIENT_URL)}
+                >
+                  {WEB_CLIENT_URL}
+                </Text>
+              </View>
+            </View>
+          ) : linkPhase === 'requesting' || linkPhase === 'waiting_code' || linkPhase === 'verifying' ? (
+            <View>
+              <View style={styles.actionBtnInner}>
+                <ActivityIndicator size="small" color="#4FC3F7" />
+                <Text style={styles.loadingText}>
+                  {linkPhase === 'requesting' ? t(language, 'requestingCode') :
+                   linkPhase === 'waiting_code' ? t(language, 'waitingCode') :
+                   t(language, 'processing')}
+                </Text>
+              </View>
               <TouchableOpacity
-                style={[styles.actionBtn, styles.linkBtn, deviceLinking && styles.actionBtnDisabled]}
-                onPress={handleLinkDevice}
-                disabled={deviceLinking}
+                style={[styles.actionBtn, styles.cancelBtn]}
+                onPress={() => setLinkPhase('idle')}
                 activeOpacity={0.7}
               >
-                {deviceLinking ? (
-                  <View style={styles.actionBtnInner}>
-                    <ActivityIndicator size="small" color="#fff" />
-                    <Text style={styles.actionBtnText}>{t(language, 'processing')}</Text>
-                  </View>
-                ) : (
-                  <Text style={styles.actionBtnText}>{t(language, 'linkDevice')}</Text>
-                )}
+                <Text style={styles.actionBtnText}>{t(language, 'cancel')}</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View>
-              <View style={styles.linkedBadge}>
-                <Text style={styles.linkedText}>{t(language, 'deviceLinked')}</Text>
-              </View>
-
-              {currentBalance > 0 && (
-                <TouchableOpacity
-                  style={[styles.actionBtn, deviceClaiming && styles.actionBtnDisabled]}
-                  onPress={handleDeviceClaimToWallet}
-                  disabled={deviceClaiming}
-                  activeOpacity={0.7}
-                >
-                  {deviceClaiming ? (
-                    <View style={styles.actionBtnInner}>
-                      <ActivityIndicator size="small" color="#fff" />
-                      <Text style={styles.actionBtnText}>{t(language, 'processing')}</Text>
-                    </View>
-                  ) : (
-                    <Text style={styles.actionBtnText}>
-                      {currentBalance.toFixed(4)} TON {t(language, 'claimToWallet')}
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              )}
+              <Text style={styles.guideText}>{t(language, 'enterWalletToLink')}</Text>
+              <TextInput
+                style={[styles.walletInput, walletInputError ? styles.walletInputError : null]}
+                value={walletInput}
+                onChangeText={(text) => {
+                  setWalletInput(text);
+                  if (walletInputError) setWalletInputError('');
+                }}
+                placeholder="0x..."
+                placeholderTextColor="#555"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              {walletInputError ? (
+                <Text style={styles.errorText}>{walletInputError}</Text>
+              ) : null}
+              <TouchableOpacity
+                style={[styles.actionBtn, styles.linkBtn, !walletInput && styles.actionBtnDisabled]}
+                onPress={handleRequestLinkCode}
+                disabled={!walletInput}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.actionBtnText}>{t(language, 'registerWallet')}</Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>
       )}
+
     </ScrollView>
   );
 }
@@ -375,9 +319,27 @@ const styles = StyleSheet.create({
     color: '#999',
     fontSize: 13,
     fontWeight: '600',
-    marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  balanceHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 8,
+  },
+  refreshBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  refreshBtnText: {
+    fontSize: 18,
+    color: '#999',
   },
   totalBalanceAmount: {
     color: '#fbbf24',
@@ -477,38 +439,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
   },
-  // Current Network in Wallet
-  currentNetworkRow: {
-    marginBottom: 10,
-  },
-  // Connect Options
-  wcBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: 'rgba(59,130,246,0.12)',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(59,130,246,0.3)',
-  },
-  wcBtnIcon: {
-    fontSize: 24,
-  },
-  wcBtnInfo: {
-    flex: 1,
-  },
-  wcBtnTitle: {
-    color: '#3b82f6',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  wcBtnDesc: {
-    color: '#666',
-    fontSize: 12,
-    marginTop: 2,
-  },
   // Wallet
   walletBox: {
     backgroundColor: 'rgba(255,255,255,0.03)',
@@ -520,16 +450,6 @@ const styles = StyleSheet.create({
     color: '#bbb',
     fontSize: 12,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-  },
-  disconnectBtn: {
-    marginTop: 10,
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  disconnectBtnText: {
-    color: '#ef4444',
-    fontSize: 13,
-    fontWeight: '600',
   },
   // Actions
   guideText: {
@@ -568,6 +488,25 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
   },
+  claimGuideBox: {
+    backgroundColor: 'rgba(59,130,246,0.08)',
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(59,130,246,0.15)',
+  },
+  claimGuideText: {
+    color: '#8bb8f0',
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  claimGuideUrl: {
+    color: '#60a5fa',
+    fontSize: 13,
+    marginTop: 8,
+    textDecorationLine: 'underline',
+  },
   linkedBadge: {
     backgroundColor: 'rgba(16,185,129,0.1)',
     paddingVertical: 8,
@@ -604,5 +543,30 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#888',
     fontSize: 13,
+  },
+  walletInput: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    color: '#ddd',
+    fontSize: 14,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    borderWidth: 1,
+    borderColor: 'rgba(167,139,250,0.2)',
+    marginBottom: 8,
+  },
+  walletInputError: {
+    borderColor: '#ef4444',
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: 12,
+    marginBottom: 8,
+  },
+  cancelBtn: {
+    backgroundColor: '#555',
+    shadowColor: 'transparent',
+    marginTop: 12,
   },
 });

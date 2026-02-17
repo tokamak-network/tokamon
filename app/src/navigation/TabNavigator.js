@@ -126,8 +126,8 @@ export default function TabNavigator({ wallet, pushToken, receivedCode, language
         {(props) => (
           <WalletScreen
             {...props}
-            wallet={wallet}
             pushToken={pushToken}
+            receivedCode={receivedCode}
             language={language}
             networkId={networkId}
             onNetworkChange={onNetworkChange}

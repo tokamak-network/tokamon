@@ -15,6 +15,9 @@ export const API_BASE = process.env.EXPO_PUBLIC_API_BASE
 export const WALLETCONNECT_PROJECT_ID = process.env.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID
   || '';
 
+export const WEB_CLIENT_URL = process.env.EXPO_PUBLIC_WEB_CLIENT_URL
+  || `http://${LOCAL_HOST}:5173`;
+
 // Contract ABI for client-side calls
 export const TOKAMON_ABI = [
   'function createSpotSelf(uint256 reward, uint128 stampGoal, uint128 stampBonus, uint48 cooldown, bool allowDuplicateClaims, tuple(string name, string description, int96 lat, int96 lng, uint64 startTime, uint64 endTime) meta) payable returns (uint256)',
