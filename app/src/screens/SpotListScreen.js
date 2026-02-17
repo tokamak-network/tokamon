@@ -167,6 +167,14 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
             )}
           </View>
         </TouchableOpacity>
+        <View style={{ flex: 1 }} />
+        <TouchableOpacity
+          style={styles.refreshBtn}
+          onPress={onRefresh}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.refreshBtnText}>↻</Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -371,5 +379,19 @@ const styles = StyleSheet.create({
   emptyText: {
     color: '#666',
     fontSize: 15,
+  },
+  refreshBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  refreshBtnText: {
+    fontSize: 18,
+    color: '#888',
   },
 });
