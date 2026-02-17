@@ -10,13 +10,16 @@ function withNetwork(url) {
 
 async function parseJson(res) {
   const contentType = res.headers.get('content-type') || '';
-  if (!res.ok || !contentType.includes('application/json')) {
-    const msg = contentType.includes('text/html')
+  if (!contentType.includes('application/json')) {
+    throw new Error(contentType.includes('text/html')
       ? 'API server is not running (HTML response)'
-      : `API error: ${res.status}`;
-    throw new Error(msg);
+      : `API error: ${res.status}`);
   }
-  return res.json();
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || `API error: ${res.status}`);
+  }
+  return data;
 }
 
 export async function getSpots() {
@@ -104,11 +107,21 @@ export async function getDeviceBalanceByListenerUrl(fcmToken, listenerUrl) {
   return parseJson(res);
 }
 
-export async function linkDeviceToWallet(fcmToken, walletAddress) {
-  const res = await fetch(`${getListenerUrl()}/api/device/link-wallet`, {
+export async function requestWalletLinkCode(fcmToken, walletAddress) {
+  const res = await fetch(`${getListenerUrl()}/api/device/request-link-code`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fcm_token: fcmToken, wallet_address: walletAddress }),
   });
   return parseJson(res);
 }
+
+export async function verifyAndLinkWallet(fcmToken, walletAddress, code) {
+  const res = await fetch(`${getListenerUrl()}/api/device/verify-and-link`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fcm_token: fcmToken, wallet_address: walletAddress, code }),
+  });
+  return parseJson(res);
+}
+

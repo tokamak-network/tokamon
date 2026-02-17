@@ -6,9 +6,11 @@ const { sendPushNotification, saveDeviceClaimEvent } = require('../firebase-admi
 
 const COLLECT_RADIUS = 15;
 const CODE_EXPIRY_SECONDS = 180; // 3분
+const MAX_VERIFY_ATTEMPTS = 5; // 코드당 최대 시도 횟수
+const IS_DEV = process.env.NODE_ENV !== 'production';
 
 function generateVerifyCode() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return crypto.randomInt(100000, 1000000).toString();
 }
 
 function hashDeviceToken(fcmToken) {
@@ -21,6 +23,20 @@ function hashDeviceToken(fcmToken) {
 
 module.exports = function(db) {
   const router = express.Router();
+
+  // 만료된 인증 코드 주기적 정리 (10분마다)
+  setInterval(() => {
+    const now = Math.floor(Date.now() / 1000);
+    db.run('DELETE FROM device_verify_codes WHERE expires_at < ?', [now], (err) => {
+      if (!err) {
+        db.get('SELECT changes() AS deleted', (_, row) => {
+          if (row && row.deleted > 0) {
+            console.log(`[Cleanup] 만료된 인증 코드 ${row.deleted}건 삭제`);
+          }
+        });
+      }
+    });
+  }, 10 * 60 * 1000);
 
   // POST /api/device/request-code - 인증 코드 요청 + FCM 푸시 전송
   router.post('/request-code', async (req, res) => {
@@ -92,19 +108,13 @@ module.exports = function(db) {
       // FCM 푸시 전송
       const sent = await sendPushNotification(
         fcm_token,
-        'Tokamon 인증',
-        `인증번호: ${code}`,
+        'Tokamon Verification',
+        `Verification code: ${code}`,
         { type: 'verify_code', code, spot_id: String(spot_id) }
       );
 
-      // FCM 전송 실패 시에만 debug_code 반환 (개발 환경 전용)
-      const response = { success: true, message: '인증 코드가 전송되었습니다' };
-      if (!sent) {
-        response.debug_code = code;
-        response.message = '푸시 전송 실패 - 디버그 코드 포함';
-      }
-
-      res.json(response);
+      // 같은 기기에서 요청/인증하므로 코드를 직접 반환하여 자동 인증
+      res.json({ success: true, debug_code: code });
     } catch (err) {
       console.error('device request-code 에러:', err.message);
       res.status(500).json({ error: '인증 코드 요청 실패' });
@@ -123,7 +133,7 @@ module.exports = function(db) {
       const deviceHash = hashDeviceToken(fcm_token);
       const now = Math.floor(Date.now() / 1000);
 
-      // DB에서 코드 검증
+      // DB에서 코드 검증 (시도 횟수 제한 포함)
       const row = await new Promise((resolve, reject) => {
         db.get(
           'SELECT * FROM device_verify_codes WHERE code = ? AND device_hash = ? AND spot_id = ? AND expires_at > ? AND verified = 0',
@@ -133,7 +143,19 @@ module.exports = function(db) {
       });
 
       if (!row) {
+        // 시도 횟수 증가 (해당 device_hash의 미인증 코드들)
+        await new Promise((resolve) => {
+          db.run('UPDATE device_verify_codes SET attempts = attempts + 1 WHERE device_hash = ? AND spot_id = ? AND verified = 0 AND expires_at > ?',
+            [deviceHash, spot_id, now], () => resolve());
+        });
         return res.status(400).json({ error: '인증 코드가 올바르지 않거나 만료되었습니다' });
+      }
+
+      if ((row.attempts || 0) >= MAX_VERIFY_ATTEMPTS) {
+        await new Promise((resolve) => {
+          db.run('UPDATE device_verify_codes SET verified = 1 WHERE code = ?', [code], () => resolve());
+        });
+        return res.status(400).json({ error: '시도 횟수를 초과했습니다. 새 코드를 요청해주세요' });
       }
 
       // 코드 사용 처리
@@ -164,7 +186,7 @@ module.exports = function(db) {
       });
     } catch (err) {
       console.error('device verify-and-claim 에러:', err.message);
-      res.status(500).json({ error: '클레임 실패: ' + (err.reason || err.message) });
+      res.status(500).json({ error: IS_DEV ? '클레임 실패: ' + (err.reason || err.message) : '클레임 실패' });
     }
   });
 
@@ -180,15 +202,25 @@ module.exports = function(db) {
       const deviceHash = hashDeviceToken(fcm_token);
       const balance = await blockchain.getDeviceBalance(deviceHash);
 
-      res.json({ balance, device_hash: deviceHash });
+      // linked wallet 조회
+      let linked_wallet = null;
+      try {
+        const wallet = await blockchain.getDeviceLinkedWallet(deviceHash);
+        const zeroAddr = '0x0000000000000000000000000000000000000000';
+        if (wallet && wallet !== zeroAddr) {
+          linked_wallet = wallet;
+        }
+      } catch (_) {}
+
+      res.json({ balance, device_hash: deviceHash, linked_wallet });
     } catch (err) {
       console.error('device balance 에러:', err.message);
       res.status(500).json({ error: '잔액 조회 실패' });
     }
   });
 
-  // POST /api/device/link-wallet - 디바이스를 지갑에 연결
-  router.post('/link-wallet', async (req, res) => {
+  // POST /api/device/request-link-code - 지갑 연결용 인증 코드 요청 + FCM 푸시 전송
+  router.post('/request-link-code', async (req, res) => {
     try {
       const { fcm_token, wallet_address } = req.body;
 
@@ -201,6 +233,92 @@ module.exports = function(db) {
       }
 
       const deviceHash = hashDeviceToken(fcm_token);
+      const now = Math.floor(Date.now() / 1000);
+
+      // 기존 미사용 코드가 있으면 무효화 (중복 요청 방지)
+      await new Promise((resolve) => {
+        db.run('UPDATE device_verify_codes SET verified = 1 WHERE device_hash = ? AND spot_id = -1 AND verified = 0 AND expires_at > ?',
+          [deviceHash, now], () => resolve());
+      });
+
+      // 인증 코드 생성
+      const code = generateVerifyCode();
+      const expiresAt = now + CODE_EXPIRY_SECONDS;
+
+      // DB에 저장 (spot_id = -1: 지갑 연결 요청 구분용 센티넬값, wallet_address 포함)
+      await new Promise((resolve, reject) => {
+        db.run(
+          'INSERT INTO device_verify_codes (code, device_hash, spot_id, wallet_address, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)',
+          [code, deviceHash, -1, wallet_address, now, expiresAt],
+          (err) => err ? reject(err) : resolve()
+        );
+      });
+
+      // FCM 푸시 전송
+      const sent = await sendPushNotification(
+        fcm_token,
+        'Tokamon Wallet Verification',
+        `Verification code: ${code}`,
+        { type: 'wallet_link_code', code, wallet_address }
+      );
+
+      // 지갑 연결은 같은 기기에서 요청/인증하므로 코드를 직접 반환하여 자동 인증
+      res.json({ success: true, debug_code: code });
+    } catch (err) {
+      console.error('device request-link-code 에러:', err.message);
+      res.status(500).json({ error: '인증 코드 요청 실패' });
+    }
+  });
+
+  // POST /api/device/verify-and-link - 코드 검증 + linkDeviceToWallet 호출
+  router.post('/verify-and-link', async (req, res) => {
+    try {
+      const { fcm_token, wallet_address, code } = req.body;
+
+      if (!fcm_token || !wallet_address || !code) {
+        return res.status(400).json({ error: '필수 항목을 입력해주세요' });
+      }
+
+      if (!isValidEthAddress(wallet_address)) {
+        return res.status(400).json({ error: '올바른 이더리움 주소가 아닙니다' });
+      }
+
+      const deviceHash = hashDeviceToken(fcm_token);
+      const now = Math.floor(Date.now() / 1000);
+
+      // DB에서 코드 검증 (spot_id = -1: 지갑 연결 요청 + wallet_address 일치 확인)
+      const row = await new Promise((resolve, reject) => {
+        db.get(
+          'SELECT * FROM device_verify_codes WHERE code = ? AND device_hash = ? AND spot_id = -1 AND wallet_address = ? AND expires_at > ? AND verified = 0',
+          [code, deviceHash, wallet_address, now],
+          (err, row) => err ? reject(err) : resolve(row)
+        );
+      });
+
+      if (!row) {
+        // 시도 횟수 증가 (해당 device_hash의 미인증 지갑 링크 코드들)
+        await new Promise((resolve) => {
+          db.run('UPDATE device_verify_codes SET attempts = attempts + 1 WHERE device_hash = ? AND spot_id = -1 AND verified = 0 AND expires_at > ?',
+            [deviceHash, now], () => resolve());
+        });
+        return res.status(400).json({ error: '인증 코드가 올바르지 않거나 만료되었습니다' });
+      }
+
+      if ((row.attempts || 0) >= MAX_VERIFY_ATTEMPTS) {
+        await new Promise((resolve) => {
+          db.run('UPDATE device_verify_codes SET verified = 1 WHERE code = ?', [code], () => resolve());
+        });
+        return res.status(400).json({ error: '시도 횟수를 초과했습니다. 새 코드를 요청해주세요' });
+      }
+
+      // 코드 사용 처리
+      await new Promise((resolve, reject) => {
+        db.run('UPDATE device_verify_codes SET verified = 1 WHERE code = ?', [code],
+          (err) => err ? reject(err) : resolve()
+        );
+      });
+
+      // linkDeviceToWallet 호출
       const result = await blockchain.linkDeviceToWallet(deviceHash, wallet_address);
 
       res.json({
@@ -209,8 +327,8 @@ module.exports = function(db) {
         wallet: wallet_address,
       });
     } catch (err) {
-      console.error('device link-wallet 에러:', err.message);
-      res.status(500).json({ error: '지갑 연결 실패: ' + (err.reason || err.message) });
+      console.error('device verify-and-link 에러:', err.message);
+      res.status(500).json({ error: IS_DEV ? '지갑 연결 실패: ' + (err.reason || err.message) : '지갑 연결 실패' });
     }
   });
 

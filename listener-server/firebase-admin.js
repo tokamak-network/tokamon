@@ -135,6 +135,15 @@ async function sendPushNotification(fcmToken, title, body, data = {}) {
           channelId: 'tokamon-verify',
         },
       },
+      apns: {
+        payload: {
+          aps: {
+            alert: { title, body },
+            sound: 'default',
+            'content-available': 1,
+          },
+        },
+      },
     };
     const result = await admin.messaging().send(message);
     console.log('[FCM] 푸시 전송 성공:', result);
