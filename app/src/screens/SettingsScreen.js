@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,42 +6,15 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  ActivityIndicator,
   Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getTelegramLinked } from '../services/api';
 import { disconnectWallet } from '../services/wallet';
 import { t } from '../utils/translations';
 import { getSelectedNetwork, setSelectedNetwork, getAllNetworks, getNetworkConfig } from '../utils/networkStore';
 
 export default function SettingsScreen({ wallet, language, onLanguageChange, onWalletDisconnect, onNetworkChange }) {
-  const [linkedTelegram, setLinkedTelegram] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [currentNetworkId, setCurrentNetworkId] = useState(getSelectedNetwork());
-
-  useEffect(() => {
-    if (wallet) {
-      fetchLinkedTelegram();
-    }
-  }, [wallet]);
-
-  const fetchLinkedTelegram = async () => {
-    if (!wallet) return;
-    setLoading(true);
-    try {
-      const data = await getTelegramLinked(wallet);
-      if (data.linked && data.telegram_hash) {
-        setLinkedTelegram(data.telegram_hash);
-      } else {
-        setLinkedTelegram(null);
-      }
-    } catch {
-      setLinkedTelegram(null);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleLanguageChange = async (lang) => {
     await AsyncStorage.setItem('language', lang);
@@ -74,62 +47,6 @@ export default function SettingsScreen({ wallet, language, onLanguageChange, onW
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Telegram Account Link */}
-      <View style={styles.section}>
-        <View style={styles.sectionTitleRow}>
-          <Text style={styles.sectionTitleIcon}>💬</Text>
-          <Text style={styles.sectionTitle}>{t(language, 'telegramAccountLink')}</Text>
-        </View>
-
-        {wallet ? (
-          loading ? (
-            <View style={styles.loadingRow}>
-              <ActivityIndicator size="small" color="#4FC3F7" />
-              <Text style={styles.loadingText}>{t(language, 'loading')}</Text>
-            </View>
-          ) : linkedTelegram ? (
-            <View style={styles.linkedBadge}>
-              <Text style={styles.statusIcon}>✅</Text>
-              <Text style={styles.statusText}>{t(language, 'connected')}</Text>
-              <Text style={styles.hashText} numberOfLines={1}>
-                {linkedTelegram.slice(0, 8)}...{linkedTelegram.slice(-8)}
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.unlinkedBadge}>
-              <Text style={styles.statusIcon}>❌</Text>
-              <Text style={styles.statusTextRed}>{t(language, 'notConnected')}</Text>
-            </View>
-          )
-        ) : (
-          <View style={styles.walletRequiredBadge}>
-            <Text style={styles.walletRequiredIcon}>🔗</Text>
-            <Text style={styles.walletRequiredText}>{t(language, 'walletRequired')}</Text>
-          </View>
-        )}
-
-        {/* Guide */}
-        <View style={styles.guideBox}>
-          <Text style={styles.guideTitle}>💡 {t(language, 'connectionGuide')}</Text>
-          <View style={styles.guideDivider} />
-          <Text style={styles.guideStep}>
-            1. {t(language, 'guideStep1')} @TokamonBot {t(language, 'guideStep1_2')}
-          </Text>
-          <Text style={styles.guideStep}>
-            2. /start {t(language, 'guideStep2')}
-          </Text>
-          <Text style={styles.guideStep}>
-            3. /link {t(language, 'guideStep3')}
-          </Text>
-          <Text style={styles.guideStep}>
-            4. {t(language, 'guideStep4')}{' '}
-            {wallet ? (
-              <Text style={styles.guideWalletInline}>{wallet.slice(0, 10)}...</Text>
-            ) : t(language, 'walletRequired')}
-          </Text>
-        </View>
-      </View>
-
       {/* Language Settings */}
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
@@ -189,15 +106,18 @@ export default function SettingsScreen({ wallet, language, onLanguageChange, onW
               activeOpacity={0.7}
             >
               <View style={[styles.networkDot, currentNetworkId === net.id ? styles.networkDotActive : styles.networkDotInactive]} />
-              <Text
-                style={[
-                  styles.networkBtnText,
-                  currentNetworkId === net.id && styles.networkBtnTextActive,
-                ]}
-                numberOfLines={1}
-              >
-                {net.name}
-              </Text>
+              <View style={styles.networkBtnInfo}>
+                <Text
+                  style={[
+                    styles.networkBtnText,
+                    currentNetworkId === net.id && styles.networkBtnTextActive,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {net.name}
+                </Text>
+                <Text style={styles.networkBtnChain}>Chain ID: {net.chainId}</Text>
+              </View>
               {currentNetworkId === net.id && <Text style={styles.networkCheck}>✓</Text>}
             </TouchableOpacity>
           ))}
@@ -210,27 +130,12 @@ export default function SettingsScreen({ wallet, language, onLanguageChange, onW
           <Text style={styles.sectionTitleIcon}>ℹ️</Text>
           <Text style={styles.sectionTitle}>{t(language, 'information')}</Text>
         </View>
-        <View style={styles.infoRow}>
+        <View style={[styles.infoRow, styles.infoRowLast]}>
           <Text style={styles.infoLabel}>{t(language, 'version')}</Text>
           <View style={styles.infoValueBadge}>
             <Text style={styles.infoValue}>1.0.0</Text>
           </View>
         </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>{t(language, 'network')}</Text>
-          <View style={[styles.infoValueBadge, styles.infoValueNetwork]}>
-            <View style={[styles.networkDot, styles.networkDotActive]} />
-            <Text style={[styles.infoValue, styles.infoValueGreen]}>{getNetworkConfig().name}</Text>
-          </View>
-        </View>
-        {wallet && (
-          <View style={[styles.infoRow, styles.infoRowLast]}>
-            <Text style={styles.infoLabel}>{t(language, 'myWallet')}</Text>
-            <Text style={styles.infoValueMono}>
-              {wallet.slice(0, 6)}...{wallet.slice(-4)}
-            </Text>
-          </View>
-        )}
       </View>
 
       {/* Powered by */}
@@ -259,6 +164,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a0a1a',
   },
   content: {
+    flexGrow: 1,
     padding: 16,
     paddingBottom: 40,
   },
@@ -295,103 +201,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginBottom: 12,
     lineHeight: 18,
-  },
-  loadingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 4,
-  },
-  loadingText: {
-    color: '#888',
-    fontSize: 13,
-  },
-  linkedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(16,185,129,0.08)',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(16,185,129,0.15)',
-    flexWrap: 'wrap',
-  },
-  unlinkedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(248,113,113,0.08)',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(248,113,113,0.15)',
-  },
-  statusIcon: {
-    fontSize: 14,
-  },
-  statusText: {
-    color: '#10b981',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  statusTextRed: {
-    color: '#f87171',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  hashText: {
-    color: '#777',
-    fontSize: 11,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    flex: 1,
-  },
-  walletRequiredBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-  },
-  walletRequiredIcon: {
-    fontSize: 14,
-  },
-  walletRequiredText: {
-    color: '#777',
-    fontSize: 13,
-  },
-  guideBox: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 12,
-    padding: 14,
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(251,191,36,0.1)',
-  },
-  guideTitle: {
-    color: '#fbbf24',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  guideDivider: {
-    height: 1,
-    backgroundColor: 'rgba(251,191,36,0.1)',
-    marginVertical: 8,
-  },
-  guideStep: {
-    color: '#bbb',
-    fontSize: 12,
-    marginBottom: 4,
-    lineHeight: 18,
-  },
-  guideWalletInline: {
-    color: '#4FC3F7',
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    fontSize: 11,
   },
   langRow: {
     flexDirection: 'row',
@@ -446,6 +255,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
   },
+  infoLabelActive: {
+    color: '#10b981',
+    fontWeight: '600',
+  },
   infoValueBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -476,15 +289,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(16,185,129,0.12)',
     borderColor: 'rgba(16,185,129,0.35)',
   },
+  networkBtnInfo: {
+    flex: 1,
+  },
   networkBtnText: {
     color: '#777',
     fontSize: 14,
     fontWeight: '600',
-    flex: 1,
   },
   networkBtnTextActive: {
     color: '#10b981',
     fontWeight: '700',
+  },
+  networkBtnChain: {
+    color: '#555',
+    fontSize: 11,
+    marginTop: 2,
   },
   networkCheck: {
     color: '#10b981',
@@ -518,6 +338,7 @@ const styles = StyleSheet.create({
   poweredBy: {
     alignItems: 'center',
     paddingVertical: 16,
+    marginTop: 'auto',
   },
   poweredByText: {
     color: '#444',
