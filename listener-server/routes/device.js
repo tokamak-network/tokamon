@@ -47,6 +47,22 @@ module.exports = function(db) {
         return res.status(400).json({ error: '필수 항목을 입력해주세요' });
       }
 
+      if (typeof fcm_token !== 'string' || fcm_token.length < 1 || fcm_token.length > 4096) {
+        return res.status(400).json({ error: 'fcm_token이 올바르지 않습니다' });
+      }
+
+      if (!Number.isInteger(spot_id)) {
+        return res.status(400).json({ error: 'spot_id는 정수여야 합니다' });
+      }
+
+      if (typeof lat !== 'number' || lat < -90 || lat > 90) {
+        return res.status(400).json({ error: 'lat는 -90~90 범위의 숫자여야 합니다' });
+      }
+
+      if (typeof lng !== 'number' || lng < -180 || lng > 180) {
+        return res.status(400).json({ error: 'lng는 -180~180 범위의 숫자여야 합니다' });
+      }
+
       const deviceHash = hashDeviceToken(fcm_token);
 
       // 스팟 조회
@@ -81,8 +97,8 @@ module.exports = function(db) {
               cooldown_remaining: stampInfo.cooldown_remaining,
             });
           }
-        } catch (_) {
-          // getDeviceStampInfo가 없을 수 있음 - 무시
+        } catch (e) {
+          console.warn('getDeviceStampInfo 실패:', e.message);
         }
       }
 
@@ -210,7 +226,9 @@ module.exports = function(db) {
         if (wallet && wallet !== zeroAddr) {
           linked_wallet = wallet;
         }
-      } catch (_) {}
+      } catch (e) {
+        console.warn('getDeviceLinkedWallet 실패:', e.message);
+      }
 
       res.json({ balance, device_hash: deviceHash, linked_wallet });
     } catch (err) {

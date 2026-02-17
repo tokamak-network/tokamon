@@ -79,6 +79,11 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     event SpotUpdated(uint256 indexed spotId);
     event TelegramUnlinked(bytes32 indexed telegramHash, address indexed wallet);
     event DeviceUnlinked(bytes32 indexed deviceHash, address indexed wallet);
+    event TelegramWithdrawn(bytes32 indexed telegramHash, address indexed wallet, uint256 amount);
+    event DeviceWithdrawn(bytes32 indexed deviceHash, address indexed wallet, uint256 amount);
+    event AdminTransferStarted(address indexed currentAdmin, address indexed pendingAdmin);
+    event AdminTransferred(address indexed oldAdmin, address indexed newAdmin);
+    event ClaimManagerUpdated(address indexed oldManager, address indexed newManager);
 
     // ── Modifiers ──
     modifier onlyAdmin() {
@@ -131,18 +136,23 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     function setAdmin(address newAdmin) external onlyAdmin {
         if (newAdmin == address(0)) revert ZeroAddress();
         pendingAdmin = newAdmin;
+        emit AdminTransferStarted(msg.sender, newAdmin);
     }
 
     function acceptAdmin() external {
         if (msg.sender != pendingAdmin) revert NotPendingAdmin();
+        address oldAdmin = admin;
         admin = msg.sender;
         pendingAdmin = address(0);
+        emit AdminTransferred(oldAdmin, msg.sender);
     }
 
     // ── Claim manager ──
     function setClaimManager(address _claimManager) external onlyAdmin {
         if (_claimManager == address(0)) revert ZeroAddress();
+        address oldManager = claimManager;
         claimManager = _claimManager;
+        emit ClaimManagerUpdated(oldManager, _claimManager);
     }
 
     // ── Spot creation ──
@@ -404,6 +414,7 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         telegramBalances[telegramHash] = 0;
         (bool ok, ) = payable(msg.sender).call{value: amount}("");
         if (!ok) revert TransferFailed();
+        emit TelegramWithdrawn(telegramHash, msg.sender, amount);
     }
 
     function unlinkTelegram() external {
@@ -483,6 +494,7 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         deviceBalances[deviceHash] = 0;
         (bool ok, ) = payable(msg.sender).call{value: amount}("");
         if (!ok) revert TransferFailed();
+        emit DeviceWithdrawn(deviceHash, msg.sender, amount);
     }
 
     // ── Spot management ──
