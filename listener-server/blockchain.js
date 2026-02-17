@@ -355,7 +355,15 @@ async function init() {
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
   });
 
-  console.log('[이벤트 등록 완료] 8개 이벤트 리스너 등록됨');
+  console.log('[이벤트 등록] DeviceUnlinked 리스너 등록');
+  contract.on('DeviceUnlinked', async (deviceHash, wallet, ev) => {
+    const hashHex = deviceHash.slice(2);
+    const blockNum = ev?.log?.blockNumber ?? '?';
+    console.log(`[이벤트 수신] DeviceUnlinked | hash=${hashHex.slice(0,10)}... wallet=${String(wallet).slice(0,10)}... block=${blockNum}`);
+    if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
+  });
+
+  console.log('[이벤트 등록 완료] 9개 이벤트 리스너 등록됨');
 }
 
 // ─── 컨트랙트 조회 함수들 ───
@@ -628,6 +636,12 @@ async function getDeviceStampInfo(spotId, deviceHash) {
   };
 }
 
+async function getDeviceLinkedWallet(deviceHash) {
+  const fullHash = '0x' + deviceHash;
+  const wallet = await contract.getDeviceLinkedWallet(fullHash);
+  return wallet;
+}
+
 async function linkDeviceToWallet(deviceHash, walletAddress) {
   const fullHash = '0x' + deviceHash;
   const tx = await writeContract.linkDeviceToWallet(fullHash, toAddr(walletAddress));
@@ -674,6 +688,7 @@ module.exports = {
   claimByDevice,
   getDeviceBalance,
   getDeviceStampInfo,
+  getDeviceLinkedWallet,
   linkDeviceToWallet,
   updateAllowDuplicateClaims,
 };

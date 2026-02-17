@@ -101,6 +101,9 @@ export function setupNotificationListener(onCodeReceived) {
     if (data?.type === 'verify_code' && data?.code) {
       console.log('[Notifications] 인증번호 수신:', data.code, 'spotId:', data.spot_id);
       onCodeReceived(data.code, data.spot_id);
+    } else if (data?.type === 'wallet_link_code' && data?.code) {
+      console.log('[Notifications] 지갑 인증번호 수신:', data.code);
+      onCodeReceived(data.code, 'wallet_link');
     }
   });
 
@@ -109,6 +112,8 @@ export function setupNotificationListener(onCodeReceived) {
     const data = response.notification.request.content.data;
     if (data?.type === 'verify_code' && data?.code) {
       onCodeReceived(data.code, data.spot_id);
+    } else if (data?.type === 'wallet_link_code' && data?.code) {
+      onCodeReceived(data.code, 'wallet_link');
     }
   });
 

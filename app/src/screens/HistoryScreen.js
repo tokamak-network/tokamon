@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
-import { getTelegramLinked, getDeviceBalance as getDeviceBalanceApi, linkDeviceToWallet as linkDeviceToWalletApi } from '../services/api';
+import { getTelegramLinked, getDeviceBalance as getDeviceBalanceApi } from '../services/api';
 import {
   getWalletLinkedTelegram,
   getTelegramBalanceContract,
@@ -130,21 +130,9 @@ export default function HistoryScreen({ wallet, pushToken, language = 'ko', onBa
     }
   };
 
-  // 디바이스 → 지갑 연결
-  const handleLinkDevice = async () => {
-    if (!pushToken || !wallet) return;
-    setDeviceLinking(true);
-    try {
-      await linkDeviceToWalletApi(pushToken, wallet);
-      Alert.alert('', t(language, 'deviceLinked'));
-      setDeviceLinked(true);
-      await fetchDeviceInfo();
-      onBalanceChange?.();
-    } catch (err) {
-      Alert.alert('Error', err.message || 'Link failed');
-    } finally {
-      setDeviceLinking(false);
-    }
+  // 디바이스 → 지갑 연결 (지갑 탭에서 인증 플로우 사용)
+  const handleLinkDevice = () => {
+    Alert.alert('', t(language, 'deviceWalletLink'), [{ text: 'OK' }]);
   };
 
   // 디바이스 잔액 → 지갑으로 출금

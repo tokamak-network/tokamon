@@ -14,6 +14,10 @@ const ABI = [
   'function getWalletLinkedTelegram(address wallet) external view returns (bytes32)',
   'function claimSelf(uint256 spotId) external',
   'function claimTelegramToWallet(bytes32 telegramHash) external',
+  'function getWalletLinkedDevice(address wallet) external view returns (bytes32)',
+  'function getDeviceBalance(bytes32 deviceHash) external view returns (uint256)',
+  'function claimDeviceToWallet(bytes32 deviceHash) external',
+  'function unlinkDevice() external',
   'function unlinkTelegram() external',
   'function nextSpotId() external view returns (uint256)',
   'function getSpot(uint256) view returns (tuple(address creator, bool allowDuplicateClaims, uint48 cooldown, uint128 stampGoal, uint128 stampBonus, uint256 reward, uint256 remaining, int96 lat, int96 lng, uint64 startTime, uint64 endTime, string name, string description))',
@@ -203,6 +207,34 @@ export async function claimSelf(spotId) {
 export async function claimTelegramToWallet(telegramHash) {
   const { contract } = await getSignerAndContract();
   const tx = await contract.claimTelegramToWallet(telegramHash);
+  await tx.wait();
+}
+
+// 지갑에 연결된 디바이스 해시 조회
+export async function getWalletLinkedDevice(address) {
+  const { contract } = await getSignerAndContract();
+  const deviceHash = await contract.getWalletLinkedDevice(address);
+  return deviceHash;
+}
+
+// 디바이스 잔액 조회
+export async function getDeviceBalance(deviceHash) {
+  const { contract } = await getSignerAndContract();
+  const bal = await contract.getDeviceBalance(deviceHash);
+  return Number(ethers.formatEther(bal));
+}
+
+// 디바이스 잔액을 지갑으로 클레임
+export async function claimDeviceToWallet(deviceHash) {
+  const { contract } = await getSignerAndContract();
+  const tx = await contract.claimDeviceToWallet(deviceHash);
+  await tx.wait();
+}
+
+// 기기 연결 해제
+export async function unlinkDevice() {
+  const { contract } = await getSignerAndContract();
+  const tx = await contract.unlinkDevice();
   await tx.wait();
 }
 

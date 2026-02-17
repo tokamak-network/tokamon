@@ -78,6 +78,7 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     event AllowDuplicateClaimsUpdated(uint256 indexed spotId, bool allow);
     event SpotUpdated(uint256 indexed spotId);
     event TelegramUnlinked(bytes32 indexed telegramHash, address indexed wallet);
+    event DeviceUnlinked(bytes32 indexed deviceHash, address indexed wallet);
 
     // ── Modifiers ──
     modifier onlyAdmin() {
@@ -462,10 +463,19 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         emit DeviceLinked(deviceHash, oldWallet, wallet);
     }
 
+    function unlinkDevice() external {
+        bytes32 linkedHash = walletToDevice[msg.sender];
+        if (linkedHash == bytes32(0)) revert NoDeviceLinked();
+        delete deviceToWallet[linkedHash];
+        delete walletToDevice[msg.sender];
+        emit DeviceUnlinked(linkedHash, msg.sender);
+    }
+
     function claimDeviceToWallet(bytes32 deviceHash) external nonReentrant {
         bytes32 linkedHash = walletToDevice[msg.sender];
         if (linkedHash == bytes32(0)) revert NoDeviceLinked();
         if (linkedHash != deviceHash) revert HashMismatch();
+        if (deviceToWallet[deviceHash] != msg.sender) revert HashMismatch();
 
         uint256 amount = deviceBalances[deviceHash];
         if (amount == 0) revert NoBalance();

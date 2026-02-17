@@ -72,12 +72,17 @@ function initTelegramDb() {
             code TEXT PRIMARY KEY,
             device_hash TEXT NOT NULL,
             spot_id INTEGER NOT NULL,
+            wallet_address TEXT,
             created_at INTEGER NOT NULL,
             expires_at INTEGER NOT NULL,
-            verified BOOLEAN DEFAULT 0
+            verified BOOLEAN DEFAULT 0,
+            attempts INTEGER DEFAULT 0
           )
         `);
         db.run(`CREATE INDEX IF NOT EXISTS idx_device_codes_expires ON device_verify_codes(expires_at)`);
+        // 기존 테이블에 새 컬럼 추가 (이미 존재하면 무시)
+        db.run(`ALTER TABLE device_verify_codes ADD COLUMN wallet_address TEXT`, () => {});
+        db.run(`ALTER TABLE device_verify_codes ADD COLUMN attempts INTEGER DEFAULT 0`, () => {});
         console.log('✅ DB 초기화 완료:', DB_PATH);
         resolve(db);
       });
@@ -96,6 +101,23 @@ const LISTENER_PORT = process.env.LISTENER_PORT || 3001;
 function startHttpServer(db) {
   const app = express();
 
+  const IS_PROD = process.env.NODE_ENV === 'production';
+
+  // 프록시 뒤에서 실행 시 X-Forwarded-For 신뢰
+  if (IS_PROD) {
+    app.set('trust proxy', 1);
+  }
+
+  // 프로덕션 HTTPS 리다이렉트
+  if (IS_PROD) {
+    app.use((req, res, next) => {
+      if (req.headers['x-forwarded-proto'] !== 'https') {
+        return res.redirect(301, 'https://' + req.headers.host + req.url);
+      }
+      next();
+    });
+  }
+
   // [#5] CORS 설정 (모바일 앱 + 허용된 오리진)
   const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '').split(',').filter(Boolean);
   app.use(cors({
@@ -108,13 +130,27 @@ function startHttpServer(db) {
             cb(new Error('CORS 차단'));
           }
         }
-      : true, // 오리진 미설정 시 모든 요청 허용 (개발 환경)
+      : IS_PROD
+        ? (origin, cb) => {
+            // 프로덕션에서 origin 미설정 시 모바일 앱(origin 없음)만 허용
+            if (!origin) {
+              cb(null, true);
+            } else {
+              cb(new Error('CORS 차단: 허용된 오리진을 설정해주세요'));
+            }
+          }
+        : true, // 개발 환경에서만 모든 요청 허용
   }));
 
   // 보안 헤더
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '0');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    if (IS_PROD) {
+      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    }
     next();
   });
 

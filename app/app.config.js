@@ -13,6 +13,7 @@ export default {
       backgroundColor: "#0f0f0f",
     },
     ios: {
+      bundleIdentifier: "com.tokamak.tokamon",
       supportsTablet: true,
       infoPlist: {
         NSLocationWhenInUseUsageDescription:

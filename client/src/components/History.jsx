@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { t } from '../translations';
-import { getTelegramBalance, getWalletLinkedTelegram, claimTelegramToWallet, unlinkTelegram } from '../contract';
+import { getTelegramBalance, getWalletLinkedTelegram, claimTelegramToWallet, unlinkTelegram, getWalletLinkedDevice, getDeviceBalance, claimDeviceToWallet, unlinkDevice } from '../contract';
 import { Spinner } from './Spinner';
 import { getSelectedNetwork } from '../networkStore';
 
@@ -21,11 +21,17 @@ export default function History({ history, balance = 0, account, language = 'ko'
   const [loading, setLoading] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [unlinking, setUnlinking] = useState(false);
+  const [linkedDevice, setLinkedDevice] = useState(null);
+  const [deviceBalance, setDeviceBalance] = useState(0);
+  const [deviceClaiming, setDeviceClaiming] = useState(false);
+  const [deviceLoading, setDeviceLoading] = useState(false);
+  const [deviceUnlinking, setDeviceUnlinking] = useState(false);
 
-  // 연결된 텔레그램 ID 조회
+  // 연결된 텔레그램 ID & 기기 조회
   useEffect(() => {
     if (account) {
       fetchLinkedTelegram();
+      fetchLinkedDevice();
     }
   }, [account]);
 
@@ -119,6 +125,72 @@ export default function History({ history, balance = 0, account, language = 'ko'
     }
   };
 
+  const fetchLinkedDevice = async () => {
+    if (!account) return;
+
+    setDeviceLoading(true);
+    try {
+      const hash = await getWalletLinkedDevice(account);
+
+      const zeroHash = '0x0000000000000000000000000000000000000000000000000000000000000000';
+      const isLinked = hash && hash !== zeroHash;
+
+      if (isLinked) {
+        setLinkedDevice(hash);
+        try {
+          const bal = await getDeviceBalance(hash);
+          setDeviceBalance(bal);
+        } catch (err) {
+          console.error('기기 잔액 조회 실패:', err.message);
+          setDeviceBalance(0);
+        }
+      } else {
+        setLinkedDevice(null);
+        setDeviceBalance(0);
+      }
+    } catch (err) {
+      console.error('기기 연결 조회 실패:', err.message);
+      setLinkedDevice(null);
+      setDeviceBalance(0);
+    } finally {
+      setDeviceLoading(false);
+    }
+  };
+
+  const handleUnlinkDevice = async () => {
+    if (!window.confirm(t(language, 'unlinkDeviceConfirm'))) return;
+
+    setDeviceUnlinking(true);
+    try {
+      await unlinkDevice();
+      showToast?.('success', t(language, 'unlinkDeviceSuccess'));
+      setLinkedDevice(null);
+      setDeviceBalance(0);
+    } catch (err) {
+      console.error('[UnlinkDevice] 실패:', err);
+      showToast?.('error', err.reason || err.message || t(language, 'unlinkDeviceError'));
+    } finally {
+      setDeviceUnlinking(false);
+    }
+  };
+
+  const handleClaimDeviceToWallet = async () => {
+    if (!linkedDevice || deviceBalance <= 0) return;
+
+    setDeviceClaiming(true);
+    try {
+      await claimDeviceToWallet(linkedDevice);
+      showToast?.('success', `${deviceBalance.toFixed(4)} ${t(language, 'deviceClaimSuccess')}`);
+
+      await fetchLinkedDevice();
+      if (onBalanceChange) onBalanceChange();
+    } catch (err) {
+      showToast?.('error', err.message || t(language, 'claimToWalletError'));
+    } finally {
+      setDeviceClaiming(false);
+    }
+  };
+
   if (!account) {
     return <div className="history-empty">{t(language, 'connectWalletPrompt')}</div>;
   }
@@ -148,11 +220,11 @@ export default function History({ history, balance = 0, account, language = 'ko'
                   <span className="telegram-icon">✅</span>
                   <span className="telegram-username">{linkedTelegram}</span>
                   <span
-                    onClick={unlinking ? undefined : handleUnlinkTelegram}
+                    onClick={(unlinking || claiming) ? undefined : handleUnlinkTelegram}
                     style={{
                       color: '#888', fontSize: '11px', textDecoration: 'underline',
-                      cursor: unlinking ? 'default' : 'pointer', marginLeft: '8px',
-                      opacity: unlinking ? 0.5 : 1,
+                      cursor: (unlinking || claiming) ? 'default' : 'pointer', marginLeft: '8px',
+                      opacity: (unlinking || claiming) ? 0.5 : 1,
                     }}
                   >
                     {unlinking ? t(language, 'processing') : t(language, 'unlinkTelegram')}
@@ -188,10 +260,70 @@ export default function History({ history, balance = 0, account, language = 'ko'
                   <button
                     className="claim-to-wallet-btn btn-with-spinner"
                     onClick={handleClaimToWallet}
-                    disabled={claiming}
+                    disabled={claiming || unlinking}
                   >
                     {claiming && <Spinner size={14} />}
                     {claiming ? t(language, 'processing') : t(language, 'claimToWallet')}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="tokamon-telegram-section">
+          <div className="telegram-section-header">
+            <span className="telegram-icon-large">📱</span>
+            <span className="telegram-section-title">{t(language, 'deviceAccount')}</span>
+          </div>
+
+          <div className="telegram-info-content">
+            <div className="telegram-account-info">
+              <div className="telegram-label">{t(language, 'deviceHash')}</div>
+              {deviceLoading ? (
+                <div className="telegram-value" style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Spinner size={14} /> {t(language, 'loading')}</div>
+              ) : linkedDevice ? (
+                <div className="telegram-value telegram-linked">
+                  <span className="telegram-icon">✅</span>
+                  <span className="telegram-username">{linkedDevice.slice(0, 10)}...{linkedDevice.slice(-8)}</span>
+                  <span
+                    onClick={(deviceUnlinking || deviceClaiming) ? undefined : handleUnlinkDevice}
+                    style={{
+                      color: '#888', fontSize: '11px', textDecoration: 'underline',
+                      cursor: (deviceUnlinking || deviceClaiming) ? 'default' : 'pointer', marginLeft: '8px',
+                      opacity: (deviceUnlinking || deviceClaiming) ? 0.5 : 1,
+                    }}
+                  >
+                    {deviceUnlinking ? t(language, 'processing') : t(language, 'unlinkDevice')}
+                  </span>
+                </div>
+              ) : (
+                <div className="telegram-not-linked-container">
+                  <div className="telegram-value telegram-not-linked">
+                    <span>{t(language, 'deviceNotLinked')}</span>
+                    <div className="telegram-help-tip">
+                      <div className="help-tip-icon">💡</div>
+                      <div className="help-tip-content">
+                        <strong>{t(language, 'deviceLinkGuide')}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="telegram-balance-section">
+              <div className="balance-label">{t(language, 'deviceBalance')}</div>
+              <div className="balance-amount-section">
+                <div className="balance-amount">{linkedDevice ? deviceBalance.toFixed(4) : '0.0000'} TON</div>
+                {linkedDevice && deviceBalance > 0 && (
+                  <button
+                    className="claim-to-wallet-btn btn-with-spinner"
+                    onClick={handleClaimDeviceToWallet}
+                    disabled={deviceClaiming || deviceUnlinking}
+                  >
+                    {deviceClaiming && <Spinner size={14} />}
+                    {deviceClaiming ? t(language, 'processing') : t(language, 'deviceClaimToWallet')}
                   </button>
                 )}
               </div>
