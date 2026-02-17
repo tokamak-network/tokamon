@@ -126,7 +126,7 @@ npm run dev
 npm run listener
 ```
 
-> - `npm run emulators`: `--project demo-tokamon`으로 실행되므로 실제 Firebase 프로젝트에 영향 없음
+> - `npm run emulators`: `--project tokamon-go`으로 실행되므로 실제 Firebase 프로젝트에 영향 없음
 > - `npm run listener`: `NETWORK=local FIRESTORE_EMULATOR_HOST=localhost:8080` 자동 설정
 
 ### Anvil 기본 계정 (각 10,000 ETH)
@@ -191,12 +191,19 @@ cp .env.example .env
 cd app
 npm install
 
-# 2. Android 에뮬레이터 실행 (에뮬레이터 목록: $HOME/Library/Android/sdk/emulator/emulator -list-avds)
-$HOME/Library/Android/sdk/emulator/emulator -avd Tokamon_Pixel
+# 2. Android 에뮬레이터 실행 (Google Play 포함 버전 사용 - MetaMask 설치 필요)
+#    에뮬레이터 목록: $HOME/Library/Android/sdk/emulator/emulator -list-avds
+$HOME/Library/Android/sdk/emulator/emulator -avd Tokamon_Pixel_Play
 
-# 3. 앱 빌드 + 실행 (최초 빌드 시 수 분 소요)
+# 3. 에뮬레이터 부팅 완료 후, 앱 빌드 + 실행 (최초 빌드 시 수 분 소요)
 npx expo run:android
+
+# 특정 에뮬레이터를 지정하여 실행 (여러 에뮬레이터가 있는 경우)
+# npx expo run:android --device emulator-5554
 ```
+
+> **중요:** `npx expo run:android`는 첫 번째로 발견되는 AVD를 자동 실행합니다.
+> 원하는 에뮬레이터를 사용하려면 **에뮬레이터를 먼저 직접 실행**한 후 `npx expo run:android` 또는 `npx expo start`를 실행하세요.
 
 ### 앱 실행 (iOS)
 

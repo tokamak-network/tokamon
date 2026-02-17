@@ -28,6 +28,7 @@ export default {
         backgroundColor: "#0f0f0f",
       },
       package: "com.tokamak.tokamon",
+      googleServicesFile: "./google-services.json",
       edgeToEdgeEnabled: true,
       permissions: ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
       config: {
@@ -45,6 +46,13 @@ export default {
         {
           locationAlwaysAndWhenInUsePermission:
             "Tokamon needs your location to find nearby spots.",
+        },
+      ],
+      [
+        "expo-notifications",
+        {
+          icon: "./assets/icon.png",
+          color: "#0f0f0f",
         },
       ],
     ],

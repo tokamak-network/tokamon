@@ -110,7 +110,7 @@ export default function ClaimButton({
                 {claimPhase === 'requesting'
                   ? t(language, 'requestingCode')
                   : claimPhase === 'waiting_code'
-                  ? t(language, 'waitingCode') || '인증 대기 중...'
+                  ? t(language, 'waitingCode')
                   : t(language, 'processing')}
               </Text>
             </View>

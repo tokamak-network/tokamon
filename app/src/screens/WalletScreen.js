@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
+import * as Location from 'expo-location';
 import { useWalletConnectModal } from '@walletconnect/modal-react-native';
 import {
   getDeviceBalance as getDeviceBalanceApi,
@@ -34,16 +35,57 @@ export default function WalletScreen({ wallet, pushToken, language = 'ko', netwo
   const [deviceLinked, setDeviceLinked] = useState(false);
   const [deviceClaiming, setDeviceClaiming] = useState(false);
   const [deviceLinking, setDeviceLinking] = useState(false);
+  const [userPos, setUserPos] = useState(null);
 
   const networks = getAllNetworks();
   const currentNetwork = getNetworkConfig();
 
-  // WalletConnect 연결 완료 시 signer 설정
+  // GPS 위치 가져오기
   useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') return;
+      const loc = await Location.getCurrentPositionAsync({});
+      setUserPos({ lat: loc.coords.latitude, lng: loc.coords.longitude });
+    })();
+  }, []);
+
+  // WalletConnect 연결 완료 시 signer 설정 + 네트워크 자동 추가
+  useEffect(() => {
+    console.log('[Wallet] wcConnected:', wcConnected, 'wcProvider:', !!wcProvider);
     if (wcConnected && wcProvider) {
-      setWalletFromWC(wcProvider).catch((err) => {
-        console.warn('WalletConnect signer setup failed:', err.message);
-      });
+      setWalletFromWC(wcProvider)
+        .then((address) => {
+          console.log('[Wallet] Connected:', address);
+          // 현재 선택된 네트워크를 MetaMask에 자동 추가/전환
+          const net = getNetworkConfig();
+          const chainHex = '0x' + net.chainId.toString(16);
+          console.log('[Wallet] Adding network:', net.name, 'chainId:', chainHex, 'rpc:', net.rpcUrl);
+          return wcProvider.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: chainHex,
+              chainName: net.name,
+              rpcUrls: [net.rpcUrl],
+              nativeCurrency: net.nativeCurrency || { name: 'TON', symbol: 'TON', decimals: 18 },
+            }],
+          });
+        })
+        .then(() => {
+          console.log('[Wallet] Network added successfully');
+        })
+        .catch((err) => {
+          console.warn('[Wallet] Error:', err.message || err);
+          // addEthereumChain 실패 시 switchEthereumChain 시도
+          if (wcProvider) {
+            const net = getNetworkConfig();
+            const chainHex = '0x' + net.chainId.toString(16);
+            wcProvider.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: chainHex }],
+            }).catch((e) => console.warn('[Wallet] Switch also failed:', e.message || e));
+          }
+        });
     }
   }, [wcConnected, wcProvider]);
 
@@ -130,7 +172,7 @@ export default function WalletScreen({ wallet, pushToken, language = 'ko', netwo
     setDeviceClaiming(true);
     try {
       await claimDeviceToWalletContract('0x' + deviceHash);
-      Alert.alert('', `${currentBalance.toFixed(4)} TON ${t(language, 'claimToWalletSuccess') || '지갑으로 전송 완료!'}`);
+      Alert.alert('', `${currentBalance.toFixed(4)} TON ${t(language, 'claimToWalletSuccess')}`);
       await fetchAllBalances();
     } catch (err) {
       Alert.alert('Error', err.message || 'Claim failed');
@@ -161,6 +203,16 @@ export default function WalletScreen({ wallet, pushToken, language = 'ko', netwo
               {totalBalance.toFixed(4)} <Text style={styles.totalBalanceUnit}>TON</Text>
             </Text>
           )}
+        </View>
+      )}
+
+      {/* Current Location */}
+      {userPos && (
+        <View style={styles.locationRow}>
+          <Text style={styles.locationIcon}>📍</Text>
+          <Text style={styles.locationText}>
+            {userPos.lat.toFixed(6)}, {userPos.lng.toFixed(6)}
+          </Text>
         </View>
       )}
 
@@ -527,6 +579,21 @@ const styles = StyleSheet.create({
     color: '#10b981',
     fontSize: 14,
     fontWeight: '700',
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 8,
+    paddingHorizontal: 4,
+  },
+  locationIcon: {
+    fontSize: 13,
+  },
+  locationText: {
+    color: '#888',
+    fontSize: 12,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
   loadingRow: {
     flexDirection: 'row',

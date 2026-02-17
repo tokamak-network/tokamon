@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "npm run dev -w client",
     "build": "npm run build -w client",
-    "emulators": "JAVA_HOME=/usr/local/opt/openjdk@21 PATH=/usr/local/opt/openjdk@21/bin:$PATH firebase emulators:start --project demo-tokamon",
+    "emulators": "JAVA_HOME=/usr/local/opt/openjdk@21 PATH=/usr/local/opt/openjdk@21/bin:$PATH firebase emulators:start --project tokamon-go",
     "listener": "NETWORK=local FIRESTORE_EMULATOR_HOST=localhost:8080 npm run start -w listener-server",
     "listener:prod": "npm run start -w listener-server",
     "listener:thanos-sepolia": "NETWORK=thanos-sepolia npm run start -w listener-server",

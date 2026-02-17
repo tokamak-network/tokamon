@@ -15,6 +15,15 @@ try {
       shouldSetBadge: false,
     }),
   });
+  // Android 알림 채널 설정 (필수)
+  if (Platform.OS === 'android') {
+    Notifications.setNotificationChannelAsync('tokamon-verify', {
+      name: 'Tokamon 인증',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      sound: 'default',
+    });
+  }
 } catch (_) {
   Notifications = null;
   console.log('[Notifications] expo-notifications 미설치 - 대체 토큰 모드');
@@ -25,10 +34,10 @@ try {
  * AsyncStorage에 토큰 저장 (deviceHash 일관성 유지)
  */
 export async function registerForPushNotifications() {
-  // 이미 저장된 토큰이 있으면 재사용
+  // 이미 저장된 토큰이 있으면 재사용 (단, 대체 토큰이면서 Notifications 사용 가능 시 재발급)
   try {
     const saved = await AsyncStorage.getItem(PUSH_TOKEN_KEY);
-    if (saved) {
+    if (saved && !(saved.startsWith('device_') && Notifications)) {
       return saved;
     }
   } catch (_) {}
@@ -45,10 +54,11 @@ export async function registerForPushNotifications() {
       }
 
       if (finalStatus === 'granted') {
-        const tokenData = await Notifications.getExpoPushTokenAsync();
+        // FCM 네이티브 토큰 사용 (서버에서 admin.messaging().send() 직접 전송)
+        const tokenData = await Notifications.getDevicePushTokenAsync();
         const token = tokenData.data;
         await AsyncStorage.setItem(PUSH_TOKEN_KEY, token);
-        console.log('[Notifications] 푸시 토큰 발급:', token.slice(0, 20) + '...');
+        console.log('[Notifications] FCM 토큰 발급:', token.slice(0, 20) + '...');
         return token;
       }
 
@@ -86,8 +96,10 @@ export function setupNotificationListener(onCodeReceived) {
 
   // 앱이 포그라운드일 때 알림 수신
   const foregroundSub = Notifications.addNotificationReceivedListener((notification) => {
+    console.log('[Notifications] 알림 수신:', JSON.stringify(notification.request.content));
     const data = notification.request.content.data;
     if (data?.type === 'verify_code' && data?.code) {
+      console.log('[Notifications] 인증번호 수신:', data.code, 'spotId:', data.spot_id);
       onCodeReceived(data.code, data.spot_id);
     }
   });

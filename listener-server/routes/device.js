@@ -97,7 +97,7 @@ module.exports = function(db) {
         { type: 'verify_code', code, spot_id: String(spot_id) }
       );
 
-      // 개발 환경에서 FCM이 안 될 경우 debug_code 반환
+      // FCM 전송 실패 시에만 debug_code 반환 (개발 환경 전용)
       const response = { success: true, message: '인증 코드가 전송되었습니다' };
       if (!sent) {
         response.debug_code = code;

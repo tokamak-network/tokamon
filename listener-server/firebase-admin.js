@@ -17,7 +17,17 @@ const NETWORK_ID = process.env.NETWORK || DEFAULT_NETWORK;
 // 2. serviceAccountKey.json 파일
 // 3. Application Default Credentials (클라우드 환경 IAM)
 if (process.env.FIRESTORE_EMULATOR_HOST) {
-  admin.initializeApp({ projectId: 'demo-tokamon' });
+  // 에뮬레이터 모드: Firestore는 에뮬레이터 사용, FCM은 서비스 계정 키가 있으면 실제 인증 사용
+  if (fs.existsSync(serviceAccountPath)) {
+    const serviceAccount = require(serviceAccountPath);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+    console.log(`[Firebase] Firestore 에뮬레이터 + FCM 인증 (project: ${serviceAccount.project_id})`);
+  } else {
+    admin.initializeApp({ projectId: 'tokamon-go' });
+    console.log(`[Firebase] Firestore 에뮬레이터 (FCM 사용 불가 - serviceAccountKey 없음)`);
+  }
   db = admin.firestore();
   console.log(`[Firebase] Firestore 에뮬레이터 연결: ${process.env.FIRESTORE_EMULATOR_HOST}`);
 } else if (fs.existsSync(serviceAccountPath)) {
@@ -114,10 +124,17 @@ async function sendPushNotification(fcmToken, title, body, data = {}) {
   try {
     const message = {
       token: fcmToken,
-      notification: { title, body },
       data: Object.fromEntries(
         Object.entries(data).map(([k, v]) => [k, String(v)])
       ),
+      android: {
+        priority: 'high',
+        notification: {
+          title,
+          body,
+          channelId: 'tokamon-verify',
+        },
+      },
     };
     const result = await admin.messaging().send(message);
     console.log('[FCM] 푸시 전송 성공:', result);

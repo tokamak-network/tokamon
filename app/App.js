@@ -118,7 +118,7 @@ export default function App() {
       sessionParams={{
         namespaces: {
           eip155: {
-            methods: ['eth_sendTransaction', 'personal_sign', 'eth_signTypedData'],
+            methods: ['eth_sendTransaction', 'personal_sign', 'eth_signTypedData', 'wallet_addEthereumChain', 'wallet_switchEthereumChain'],
             chains: [`eip155:${getNetworkConfig().chainId}`],
             events: ['chainChanged', 'accountsChanged'],
             rpiMap: {
