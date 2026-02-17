@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -11,20 +11,18 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { disconnectWallet } from '../services/wallet';
 import { t } from '../utils/translations';
-import { getSelectedNetwork, setSelectedNetwork, getAllNetworks, getNetworkConfig } from '../utils/networkStore';
+import { setSelectedNetwork, getAllNetworks } from '../utils/networkStore';
 
-export default function SettingsScreen({ wallet, language, onLanguageChange, onWalletDisconnect, onNetworkChange }) {
-  const [currentNetworkId, setCurrentNetworkId] = useState(getSelectedNetwork());
+export default function SettingsScreen({ wallet, language, networkId: currentNetworkId, onLanguageChange, onWalletDisconnect, onNetworkChange }) {
 
   const handleLanguageChange = async (lang) => {
     await AsyncStorage.setItem('language', lang);
     onLanguageChange(lang);
   };
 
-  const handleNetworkChange = async (networkId) => {
-    await setSelectedNetwork(networkId);
-    setCurrentNetworkId(networkId);
-    onNetworkChange?.(networkId);
+  const handleNetworkChange = async (id) => {
+    await setSelectedNetwork(id);
+    onNetworkChange?.(id);
   };
 
   const handleDisconnect = () => {

@@ -147,6 +147,7 @@ export default function TabNavigator({ wallet, pushToken, receivedCode, language
             {...props}
             wallet={wallet}
             language={language}
+            networkId={networkId}
             onLanguageChange={onLanguageChange}
             onWalletDisconnect={onWalletDisconnect}
             onNetworkChange={onNetworkChange}
