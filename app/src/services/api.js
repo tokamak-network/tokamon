@@ -1,5 +1,5 @@
-import { API_BASE, LISTENER_API_BASE } from '../utils/constants';
-import { getSelectedNetwork } from '../utils/networkStore';
+import { API_BASE } from '../utils/constants';
+import { getSelectedNetwork, getListenerUrl } from '../utils/networkStore';
 
 // 현재 선택된 네트워크를 쿼리 파라미터로 추가
 function withNetwork(url) {
@@ -69,7 +69,7 @@ export async function getTelegramLinked(account) {
 // ─── Device API (listener-server direct) ───
 
 export async function requestDeviceCode(fcmToken, spotId, lat, lng) {
-  const res = await fetch(`${LISTENER_API_BASE}/api/device/request-code`, {
+  const res = await fetch(`${getListenerUrl()}/api/device/request-code`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fcm_token: fcmToken, spot_id: spotId, lat, lng }),
@@ -78,7 +78,7 @@ export async function requestDeviceCode(fcmToken, spotId, lat, lng) {
 }
 
 export async function verifyAndClaimDevice(fcmToken, spotId, code) {
-  const res = await fetch(`${LISTENER_API_BASE}/api/device/verify-and-claim`, {
+  const res = await fetch(`${getListenerUrl()}/api/device/verify-and-claim`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fcm_token: fcmToken, spot_id: spotId, code }),
@@ -87,7 +87,16 @@ export async function verifyAndClaimDevice(fcmToken, spotId, code) {
 }
 
 export async function getDeviceBalance(fcmToken) {
-  const res = await fetch(`${LISTENER_API_BASE}/api/device/balance`, {
+  const res = await fetch(`${getListenerUrl()}/api/device/balance`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fcm_token: fcmToken }),
+  });
+  return parseJson(res);
+}
+
+export async function getDeviceBalanceByListenerUrl(fcmToken, listenerUrl) {
+  const res = await fetch(`${listenerUrl}/api/device/balance`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fcm_token: fcmToken }),
@@ -96,7 +105,7 @@ export async function getDeviceBalance(fcmToken) {
 }
 
 export async function linkDeviceToWallet(fcmToken, walletAddress) {
-  const res = await fetch(`${LISTENER_API_BASE}/api/device/link-wallet`, {
+  const res = await fetch(`${getListenerUrl()}/api/device/link-wallet`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fcm_token: fcmToken, wallet_address: walletAddress }),

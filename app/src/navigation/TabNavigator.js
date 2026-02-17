@@ -4,8 +4,9 @@ import { View, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import MapScreen from '../screens/MapScreen';
 import SpotListScreen from '../screens/SpotListScreen';
-import HistoryScreen from '../screens/HistoryScreen';
+import WalletScreen from '../screens/WalletScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import NetworkSelector from '../components/NetworkSelector';
 import { t } from '../utils/translations';
 
 const Tab = createBottomTabNavigator();
@@ -13,7 +14,7 @@ const Tab = createBottomTabNavigator();
 const TAB_ICONS = {
   MapTab: { icon: 'map-outline', activeIcon: 'map' },
   Spots: { icon: 'location-outline', activeIcon: 'location' },
-  History: { icon: 'person-outline', activeIcon: 'person' },
+  History: { icon: 'wallet-outline', activeIcon: 'wallet' },
   Settings: { icon: 'settings-outline', activeIcon: 'settings' },
 };
 
@@ -32,7 +33,7 @@ function TabIcon({ routeName, focused, color }) {
   );
 }
 
-export default function TabNavigator({ wallet, pushToken, receivedCode, language, onLanguageChange, onWalletDisconnect, onNetworkChange }) {
+export default function TabNavigator({ wallet, pushToken, receivedCode, language, networkId, onLanguageChange, onWalletDisconnect, onNetworkChange }) {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -87,6 +88,8 @@ export default function TabNavigator({ wallet, pushToken, receivedCode, language
             pushToken={pushToken}
             receivedCode={receivedCode}
             language={language}
+            networkId={networkId}
+            onNetworkChange={onNetworkChange}
           />
         )}
       </Tab.Screen>
@@ -96,12 +99,19 @@ export default function TabNavigator({ wallet, pushToken, receivedCode, language
         options={{
           title: t(language, 'spotList'),
           headerTitle: t(language, 'spotList'),
+          headerRight: () => (
+            <View style={{ marginRight: 16 }}>
+              <NetworkSelector currentNetworkId={networkId} onNetworkChange={onNetworkChange} />
+            </View>
+          ),
         }}
       >
         {(props) => (
           <SpotListScreen
             {...props}
             language={language}
+            networkId={networkId}
+            onNetworkChange={onNetworkChange}
           />
         )}
       </Tab.Screen>
@@ -114,11 +124,13 @@ export default function TabNavigator({ wallet, pushToken, receivedCode, language
         }}
       >
         {(props) => (
-          <HistoryScreen
+          <WalletScreen
             {...props}
             wallet={wallet}
             pushToken={pushToken}
             language={language}
+            networkId={networkId}
+            onNetworkChange={onNetworkChange}
           />
         )}
       </Tab.Screen>

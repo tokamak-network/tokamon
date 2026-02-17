@@ -4,20 +4,16 @@ export const COORD_SCALE = 1_000_000;
 export const COLLECT_RADIUS = 15; // meters
 export const MIN_DEPOSIT = 10;
 
-// API base URL - Firebase Hosting emulator (rewrites /api/** to Functions)
-// Android emulator uses 10.0.2.2, iOS simulator uses localhost
-export const API_BASE = Platform.OS === 'android'
-  ? 'http://10.0.2.2:5002/api'
-  : 'http://localhost:5002/api';
+// 로컬 기본값 (에뮬레이터용)
+const LOCAL_HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
 
-// Listener server API base URL (direct blockchain access)
-// Android emulator uses 10.0.2.2, iOS simulator uses localhost
-export const LISTENER_API_BASE = Platform.OS === 'android'
-  ? 'http://10.0.2.2:3001'
-  : 'http://localhost:3001';
+// 환경변수(EXPO_PUBLIC_*)로 오버라이드 가능, 미설정 시 로컬 기본값 사용
+// .env 예시: app/.env.example 참고
+export const API_BASE = process.env.EXPO_PUBLIC_API_BASE
+  || `http://${LOCAL_HOST}:5002/api`;
 
-// WalletConnect project ID - get one at https://cloud.walletconnect.com
-export const WALLETCONNECT_PROJECT_ID = 'YOUR_WALLETCONNECT_PROJECT_ID';
+export const WALLETCONNECT_PROJECT_ID = process.env.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID
+  || '';
 
 // Contract ABI for client-side calls
 export const TOKAMON_ABI = [

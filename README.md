@@ -34,13 +34,21 @@ tokamon/
 | 항목 | 버전/설명 |
 |------|-----------|
 | Node.js | 18+ |
-| Java | 21+ (Firebase 에뮬레이터 실행에 필요) |
+| JDK | 17+ (Android 빌드 + Firebase 에뮬레이터에 필요) |
 | Foundry (forge, anvil) | [설치 가이드](https://book.getfoundry.sh/getting-started/installation) |
 | Firebase CLI | `npm install -g firebase-tools` |
-| MetaMask | 브라우저 지갑 (클라이언트 연동) |
-| Expo CLI | `npx expo` (앱 실행 시 필요) |
+| MetaMask | 브라우저 지갑 (웹 클라이언트 연동) |
+| Android Studio | Android 앱 빌드/에뮬레이터 실행 시 필요 |
+| Xcode | iOS 앱 빌드/시뮬레이터 실행 시 필요 (macOS 전용) |
 
 ```bash
+# JDK 17 설치 (미설치 시)
+brew install openjdk@17
+# macOS에서 java_home이 인식하도록 심볼릭 링크 생성
+sudo ln -sfn $(brew --prefix openjdk@17)/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-17.jdk
+# JAVA_HOME 설정 (~/.zshrc에 추가 권장)
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+
 # Foundry 설치 (미설치 시)
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
@@ -60,7 +68,7 @@ npm install -g firebase-tools
 | 서비스 | 포트 | 설명 |
 |--------|------|------|
 | Emulator UI | `http://localhost:4000` | 에뮬레이터 대시보드 |
-| Hosting | `http://localhost:5002` | 웹 클라이언트 (빌드된 정적 파일) |
+| Hosting | ocalhost:5002` | 웹 클라이언트 (빌드된 정적 파일) |
 | Functions | `http://localhost:5001` | Cloud Functions API (`/api/*`) |
 | Firestore | `localhost:8080` | Firestore 에뮬레이터 |
 | Vite Dev Server | `https://localhost:5174` | 클라이언트 개발 서버 (HMR, HTTPS) |
@@ -140,42 +148,67 @@ npm run listener
 
 ## 모바일 앱 실행 (Android / iOS)
 
-`app/` 디렉토리는 **Expo + React Native** 기반 모바일 앱입니다. 로컬 백엔드(Anvil, Firebase Emulators 등)가 실행된 상태에서 앱을 시작합니다.
+`app/` 디렉토리는 **Expo + React Native** 기반 모바일 앱입니다.
 
 ### 사전 요구사항
 
 | 항목 | Android | iOS |
 |------|---------|-----|
-| 런타임 | [Android Studio](https://developer.android.com/studio) + Android Emulator | [Xcode](https://developer.apple.com/xcode/) (macOS 전용) |
-| 실물 디바이스 | USB 디버깅 활성화 | Apple 개발자 계정 (무료 가능) |
+| JDK | 17+ (`brew install openjdk@17`) | 불필요 |
+| IDE | [Android Studio](https://developer.android.com/studio) + Android Emulator | [Xcode](https://developer.apple.com/xcode/) (macOS 전용) |
+| Google Maps API 키 | `app/.env`에 설정 | `app/.env`에 설정 |
 
-### API 주소 설정
-
-`app/src/utils/constants.js`의 `API_BASE`를 로컬 서버 주소로 변경합니다.
-
-```js
-// Android Emulator
-export const API_BASE = 'http://10.0.2.2:5001/demo-tokamon/us-central1/api';
-
-// iOS Simulator
-export const API_BASE = 'http://localhost:5001/demo-tokamon/us-central1/api';
-
-// 실물 디바이스 (같은 Wi-Fi)
-export const API_BASE = 'http://<내-PC-IP>:5001/demo-tokamon/us-central1/api';
-```
-
-### 앱 실행
+### 환경 설정
 
 ```bash
 cd app
-npm install
-
-npx expo start             # Expo 개발 서버 (QR 코드)
-npx expo start --android   # Android 에뮬레이터
-npx expo start --ios       # iOS 시뮬레이터 (macOS)
+cp .env.example .env
 ```
 
-> `react-native-maps` 등 네이티브 모듈 사용 시 `npx expo run:android` / `npx expo run:ios`로 Development Build를 사용하세요.
+`app/.env`에서 필요한 값을 설정합니다. 로컬 개발 시에는 `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`만 필수이고, Firebase 관련 값은 배포 시에만 필요합니다.
+
+| 환경변수 | 설명 | 필수 (로컬) |
+|----------|------|:-----------:|
+| `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps API 키 | O |
+| `EXPO_PUBLIC_API_BASE` | Firebase Functions API URL | X (에뮬레이터 자동) |
+| `EXPO_PUBLIC_FIREBASE_*` | Firebase 설정값 (6개) | X (배포 시 필요) |
+
+#### Google Maps API 키 발급
+
+1. [Google Cloud Console](https://console.cloud.google.com/apis/credentials) → API 키 생성
+2. **Maps SDK for Android** + **Maps SDK for iOS** 활성화
+3. `app/.env`에 설정:
+   ```
+   EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=발급받은_키
+   ```
+
+### 앱 실행 (Android)
+
+**반드시 `app/` 디렉토리 안에서 실행해야 합니다.** 루트에서 실행하면 잘못된 위치에 빌드 파일이 생성됩니다.
+
+```bash
+# 1. 의존성 설치 (최초 1회)
+cd app
+npm install
+
+# 2. Android 에뮬레이터 실행 (에뮬레이터 목록: $HOME/Library/Android/sdk/emulator/emulator -list-avds)
+$HOME/Library/Android/sdk/emulator/emulator -avd Tokamon_Pixel
+
+# 3. 앱 빌드 + 실행 (최초 빌드 시 수 분 소요)
+npx expo run:android
+```
+
+### 앱 실행 (iOS)
+
+```bash
+cd app
+npx expo run:ios
+```
+
+> - 최초 빌드 후 JS 코드만 수정했다면 `npx expo start`로 Metro만 재실행하여 빠르게 테스트 가능
+> - Android 빌드 시 JDK 17+과 `JAVA_HOME` 설정이 필요합니다
+> - Android 에뮬레이터는 `localhost` 대신 `10.0.2.2`가 자동으로 사용됩니다
+> - 실물 디바이스에서 테스트 시 PC의 실제 IP를 사용하세요 (예: `http://192.168.0.10:5002/api`)
 
 ---
 

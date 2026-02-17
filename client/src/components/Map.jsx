@@ -112,16 +112,52 @@ function MapResizeHandler() {
   return null;
 }
 
-function AutoCenter({ userPos }) {
+function AutoCenter({ userPos, hasMapView }) {
   const map = useMap();
   const hasCentered = useRef(false);
 
   useEffect(() => {
-    if (userPos && !hasCentered.current) {
+    if (userPos && !hasCentered.current && !hasMapView) {
       hasCentered.current = true;
       map.flyTo([userPos.lat, userPos.lng], 16);
     }
-  }, [userPos, map]);
+  }, [userPos, map, hasMapView]);
+
+  return null;
+}
+
+// 지도 뷰 상태 저장 (탭 전환 시 복원용)
+function TrackView({ onViewChange }) {
+  const map = useMap();
+  useEffect(() => {
+    const save = () => {
+      const c = map.getCenter();
+      onViewChange({ lat: c.lat, lng: c.lng, zoom: map.getZoom() });
+    };
+    map.on('moveend', save);
+    map.on('zoomend', save);
+    return () => {
+      map.off('moveend', save);
+      map.off('zoomend', save);
+    };
+  }, [map, onViewChange]);
+  return null;
+}
+
+// 선택된 스팟으로 지도 이동 (줌 레벨은 현재 상태 유지)
+function FlyToSpot({ selectedSpot }) {
+  const map = useMap();
+  const prevSpotId = useRef(null);
+
+  useEffect(() => {
+    if (selectedSpot && selectedSpot.id !== prevSpotId.current) {
+      prevSpotId.current = selectedSpot.id;
+      requestAnimationFrame(() => {
+        map.invalidateSize();
+        map.flyTo([selectedSpot.lat, selectedSpot.lng]);
+      });
+    }
+  }, [selectedSpot, map]);
 
   return null;
 }
@@ -147,8 +183,9 @@ function LocateButton({ userPos }) {
   );
 }
 
-export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectSpot, initialCenter, createMode, pinPos, onMapClick, onConfirmAddSpot, wallet, role, language = 'ko' }) {
-  const center = initialCenter || { lat: 37.5665, lng: 126.978 };
+export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectSpot, initialCenter, createMode, pinPos, onMapClick, onConfirmAddSpot, wallet, role, language = 'ko', mapView, onViewChange }) {
+  const center = mapView || initialCenter || { lat: 37.5665, lng: 126.978 };
+  const zoom = mapView?.zoom || 16;
 
   return (
     <div className="map-container">
@@ -187,7 +224,7 @@ export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectS
       )}
       <MapContainer
         center={[center.lat, center.lng]}
-        zoom={16}
+        zoom={zoom}
         zoomControl={false}
         style={{ height: '100%', width: '100%' }}
       >
@@ -197,8 +234,10 @@ export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectS
         />
 
         <MapResizeHandler />
+        {onViewChange && <TrackView onViewChange={onViewChange} />}
         <MapClickHandler createMode={createMode} onMapClick={onMapClick} />
-        <AutoCenter userPos={userPos} />
+        <AutoCenter userPos={userPos} hasMapView={!!mapView} />
+        <FlyToSpot selectedSpot={selectedSpot} />
         <LocateButton userPos={userPos} />
 
         {userPos && (

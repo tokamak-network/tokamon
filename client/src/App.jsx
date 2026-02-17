@@ -85,6 +85,9 @@ export default function App() {
   const [chainId, setChainId] = useState(null);
   const [networkId, setNetworkId] = useState(getSelectedNetwork());
 
+  // 지도 뷰 상태 유지 (탭 전환 시 복원)
+  const [mapView, setMapView] = useState(null);
+
   // 역할: null | 'customer' | 'owner'
   const [role, setRole] = useState(null);
 
@@ -510,6 +513,8 @@ export default function App() {
           wallet={wallet}
           role={role}
           language={language}
+          mapView={mapView}
+          onViewChange={setMapView}
         />
       )}
 
@@ -530,6 +535,7 @@ export default function App() {
               language={language}
               onRedeposited={() => { refreshSpots(); refreshBalance(); }}
               onConnectWallet={handleConnect}
+              onClose={() => setSelectedSpot(null)}
               showToast={showToast}
             />
           ) : (
@@ -548,8 +554,8 @@ export default function App() {
             spots={spots}
             language={language}
             onSelect={(spot) => {
-              setSelectedSpot(spot);
               switchTab('map');
+              setSelectedSpot(spot);
             }}
           />
         )}

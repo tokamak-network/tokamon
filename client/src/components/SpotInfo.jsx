@@ -22,7 +22,7 @@ function formatCooldown(seconds, language) {
   return `${m}${t(language, 'minutesUnit')}`;
 }
 
-export default function SpotInfo({ spot, userPos, wallet, role, language = 'ko', onRedeposited, onConnectWallet, showToast }) {
+export default function SpotInfo({ spot, userPos, wallet, role, language = 'ko', onRedeposited, onConnectWallet, onClose, showToast }) {
   const [stampInfo, setStampInfo] = useState(null);
   const [redepositAmount, setRedepositAmount] = useState('');
   const [showRedeposit, setShowRedeposit] = useState(false);
@@ -95,7 +95,19 @@ export default function SpotInfo({ spot, userPos, wallet, role, language = 'ko',
   };
 
   return (
-    <div className="spot-info">
+    <div className="spot-info" style={{ position: 'relative' }}>
+      {onClose && (
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute', top: 0, right: 0,
+            background: 'none', border: 'none', color: '#888', fontSize: '20px',
+            cursor: 'pointer', padding: '0 4px', lineHeight: 1,
+          }}
+        >
+          ✕
+        </button>
+      )}
       <div className="name">{spot.name}</div>
       {spot.description && <div className="detail">{spot.description}</div>}
       <div className="detail">

@@ -9,9 +9,10 @@ import {
   Platform,
 } from 'react-native';
 import { getSpots } from '../services/api';
+import NetworkSelector from '../components/NetworkSelector';
 import { t } from '../utils/translations';
 
-export default function SpotListScreen({ navigation, language = 'ko' }) {
+export default function SpotListScreen({ navigation, language = 'ko', networkId, onNetworkChange }) {
   const [spots, setSpots] = useState([]);
   const [filter, setFilter] = useState('active');
   const [refreshing, setRefreshing] = useState(false);
@@ -23,9 +24,10 @@ export default function SpotListScreen({ navigation, language = 'ko' }) {
     } catch (err) {
       console.warn('Failed to fetch spots:', err.message);
     }
-  }, []);
+  }, [networkId]);
 
   useEffect(() => {
+    setSpots([]);
     fetchSpots();
   }, [fetchSpots]);
 
@@ -123,7 +125,6 @@ export default function SpotListScreen({ navigation, language = 'ko' }) {
 
   return (
     <View style={styles.container}>
-      {/* Filter tabs */}
       <View style={styles.filterRow}>
         <TouchableOpacity
           style={[styles.filterBtn, filter === 'active' && styles.filterBtnActive]}
@@ -202,7 +203,7 @@ const styles = StyleSheet.create({
   filterRow: {
     flexDirection: 'row',
     paddingHorizontal: 16,
-    paddingTop: 14,
+    paddingTop: 10,
     paddingBottom: 10,
     gap: 10,
   },

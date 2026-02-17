@@ -15,7 +15,7 @@ export const translations = {
     // 탭
     map: '지도',
     spotList: '스팟 목록',
-    myTokamon: '나의 토카몬',
+    myTokamon: '지갑',
     settings: '설정',
 
     // 스팟 리스트
@@ -142,7 +142,7 @@ export const translations = {
     // Tabs
     map: 'Map',
     spotList: 'Spots',
-    myTokamon: 'My Tokamon',
+    myTokamon: 'Wallet',
     settings: 'Settings',
 
     // Spot List

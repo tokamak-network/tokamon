@@ -131,7 +131,8 @@ anvil-state.json
 *.bak
 *~
 
-# Firebase Emulator logs
+# Firebase
+.firebase/
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
@@ -153,3 +154,8 @@ client/index_old.html
 
 # Project status (local notes)
 STATUS.md
+
+
+# Firebase
+google-services.json
+GoogleService-Info.plist

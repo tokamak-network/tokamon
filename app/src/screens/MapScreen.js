@@ -8,11 +8,12 @@ import {
   Animated,
   Platform,
 } from 'react-native';
-import MapView, { Circle } from 'react-native-maps';
+import MapView, { Circle, Marker } from 'react-native-maps';
 import useLocation from '../hooks/useLocation';
 import { getSpots } from '../services/api';
 import SpotMarker from '../components/SpotMarker';
 import SpotDetailSheet from '../components/SpotDetailSheet';
+import NetworkSelector from '../components/NetworkSelector';
 import { t } from '../utils/translations';
 
 const DEFAULT_REGION = {
@@ -22,7 +23,7 @@ const DEFAULT_REGION = {
   longitudeDelta: 0.01,
 };
 
-export default function MapScreen({ route, wallet, pushToken, receivedCode, language = 'ko', onRefreshSpots }) {
+export default function MapScreen({ route, wallet, pushToken, receivedCode, language = 'ko', networkId, onNetworkChange, onRefreshSpots }) {
   const { userPos, gpsStatus } = useLocation();
   const [spots, setSpots] = useState([]);
   const [selectedSpot, setSelectedSpot] = useState(null);
@@ -40,9 +41,12 @@ export default function MapScreen({ route, wallet, pushToken, receivedCode, lang
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [networkId]);
 
   useEffect(() => {
+    setSpots([]);
+    setSelectedSpot(null);
+    setLoading(true);
     fetchSpots();
     const interval = setInterval(fetchSpots, 30000);
     return () => clearInterval(interval);
@@ -154,15 +158,18 @@ export default function MapScreen({ route, wallet, pushToken, receivedCode, lang
         </View>
       )}
 
-      {/* Spot count badge */}
-      {!loading && spots.length > 0 && (
-        <View style={styles.spotCountBadge}>
-          <View style={styles.spotCountDot} />
-          <Text style={styles.spotCountText}>
-            {activeSpotCount} spots
-          </Text>
-        </View>
-      )}
+      {/* Network selector + Spot count */}
+      <View style={styles.topBar}>
+        <NetworkSelector currentNetworkId={networkId} onNetworkChange={onNetworkChange} />
+        {!loading && spots.length > 0 && (
+          <View style={styles.spotCountBadge}>
+            <View style={styles.spotCountDot} />
+            <Text style={styles.spotCountText}>
+              {activeSpotCount} spots
+            </Text>
+          </View>
+        )}
+      </View>
 
       <MapView
         ref={mapRef}
@@ -173,15 +180,26 @@ export default function MapScreen({ route, wallet, pushToken, receivedCode, lang
         showsCompass={true}
         userInterfaceStyle="light"
       >
-        {/* User radius circle */}
+        {/* User location marker */}
         {userPos && (
-          <Circle
-            center={{ latitude: userPos.lat, longitude: userPos.lng }}
-            radius={10}
-            strokeColor="rgba(79,195,247,0.4)"
-            fillColor="rgba(79,195,247,0.08)"
-            strokeWidth={1.5}
-          />
+          <>
+            <Circle
+              center={{ latitude: userPos.lat, longitude: userPos.lng }}
+              radius={30}
+              strokeColor="rgba(79,195,247,0.5)"
+              fillColor="rgba(79,195,247,0.1)"
+              strokeWidth={1.5}
+            />
+            <Marker
+              coordinate={{ latitude: userPos.lat, longitude: userPos.lng }}
+              anchor={{ x: 0.5, y: 0.5 }}
+              flat
+            >
+              <View style={styles.myLocationMarker}>
+                <View style={styles.myLocationDot} />
+              </View>
+            </Marker>
+          </>
         )}
 
         {/* Spot markers */}
@@ -291,11 +309,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
   },
-  spotCountBadge: {
+  topBar: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 60 : 40,
     left: 16,
+    right: 16,
     zIndex: 90,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  spotCountBadge: {
     backgroundColor: 'rgba(17,17,34,0.9)',
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -395,5 +419,21 @@ const styles = StyleSheet.create({
     color: '#aaa',
     fontSize: 13,
     fontWeight: '500',
+  },
+  myLocationMarker: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(79,195,247,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  myLocationDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#4FC3F7',
+    borderWidth: 2,
+    borderColor: '#fff',
   },
 });

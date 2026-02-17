@@ -147,14 +147,16 @@ export default function History({ history, balance = 0, account, language = 'ko'
                 <div className="telegram-value telegram-linked">
                   <span className="telegram-icon">✅</span>
                   <span className="telegram-username">{linkedTelegram}</span>
-                  <button
-                    className="unlink-telegram-btn btn-with-spinner"
-                    onClick={handleUnlinkTelegram}
-                    disabled={unlinking}
+                  <span
+                    onClick={unlinking ? undefined : handleUnlinkTelegram}
+                    style={{
+                      color: '#888', fontSize: '11px', textDecoration: 'underline',
+                      cursor: unlinking ? 'default' : 'pointer', marginLeft: '8px',
+                      opacity: unlinking ? 0.5 : 1,
+                    }}
                   >
-                    {unlinking && <Spinner size={12} />}
                     {unlinking ? t(language, 'processing') : t(language, 'unlinkTelegram')}
-                  </button>
+                  </span>
                 </div>
               ) : (
                 <div className="telegram-not-linked-container">

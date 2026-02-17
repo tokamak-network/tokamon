@@ -1,13 +1,17 @@
 import 'react-native-get-random-values';
+import '@walletconnect/react-native-compat';
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { WalletConnectModal } from '@walletconnect/modal-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import TabNavigator from './src/navigation/TabNavigator';
 import IntroScreen from './src/screens/IntroScreen';
 import { initWallet, onWalletChange } from './src/services/wallet';
 import { registerForPushNotifications, setupNotificationListener } from './src/services/notifications';
-import { initNetwork } from './src/utils/networkStore';
+import { initNetwork, getSelectedNetwork, onNetworkChange } from './src/utils/networkStore';
+import { WALLETCONNECT_PROJECT_ID } from './src/utils/constants';
+import { getNetworkConfig } from './src/utils/networkStore';
 
 export default function App() {
   const [showIntro, setShowIntro] = useState(true);
@@ -15,14 +19,17 @@ export default function App() {
   const [language, setLanguage] = useState('ko');
   const [pushToken, setPushToken] = useState(null);
   const [receivedCode, setReceivedCode] = useState(null);
+  const [networkId, setNetworkId] = useState('local');
 
   useEffect(() => {
     AsyncStorage.getItem('language').then((lang) => {
       if (lang) setLanguage(lang);
     });
 
-    initNetwork();
+    initNetwork().then((id) => setNetworkId(id));
     initWallet();
+
+    const unsubNetwork = onNetworkChange((id) => setNetworkId(id));
 
     const unsub = onWalletChange((address) => {
       setWallet(address);
@@ -46,6 +53,7 @@ export default function App() {
 
     return () => {
       unsub();
+      unsubNetwork();
       cleanupNotifications();
     };
   }, []);
@@ -68,6 +76,7 @@ export default function App() {
   }
 
   return (
+    <>
     <NavigationContainer
       theme={{
         ...DefaultTheme,
@@ -89,10 +98,36 @@ export default function App() {
         pushToken={pushToken}
         receivedCode={receivedCode}
         language={language}
+        networkId={networkId}
         onLanguageChange={handleLanguageChange}
         onWalletDisconnect={handleWalletDisconnect}
-        onNetworkChange={() => {/* 네트워크 변경 시 데이터 자동 새로고침됨 */}}
+        onNetworkChange={(id) => setNetworkId(id)}
       />
     </NavigationContainer>
+    <WalletConnectModal
+      projectId={WALLETCONNECT_PROJECT_ID}
+      providerMetadata={{
+        name: 'Tokamon',
+        description: 'Tokamon - Location-based TON rewards',
+        url: 'https://tokamon.io',
+        icons: ['https://tokamon.io/icon.png'],
+        redirect: {
+          native: 'tokamon://',
+        },
+      }}
+      sessionParams={{
+        namespaces: {
+          eip155: {
+            methods: ['eth_sendTransaction', 'personal_sign', 'eth_signTypedData'],
+            chains: [`eip155:${getNetworkConfig().chainId}`],
+            events: ['chainChanged', 'accountsChanged'],
+            rpiMap: {
+              [`eip155:${getNetworkConfig().chainId}`]: getNetworkConfig().rpcUrl,
+            },
+          },
+        },
+      }}
+    />
+    </>
   );
 }

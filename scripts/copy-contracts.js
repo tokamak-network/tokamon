@@ -36,8 +36,9 @@ if (fs.existsSync(networksPath)) {
 
   // 해당 네트워크의 contracts 블록에서 tokamon/faucet 주소 업데이트
   // 패턴: '네트워크ID': { tokamon: ..., faucet: ... }
+  const escapedId = networkId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const blockRegex = new RegExp(
-    `([ \\t]*'${networkId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}':\\s*\\{[^}]*tokamon:\\s*)(?:null|'[^']*')(,[^}]*faucet:\\s*)(?:null|'[^']*')`,
+    `([ \\t]*(?:'${escapedId}'|${escapedId}):\\s*\\{[^}]*tokamon:\\s*)(?:null|'[^']*')(,[^}]*faucet:\\s*)(?:null|'[^']*')`,
   );
   const match = content.match(blockRegex);
   if (match) {

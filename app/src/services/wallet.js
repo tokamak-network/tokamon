@@ -1,11 +1,11 @@
 import { ethers } from 'ethers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { WALLETCONNECT_PROJECT_ID } from '../utils/constants';
+import { getNetworkConfig } from '../utils/networkStore';
 
-let wcProvider = null;
 let ethersProvider = null;
 let ethersSigner = null;
 let connectedAddress = null;
+let connectionType = null; // 'walletconnect' | 'privatekey'
 
 // Event listeners
 const listeners = new Set();
@@ -20,13 +20,15 @@ function notifyListeners() {
 }
 
 /**
- * Initialize WalletConnect and attempt to restore previous session
+ * Initialize wallet - restore previous session
  */
 export async function initWallet() {
   try {
     const saved = await AsyncStorage.getItem('wallet_address');
+    const type = await AsyncStorage.getItem('wallet_type');
     if (saved) {
       connectedAddress = saved;
+      connectionType = type || null;
       notifyListeners();
     }
   } catch {
@@ -35,22 +37,39 @@ export async function initWallet() {
 }
 
 /**
- * Connect wallet via WalletConnect
- * In production, the WalletConnectModal component in the UI handles the flow.
- * This function is a placeholder — call setConnectedWallet() after modal connection.
+ * Set wallet from WalletConnect provider (EIP-1193)
  */
-export async function connectWallet() {
-  throw new Error('Use WalletConnect modal component for connection');
+export async function setWalletFromWC(wcProvider) {
+  try {
+    const provider = new ethers.BrowserProvider(wcProvider);
+    const signer = await provider.getSigner();
+    const address = await signer.getAddress();
+
+    connectedAddress = address;
+    ethersProvider = provider;
+    ethersSigner = signer;
+    connectionType = 'walletconnect';
+
+    await AsyncStorage.setItem('wallet_address', address);
+    await AsyncStorage.setItem('wallet_type', 'walletconnect');
+    notifyListeners();
+    return address;
+  } catch (err) {
+    throw new Error('WalletConnect connection failed: ' + err.message);
+  }
 }
 
 /**
- * Set the connected wallet address (called from WalletConnect modal callback)
+ * Set wallet from private key (dev/advanced)
  */
 export async function setConnectedWallet(address, provider, signer) {
   connectedAddress = address;
   ethersProvider = provider;
   ethersSigner = signer;
+  connectionType = 'privatekey';
+
   await AsyncStorage.setItem('wallet_address', address);
+  await AsyncStorage.setItem('wallet_type', 'privatekey');
   notifyListeners();
 }
 
@@ -61,8 +80,9 @@ export async function disconnectWallet() {
   connectedAddress = null;
   ethersProvider = null;
   ethersSigner = null;
-  wcProvider = null;
+  connectionType = null;
   await AsyncStorage.removeItem('wallet_address');
+  await AsyncStorage.removeItem('wallet_type');
   notifyListeners();
 }
 
@@ -92,4 +112,11 @@ export function getSigner() {
  */
 export function isConnected() {
   return !!connectedAddress;
+}
+
+/**
+ * Get connection type
+ */
+export function getConnectionType() {
+  return connectionType;
 }

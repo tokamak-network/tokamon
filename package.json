@@ -15,11 +15,12 @@
     "listener:thanos-sepolia": "NETWORK=thanos-sepolia npm run start -w listener-server",
     "copy-contracts": "node scripts/copy-contracts.js",
     "deploy": "npm run build && mkdir -p functions/shared && cp shared/networks.js functions/shared/networks.js && firebase deploy",
-    "serve": "npm run build && firebase serve"
+    "serve": "npm run build && firebase serve",
+    "android": "cd app && npx expo run:android",
+    "ios": "cd app && npx expo run:ios"
   },
   "dependencies": {
     "cors": "^2.8.6",
-    "expo-notifications": "^0.32.16",
     "express": "^5.2.1"
   }
 }
