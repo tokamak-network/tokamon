@@ -1,45 +1,27 @@
-# Dependencies
-node_modules/
-client/node_modules/
-server/node_modules/
+# 화이트리스트 방식: 모든 파일 제외 후 필요한 것만 포함
+*
 
-# Git & IDE
+# listener-server 소스 포함
+!listener-server/
+listener-server/node_modules/
+listener-server/.env
+listener-server/.env.*
+listener-server/*.db
+listener-server/*.sqlite
+listener-server/serviceAccountKey.json
+listener-server/contract-address.json
+listener-server/spot-metadata*.json
+listener-server/last-block*.json
+listener-server/__tests__/
+listener-server/firebase-debug.log
+
+# shared 모듈 포함
+!shared/
+
+# 컨트랙트 ABI 아티팩트 포함 (있으면 사용)
+!contracts/out/Tokamon.sol/Tokamon.json
+
+# 공통 제외
 .git/
-.idea/
-.vscode/
-.claude/
-
-# Env (mount at runtime)
-.env
-.env.*
-*.env
-
-# Generated / runtime
-logs/
-*.log
-*.db
-*.sqlite
-anvil-state.json
-server/contract-address.json
-server/spot-metadata.json
-server/admin_keys.json
-
-# Build artifacts (rebuilt in Docker)
-client/dist/
-contracts/out/
-contracts/cache/
-
-# Test & docs (optional, reduce image size)
-*.md
-docs/
-playwright/
-test-results/
-playwright-report/
-__tests__/
-*.test.js
-*.spec.js
-
-# Misc
 .DS_Store
-*.tmp
-*.bak
+*.md

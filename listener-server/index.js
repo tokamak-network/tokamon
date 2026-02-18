@@ -104,7 +104,7 @@ if (process.env.DEVICE_HASH_SALT === process.env.TELEGRAM_HASH_SALT) {
   console.warn('⚠️  DEVICE_HASH_SALT와 TELEGRAM_HASH_SALT가 동일합니다. 보안을 위해 서로 다른 값을 사용하세요.');
 }
 
-const LISTENER_PORT = process.env.LISTENER_PORT || 3001;
+const LISTENER_PORT = process.env.PORT || process.env.LISTENER_PORT || 3001;
 
 function startHttpServer(db) {
   const app = express();

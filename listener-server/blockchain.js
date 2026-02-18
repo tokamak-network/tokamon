@@ -114,11 +114,18 @@ async function init() {
     throw new Error(`[${networkId}] 컨트랙트 주소를 찾을 수 없습니다. CONTRACT_ADDRESS 환경변수, contract-address.json, 또는 shared/networks.js에 설정하세요.`);
   }
 
-  // WebSocket 구독 방식 (실시간 이벤트 수신)
-  // 트랜잭션 전송용 HTTP provider (signer 획득)
+  // 트랜잭션 전송용 HTTP provider + signer 획득
   const httpProvider = new ethers.JsonRpcProvider(RPC_URL);
-  const accounts = await httpProvider.listAccounts();
-  signer = accounts[0];
+  if (process.env.SIGNER_PRIVATE_KEY) {
+    // 실제 체인: 환경변수로 전달된 개인키로 Wallet 생성
+    signer = new ethers.Wallet(process.env.SIGNER_PRIVATE_KEY, httpProvider);
+    console.log('[Blockchain] Signer (Wallet):', signer.address);
+  } else {
+    // 로컬 Anvil: listAccounts()로 서명자 획득
+    const accounts = await httpProvider.listAccounts();
+    signer = accounts[0];
+    console.log('[Blockchain] Signer (listAccounts):', signer?.address);
+  }
 
   // 이벤트 구독용 WebSocket provider
   provider = new ethers.WebSocketProvider(WS_URL);
@@ -407,7 +414,7 @@ async function init() {
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
   });
 
-  console.log('[이벤트 등록 완료] 13개 이벤트 리스너 등록됨');
+  console.log('[이벤트 등록 완료] 12개 이벤트 리스너 등록됨');
 }
 
 // ─── 컨트랙트 조회 함수들 ───
@@ -525,17 +532,6 @@ async function getStampInfo(spotId, userAddress) {
   };
 }
 
-
-// ─── Faucet ───
-
-async function sendETH(toAddress, amountETH) {
-  const tx = await signer.sendTransaction({
-    to: toAddr(toAddress),
-    value: toWei(amountETH),
-  });
-  await tx.wait();
-  return amountETH;
-}
 
 // ─── 텔레그램 관련 ───
 
@@ -720,7 +716,7 @@ module.exports = {
   getAllSpots,
   getBalance,
   getStampInfo,
-  sendETH,
+
   getTelegramBalance,
   getTelegramStampInfo,
   getTelegramLinkedWallet,
