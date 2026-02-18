@@ -23,6 +23,8 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     error Locked();
     error DeviceAlreadyLinked();
     error NoDeviceLinked();
+    error OutsideActiveTime();
+    error AlreadyClaimed();
 
     // ── State ──
     address public admin;
@@ -41,8 +43,11 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         uint256 remaining;          //   slot
         int96 lat;                  // ─┐
         int96 lng;                  //  │ slot (12+12+8 = 32 bytes)
-        uint64 startTime;           // ─┘
-        uint64 endTime;             //   slot (partial)
+        uint64 startDate;           // ─┘
+        uint64 endDate;             // ─┐
+        uint16 dailyStartTime;     //  │ slot (8+2+2+1 = 13 bytes)
+        uint16 dailyEndTime;       //  │
+        int8 utcOffset;            // ─┘
         string name;                //   slot
         string description;         //   slot
     }
@@ -52,8 +57,11 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         string description;
         int96 lat;
         int96 lng;
-        uint64 startTime;
-        uint64 endTime;
+        uint64 startDate;
+        uint64 endDate;
+        uint16 dailyStartTime;
+        uint16 dailyEndTime;
+        int8 utcOffset;
     }
 
     mapping(uint256 => Spot) public spots;
@@ -68,7 +76,6 @@ contract Tokamon is Initializable, UUPSUpgradeable {
 
     // ── Events ──
     event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit, string name, string description, int96 lat, int96 lng);
-    event Claimed(uint256 indexed spotId, address indexed user, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
     event Redeposited(uint256 indexed spotId, address indexed creator, uint256 amount);
     event TelegramClaimed(uint256 indexed spotId, bytes32 indexed telegramHash, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp);
     event TelegramLinked(bytes32 indexed telegramHash, address indexed oldWallet, address indexed newWallet, uint256 transferredAmount);
@@ -179,6 +186,8 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         SpotMetadata calldata meta
     ) internal returns (uint256) {
         if (reward == 0 || depositAmt < reward || stampGoal == 0) revert InvalidInput();
+        if (meta.dailyStartTime >= 1440 || meta.dailyEndTime >= 1440) revert InvalidInput();
+        if (meta.utcOffset < -12 || meta.utcOffset > 14) revert InvalidInput();
 
         uint256 spotId = nextSpotId;
         Spot storage s = spots[spotId];
@@ -191,8 +200,11 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         s.remaining = depositAmt;
         s.lat = meta.lat;
         s.lng = meta.lng;
-        s.startTime = meta.startTime;
-        s.endTime = meta.endTime;
+        s.startDate = meta.startDate;
+        s.endDate = meta.endDate;
+        s.dailyStartTime = meta.dailyStartTime;
+        s.dailyEndTime = meta.dailyEndTime;
+        s.utcOffset = meta.utcOffset;
         s.name = meta.name;
         s.description = meta.description;
 
@@ -212,58 +224,44 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     }
 
     // ── Internal helpers ──
-    function _walletToHash(address user) internal pure returns (bytes32 hash) {
-        /// @solidity memory-safe-assembly
-        assembly {
-            let ptr := mload(0x40)
-            mstore(ptr, shl(0xc8, 0x77616c6c65743a))
-            mstore(add(ptr, 7), shl(96, user))
-            hash := keccak256(ptr, 27)
-        }
+    function _checkCooldown(uint256 spotId, bytes32 claimHash, uint48 cooldown) internal view {
+        uint256 last = claimLastTime[claimHash][spotId];
+        if (last > 0 && block.timestamp < last + cooldown) revert CooldownNotElapsed();
     }
 
-    function _checkCooldown(uint256 spotId, bytes32 telegramHash, uint48 cooldown) internal view {
-        uint256 lastTelegram = claimLastTime[telegramHash][spotId];
-        if (lastTelegram > 0 && block.timestamp < lastTelegram + cooldown) revert CooldownNotElapsed();
-        address linkedWallet = telegramToWallet[telegramHash];
-        if (linkedWallet != address(0)) {
-            bytes32 walletHash = _walletToHash(linkedWallet);
-            uint256 lastWallet = claimLastTime[walletHash][spotId];
-            if (lastWallet > 0 && block.timestamp < lastWallet + cooldown) revert CooldownNotElapsed();
+    function _cooldownRemaining(uint256 spotId, bytes32 hash, uint48 cooldown) internal view returns (uint256) {
+        uint256 last = claimLastTime[hash][spotId];
+        if (last > 0 && last + cooldown > block.timestamp) {
+            return (last + cooldown) - block.timestamp;
         }
+        return 0;
     }
 
-    function _checkCooldownForWallet(uint256 spotId, address user, uint48 cooldown) internal view {
-        bytes32 walletHash = _walletToHash(user);
-        uint256 lastWallet = claimLastTime[walletHash][spotId];
-        if (lastWallet > 0 && block.timestamp < lastWallet + cooldown) revert CooldownNotElapsed();
-        bytes32 linkedTelegram = walletToTelegram[user];
-        if (linkedTelegram != bytes32(0)) {
-            uint256 lastTelegram = claimLastTime[linkedTelegram][spotId];
-            if (lastTelegram > 0 && block.timestamp < lastTelegram + cooldown) revert CooldownNotElapsed();
-        }
-    }
+    function _isWithinActiveTime(Spot storage spot) internal view returns (bool) {
+        // UTC 오프셋 적용한 로컬 시각
+        int256 localTime = int256(block.timestamp) + int256(spot.utcOffset) * 3600;
 
-    function _getStampCount(uint256 spotId, bytes32 telegramHash) internal view returns (uint256) {
-        uint256 telegramStamps = claimStampCount[telegramHash][spotId];
-        address linkedWallet = telegramToWallet[telegramHash];
-        if (linkedWallet != address(0)) {
-            bytes32 walletHash = _walletToHash(linkedWallet);
-            uint256 walletStamps = claimStampCount[walletHash][spotId];
-            return telegramStamps > walletStamps ? telegramStamps : walletStamps;
-        }
-        return telegramStamps;
-    }
+        // 날짜 범위 체크 (로컬 시각 기준)
+        uint64 sDate = spot.startDate;
+        uint64 eDate = spot.endDate;
+        if (sDate > 0 && localTime < int256(uint256(sDate))) return false;
+        if (eDate > 0 && localTime > int256(uint256(eDate))) return false;
 
-    function _getStampCountForWallet(uint256 spotId, address user) internal view returns (uint256) {
-        bytes32 walletHash = _walletToHash(user);
-        uint256 walletStamps = claimStampCount[walletHash][spotId];
-        bytes32 linkedTelegram = walletToTelegram[user];
-        if (linkedTelegram != bytes32(0)) {
-            uint256 telegramStamps = claimStampCount[linkedTelegram][spotId];
-            return walletStamps > telegramStamps ? walletStamps : telegramStamps;
+        // 일별 시간대 체크
+        uint16 dStart = spot.dailyStartTime;
+        uint16 dEnd = spot.dailyEndTime;
+        if (dStart == 0 && dEnd == 0) return true;  // 제한 없음
+
+        // 자정 기준 분으로 변환
+        uint256 minuteOfDay = uint256(localTime % 86400) / 60;
+
+        if (dStart < dEnd) {
+            // 일반 (09:00~18:00)
+            return minuteOfDay >= dStart && minuteOfDay < dEnd;
+        } else {
+            // 야간 (22:00~06:00)
+            return minuteOfDay >= dStart || minuteOfDay < dEnd;
         }
-        return walletStamps;
     }
 
     function _calcAndDeductPayout(
@@ -272,68 +270,63 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         uint256 currentStamps
     ) internal returns (uint256 payout, uint256 bonus, uint256 newStamp) {
         Spot storage spot = spots[spotId];
-        payout = spot.reward;
+
+        // Cache storage reads into locals to avoid repeated SLOADs
+        uint256 reward = spot.reward;
+        uint256 remaining = spot.remaining;
+        uint128 stampGoal = spot.stampGoal;
+        uint128 stampBonus = spot.stampBonus;
+
+        payout = reward;
         unchecked { newStamp = currentStamps + 1; }
 
-        if (newStamp >= spot.stampGoal) {
-            bonus = spot.stampBonus;
+        if (newStamp >= stampGoal) {
+            bonus = stampBonus;
             payout += bonus;
             newStamp = 0;
         }
 
-        if (spot.remaining < payout) {
-            if (bonus > 0 && spot.remaining >= spot.reward) {
-                payout = spot.reward;
+        if (remaining < payout) {
+            if (bonus > 0 && remaining >= reward) {
+                payout = reward;
                 bonus = 0;
                 newStamp = currentStamps + 1;
             } else {
                 revert SpotExhausted();
             }
         }
-        unchecked { spot.remaining -= payout; }
+        unchecked { spot.remaining = remaining - payout; }
 
         claimStampCount[claimKey][spotId] = newStamp;
         claimLastTime[claimKey][spotId] = block.timestamp;
     }
 
     // ── Claims ──
-    function claim(uint256 spotId, address user) external onlyClaimManager nonReentrant {
-        _doClaim(spotId, user);
-    }
-
-    function claimSelf(uint256 spotId) external nonReentrant {
-        _doClaim(spotId, msg.sender);
-    }
-
-    function _doClaim(uint256 spotId, address user) internal {
-        Spot storage spot = spots[spotId];
-        if (spot.reward == 0) revert SpotNotFound();
-
-        if (!spot.allowDuplicateClaims) {
-            _checkCooldownForWallet(spotId, user, spot.cooldown);
-        }
-
-        bytes32 linkedTelegram = walletToTelegram[user];
-        bytes32 recordHash = linkedTelegram != bytes32(0) ? linkedTelegram : _walletToHash(user);
-        uint256 currentStamps = _getStampCountForWallet(spotId, user);
-
-        (uint256 payout, uint256 bonus, uint256 newStamp) = _calcAndDeductPayout(spotId, recordHash, currentStamps);
-
-        (bool ok, ) = payable(user).call{value: payout}("");
-        if (!ok) revert TransferFailed();
-        emit Claimed(spotId, user, payout - bonus, bonus, newStamp, block.timestamp);
-    }
-
     function claimToTelegram(uint256 spotId, bytes32 telegramHash) external {
         Spot storage spot = spots[spotId];
         if (spot.reward == 0) revert SpotNotFound();
         if (spot.creator != msg.sender) revert NotSpotCreator();
+        if (!_isWithinActiveTime(spot)) revert OutsideActiveTime();
 
-        if (!spot.allowDuplicateClaims) {
-            _checkCooldown(spotId, telegramHash, spot.cooldown);
+        // 중복발행 불가면 1인 1회만
+        if (!spot.allowDuplicateClaims && claimLastTime[telegramHash][spotId] > 0) {
+            revert AlreadyClaimed();
         }
 
-        uint256 currentStamps = _getStampCount(spotId, telegramHash);
+        // 쿨다운은 항상 적용
+        uint48 cd = spot.cooldown;
+        _checkCooldown(spotId, telegramHash, cd);
+
+        // 교차 쿨다운: 같은 지갑에 디바이스도 연결되어 있으면 같은 사람
+        address wallet = telegramToWallet[telegramHash];
+        if (wallet != address(0)) {
+            bytes32 linkedDevice = walletToDevice[wallet];
+            if (linkedDevice != bytes32(0)) {
+                _checkCooldown(spotId, linkedDevice, cd);
+            }
+        }
+
+        uint256 currentStamps = claimStampCount[telegramHash][spotId];
         (uint256 payout, uint256 bonus, uint256 newStamp) = _calcAndDeductPayout(spotId, telegramHash, currentStamps);
 
         telegramBalances[telegramHash] += payout;
@@ -343,10 +336,24 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     function claimByDevice(uint256 spotId, bytes32 deviceHash) external onlyClaimManager {
         Spot storage spot = spots[spotId];
         if (spot.reward == 0) revert SpotNotFound();
+        if (!_isWithinActiveTime(spot)) revert OutsideActiveTime();
 
-        if (!spot.allowDuplicateClaims) {
-            uint256 last = claimLastTime[deviceHash][spotId];
-            if (last > 0 && block.timestamp < last + spot.cooldown) revert CooldownNotElapsed();
+        // 중복발행 불가면 1인 1회만
+        if (!spot.allowDuplicateClaims && claimLastTime[deviceHash][spotId] > 0) {
+            revert AlreadyClaimed();
+        }
+
+        // 쿨다운은 항상 적용
+        uint48 cd = spot.cooldown;
+        _checkCooldown(spotId, deviceHash, cd);
+
+        // 교차 쿨다운: 같은 지갑에 텔레그램도 연결되어 있으면 같은 사람
+        address wallet = deviceToWallet[deviceHash];
+        if (wallet != address(0)) {
+            bytes32 linkedTelegram = walletToTelegram[wallet];
+            if (linkedTelegram != bytes32(0)) {
+                _checkCooldown(spotId, linkedTelegram, cd);
+            }
         }
 
         uint256 currentStamps = claimStampCount[deviceHash][spotId];
@@ -370,7 +377,7 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         Spot storage s = spots[spotId];
         uint256 last = claimLastTime[identifier][spotId];
         uint256 remaining = 0;
-        if (last + s.cooldown > block.timestamp) {
+        if (last > 0 && last + s.cooldown > block.timestamp) {
             remaining = (last + s.cooldown) - block.timestamp;
         }
         return (claimStampCount[identifier][spotId], s.stampGoal, last, remaining);
@@ -511,6 +518,8 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         if (spot.reward == 0) revert SpotNotFound();
         if (spot.creator != msg.sender) revert NotSpotCreator();
         if (reward == 0 || stampGoal == 0) revert InvalidInput();
+        if (meta.dailyStartTime >= 1440 || meta.dailyEndTime >= 1440) revert InvalidInput();
+        if (meta.utcOffset < -12 || meta.utcOffset > 14) revert InvalidInput();
 
         spot.reward = reward;
         spot.stampGoal = stampGoal;
@@ -521,8 +530,11 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         spot.description = meta.description;
         spot.lat = meta.lat;
         spot.lng = meta.lng;
-        spot.startTime = meta.startTime;
-        spot.endTime = meta.endTime;
+        spot.startDate = meta.startDate;
+        spot.endDate = meta.endDate;
+        spot.dailyStartTime = meta.dailyStartTime;
+        spot.dailyEndTime = meta.dailyEndTime;
+        spot.utcOffset = meta.utcOffset;
 
         emit SpotUpdated(spotId);
     }
@@ -569,13 +581,81 @@ contract Tokamon is Initializable, UUPSUpgradeable {
     ) {
         Spot storage s = spots[spotId];
         bytes32 linkedTelegram = walletToTelegram[user];
-        bytes32 checkHash = linkedTelegram != bytes32(0) ? linkedTelegram : _walletToHash(user);
+        bytes32 linkedDevice = walletToDevice[user];
+
+        // Check telegram link first, then device link
+        bytes32 checkHash;
+        if (linkedTelegram != bytes32(0)) {
+            checkHash = linkedTelegram;
+        } else if (linkedDevice != bytes32(0)) {
+            checkHash = linkedDevice;
+        } else {
+            return (0, s.stampGoal, 0, 0);
+        }
+
         uint256 last = claimLastTime[checkHash][spotId];
         uint256 remaining = 0;
-        if (last + s.cooldown > block.timestamp) {
+        if (last > 0 && last + s.cooldown > block.timestamp) {
             remaining = (last + s.cooldown) - block.timestamp;
         }
-        return (_getStampCountForWallet(spotId, user), s.stampGoal, last, remaining);
+        return (claimStampCount[checkHash][spotId], s.stampGoal, last, remaining);
+    }
+
+    // ── 교차 쿨다운 포함 발행 가능 여부 조회 ──
+    function canClaimTelegram(uint256 spotId, bytes32 telegramHash) external view returns (
+        bool claimable,
+        uint256 cooldownRemaining
+    ) {
+        Spot storage s = spots[spotId];
+        if (s.reward == 0 || s.remaining < s.reward) return (false, 0);
+        if (!_isWithinActiveTime(s)) return (false, 0);
+
+        // 중복발행 불가면 이미 클레임한 경우 불가
+        if (!s.allowDuplicateClaims && claimLastTime[telegramHash][spotId] > 0) return (false, 0);
+
+        // 쿨다운은 항상 체크
+        uint48 cd = s.cooldown;
+        uint256 rem = _cooldownRemaining(spotId, telegramHash, cd);
+
+        // 교차 쿨다운
+        address wallet = telegramToWallet[telegramHash];
+        if (wallet != address(0)) {
+            bytes32 linkedDevice = walletToDevice[wallet];
+            if (linkedDevice != bytes32(0)) {
+                uint256 crossRem = _cooldownRemaining(spotId, linkedDevice, cd);
+                if (crossRem > rem) rem = crossRem;
+            }
+        }
+
+        return (rem == 0, rem);
+    }
+
+    function canClaimDevice(uint256 spotId, bytes32 deviceHash) external view returns (
+        bool claimable,
+        uint256 cooldownRemaining
+    ) {
+        Spot storage s = spots[spotId];
+        if (s.reward == 0 || s.remaining < s.reward) return (false, 0);
+        if (!_isWithinActiveTime(s)) return (false, 0);
+
+        // 중복발행 불가면 이미 클레임한 경우 불가
+        if (!s.allowDuplicateClaims && claimLastTime[deviceHash][spotId] > 0) return (false, 0);
+
+        // 쿨다운은 항상 체크
+        uint48 cd = s.cooldown;
+        uint256 rem = _cooldownRemaining(spotId, deviceHash, cd);
+
+        // 교차 쿨다운
+        address wallet = deviceToWallet[deviceHash];
+        if (wallet != address(0)) {
+            bytes32 linkedTelegram = walletToTelegram[wallet];
+            if (linkedTelegram != bytes32(0)) {
+                uint256 crossRem = _cooldownRemaining(spotId, linkedTelegram, cd);
+                if (crossRem > rem) rem = crossRem;
+            }
+        }
+
+        return (rem == 0, rem);
     }
 
     uint256[48] private _gap;

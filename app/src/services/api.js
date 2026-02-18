@@ -30,11 +30,6 @@ export async function getSpots() {
   return parseJson(res);
 }
 
-export async function getClaimHistory(userAddress) {
-  const res = await fetch(withNetwork(`${API_BASE}/claim/history?user_address=${userAddress}`));
-  return parseJson(res);
-}
-
 export async function getStampInfo(spotId, userAddress) {
   const res = await fetch(withNetwork(`${API_BASE}/stamps/${spotId}?user_address=${userAddress}`));
   return parseJson(res);

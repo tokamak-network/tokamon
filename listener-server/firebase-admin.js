@@ -68,18 +68,6 @@ async function syncSpotToFirestore(spotId, meta) {
   console.log('[Firestore] spot_metadata 업데이트:', spotId, meta.name);
 }
 
-async function saveClaimEvent(event) {
-  if (!db) return;
-  await db.collection(col('claim_events')).add({
-    spot_id: event.spotId,
-    user_address: event.user,
-    reward: event.reward,
-    bonus: event.bonus,
-    stamp: event.stamp,
-    created_at: new Date(Number(event.timestamp) * 1000).toISOString(),
-  });
-}
-
 async function getTelegramUsernameByHash(hash) {
   if (!db) return null;
   try {
@@ -154,6 +142,35 @@ async function sendPushNotification(fcmToken, title, body, data = {}) {
   }
 }
 
+async function saveTelegramClaimEvent(event) {
+  if (!db) return;
+  try {
+    await db.collection(col('claim_events')).add({
+      spot_id: event.spotId,
+      telegram_hash: event.telegramHash,
+      reward: event.reward,
+      bonus: event.bonus,
+      stamp: event.stamp,
+      created_at: new Date(Number(event.timestamp) * 1000).toISOString(),
+    });
+  } catch (e) {
+    console.error('[Firestore] telegram claim_events 저장 실패:', e.message);
+  }
+}
+
+// 컨트랙트에서 조회한 실제 잔액을 Firestore에 동기화
+async function syncTelegramBalance(telegramHash, balance) {
+  if (!db) return;
+  try {
+    await db.collection(col('telegram_balances')).doc(telegramHash).set({
+      balance,
+      updated_at: new Date().toISOString(),
+    }, { merge: true });
+  } catch (e) {
+    console.error('[Firestore] telegram_balances 동기화 실패:', e.message);
+  }
+}
+
 async function saveDeviceClaimEvent(event) {
   if (!db) return;
   try {
@@ -170,15 +187,30 @@ async function saveDeviceClaimEvent(event) {
   }
 }
 
+// 컨트랙트에서 조회한 실제 잔액을 Firestore에 동기화
+async function syncDeviceBalance(deviceHash, balance) {
+  if (!db) return;
+  try {
+    await db.collection(col('device_balances')).doc(deviceHash).set({
+      balance,
+      updated_at: new Date().toISOString(),
+    }, { merge: true });
+  } catch (e) {
+    console.error('[Firestore] device_balances 동기화 실패:', e.message);
+  }
+}
+
 module.exports = {
   db,
   NETWORK_ID,
   col,
   syncSpotToFirestore,
-  saveClaimEvent,
+  saveTelegramClaimEvent,
+  syncTelegramBalance,
   getTelegramUsernameByHash,
   saveTelegramHashMap,
   saveWalletTelegramLink,
   sendPushNotification,
   saveDeviceClaimEvent,
+  syncDeviceBalance,
 };

@@ -2,29 +2,38 @@ import React, { useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { t } from '../translations';
+import { isWithinActiveTime, isSpotClosed } from '../spotUtils';
 
-// 초록: 클레임 가능 (활성 + TON 남음) - 토카막 심볼
-const activeIcon = new L.DivIcon({
-  className: '',
-  html: '<div style="width:36px;height:36px;background:#fff;border-radius:50%;border:2px solid #4FC3F7;box-shadow:0 2px 8px rgba(79,195,247,0.5);display:flex;align-items:center;justify-content:center;padding:4px;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;"/></div>',
+// 활성: 노란 T 코인 (파란 테두리)
+const activeIcon = new L.Icon({
+  iconUrl: '/marker-blue.png',
   iconSize: [36, 36],
   iconAnchor: [18, 18],
+  popupAnchor: [0, -18],
 });
 
-// 회색: TON 소진
+// TON 소진: 회색 처리
 const exhaustedIcon = new L.DivIcon({
   className: '',
-  html: '<div style="width:32px;height:32px;background:#f5f5f5;border-radius:50%;border:2px solid #999;box-shadow:0 2px 5px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;padding:4px;opacity:0.6;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;filter:grayscale(100%);"/></div>',
+  html: '<div style="width:32px;height:32px;opacity:0.5;"><img src="/marker-blue.png" style="width:100%;height:100%;filter:grayscale(100%) brightness(0.8);"/></div>',
   iconSize: [32, 32],
   iconAnchor: [16, 16],
 });
 
-// 빨강: 비활성 (시간 밖)
+// 비활성 (운영시간 밖): 어둡게
 const inactiveIcon = new L.DivIcon({
   className: '',
-  html: '<div style="width:32px;height:32px;background:#fff;border-radius:50%;border:2px solid #f87171;box-shadow:0 2px 5px rgba(248,113,113,0.4);display:flex;align-items:center;justify-content:center;padding:4px;opacity:0.7;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;filter:hue-rotate(300deg);"/></div>',
+  html: '<div style="width:32px;height:32px;opacity:0.6;"><img src="/marker-blue.png" style="width:100%;height:100%;filter:saturate(0.3) brightness(0.7);"/></div>',
   iconSize: [32, 32],
   iconAnchor: [16, 16],
+});
+
+// 종료됨 (날짜 만료): 회색 + 더 투명
+const closedIcon = new L.DivIcon({
+  className: '',
+  html: '<div style="width:30px;height:30px;opacity:0.4;"><img src="/marker-blue.png" style="width:100%;height:100%;filter:grayscale(100%) brightness(0.6);"/></div>',
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
 });
 
 // 파랑: 사용자 위치
@@ -51,41 +60,45 @@ const addSpotButtonIcon = new L.DivIcon({
   iconAnchor: [0, 18],
 });
 
-// 선택됨 (하단 정보 표시 중) - 두꺼운 초록 테두리 + 강한 그림자
-const selectedSpotIcon = new L.DivIcon({
+// 선택됨 (하단 정보 표시 중) - 초록 테두리 T 코인
+const selectedSpotIcon = new L.Icon({
+  iconUrl: '/marker-green.png',
+  iconSize: [44, 44],
+  iconAnchor: [22, 22],
+  popupAnchor: [0, -22],
   className: 'selected-spot-marker',
-  html: '<div class="selected-spot-pin" style="width:40px;height:40px;background:#fff;border-radius:50%;border:4px solid #059669;box-shadow:0 0 0 2px #fff,0 4px 16px rgba(5,150,105,0.7);display:flex;align-items:center;justify-content:center;padding:4px;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;"/></div>',
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
 });
 
-// 내 스팟 (점주 본인 소유) - 매장관리자 로그인 시 구분용 (핑크 테두리 + 깜박임)
+// 내 스팟 (점주 본인 소유) - 매장관리자 로그인 시 구분용 (핑크 테두리)
 const mySpotIcon = new L.DivIcon({
   className: 'my-spot-marker',
-  html: '<div class="my-spot-pin" style="width:36px;height:36px;background:#fff;border-radius:50%;border:2px solid #ec4899;box-shadow:0 2px 8px rgba(236,72,153,0.5);display:flex;align-items:center;justify-content:center;padding:4px;"><img src="/tokamak-symbol.svg" style="width:100%;height:100%;"/></div>',
-  iconSize: [36, 36],
-  iconAnchor: [18, 18],
+  html: '<div class="my-spot-pin" style="width:38px;height:38px;border-radius:50%;border:3px solid #ec4899;box-shadow:0 2px 8px rgba(236,72,153,0.5);overflow:hidden;"><img src="/marker-blue.png" style="width:100%;height:100%;"/></div>',
+  iconSize: [38, 38],
+  iconAnchor: [19, 19],
 });
 
 function getSpotIcon(spot, wallet, role, selectedSpot) {
   // 고객 지도에서만: 선택된 스팟(하단 정보 표시 중)은 초록 테두리
   if (role === 'customer' && selectedSpot && selectedSpot.id === spot.id) return selectedSpotIcon;
-  // 매장관리자일 때만 내 스팟 구분 표시, 고객 지도는 지갑 연결 여부와 관계없이 동일
+  // 비활성/소진/종료 스팟은 상태 아이콘 우선 (핑크 테두리 X)
+  const isExhausted = spot.remaining < spot.reward;
+  if (isExhausted) return exhaustedIcon;
+  if (isSpotClosed(spot)) return closedIcon;
+  if (!spot.active || !isWithinActiveTime(spot)) return inactiveIcon;
+  // 매장관리자: 활성 상태인 내 스팟만 핑크 테두리 표시
   if (role === 'owner') {
     const normalizeAddr = (a) => (a || '').toString().toLowerCase();
     const isMine = wallet && normalizeAddr(spot.creator_address || spot.creator) === normalizeAddr(wallet);
     if (isMine) return mySpotIcon;
   }
-  const isExhausted = spot.remaining < spot.reward;
-  if (isExhausted) return exhaustedIcon;
-  if (!spot.active) return inactiveIcon;
   return activeIcon;
 }
 
 function getSpotStatus(spot, language) {
   const isExhausted = spot.remaining < spot.reward;
   if (isExhausted) return t(language, 'tonExhausted');
-  if (!spot.active) return t(language, 'inactive');
+  if (isSpotClosed(spot)) return t(language, 'closedStatus');
+  if (!spot.active || !isWithinActiveTime(spot)) return t(language, 'outsideActiveTime');
   return t(language, 'active');
 }
 
@@ -112,16 +125,16 @@ function MapResizeHandler() {
   return null;
 }
 
-function AutoCenter({ userPos, hasMapView }) {
+function AutoCenter({ userPos }) {
   const map = useMap();
   const hasCentered = useRef(false);
 
   useEffect(() => {
-    if (userPos && !hasCentered.current && !hasMapView) {
+    if (userPos && !hasCentered.current) {
       hasCentered.current = true;
       map.flyTo([userPos.lat, userPos.lng], 16);
     }
-  }, [userPos, map, hasMapView]);
+  }, [userPos, map]);
 
   return null;
 }
@@ -236,7 +249,7 @@ export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectS
         <MapResizeHandler />
         {onViewChange && <TrackView onViewChange={onViewChange} />}
         <MapClickHandler createMode={createMode} onMapClick={onMapClick} />
-        <AutoCenter userPos={userPos} hasMapView={!!mapView} />
+        <AutoCenter userPos={userPos} />
         <FlyToSpot selectedSpot={selectedSpot} />
         <LocateButton userPos={userPos} />
 
@@ -275,7 +288,7 @@ export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectS
           </>
         )}
 
-        {spots.map((spot) => {
+        {!createMode && spots.map((spot) => {
           const claimsLeft = spot.reward > 0 ? Math.floor(spot.remaining / spot.reward) : 0;
           return (
             <Marker

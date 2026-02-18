@@ -1,6 +1,6 @@
 const express = require('express');
 const blockchain = require('../blockchain');
-const { isWithinTimeRange } = require('../utils');
+const { isWithinActiveTime } = require('../utils');
 
 const router = express.Router();
 
@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
 
     const result = spots.map((s) => ({
       ...s,
-      active: s.remaining > 0 && isWithinTimeRange(s.start_time, s.end_time),
+      active: s.remaining > 0 && isWithinActiveTime(s.start_time, s.end_time, s.daily_start_time, s.daily_end_time, s.utc_offset),
     }));
 
     console.log('[API] GET /api/spots 반환', result.map((s) => ({

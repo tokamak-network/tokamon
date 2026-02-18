@@ -6,13 +6,12 @@ const COORD_SCALE = 1_000_000;
 
 // 최소 ABI — 클라이언트에서 호출할 함수만 포함
 const ABI = [
-  'function createSpotSelf(uint256 reward, uint128 stampGoal, uint128 stampBonus, uint48 cooldown, bool allowDuplicateClaims, tuple(string name, string description, int96 lat, int96 lng, uint64 startTime, uint64 endTime) meta) payable returns (uint256)',
+  'function createSpotSelf(uint256 reward, uint128 stampGoal, uint128 stampBonus, uint48 cooldown, bool allowDuplicateClaims, tuple(string name, string description, int96 lat, int96 lng, uint64 startDate, uint64 endDate, uint16 dailyStartTime, uint16 dailyEndTime, int8 utcOffset) meta) payable returns (uint256)',
   'function redepositSelf(uint256 spotId) payable',
   'function updateCooldown(uint256 spotId, uint48 newCooldown) external',
   'function updateAllowDuplicateClaims(uint256 spotId, bool allow) external',
   'function getTelegramBalance(bytes32 telegramHash) external view returns (uint256)',
   'function getWalletLinkedTelegram(address wallet) external view returns (bytes32)',
-  'function claimSelf(uint256 spotId) external',
   'function claimTelegramToWallet(bytes32 telegramHash) external',
   'function getWalletLinkedDevice(address wallet) external view returns (bytes32)',
   'function getDeviceBalance(bytes32 deviceHash) external view returns (uint256)',
@@ -20,10 +19,9 @@ const ABI = [
   'function unlinkDevice() external',
   'function unlinkTelegram() external',
   'function nextSpotId() external view returns (uint256)',
-  'function getSpot(uint256) view returns (tuple(address creator, bool allowDuplicateClaims, uint48 cooldown, uint128 stampGoal, uint128 stampBonus, uint256 reward, uint256 remaining, int96 lat, int96 lng, uint64 startTime, uint64 endTime, string name, string description))',
+  'function getSpot(uint256) view returns (tuple(address creator, bool allowDuplicateClaims, uint48 cooldown, uint128 stampGoal, uint128 stampBonus, uint256 reward, uint256 remaining, int96 lat, int96 lng, uint64 startDate, uint64 endDate, uint16 dailyStartTime, uint16 dailyEndTime, int8 utcOffset, string name, string description))',
   'function getStampInfo(uint256 spotId, address user) view returns (uint256 stamps, uint256 goal, uint256 lastClaim, uint256 cooldownRemaining)',
   'event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit, string name, string description, int96 lat, int96 lng)',
-  'event Claimed(uint256 indexed spotId, address indexed user, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp)',
 ];
 
 let cachedContract = null;
@@ -53,7 +51,7 @@ export function resetContractCache() {
 
 // 스팟 생성: 점주가 직접 트랜잭션 서명
 export async function createSpotSelf(depositTon, rewardTon, stampGoal, stampBonus, cooldown, allowDuplicateClaims, metadata) {
-  const { name, description, lat, lng, startTime, endTime } = metadata;
+  const { name, description, lat, lng, startDate, endDate, dailyStartTime, dailyEndTime, utcOffset } = metadata;
   const { contract } = await getSignerAndContract();
 
   const depositAmount = ethers.parseEther(String(depositTon));
@@ -63,8 +61,11 @@ export async function createSpotSelf(depositTon, rewardTon, stampGoal, stampBonu
     description: description || '',
     lat: Math.round(lat * COORD_SCALE),
     lng: Math.round(lng * COORD_SCALE),
-    startTime,
-    endTime,
+    startDate: startDate || 0,
+    endDate: endDate || 0,
+    dailyStartTime: dailyStartTime || 0,
+    dailyEndTime: dailyEndTime || 0,
+    utcOffset: utcOffset || 0,
   };
 
   const tx = await contract.createSpotSelf(
@@ -143,12 +144,15 @@ export async function getSpotsFromChain() {
         stamp_bonus: Number(ethers.formatEther(s.stampBonus ?? s[4])),
         cooldown: Number(s.cooldown ?? s[2]),
         allow_duplicate_claims: s.allowDuplicateClaims ?? s[1],
-        name: (s.name ?? s[11])?.trim() || `Spot ${id}`,
-        description: (s.description ?? s[12]) ? String(s.description ?? s[12]) : '',
+        name: (s.name ?? s[14])?.trim() || `Spot ${id}`,
+        description: (s.description ?? s[15]) ? String(s.description ?? s[15]) : '',
         lat: Number.isNaN(lat) ? 0 : lat,
         lng: Number.isNaN(lng) ? 0 : lng,
-        start_time: Number(s.startTime ?? s[9]),
-        end_time: Number(s.endTime ?? s[10]),
+        start_time: Number(s.startDate ?? s[9]),
+        end_time: Number(s.endDate ?? s[10]),
+        daily_start_time: Number(s.dailyStartTime ?? s[11] ?? 0),
+        daily_end_time: Number(s.dailyEndTime ?? s[12] ?? 0),
+        utc_offset: Number(s.utcOffset ?? s[13] ?? 0),
       });
     } catch (_) {
       // 스팟 없거나 리버트 시 스킵
@@ -181,26 +185,6 @@ export async function getWalletLinkedTelegram(address) {
   const { contract } = await getSignerAndContract();
   const telegramHash = await contract.getWalletLinkedTelegram(address);
   return telegramHash;
-}
-
-// 스팟 클레임: 고객이 직접 호출 (지갑 기반)
-export async function claimSelf(spotId) {
-  const { contract } = await getSignerAndContract();
-  const tx = await contract.claimSelf(spotId);
-  const receipt = await tx.wait();
-  const claimedEvent = receipt.logs
-    .map((log) => {
-      try { return contract.interface.parseLog(log); } catch (_) { return null; }
-    })
-    .find((e) => e && e.name === 'Claimed');
-  if (claimedEvent) {
-    return {
-      reward: Number(ethers.formatEther(claimedEvent.args.reward)),
-      bonus: Number(ethers.formatEther(claimedEvent.args.bonus)),
-      stamp: Number(claimedEvent.args.stamp),
-    };
-  }
-  return { reward: 0, bonus: 0, stamp: 0 };
 }
 
 // 텔레그램 잔액을 지갑으로 클레임
@@ -257,20 +241,3 @@ export async function getStampInfoFromContract(spotId, userAddress) {
   };
 }
 
-// 스팟별 클래임 히스토리 조회 (컨트랙트 이벤트 직접 조회)
-export async function getSpotClaimHistory(spotId) {
-  const { contract } = await getSignerAndContract();
-  const filter = contract.filters.Claimed(spotId, null);
-  const events = await contract.queryFilter(filter);
-  const history = events.map((ev) => {
-    const { user, reward, bonus, stamp, timestamp } = ev.args;
-    return {
-      user_address: user,
-      reward: Number(ethers.formatEther(reward)),
-      bonus: Number(ethers.formatEther(bonus)),
-      stamp: Number(stamp),
-      created_at: new Date(Number(timestamp) * 1000).toISOString(),
-    };
-  });
-  return history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-}

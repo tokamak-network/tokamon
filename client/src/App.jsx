@@ -12,12 +12,13 @@ import TelegramLinkPage from './components/TelegramLinkPage';
 import Settings from './components/Settings';
 import Toast from './components/Toast';
 import { Spinner } from './components/Spinner';
-import { getSpots, getClaimHistory, getTelegramBalance } from './api';
+import { getSpots, getTelegramBalance } from './api';
 import { getBalance as getContractBalance, resetContractCache } from './contract';
 import { getETH, resetFaucetCache } from './faucet';
 import { t } from './translations';
 import useGeolocation from './hooks/useGeolocation';
 import useToast from './hooks/useToast';
+import { isWithinActiveTime, isSpotClosed } from './spotUtils';
 import { getNetworkConfig, getSelectedNetwork, setSelectedNetwork, getAllNetworks, onNetworkChange } from './networkStore';
 
 // RPC URL을 현재 네트워크 설정에서 가져오기
@@ -243,9 +244,7 @@ export default function App() {
 
   // 히스토리
   const refreshHistory = useCallback(async () => {
-    if (!wallet) return;
-    const data = await getClaimHistory(wallet);
-    if (Array.isArray(data)) setHistory(data);
+    // TODO: Firestore 기반 히스토리 조회로 전환 필요
   }, [wallet]);
 
   // 역할 선택 후 스팟 로드 (지갑 없이도)
@@ -542,7 +541,7 @@ export default function App() {
             <div className="points-display">
               {spotsLoading
                 ? <span className="btn-with-spinner"><Spinner size={14} /> {t(language, 'loadingSpots')}</span>
-                : `${t(language, 'selectSpotOnMap')} (${spots.filter(s => s.remaining > 0).length}${t(language, 'activeSpotsCount')})`
+                : `${t(language, 'selectSpotOnMap')} (${spots.filter(s => s.remaining >= s.reward && !isSpotClosed(s) && s.active && isWithinActiveTime(s)).length}${t(language, 'activeSpotsCount')})`
               }
             </div>
           )
@@ -552,6 +551,7 @@ export default function App() {
         {tab === 'list' && (
           <SpotList
             spots={spots}
+            userPos={userPos}
             language={language}
             onSelect={(spot) => {
               switchTab('map');

@@ -38,32 +38,6 @@ export function resetContractCache() {
   cachedReadContract = null;
 }
 
-// Claim a spot reward (customer)
-export async function claimSelf(spotId) {
-  const contract = await getSignerAndContract();
-  const tx = await contract.claimSelf(spotId);
-  const receipt = await tx.wait();
-
-  const claimedEvent = receipt.logs
-    .map((log) => {
-      try {
-        return contract.interface.parseLog(log);
-      } catch {
-        return null;
-      }
-    })
-    .find((e) => e && e.name === 'Claimed');
-
-  if (claimedEvent) {
-    return {
-      reward: Number(ethers.formatEther(claimedEvent.args.reward)),
-      bonus: Number(ethers.formatEther(claimedEvent.args.bonus)),
-      stamp: Number(claimedEvent.args.stamp),
-    };
-  }
-  return { reward: 0, bonus: 0, stamp: 0 };
-}
-
 // Get native TON balance
 export async function getBalance(address) {
   try {
@@ -153,12 +127,15 @@ export async function getSpotsFromChain() {
           stamp_bonus: Number(ethers.formatEther(s.stampBonus ?? s[4])),
           cooldown: Number(s.cooldown ?? s[2]),
           allow_duplicate_claims: s.allowDuplicateClaims ?? s[1],
-          name: (s.name ?? s[11])?.trim() || `Spot ${id}`,
-          description: (s.description ?? s[12]) ? String(s.description ?? s[12]) : '',
+          name: (s.name ?? s[14])?.trim() || `Spot ${id}`,
+          description: (s.description ?? s[15]) ? String(s.description ?? s[15]) : '',
           lat: Number.isNaN(lat) ? 0 : lat,
           lng: Number.isNaN(lng) ? 0 : lng,
-          start_time: Number(s.startTime ?? s[9]),
-          end_time: Number(s.endTime ?? s[10]),
+          start_time: Number(s.startDate ?? s[9]),
+          end_time: Number(s.endDate ?? s[10]),
+          daily_start_time: Number(s.dailyStartTime ?? s[11] ?? 0),
+          daily_end_time: Number(s.dailyEndTime ?? s[12] ?? 0),
+          utc_offset: Number(s.utcOffset ?? s[13] ?? 0),
         });
       } catch {
         // skip

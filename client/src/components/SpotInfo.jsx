@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { redepositSelf, claimSelf, getStampInfoFromContract } from '../contract';
+import { redepositSelf, getStampInfoFromContract } from '../contract';
 import { Spinner } from './Spinner';
 import { t } from '../translations';
+import { isWithinActiveTime, isSpotClosed } from '../spotUtils';
 
 function haversineDistance(lat1, lng1, lat2, lng2) {
   const R = 6371000;
@@ -53,29 +54,8 @@ export default function SpotInfo({ spot, userPos, wallet, role, language = 'ko',
   const stampPercent = Math.min((stamps / stampGoal) * 100, 100);
 
   const [redepositing, setRedepositing] = useState(false);
-  const [claiming, setClaiming] = useState(false);
 
-  const canClaim = wallet && !isOwner && !isExhausted && !isOnCooldown && spot.active;
-  const COLLECT_RADIUS = 10;
-
-  const handleClaim = async () => {
-    if (!canClaim || !wallet) return;
-    if (distance !== null && distance > COLLECT_RADIUS) {
-      showToast?.('warning', `${distance}m - ${t(language, 'tooFarToClaim').replace('{radius}', COLLECT_RADIUS)}`);
-      return;
-    }
-    setClaiming(true);
-    try {
-      const result = await claimSelf(spot.id);
-      const total = result.reward + result.bonus;
-      showToast?.('success', `${total} ${t(language, 'claimSuccess')}`);
-      onRedeposited?.();
-    } catch (err) {
-      showToast?.('error', err.reason || err.message || t(language, 'claimFailed'));
-    } finally {
-      setClaiming(false);
-    }
-  };
+  const COLLECT_RADIUS = 15;
 
   const handleRedeposit = async () => {
     const amount = Number(redepositAmount);
@@ -111,9 +91,22 @@ export default function SpotInfo({ spot, userPos, wallet, role, language = 'ko',
       <div className="name">{spot.name}</div>
       {spot.description && <div className="detail">{spot.description}</div>}
       <div className="detail">
-        {spot.start_time || spot.end_time
-          ? `${spot.start_time ? new Date(spot.start_time * 1000).toLocaleString() : ''} ~ ${spot.end_time ? new Date(spot.end_time * 1000).toLocaleString() : ''}`
-          : t(language, 'alwaysActive')}
+        {(() => {
+          const utc = spot.utc_offset || 0;
+          const utcLabel = ` (UTC${utc >= 0 ? '+' : ''}${utc})`;
+          // UTC 정규화 날짜이므로 UTC 기준으로 표시
+          const fmtDate = (ts) => {
+            const d = new Date(ts * 1000);
+            return `${d.getUTCFullYear()}.${d.getUTCMonth() + 1}.${d.getUTCDate()}`;
+          };
+          const datePart = spot.start_time || spot.end_time
+            ? `${spot.start_time ? fmtDate(spot.start_time) : ''} ~ ${spot.end_time ? fmtDate(spot.end_time) : ''}${utcLabel}`
+            : t(language, 'alwaysActive');
+          const dailyPart = (spot.daily_start_time > 0 || spot.daily_end_time > 0)
+            ? ` | ${String(Math.floor(spot.daily_start_time / 60)).padStart(2, '0')}:${String(spot.daily_start_time % 60).padStart(2, '0')}~${String(Math.floor(spot.daily_end_time / 60)).padStart(2, '0')}:${String(spot.daily_end_time % 60).padStart(2, '0')}`
+            : '';
+          return datePart + dailyPart;
+        })()}
       </div>
       <div className="detail" style={{ color: '#fbbf24' }}>
         {t(language, 'rewardLabel')}: {spot.reward} TON | {t(language, 'remainingTONLabel')}: {spot.remaining}
@@ -135,23 +128,9 @@ export default function SpotInfo({ spot, userPos, wallet, role, language = 'ko',
         </div>
       )}
 
-      <div className={`status ${spot.active && !isExhausted ? 'active' : 'inactive'}`}>
-        {isExhausted ? t(language, 'tonExhausted') : spot.active ? t(language, 'activeStatus') : t(language, 'inactive')}
+      <div className={`status ${isExhausted || isSpotClosed(spot) ? 'inactive' : spot.active && isWithinActiveTime(spot) ? 'active' : 'inactive'}`}>
+        {isExhausted ? t(language, 'tonExhausted') : isSpotClosed(spot) ? t(language, 'closedStatus') : !isWithinActiveTime(spot) ? t(language, 'outsideActiveTime') : spot.active ? t(language, 'activeStatus') : t(language, 'inactive')}
       </div>
-
-      {/* 고객 클레임 버튼 - 지갑 연결, 스팟 소유자 아님, 활성, 쿨다운 아님 */}
-      {canClaim && (
-        <div style={{ marginTop: 12 }}>
-          <button
-            className="primary btn-with-spinner"
-            onClick={handleClaim}
-            disabled={claiming}
-          >
-            {claiming && <Spinner size={16} />}
-            {claiming ? t(language, 'waitingForMetaMask') : `${spot.reward} ${t(language, 'getTONButton')}`}
-          </button>
-        </div>
-      )}
 
       {/* Owner redeposit - only show for owner role when wallet connected and is actual owner */}
       {role === 'owner' && isOwner && (

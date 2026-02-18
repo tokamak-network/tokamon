@@ -9,7 +9,6 @@ import {
   getSpot,
   getNextSpotId,
   getStampInfo,
-  claimSelf,
 } from './tokamon.js';
 
 function formatAddress(address) {
@@ -171,8 +170,7 @@ export function renderApp() {
           const spotId = Number(this.dataset.spotId);
           this.disabled = true;
           try {
-            await claimSelf(signer, spotId);
-            alert('클레임 완료!');
+            alert('직접 클레임은 더 이상 지원되지 않습니다. 텔레그램 또는 앱을 이용해주세요.');
             render(resolvedAddress);
           } catch (err) {
             alert(err.message || '클레임 실패');

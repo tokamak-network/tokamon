@@ -1,7 +1,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const blockchain = require('../blockchain');
-const { isValidEthAddress, haversineDistance, isWithinTimeRange } = require('../utils');
+const { isValidEthAddress, haversineDistance } = require('../utils');
 const { sendPushNotification, saveDeviceClaimEvent } = require('../firebase-admin');
 
 const COLLECT_RADIUS = 15;
@@ -80,31 +80,22 @@ module.exports = function(db) {
         });
       }
 
-      // 시간 확인
-      if (!isWithinTimeRange(spot.start_time, spot.end_time)) {
-        return res.status(400).json({ error: '활성 시간이 아닙니다' });
-      }
-
-      // 쿨다운 확인
-      if (!spot.allow_duplicate_claims) {
-        try {
-          const stampInfo = await blockchain.getDeviceStampInfo(spot_id, deviceHash);
-          if (stampInfo.cooldown_remaining > 0) {
-            const hours = Math.floor(stampInfo.cooldown_remaining / 3600);
-            const minutes = Math.floor((stampInfo.cooldown_remaining % 3600) / 60);
+      // 발행 가능 여부 확인 (시간 + 쿨다운 + 교차 쿨다운 + 잔액 — 컨트랙트에서 일괄 체크)
+      try {
+        const canClaim = await blockchain.canClaimDevice(spot_id, deviceHash);
+        if (!canClaim.claimable) {
+          if (canClaim.cooldown_remaining > 0) {
+            const hours = Math.floor(canClaim.cooldown_remaining / 3600);
+            const minutes = Math.floor((canClaim.cooldown_remaining % 3600) / 60);
             return res.status(400).json({
               error: `쿨다운 중입니다 (${hours}시간 ${minutes}분 남음)`,
-              cooldown_remaining: stampInfo.cooldown_remaining,
+              cooldown_remaining: canClaim.cooldown_remaining,
             });
           }
-        } catch (e) {
-          console.warn('getDeviceStampInfo 실패:', e.message);
+          return res.status(400).json({ error: '현재 발행할 수 없습니다 (시간 또는 잔액)' });
         }
-      }
-
-      // 잔액 확인
-      if (spot.remaining < spot.reward) {
-        return res.status(400).json({ error: '이 스팟의 TON이 소진되었습니다' });
+      } catch (e) {
+        console.warn('canClaimDevice 실패:', e.message);
       }
 
       // 인증 코드 생성

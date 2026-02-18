@@ -20,20 +20,18 @@ export const WEB_CLIENT_URL = process.env.EXPO_PUBLIC_WEB_CLIENT_URL
 
 // Contract ABI for client-side calls
 export const TOKAMON_ABI = [
-  'function createSpotSelf(uint256 reward, uint128 stampGoal, uint128 stampBonus, uint48 cooldown, bool allowDuplicateClaims, tuple(string name, string description, int96 lat, int96 lng, uint64 startTime, uint64 endTime) meta) payable returns (uint256)',
+  'function createSpotSelf(uint256 reward, uint128 stampGoal, uint128 stampBonus, uint48 cooldown, bool allowDuplicateClaims, tuple(string name, string description, int96 lat, int96 lng, uint64 startDate, uint64 endDate, uint16 dailyStartTime, uint16 dailyEndTime, int8 utcOffset) meta) payable returns (uint256)',
   'function redepositSelf(uint256 spotId) payable',
   'function updateCooldown(uint256 spotId, uint48 newCooldown) external',
   'function updateAllowDuplicateClaims(uint256 spotId, bool allow) external',
   'function getTelegramBalance(bytes32 telegramHash) external view returns (uint256)',
   'function getWalletLinkedTelegram(address wallet) external view returns (bytes32)',
-  'function claimSelf(uint256 spotId) external',
   'function claimTelegramToWallet(bytes32 telegramHash) external',
   'function nextSpotId() external view returns (uint256)',
-  'function getSpot(uint256) view returns (tuple(address creator, bool allowDuplicateClaims, uint48 cooldown, uint128 stampGoal, uint128 stampBonus, uint256 reward, uint256 remaining, int96 lat, int96 lng, uint64 startTime, uint64 endTime, string name, string description))',
+  'function getSpot(uint256) view returns (tuple(address creator, bool allowDuplicateClaims, uint48 cooldown, uint128 stampGoal, uint128 stampBonus, uint256 reward, uint256 remaining, int96 lat, int96 lng, uint64 startDate, uint64 endDate, uint16 dailyStartTime, uint16 dailyEndTime, int8 utcOffset, string name, string description))',
   'function getStampInfo(uint256 spotId, address user) view returns (uint256 stamps, uint256 goal, uint256 lastClaim, uint256 cooldownRemaining)',
   'function getDeviceBalance(bytes32 deviceHash) external view returns (uint256)',
   'function getWalletLinkedDevice(address wallet) external view returns (bytes32)',
   'function claimDeviceToWallet(bytes32 deviceHash) external',
   'event SpotCreated(uint256 indexed spotId, address indexed creator, uint256 reward, uint256 deposit, string name, string description, int96 lat, int96 lng)',
-  'event Claimed(uint256 indexed spotId, address indexed user, uint256 reward, uint256 bonus, uint256 stamp, uint256 timestamp)',
 ];

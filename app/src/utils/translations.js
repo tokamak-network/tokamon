@@ -19,10 +19,13 @@ export const translations = {
     settings: '설정',
 
     // 스팟 리스트
-    activeSpots: '활성 스팟',
+    activeSpots: '운영중',
     allSpots: '전체',
     noSpotsRegistered: '등록된 스팟이 없습니다',
-    noActiveSpots: '활성 스팟이 없습니다',
+    noActiveSpots: '운영중인 스팟이 없습니다',
+    inactiveSpots: '비활성',
+    noInactiveSpots: '비활성 스팟이 없습니다',
+    closedStatus: '종료됨',
     exhausted: '소진',
     active: '활성',
     inactive: '비활성',
@@ -109,6 +112,8 @@ export const translations = {
     activeStatus: '활성중',
     inactiveStatus: '비활성',
     remainingTON: '남은 TON',
+    activeTime: '운영 시간',
+    dailyHours: '영업 시간',
 
     // 디바이스 클레임
     deviceBalance: 'TON 적립금',
@@ -159,10 +164,13 @@ export const translations = {
     settings: 'Settings',
 
     // Spot List
-    activeSpots: 'Active',
+    activeSpots: 'Open',
     allSpots: 'All',
     noSpotsRegistered: 'No spots registered',
-    noActiveSpots: 'No active spots',
+    noActiveSpots: 'No open spots',
+    inactiveSpots: 'Inactive',
+    noInactiveSpots: 'No inactive spots',
+    closedStatus: 'Closed',
     exhausted: 'Exhausted',
     active: 'Active',
     inactive: 'Inactive',
@@ -249,6 +257,8 @@ export const translations = {
     activeStatus: 'Active',
     inactiveStatus: 'Inactive',
     remainingTON: 'Remaining TON',
+    activeTime: 'Active Time',
+    dailyHours: 'Daily Hours',
 
     // Device Claim
     deviceBalance: 'TON Balance',

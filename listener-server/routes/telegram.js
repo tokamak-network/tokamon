@@ -1,9 +1,9 @@
 const express = require('express');
 const blockchain = require('../blockchain');
-const { hashTelegramId, isValidTelegramUsername, isValidEthAddress, haversineDistance, isWithinTimeRange } = require('../utils');
+const { hashTelegramId, isValidTelegramUsername, isValidEthAddress, haversineDistance } = require('../utils');
 const { sendClaimNotification, sendVerificationCode, isBotEnabled } = require('../telegram-bot');
 
-const COLLECT_RADIUS = 50;
+const COLLECT_RADIUS = 15;
 
 // 인증 코드 생성 함수
 function generateVerifyCode() {
@@ -90,30 +90,18 @@ router.post('/validate-claim', async (req, res) => {
       });
     }
 
-    // 시간 확인
-    if (!isWithinTimeRange(spot.start_time, spot.end_time)) {
-      const fmt = (ts) => ts ? new Date(ts * 1000).toLocaleString() : '-';
-      return res.status(400).json({
-        error: `활성 시간이 아닙니다 (${fmt(spot.start_time)}~${fmt(spot.end_time)})`,
-      });
-    }
-
-    // 쿨다운 확인 (중복 발행이 허용되지 않은 경우에만)
-    if (!spot.allow_duplicate_claims) {
-      const stampInfo = await blockchain.getTelegramStampInfo(spot_id, telegramHash);
-      if (stampInfo.cooldown_remaining > 0) {
-        const hours = Math.floor(stampInfo.cooldown_remaining / 3600);
-        const minutes = Math.floor((stampInfo.cooldown_remaining % 3600) / 60);
+    // 발행 가능 여부 확인 (시간 + 쿨다운 + 교차 쿨다운 + 잔액 — 컨트랙트에서 일괄 체크)
+    const canClaim = await blockchain.canClaimTelegram(spot_id, telegramHash);
+    if (!canClaim.claimable) {
+      if (canClaim.cooldown_remaining > 0) {
+        const hours = Math.floor(canClaim.cooldown_remaining / 3600);
+        const minutes = Math.floor((canClaim.cooldown_remaining % 3600) / 60);
         return res.status(400).json({
           error: `쿨다운 중입니다 (${hours}시간 ${minutes}분 남음)`,
-          cooldown_remaining: stampInfo.cooldown_remaining,
+          cooldown_remaining: canClaim.cooldown_remaining,
         });
       }
-    }
-
-    // 잔액 확인
-    if (spot.remaining < spot.reward) {
-      return res.status(400).json({ error: '이 스팟의 TON이 소진되었습니다' });
+      return res.status(400).json({ error: '현재 발행할 수 없습니다 (시간 또는 잔액)' });
     }
 
     res.json({ valid: true });

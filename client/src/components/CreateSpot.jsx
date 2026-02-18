@@ -6,32 +6,30 @@ import { t } from '../translations';
 const MIN_DEPOSIT = 10;
 
 export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated, language = 'ko', showToast }) {
-  const COOLDOWN_OPTIONS = [
-    { label: t(language, 'oneHour'), value: 3600 },
-    { label: t(language, 'sixHours'), value: 21600 },
-    { label: t(language, 'twelveHours'), value: 43200 },
-    { label: t(language, 'twentyFourHours'), value: 86400 },
-  ];
-
-  // 기본값: 지금부터 24시간
-  const toLocalDatetime = (date) => {
+  // 기본값: 오늘 ~ 내일, 영업시간 09:00~18:00
+  const toLocalDate = (date) => {
     const d = new Date(date);
     d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-    return d.toISOString().slice(0, 16);
+    return d.toISOString().slice(0, 10);
   };
   const now = new Date();
-  const tomorrow = new Date(now.getTime() + 86400000);
+  const nextMonth = new Date(now.getTime() + 30 * 86400000);
+  const browserUtcOffset = -Math.round(now.getTimezoneOffset() / 60);
 
   const [form, setForm] = useState({
     name: '',
     description: '',
-    start_time: toLocalDatetime(now),
-    end_time: toLocalDatetime(tomorrow),
+    start_date: toLocalDate(now),
+    end_date: toLocalDate(nextMonth),
+    daily_start_time: '09:00',
+    daily_end_time: '18:00',
+    utc_offset: String(browserUtcOffset),
     deposit: '30',
     reward: '0.5',
     stamp_goal: '10',
     stamp_bonus: '5',
     cooldown: '86400',
+    cooldown_hours: '24',
     allow_duplicate_claims: false,
   });
 
@@ -42,13 +40,6 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
   const stampGoal = Number(form.stamp_goal);
   const stampBonus = Number(form.stamp_bonus);
 
-  const costPerLoyal = reward > 0 && stampGoal > 0
-    ? (reward * stampGoal) + stampBonus
-    : 0;
-  const loyalCount = costPerLoyal > 0 ? Math.floor(deposit / costPerLoyal) : 0;
-  const totalVisits = reward > 0 ? Math.floor(deposit / reward) : 0;
-
-  const cooldownLabel = COOLDOWN_OPTIONS.find(o => o.value === Number(form.cooldown))?.label || '';
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -63,6 +54,15 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
 
     setSubmitting(true);
     try {
+      // 시간 파싱: HH:MM → 자정 기준 분
+      const parseTimeToMinutes = (timeStr) => {
+        if (!timeStr) return 0;
+        const [h, m] = timeStr.split(':').map(Number);
+        return h * 60 + m;
+      };
+      const dailyStart = parseTimeToMinutes(form.daily_start_time);
+      const dailyEnd = parseTimeToMinutes(form.daily_end_time);
+
       const spotId = await createSpotSelf(
         deposit,
         reward,
@@ -75,8 +75,11 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
           description: form.description.trim(),
           lat: pinPos.lat,
           lng: pinPos.lng,
-          startTime: form.start_time ? Math.floor(new Date(form.start_time).getTime() / 1000) : 0,
-          endTime: form.end_time ? Math.floor(new Date(form.end_time).getTime() / 1000) : 0,
+          startDate: form.start_date ? Math.floor(new Date(form.start_date + 'T00:00:00Z').getTime() / 1000) : 0,
+          endDate: form.end_date ? Math.floor(new Date(form.end_date + 'T23:59:59Z').getTime() / 1000) : 0,
+          dailyStartTime: dailyStart,
+          dailyEndTime: dailyEnd,
+          utcOffset: Number(form.utc_offset) || 0,
         }
       );
 
@@ -110,14 +113,28 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
 
         <div className="time-row">
           <div>
-            <label>{t(language, 'openingTime')}</label>
-            <input type="datetime-local" value={form.start_time} onChange={update('start_time')} />
+            <label>{t(language, 'startDate')}</label>
+            <input type="date" value={form.start_date} onChange={update('start_date')} />
           </div>
           <div>
-            <label>{t(language, 'closingTime')}</label>
-            <input type="datetime-local" value={form.end_time} onChange={update('end_time')} />
+            <label>{t(language, 'endDate')}</label>
+            <input type="date" value={form.end_date} onChange={update('end_date')} />
           </div>
         </div>
+
+        <div className="time-row">
+          <div>
+            <label>{t(language, 'dailyOpenTime')}</label>
+            <input type="time" value={form.daily_start_time} onChange={update('daily_start_time')} />
+          </div>
+          <div>
+            <label>{t(language, 'dailyCloseTime')}</label>
+            <input type="time" value={form.daily_end_time} onChange={update('daily_end_time')} />
+          </div>
+        </div>
+        <p style={{ color: '#888', fontSize: 12, marginTop: 2 }}>
+          UTC{browserUtcOffset >= 0 ? '+' : ''}{browserUtcOffset} · {t(language, 'dailyHoursDesc')}
+        </p>
 
         <div className="time-row">
           <div>
@@ -146,17 +163,19 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
         </div>
 
         <label>{t(language, 'revisitCooldown')}</label>
-        <div className="cooldown-options">
-          {COOLDOWN_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              className={`cooldown-option ${Number(form.cooldown) === opt.value ? 'selected' : ''}`}
-              onClick={() => setForm({ ...form, cooldown: String(opt.value) })}
-            >
-              {opt.label}
-            </button>
-          ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <input
+            type="number"
+            value={form.cooldown_hours}
+            onChange={(e) => {
+              const hours = e.target.value;
+              setForm({ ...form, cooldown_hours: hours, cooldown: String(Math.round(Number(hours) * 3600)) });
+            }}
+            min="0"
+            step="0.5"
+            style={{ width: 100 }}
+          />
+          <span style={{ color: '#aaa', fontSize: 13 }}>{t(language, 'hoursUnit')}</span>
         </div>
 
         <div style={{ marginTop: 16, marginBottom: 8 }}>
@@ -174,23 +193,6 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
           </p>
         </div>
 
-        {/* Cost Summary */}
-        {deposit >= MIN_DEPOSIT && reward > 0 && (
-          <div className="cost-summary">
-            <div className="cost-row">
-              <span>{t(language, 'totalPossibleVisits')}</span>
-              <span>{totalVisits}{t(language, 'visits')}</span>
-            </div>
-            <div className="cost-row">
-              <span>{t(language, 'costPerLoyal')}</span>
-              <span>{costPerLoyal} TON ({stampGoal}{t(language, 'visits')} × {reward} + {t(language, 'bonus')} {stampBonus})</span>
-            </div>
-            <div className="cost-row highlight">
-              <span>{t(language, 'possibleLoyalCustomers')}</span>
-              <span>{loyalCount}{t(language, 'people')}</span>
-            </div>
-          </div>
-        )}
         {deposit < MIN_DEPOSIT && (
           <p style={{ color: '#f87171', fontSize: 13, marginTop: 8 }}>
             {t(language, 'minimumDeposit')}: {MIN_DEPOSIT} TON

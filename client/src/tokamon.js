@@ -57,17 +57,6 @@ export async function getNextSpotId() {
 
 /**
  * @param {ethers.Signer} signer
- * @param {bigint|number} spotId
- */
-export async function claimSelf(signer, spotId) {
-  if (!tokamonContract) throw new Error('Tokamon이 초기화되지 않았습니다.');
-  const contractWithSigner = tokamonContract.connect(signer);
-  const tx = await contractWithSigner.claimSelf(spotId);
-  await tx.wait();
-}
-
-/**
- * @param {ethers.Signer} signer
  * @param {object} params
  */
 export async function createSpotSelf(signer, params) {
@@ -78,8 +67,11 @@ export async function createSpotSelf(signer, params) {
     description: params.description || '',
     lat: params.lat ?? 0,
     lng: params.lng ?? 0,
-    startTime: params.startTime || 0,
-    endTime: params.endTime || 0,
+    startDate: params.startDate || 0,
+    endDate: params.endDate || 0,
+    dailyStartTime: params.dailyStartTime || 0,
+    dailyEndTime: params.dailyEndTime || 0,
+    utcOffset: params.utcOffset || 0,
   };
   const contractWithSigner = tokamonContract.connect(signer);
   const tx = await contractWithSigner.createSpotSelf(

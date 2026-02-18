@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { ethers } = require('ethers');
 console.log('[Blockchain] ethers 버전:', ethers.version, '| 경로:', require.resolve('ethers'));
-const { syncSpotToFirestore, saveClaimEvent, getTelegramUsernameByHash, NETWORK_ID } = require('./firebase-admin');
+const { syncSpotToFirestore, saveTelegramClaimEvent, syncTelegramBalance, saveWalletTelegramLink, getTelegramUsernameByHash, syncDeviceBalance, NETWORK_ID } = require('./firebase-admin');
 const { getNetwork, getContracts, DEFAULT_NETWORK } = require('../shared/networks');
 
 // 네트워크 설정: NETWORK 환경변수 → shared/networks.js에서 로드
@@ -165,20 +165,6 @@ async function init() {
               await syncSpotToFirestore(id, meta);
             }
             recoveredCount++;
-          } else if (parsed.name === 'Claimed') {
-            const [spotId, user, reward, bonus, stamp, timestamp] = parsed.args;
-            await saveClaimEvent({
-              spotId: Number(spotId), user,
-              reward: fromWei(reward), bonus: fromWei(bonus),
-              stamp: Number(stamp), timestamp,
-            });
-            const id = Number(spotId);
-            const meta = await fetchFullSpotFromContract(id);
-            if (meta) {
-              spotMetadata[id] = meta;
-              await syncSpotToFirestore(id, meta);
-            }
-            recoveredCount++;
           } else if (parsed.name === 'TelegramClaimed') {
             recoveredCount++;
           }
@@ -253,34 +239,30 @@ async function init() {
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
   });
 
-  console.log('[이벤트 등록] Claimed 리스너 등록');
-  contract.on('Claimed', async (spotId, user, reward, bonus, stamp, timestamp, ev) => {
-    const id = Number(spotId);
-    const blockNum = ev?.log?.blockNumber ?? '?';
-    console.log(`[이벤트 수신] Claimed | spotId=${id} user=${String(user).slice(0,10)}... reward=${fromWei(reward)} bonus=${fromWei(bonus)} stamp=${Number(stamp)} block=${blockNum}`);
-    await saveClaimEvent({
-      spotId: id,
-      user,
-      reward: fromWei(reward),
-      bonus: fromWei(bonus),
-      stamp: Number(stamp),
-      timestamp,
-    });
-    const meta = await fetchFullSpotFromContract(id);
-    if (meta) {
-      spotMetadata[id] = meta;
-      saveMetadata();
-      await syncSpotToFirestore(id, meta);
-    }
-    if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
-  });
-
   console.log('[이벤트 등록] TelegramClaimed 리스너 등록');
   contract.on('TelegramClaimed', async (spotId, telegramHash, reward, bonus, stamp, timestamp, ev) => {
     const id = Number(spotId);
     const hashHex = telegramHash.slice(2); // 0x 제거
     const blockNum = ev?.log?.blockNumber ?? '?';
     console.log(`[이벤트 수신] TelegramClaimed | spotId=${id} hash=${hashHex.slice(0,10)}... reward=${fromWei(reward)} bonus=${fromWei(bonus)} stamp=${Number(stamp)} block=${blockNum}`);
+
+    // Firestore에 텔레그램 클레임 이벤트 저장 (히스토리용)
+    await saveTelegramClaimEvent({
+      spotId: id,
+      telegramHash: hashHex,
+      reward: fromWei(reward),
+      bonus: fromWei(bonus),
+      stamp: Number(stamp),
+      timestamp,
+    });
+
+    // 컨트랙트에서 실제 잔액 조회 → Firestore 동기화
+    try {
+      const bal = await contract.getTelegramBalance(telegramHash);
+      await syncTelegramBalance(hashHex, fromWei(bal));
+    } catch (e) {
+      console.error('[TelegramClaimed] 잔액 동기화 실패:', e.message);
+    }
 
     // 스팟 메타데이터 갱신 (remaining 등 최신 상태 반영)
     const meta = await fetchFullSpotFromContract(id);
@@ -329,6 +311,14 @@ async function init() {
       await syncSpotToFirestore(id, meta);
     }
 
+    // 컨트랙트에서 실제 잔액 조회 → Firestore 동기화
+    try {
+      const bal = await contract.getDeviceBalance(deviceHash);
+      await syncDeviceBalance(hashHex, fromWei(bal));
+    } catch (e) {
+      console.error('[DeviceClaimed] 잔액 동기화 실패:', e.message);
+    }
+
     if (deviceClaimedCallback) {
       try {
         const spot = spotMetadata[id] || {};
@@ -363,7 +353,47 @@ async function init() {
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
   });
 
-  console.log('[이벤트 등록 완료] 9개 이벤트 리스너 등록됨');
+  console.log('[이벤트 등록] TelegramWithdrawn 리스너 등록');
+  contract.on('TelegramWithdrawn', async (telegramHash, wallet, amount, ev) => {
+    const hashHex = telegramHash.slice(2);
+    const blockNum = ev?.log?.blockNumber ?? '?';
+    console.log(`[이벤트 수신] TelegramWithdrawn | hash=${hashHex.slice(0,10)}... wallet=${String(wallet).slice(0,10)}... amount=${fromWei(amount)} block=${blockNum}`);
+    // 컨트랙트에서 실제 잔액 조회 → Firestore 동기화 (출금 후 0이 되어야 함)
+    try {
+      const bal = await contract.getTelegramBalance(telegramHash);
+      await syncTelegramBalance(hashHex, fromWei(bal));
+    } catch (e) {
+      console.error('[TelegramWithdrawn] 잔액 동기화 실패:', e.message);
+    }
+    if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
+  });
+
+  console.log('[이벤트 등록] TelegramLinked 리스너 등록');
+  contract.on('TelegramLinked', async (telegramHash, oldWallet, newWallet, transferredAmount, ev) => {
+    const hashHex = telegramHash.slice(2);
+    const blockNum = ev?.log?.blockNumber ?? '?';
+    console.log(`[이벤트 수신] TelegramLinked | hash=${hashHex.slice(0,10)}... wallet=${String(newWallet).slice(0,10)}... block=${blockNum}`);
+    // Firestore에 지갑-텔레그램 연결 저장
+    await saveWalletTelegramLink(String(newWallet), hashHex);
+    if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
+  });
+
+  console.log('[이벤트 등록] DeviceWithdrawn 리스너 등록');
+  contract.on('DeviceWithdrawn', async (deviceHash, wallet, amount, ev) => {
+    const hashHex = deviceHash.slice(2);
+    const blockNum = ev?.log?.blockNumber ?? '?';
+    console.log(`[이벤트 수신] DeviceWithdrawn | hash=${hashHex.slice(0,10)}... wallet=${String(wallet).slice(0,10)}... amount=${fromWei(amount)} block=${blockNum}`);
+    // 컨트랙트에서 실제 잔액 조회 → Firestore 동기화
+    try {
+      const bal = await contract.getDeviceBalance(deviceHash);
+      await syncDeviceBalance(hashHex, fromWei(bal));
+    } catch (e) {
+      console.error('[DeviceWithdrawn] 잔액 동기화 실패:', e.message);
+    }
+    if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
+  });
+
+  console.log('[이벤트 등록 완료] 12개 이벤트 리스너 등록됨');
 }
 
 // ─── 컨트랙트 조회 함수들 ───
@@ -375,7 +405,8 @@ async function fetchFullSpotFromContract(spotId) {
       : await contract.spots(spotId);
     // Spot struct field order:
     // 0:creator 1:allowDuplicateClaims 2:cooldown 3:stampGoal 4:stampBonus
-    // 5:reward 6:remaining 7:lat 8:lng 9:startTime 10:endTime 11:name 12:description
+    // 5:reward 6:remaining 7:lat 8:lng 9:startDate 10:endDate
+    // 11:dailyStartTime 12:dailyEndTime 13:utcOffset 14:name 15:description
     const reward = s.reward ?? s[5];
     if (!s || reward === 0n) return null;
     const creator = s.creator ?? s[0];
@@ -386,10 +417,13 @@ async function fetchFullSpotFromContract(spotId) {
     const remaining = s.remaining ?? s[6];
     const latRaw = s.lat ?? s[7];
     const lngRaw = s.lng ?? s[8];
-    const startTime = s.startTime ?? s[9];
-    const endTime = s.endTime ?? s[10];
-    const name = s.name ?? s[11];
-    const description = s.description ?? s[12];
+    const startDate = s.startDate ?? s[9];
+    const endDate = s.endDate ?? s[10];
+    const dailyStartTime = s.dailyStartTime ?? s[11];
+    const dailyEndTime = s.dailyEndTime ?? s[12];
+    const utcOffset = s.utcOffset ?? s[13];
+    const name = s.name ?? s[14];
+    const description = s.description ?? s[15];
     const lat = Number(latRaw) / COORD_SCALE;
     const lng = Number(lngRaw) / COORD_SCALE;
     if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
@@ -406,8 +440,11 @@ async function fetchFullSpotFromContract(spotId) {
       description: description ? String(description) : '',
       lat,
       lng,
-      start_time: Number(startTime),
-      end_time: Number(endTime),
+      start_time: Number(startDate),
+      end_time: Number(endDate),
+      daily_start_time: Number(dailyStartTime || 0),
+      daily_end_time: Number(dailyEndTime || 0),
+      utc_offset: Number(utcOffset || 0),
     };
   } catch (e) {
     console.error('[fetchFullSpotFromContract]', spotId, e.message);
@@ -474,32 +511,6 @@ async function getStampInfo(spotId, userAddress) {
   };
 }
 
-async function getClaimHistory(userAddress) {
-  const filter = contract.filters.Claimed(null, toAddr(userAddress));
-  const events = await contract.queryFilter(filter);
-
-  const history = await Promise.all(
-    events.map(async (ev) => {
-      const { spotId, user, reward, bonus, stamp, timestamp } = ev.args;
-      let spotName = '';
-      try {
-        const spot = await getSpot(Number(spotId));
-        spotName = spot.name;
-      } catch (_) {}
-      return {
-        spot_id: Number(spotId),
-        user_address: user,
-        reward: fromWei(reward),
-        bonus: fromWei(bonus),
-        stamp: Number(stamp),
-        spot_name: spotName,
-        created_at: new Date(Number(timestamp) * 1000).toISOString(),
-      };
-    })
-  );
-
-  return history.reverse();
-}
 
 // ─── Faucet ───
 
@@ -579,12 +590,13 @@ async function claimToTelegram(spotId, telegramHash) {
 // ─── 핸드폰/키오스크 관련 ───
 
 async function getPhoneBalance(phoneHash) {
-  const bal = await contract.getPhoneBalance('0x' + phoneHash);
+  // Phone은 Device로 대체됨 — getClaimInfo로 잔액 조회 불가, getDeviceBalance 사용
+  const bal = await contract.getDeviceBalance('0x' + phoneHash);
   return fromWei(bal);
 }
 
 async function getPhoneStampInfo(spotId, phoneHash) {
-  const info = await contract.getPhoneStampInfo(spotId, '0x' + phoneHash);
+  const info = await contract.getClaimInfo(spotId, '0x' + phoneHash);
   return {
     stamps: Number(info.stamps),
     goal: Number(info.goal),
@@ -627,7 +639,7 @@ async function getDeviceBalance(deviceHash) {
 
 async function getDeviceStampInfo(spotId, deviceHash) {
   const fullHash = '0x' + deviceHash;
-  const info = await contract.getDeviceStampInfo(spotId, fullHash);
+  const info = await contract.getClaimInfo(spotId, fullHash);
   return {
     stamps: Number(info.stamps),
     goal: Number(info.goal),
@@ -660,6 +672,24 @@ async function linkDeviceToWallet(deviceHash, walletAddress) {
   };
 }
 
+// ─── 발행 가능 여부 조회 (교차 쿨다운 포함) ───
+
+async function canClaimTelegram(spotId, telegramHash) {
+  const result = await contract.canClaimTelegram(spotId, '0x' + telegramHash);
+  return {
+    claimable: result.claimable,
+    cooldown_remaining: Number(result.cooldownRemaining),
+  };
+}
+
+async function canClaimDevice(spotId, deviceHash) {
+  const result = await contract.canClaimDevice(spotId, '0x' + deviceHash);
+  return {
+    claimable: result.claimable,
+    cooldown_remaining: Number(result.cooldownRemaining),
+  };
+}
+
 // ─── 스팟 설정 ───
 
 async function updateAllowDuplicateClaims(spotId, allow) {
@@ -676,7 +706,6 @@ module.exports = {
   getAllSpots,
   getBalance,
   getStampInfo,
-  getClaimHistory,
   sendETH,
   getTelegramBalance,
   getTelegramStampInfo,
@@ -690,5 +719,7 @@ module.exports = {
   getDeviceStampInfo,
   getDeviceLinkedWallet,
   linkDeviceToWallet,
+  canClaimTelegram,
+  canClaimDevice,
   updateAllowDuplicateClaims,
 };

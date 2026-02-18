@@ -137,6 +137,21 @@ export default function SpotDetailSheet({ spot, userPos, wallet, pushToken, rece
         )}
       </View>
 
+      {/* Active time */}
+      {(spot.start_time > 0 || spot.end_time > 0 || spot.daily_start_time > 0 || spot.daily_end_time > 0) && (
+        <View style={styles.remainingBar}>
+          <Text style={styles.remainingLabel}>{t(language, 'activeTime')}</Text>
+          <Text style={styles.remainingValue}>
+            {spot.start_time || spot.end_time
+              ? `${spot.start_time ? (() => { const d = new Date(spot.start_time * 1000); return `${d.getUTCFullYear()}.${d.getUTCMonth() + 1}.${d.getUTCDate()}`; })() : ''} ~ ${spot.end_time ? (() => { const d = new Date(spot.end_time * 1000); return `${d.getUTCFullYear()}.${d.getUTCMonth() + 1}.${d.getUTCDate()}`; })() : ''}`
+              : t(language, 'alwaysOpen')}
+            {(spot.daily_start_time > 0 || spot.daily_end_time > 0)
+              ? ` | ${String(Math.floor(spot.daily_start_time / 60)).padStart(2, '0')}:${String(spot.daily_start_time % 60).padStart(2, '0')}~${String(Math.floor(spot.daily_end_time / 60)).padStart(2, '0')}:${String(spot.daily_end_time % 60).padStart(2, '0')}`
+              : ''}
+          </Text>
+        </View>
+      )}
+
       {/* Remaining TON bar */}
       <View style={styles.remainingBar}>
         <Text style={styles.remainingLabel}>{t(language, 'remainingTON')}</Text>
@@ -158,7 +173,6 @@ export default function SpotDetailSheet({ spot, userPos, wallet, pushToken, rece
         spot={spot}
         distance={distance}
         userPos={userPos}
-        wallet={wallet}
         pushToken={pushToken}
         receivedCode={receivedCode}
         isOwner={isOwner}

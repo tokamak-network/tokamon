@@ -14,7 +14,11 @@ vi.mock('react-leaflet', () => {
     Popup: ({ children }) => <div data-testid="popup">{children}</div>,
     Circle: () => <div data-testid="circle" />,
     useMapEvents: () => null,
-    useMap: () => ({ flyTo: flyToMock }),
+    useMap: () => ({
+      flyTo: flyToMock,
+      invalidateSize: vi.fn(),
+      getContainer: () => document.createElement('div'),
+    }),
   };
 });
 
@@ -23,14 +27,26 @@ vi.mock('leaflet', () => ({
     DivIcon: class DivIcon {
       constructor() {}
     },
+    Icon: class Icon {
+      constructor() {}
+    },
   },
   DivIcon: class DivIcon {
     constructor() {}
   },
+  Icon: class Icon {
+    constructor() {}
+  },
 }));
 
+// t(lang, key) → key 반환
 vi.mock('../translations', () => ({
   t: (lang, key) => key,
+}));
+
+vi.mock('../spotUtils', () => ({
+  isWithinActiveTime: () => true,
+  isSpotClosed: () => false,
 }));
 
 import Map from './Map';
@@ -52,31 +68,31 @@ describe('Map — GPS 상태 표시', () => {
     flyToMock.mockClear();
   });
 
-  it('gpsStatus="loading"일 때 로딩 배너를 표시', () => {
+  it('gpsStatus="loading"일 때 findingLocation 키를 표시', () => {
     render(<Map {...defaultProps} gpsStatus="loading" />);
-    expect(screen.getByText('위치를 찾고 있습니다...')).toBeInTheDocument();
+    expect(screen.getByText('findingLocation')).toBeInTheDocument();
   });
 
-  it('gpsStatus="denied"일 때 권한 거부 배너를 표시', () => {
+  it('gpsStatus="denied"일 때 locationDenied 키를 표시', () => {
     render(<Map {...defaultProps} gpsStatus="denied" />);
-    expect(screen.getByText(/위치 권한이 거부되었습니다/)).toBeInTheDocument();
+    expect(screen.getByText('locationDenied')).toBeInTheDocument();
   });
 
-  it('gpsStatus="unavailable"일 때 불가 배너를 표시', () => {
+  it('gpsStatus="unavailable"일 때 locationUnavailable 키를 표시', () => {
     render(<Map {...defaultProps} gpsStatus="unavailable" />);
-    expect(screen.getByText('위치 서비스를 사용할 수 없습니다.')).toBeInTheDocument();
+    expect(screen.getByText('locationUnavailable')).toBeInTheDocument();
   });
 
   it('gpsStatus="active"일 때 어떤 배너도 표시하지 않음', () => {
     render(<Map {...defaultProps} gpsStatus="active" />);
-    expect(screen.queryByText('위치를 찾고 있습니다...')).not.toBeInTheDocument();
-    expect(screen.queryByText(/위치 권한이 거부되었습니다/)).not.toBeInTheDocument();
-    expect(screen.queryByText('위치 서비스를 사용할 수 없습니다.')).not.toBeInTheDocument();
+    expect(screen.queryByText('findingLocation')).not.toBeInTheDocument();
+    expect(screen.queryByText('locationDenied')).not.toBeInTheDocument();
+    expect(screen.queryByText('locationUnavailable')).not.toBeInTheDocument();
   });
 
-  it('createMode일 때 생성 모드 배너를 표시', () => {
+  it('createMode일 때 tapMapToSelectLocation 키를 표시', () => {
     render(<Map {...defaultProps} createMode={true} />);
-    expect(screen.getByText('지도를 탭하여 스팟 위치를 선택하세요')).toBeInTheDocument();
+    expect(screen.getByText('tapMapToSelectLocation')).toBeInTheDocument();
   });
 });
 
@@ -96,19 +112,19 @@ describe('Map — LocateButton', () => {
     flyToMock.mockClear();
   });
 
-  it('userPos가 없으면 내 위치로 버튼이 없음', () => {
+  it('userPos가 없으면 locate 버튼(◎)이 없음', () => {
     render(<Map {...defaultProps} userPos={null} />);
-    expect(screen.queryByTitle('내 위치로')).not.toBeInTheDocument();
+    expect(screen.queryByText('◎')).not.toBeInTheDocument();
   });
 
-  it('userPos가 있으면 내 위치로 버튼이 표시됨', () => {
+  it('userPos가 있으면 locate 버튼(◎)이 표시됨', () => {
     render(<Map {...defaultProps} userPos={{ lat: 37.5, lng: 127.0 }} />);
-    expect(screen.getByTitle('내 위치로')).toBeInTheDocument();
+    expect(screen.getByText('◎')).toBeInTheDocument();
   });
 
-  it('내 위치로 버튼 클릭 시 flyTo가 호출됨', () => {
+  it('locate 버튼 클릭 시 flyTo가 호출됨', () => {
     render(<Map {...defaultProps} userPos={{ lat: 37.5, lng: 127.0 }} />);
-    fireEvent.click(screen.getByTitle('내 위치로'));
+    fireEvent.click(screen.getByText('◎'));
     expect(flyToMock).toHaveBeenCalledWith([37.5, 127.0], 16);
   });
 });

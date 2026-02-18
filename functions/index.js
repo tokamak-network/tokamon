@@ -165,15 +165,37 @@ app.get('/api/contract', async (req, res) => {
   }
 });
 
-// 시간 범위 체크 (start_time, end_time: Unix timestamp, 0 = 제한 없음)
-function isWithinTimeRange(startTime, endTime) {
-  const start = Number(startTime || 0);
-  const end = Number(endTime || 0);
-  if (start === 0 && end === 0) return true;
+// 활성 시간 체크 (날짜 범위 + 일별 영업시간)
+// NOTE: 정규 구현체는 listener-server/utils.js — 로직 변경 시 양쪽 모두 업데이트할 것
+function isWithinActiveTime(startDate, endDate, dailyStartTime, dailyEndTime, utcOffset) {
+  const start = Number(startDate || 0);
+  const end = Number(endDate || 0);
+  const dailyStart = Number(dailyStartTime || 0);
+  const dailyEnd = Number(dailyEndTime || 0);
+  const offset = Number(utcOffset || 0);
+
   const now = Math.floor(Date.now() / 1000);
+
+  // 1단계: 날짜 범위 체크
   if (start > 0 && now < start) return false;
   if (end > 0 && now > end) return false;
-  return true;
+
+  // 2단계: 일별 영업시간 체크 (둘 다 0이면 제한 없음)
+  if (dailyStart === 0 && dailyEnd === 0) return true;
+
+  // 현재 시각을 UTC 오프셋 적용하여 자정 기준 분으로 변환
+  const nowMs = Date.now();
+  const localMs = nowMs + offset * 3600 * 1000;
+  const localDate = new Date(localMs);
+  const currentMinutes = localDate.getUTCHours() * 60 + localDate.getUTCMinutes();
+
+  if (dailyStart < dailyEnd) {
+    // 일반 (예: 09:00~18:00)
+    return currentMinutes >= dailyStart && currentMinutes < dailyEnd;
+  } else {
+    // 야간 영업 (예: 22:00~06:00)
+    return currentMinutes >= dailyStart || currentMinutes < dailyEnd;
+  }
 }
 
 // GET /api/spots — 스팟 목록 + active (listener-server 호환)
@@ -186,7 +208,7 @@ app.get('/api/spots', async (req, res) => {
       .sort((a, b) => a.id - b.id)
       .map((s) => ({
         ...s,
-        active: (s.remaining || 0) > 0 && isWithinTimeRange(s.start_time, s.end_time),
+        active: (s.remaining || 0) > 0 && isWithinActiveTime(s.start_time, s.end_time, s.daily_start_time, s.daily_end_time, s.utc_offset),
       }));
     res.json(spots);
   } catch (e) {
@@ -251,12 +273,21 @@ app.get('/api/stamps/:spotId', async (req, res) => {
     );
     const lastClaim = claims[0];
 
+    // 쿨다운 계산
+    const cooldownSeconds = spotData.cooldown || 0;
+    let cooldownRemaining = 0;
+    if (cooldownSeconds > 0 && lastClaim && lastClaim.created_at) {
+      const lastClaimTime = Math.floor(new Date(lastClaim.created_at).getTime() / 1000);
+      const now = Math.floor(Date.now() / 1000);
+      cooldownRemaining = Math.max(0, cooldownSeconds - (now - lastClaimTime));
+    }
+
     res.json({
       spot_id: Number(spotId),
       stamps: claims.length % goal,
       goal,
       last_claim: lastClaim ? lastClaim.created_at : null,
-      cooldown_remaining: 0,
+      cooldown_remaining: cooldownRemaining,
     });
   } catch (e) {
     console.error(e);
@@ -333,11 +364,47 @@ app.post('/api/telegram/validate-claim', async (req, res) => {
       });
     }
 
-    if (!isWithinTimeRange(spot.start_time, spot.end_time)) {
+    if (!isWithinActiveTime(spot.start_time, spot.end_time, spot.daily_start_time, spot.daily_end_time, spot.utc_offset)) {
       const fmt = (ts) => ts ? new Date(ts * 1000).toLocaleString() : '-';
       return res.status(400).json({
         error: `활성 시간이 아닙니다 (${fmt(spot.start_time)}~${fmt(spot.end_time)})`,
       });
+    }
+
+    // 클레임 이력 확인
+    const telegramHash = hashTelegramId(telegram_username);
+    const claimSnap = await db.collection(col(req, 'claim_events'))
+      .where('telegram_hash', '==', telegramHash)
+      .where('spot_id', '==', Number(spot_id))
+      .get();
+
+    if (!claimSnap.empty) {
+      // 중복발행 불가면 1인 1회만
+      if (!spot.allow_duplicate_claims) {
+        return res.status(400).json({ error: '이미 발행 받은 스팟입니다' });
+      }
+
+      // 쿨다운은 항상 적용
+      const claims = claimSnap.docs.map((d) => d.data()).sort((a, b) =>
+        new Date(b.created_at || 0) - new Date(a.created_at || 0)
+      );
+      const lastClaim = claims[0];
+      const cooldownSeconds = spot.cooldown || 0;
+
+      if (cooldownSeconds > 0 && lastClaim && lastClaim.created_at) {
+        const lastClaimTime = Math.floor(new Date(lastClaim.created_at).getTime() / 1000);
+        const now = Math.floor(Date.now() / 1000);
+        const cooldownRemaining = Math.max(0, cooldownSeconds - (now - lastClaimTime));
+
+        if (cooldownRemaining > 0) {
+          const hours = Math.floor(cooldownRemaining / 3600);
+          const minutes = Math.floor((cooldownRemaining % 3600) / 60);
+          return res.status(400).json({
+            error: `쿨다운 중입니다 (${hours}시간 ${minutes}분 남음)`,
+            cooldown_remaining: cooldownRemaining,
+          });
+        }
+      }
     }
 
     if ((spot.remaining || 0) < (spot.reward || 0)) {
@@ -351,7 +418,7 @@ app.post('/api/telegram/validate-claim', async (req, res) => {
   }
 });
 
-// POST /api/telegram/balance — 텔레그램 잔액 조회 (Firestore claim_events 기반)
+// POST /api/telegram/balance — 텔레그램 잔액 조회 (컨트랙트 동기화 잔액)
 app.post('/api/telegram/balance', async (req, res) => {
   try {
     const { telegram_username } = req.body;
@@ -362,15 +429,9 @@ app.post('/api/telegram/balance', async (req, res) => {
 
     const telegramHash = hashTelegramId(telegram_username);
 
-    const snap = await db.collection(col(req, 'claim_events'))
-      .where('telegram_hash', '==', telegramHash)
-      .get();
-
-    let balance = 0;
-    snap.docs.forEach((d) => {
-      const data = d.data();
-      balance += (data.reward || 0) + (data.bonus || 0);
-    });
+    // listener-server가 컨트랙트에서 조회하여 동기화한 잔액 읽기
+    const balDoc = await db.collection(col(req, 'telegram_balances')).doc(telegramHash).get();
+    const balance = balDoc.exists ? (balDoc.data().balance || 0) : 0;
 
     res.json({ balance });
   } catch (err) {
@@ -404,11 +465,20 @@ app.post('/api/telegram/stamp-info', async (req, res) => {
     );
     const lastClaim = claims[0];
 
+    // 쿨다운 계산
+    const cooldownSeconds = spotData.cooldown || 0;
+    let cooldownRemaining = 0;
+    if (cooldownSeconds > 0 && lastClaim && lastClaim.created_at) {
+      const lastClaimTime = Math.floor(new Date(lastClaim.created_at).getTime() / 1000);
+      const now = Math.floor(Date.now() / 1000);
+      cooldownRemaining = Math.max(0, cooldownSeconds - (now - lastClaimTime));
+    }
+
     res.json({
       stamps: claims.length % goal,
       goal,
       last_claim: lastClaim ? lastClaim.created_at : null,
-      cooldown_remaining: 0,
+      cooldown_remaining: cooldownRemaining,
     });
   } catch (err) {
     console.error('스탬프 정보 조회 에러:', err.message);

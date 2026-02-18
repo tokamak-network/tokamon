@@ -48,11 +48,6 @@ export async function redepositSpot(spotId, creatorAddress, amount) {
   return parseJson(res);
 }
 
-export async function getClaimHistory(userAddress) {
-  const res = await fetch(withNetwork(`${API}/claim/history?user_address=${userAddress}`));
-  return parseJson(res);
-}
-
 export async function getStampInfo(spotId, userAddress) {
   const res = await fetch(withNetwork(`${API}/stamps/${spotId}?user_address=${userAddress}`));
   return parseJson(res);

@@ -33,15 +33,47 @@ function isValidPhoneNumber(phone) {
   return /^0[0-9]{9,10}$/.test(cleaned);
 }
 
-// 시간 범위 체크 (start_time, end_time: Unix timestamp (uint64), 0 = 제한 없음)
-function isWithinTimeRange(startTime, endTime) {
-  const start = Number(startTime || 0);
-  const end = Number(endTime || 0);
-  if (start === 0 && end === 0) return true;
+// 활성 시간 체크 (날짜 범위 + 일별 영업시간)
+// startDate, endDate: Unix timestamp (uint64), 0 = 제한 없음
+// dailyStartTime, dailyEndTime: 자정 기준 분 단위 (0~1439), 둘 다 0 = 일별 제한 없음
+// utcOffset: UTC 오프셋 (시간 단위, 예: 9 = UTC+9)
+function isWithinActiveTime(startDate, endDate, dailyStartTime, dailyEndTime, utcOffset) {
+  const start = Number(startDate || 0);
+  const end = Number(endDate || 0);
+  const dailyStart = Number(dailyStartTime || 0);
+  const dailyEnd = Number(dailyEndTime || 0);
+  const offset = Number(utcOffset || 0);
+
   const now = Math.floor(Date.now() / 1000);
-  if (start > 0 && now < start) return false;
-  if (end > 0 && now > end) return false;
-  return true;
+
+  // UTC 오프셋 적용한 로컬 시각 (초 단위)
+  const localNow = now + offset * 3600;
+
+  // 1단계: 날짜 범위 체크 (로컬 시각 기준)
+  if (start > 0 && localNow < start) return false;
+  if (end > 0 && localNow > end) return false;
+
+  // 2단계: 일별 영업시간 체크 (둘 다 0이면 제한 없음)
+  if (dailyStart === 0 && dailyEnd === 0) return true;
+
+  // 자정 기준 분으로 변환
+  const nowMs = Date.now();
+  const localMs = nowMs + offset * 3600 * 1000;
+  const localDate = new Date(localMs);
+  const currentMinutes = localDate.getUTCHours() * 60 + localDate.getUTCMinutes();
+
+  if (dailyStart < dailyEnd) {
+    // 일반 (예: 09:00~18:00)
+    return currentMinutes >= dailyStart && currentMinutes < dailyEnd;
+  } else {
+    // 야간 영업 (예: 22:00~06:00) — dailyStart > dailyEnd
+    return currentMinutes >= dailyStart || currentMinutes < dailyEnd;
+  }
+}
+
+// 하위 호환용 래퍼
+function isWithinTimeRange(startTime, endTime) {
+  return isWithinActiveTime(startTime, endTime, 0, 0, 0);
 }
 
 // Haversine 거리 계산 (미터 단위)
@@ -63,5 +95,6 @@ module.exports = {
   isValidTelegramUsername,
   isValidPhoneNumber,
   isWithinTimeRange,
+  isWithinActiveTime,
   haversineDistance,
 };

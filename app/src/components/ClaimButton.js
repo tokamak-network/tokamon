@@ -1,22 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TouchableOpacity, Text, View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import { claimSelf } from '../services/contract';
 import { requestDeviceCode, verifyAndClaimDevice } from '../services/api';
 import { COLLECT_RADIUS } from '../utils/constants';
 import { t } from '../utils/translations';
 
 export default function ClaimButton({
-  spot, distance, userPos, wallet, pushToken, receivedCode, isOwner, isExhausted, isOnCooldown,
+  spot, distance, userPos, pushToken, receivedCode, isOwner, isExhausted, isOnCooldown,
   onClaimed, language = 'ko',
 }) {
   const [claiming, setClaiming] = useState(false);
   const [claimPhase, setClaimPhase] = useState('idle'); // idle → requesting → waiting_code → verifying
   const pendingSpotId = useRef(null);
 
-  // 지갑이 있으면 기존 방식, 없으면 pushToken으로 디바이스 클레임
-  const hasWallet = !!wallet;
   const hasDevice = !!pushToken;
-  const canClaim = (hasWallet || hasDevice) && !isOwner && !isExhausted && !isOnCooldown && spot.active;
+  const canClaim = hasDevice && !isOwner && !isExhausted && !isOnCooldown && spot.active;
 
   // FCM 푸시 알림에서 인증번호 수신 시 자동으로 검증+클레임
   useEffect(() => {
@@ -44,25 +41,6 @@ export default function ClaimButton({
   if (!canClaim) return null;
 
   const withinRange = distance === null || distance <= COLLECT_RADIUS;
-
-  // 지갑 클레임 (기존)
-  const handleWalletClaim = async () => {
-    if (distance !== null && distance > COLLECT_RADIUS) {
-      Alert.alert('', t(language, 'tooFar').replace('{distance}', distance).replace('{radius}', COLLECT_RADIUS));
-      return;
-    }
-    setClaiming(true);
-    try {
-      const result = await claimSelf(spot.id);
-      const total = result.reward + result.bonus;
-      Alert.alert('', t(language, 'claimSuccess').replace('{amount}', total));
-      onClaimed?.();
-    } catch (err) {
-      Alert.alert(t(language, 'claimFailed'), err.reason || err.message || '');
-    } finally {
-      setClaiming(false);
-    }
-  };
 
   // 디바이스 클레임 - 요청부터 완료까지 자동 처리
   const handleDeviceClaim = async () => {
@@ -126,7 +104,7 @@ export default function ClaimButton({
   }
 
   // 메인 버튼
-  const handlePress = hasWallet ? handleWalletClaim : handleDeviceClaim;
+  const handlePress = handleDeviceClaim;
   const isLoading = claiming;
 
   return (
@@ -150,11 +128,6 @@ export default function ClaimButton({
               <Text style={styles.buttonText}>
                 {t(language, 'claimReward').replace('{amount}', spot.reward)}
               </Text>
-              {!hasWallet && (
-                <Text style={styles.deviceClaimHint}>
-                  {t(language, 'claimWithoutWallet')}
-                </Text>
-              )}
               {withinRange && distance !== null && (
                 <Text style={styles.distanceOk}>{distance}m</Text>
               )}

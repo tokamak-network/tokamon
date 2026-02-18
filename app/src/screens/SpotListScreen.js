@@ -11,11 +11,25 @@ import {
 import { getSpots } from '../services/api';
 import NetworkSelector from '../components/NetworkSelector';
 import { t } from '../utils/translations';
+import { isWithinActiveTime, isSpotClosed } from '../utils/spotUtils';
+import useLocation from '../hooks/useLocation';
+
+function haversineDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 export default function SpotListScreen({ navigation, language = 'ko', networkId, onNetworkChange }) {
   const [spots, setSpots] = useState([]);
   const [filter, setFilter] = useState('active');
   const [refreshing, setRefreshing] = useState(false);
+  const { userPos } = useLocation();
 
   const fetchSpots = useCallback(async () => {
     try {
@@ -37,47 +51,68 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
     setRefreshing(false);
   };
 
+  const distanceTo = useCallback((spot) => {
+    if (!userPos) return Infinity;
+    return haversineDistance(userPos.lat, userPos.lng, spot.lat, spot.lng);
+  }, [userPos]);
+
   const filtered = useMemo(() => {
-    if (filter === 'all') return spots;
-    return spots.filter((s) => s.remaining >= s.reward);
-  }, [spots, filter]);
+    let list;
+    if (filter === 'active') {
+      list = spots.filter((s) => s.remaining >= s.reward && !isSpotClosed(s) && isWithinActiveTime(s));
+    } else if (filter === 'inactive') {
+      list = spots.filter((s) => s.remaining >= s.reward && !isSpotClosed(s) && !isWithinActiveTime(s));
+    } else {
+      list = [...spots];
+    }
+    // sort by distance (closest first)
+    return list.sort((a, b) => distanceTo(a) - distanceTo(b));
+  }, [spots, filter, distanceTo]);
 
   const handleSpotPress = (spot) => {
-    // Navigate to Map tab and select this spot
     navigation.navigate('MapTab', { selectedSpot: spot });
   };
 
   const renderSpotCard = ({ item: spot }) => {
     const isExhausted = spot.remaining < spot.reward;
+    const closed = isSpotClosed(spot);
+    const active = !closed && !isExhausted && isWithinActiveTime(spot);
     const claimsLeft = spot.reward > 0 ? Math.floor(spot.remaining / spot.reward) : 0;
-    const statusColor = isExhausted ? '#6b7280' : spot.active ? '#059669' : '#ef4444';
+    const statusColor = isExhausted ? '#6b7280' : closed ? '#6b7280' : active ? '#059669' : '#ef4444';
+    const utc = spot.utc_offset || 0;
+    const utcLabel = ` (UTC${utc >= 0 ? '+' : ''}${utc})`;
+    const fmtDate = (ts) => {
+      const d = new Date(ts * 1000);
+      return `${d.getUTCFullYear()}.${d.getUTCMonth() + 1}.${d.getUTCDate()}`;
+    };
+    const dist = userPos ? Math.round(distanceTo(spot)) : null;
 
     return (
       <TouchableOpacity
-        style={[styles.card, isExhausted && styles.cardExhausted]}
+        style={[styles.card, (isExhausted || closed) && styles.cardExhausted]}
         onPress={() => handleSpotPress(spot)}
         activeOpacity={0.7}
       >
-        {/* Left accent bar */}
         <View style={[styles.cardAccent, { backgroundColor: statusColor }]} />
 
         <View style={styles.cardBody}>
           <View style={styles.cardHeader}>
-            <Text style={[styles.cardName, isExhausted && styles.cardNameExhausted]} numberOfLines={1}>
+            <Text style={[styles.cardName, (isExhausted || closed) && styles.cardNameExhausted]} numberOfLines={1}>
               {spot.name}
             </Text>
             <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
               <Text style={styles.statusText}>
                 {isExhausted
                   ? t(language, 'exhausted')
-                  : spot.active
+                  : closed
+                  ? t(language, 'closedStatus')
+                  : active
                   ? t(language, 'active')
                   : t(language, 'inactive')}
               </Text>
             </View>
           </View>
 
-          {/* Stats row */}
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Text style={styles.statIcon}>💰</Text>
@@ -97,16 +132,12 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
 
           <Text style={styles.cardDetail}>
             {spot.start_time || spot.end_time
-              ? `${
-                  spot.start_time
-                    ? new Date(spot.start_time * 1000).toLocaleString()
-                    : ''
-                } ~ ${
-                  spot.end_time
-                    ? new Date(spot.end_time * 1000).toLocaleString()
-                    : ''
-                }`
-              : t(language, 'alwaysOpen') || '항상'}
+              ? `${spot.start_time ? fmtDate(spot.start_time) : ''} ~ ${spot.end_time ? fmtDate(spot.end_time) : ''}${utcLabel}`
+              : t(language, 'alwaysOpen')}
+            {(spot.daily_start_time > 0 || spot.daily_end_time > 0) && (
+              ` | ${String(Math.floor(spot.daily_start_time / 60)).padStart(2, '0')}:${String(spot.daily_start_time % 60).padStart(2, '0')}~${String(Math.floor(spot.daily_end_time / 60)).padStart(2, '0')}:${String(spot.daily_end_time % 60).padStart(2, '0')}`
+            )}
+            {dist !== null && ` · 📍 ${dist >= 1000 ? `${(dist / 1000).toFixed(1)}km` : `${dist}m`}`}
           </Text>
 
           {spot.stamp_goal > 0 && (
@@ -133,14 +164,29 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
           <View style={styles.filterInner}>
             <View style={[styles.filterDot, filter === 'active' && styles.filterDotActive]} />
             <Text
-              style={[
-                styles.filterText,
-                filter === 'active' && styles.filterTextActive,
-              ]}
+              style={[styles.filterText, filter === 'active' && styles.filterTextActive]}
             >
               {t(language, 'activeSpots')}
             </Text>
             {filter === 'active' && (
+              <View style={styles.filterCountBadge}>
+                <Text style={styles.filterCount}>{filtered.length}</Text>
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.filterBtn, filter === 'inactive' && styles.filterBtnActive]}
+          onPress={() => setFilter('inactive')}
+        >
+          <View style={styles.filterInner}>
+            <View style={[styles.filterDot, filter === 'inactive' && styles.filterDotInactive]} />
+            <Text
+              style={[styles.filterText, filter === 'inactive' && styles.filterTextActive]}
+            >
+              {t(language, 'inactiveSpots')}
+            </Text>
+            {filter === 'inactive' && (
               <View style={styles.filterCountBadge}>
                 <Text style={styles.filterCount}>{filtered.length}</Text>
               </View>
@@ -153,10 +199,7 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
         >
           <View style={styles.filterInner}>
             <Text
-              style={[
-                styles.filterText,
-                filter === 'all' && styles.filterTextActive,
-              ]}
+              style={[styles.filterText, filter === 'all' && styles.filterTextActive]}
             >
               {t(language, 'allSpots')}
             </Text>
@@ -192,9 +235,11 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>
-              {filter === 'all'
-                ? t(language, 'noSpotsRegistered')
-                : t(language, 'noActiveSpots')}
+              {filter === 'active'
+                ? t(language, 'noActiveSpots')
+                : filter === 'inactive'
+                ? t(language, 'noInactiveSpots')
+                : t(language, 'noSpotsRegistered')}
             </Text>
           </View>
         }
@@ -213,11 +258,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 10,
-    gap: 10,
+    gap: 8,
   },
   filterBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
     borderRadius: 14,
     backgroundColor: 'rgba(255,255,255,0.04)',
     borderWidth: 1,
@@ -241,9 +286,12 @@ const styles = StyleSheet.create({
   filterDotActive: {
     backgroundColor: '#10b981',
   },
+  filterDotInactive: {
+    backgroundColor: '#ef4444',
+  },
   filterText: {
     color: '#777',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
   },
   filterTextActive: {

@@ -5,6 +5,7 @@ import useToast from '../hooks/useToast';
 import Toast from './Toast';
 import { Spinner } from './Spinner';
 import { getSelectedNetwork, getNetworkConfig } from '../networkStore';
+import { isWithinActiveTime, isSpotClosed } from '../spotUtils';
 
 const API = '';
 
@@ -167,7 +168,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
 
       // 컨트랙트에서 직접 조회
       if (!contract) {
-        setMessage('먼저 지갑을 연결해주세요');
+        setMessage(t(language, 'connectWalletFirst'));
         setLoading(false);
         return;
       }
@@ -188,7 +189,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
       }
     } catch (err) {
       console.error('잔액 조회 에러:', err);
-      setMessage('잔액 조회 실패: ' + err.message);
+      setMessage(t(language, 'balanceCheckFailed') + ': ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -197,18 +198,18 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
   // 클레임 (MetaMask로 직접 트랜잭션)
   const handleClaim = async () => {
     if (!selectedSpot) {
-      setMessage('스팟을 선택해주세요');
+      setMessage(t(language, 'pleaseSelectSpot'));
       return;
     }
 
     if (!wallet) {
-      setMessage('먼저 지갑을 연결해주세요');
+      setMessage(t(language, 'connectWalletFirst'));
       return;
     }
 
     const username = telegramUsername.replace('@', '').trim();
     if (username.length < 5) {
-      setMessage('올바른 텔레그램 username을 입력해주세요');
+      setMessage(t(language, 'enterValidTelegram'));
       return;
     }
 
@@ -244,7 +245,17 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
 
       const validateData = await validateRes.json();
       if (!validateRes.ok) {
-        setMessage(validateData.error || '클레임 검증 실패');
+        let errMsg = validateData.error;
+        // 서버 에러를 번역된 메시지로 변환
+        if (validateData.cooldown_remaining > 0) {
+          const h = Math.floor(validateData.cooldown_remaining / 3600);
+          const m = Math.floor((validateData.cooldown_remaining % 3600) / 60);
+          const timeStr = h > 0
+            ? `${h}${t(language, 'hoursUnit')} ${m}${t(language, 'minutesUnit')}`
+            : `${m}${t(language, 'minutesUnit')}`;
+          errMsg = t(language, 'cooldownInProgress').replace('{time}', timeStr);
+        }
+        setMessage(errMsg);
         setLoading(false);
         return;
       }
@@ -350,16 +361,37 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
             </div>
           ) : (
             <div className="spot-grid-compact">
-              {ownerSpots.map((spot) => (
+              {[...ownerSpots].sort((a, b) => {
+                const aClosed = isSpotClosed(a) ? 1 : 0;
+                const bClosed = isSpotClosed(b) ? 1 : 0;
+                return aClosed - bClosed;
+              }).map((spot) => {
+                const closed = isSpotClosed(spot);
+                const active = !closed && isWithinActiveTime(spot);
+                const cdSec = spot.cooldown || 0;
+                const cdH = Math.floor(cdSec / 3600);
+                const cdM = Math.floor((cdSec % 3600) / 60);
+                const cdText = cdSec === 0
+                  ? t(language, 'none')
+                  : cdH > 0
+                    ? `${cdH}${t(language, 'hoursUnit')} ${cdM > 0 ? `${cdM}${t(language, 'minutesUnit')}` : ''}`
+                    : `${cdM}${t(language, 'minutesUnit')}`;
+                return (
                 <div
                   key={spot.id}
-                  className="spot-card-compact"
-                  onClick={() => setSelectedSpot(spot)}
+                  className={`spot-card-compact${closed ? ' spot-closed' : ''}`}
+                  onClick={() => { setSelectedSpot(spot); setStampCount(null); }}
                 >
                   <div className="spot-compact-header">
                     <div className="spot-compact-title">
                       <h3>{spot.name}</h3>
                       <span className="spot-compact-badge">ID {spot.id}</span>
+                      {closed
+                        ? <span className="spot-status-badge closed">{t(language, 'closedStatus')}</span>
+                        : active
+                          ? <span className="spot-status-badge active">{t(language, 'activeStatus')}</span>
+                          : <span className="spot-status-badge inactive">{t(language, 'outsideActiveTime')}</span>
+                      }
                     </div>
                     <div className="spot-compact-reward">{spot.reward} TON</div>
                   </div>
@@ -371,9 +403,25 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
                     </div>
                     <div className="spot-compact-row">
                       <span className="compact-label">🕐 {t(language, 'businessHours')}</span>
-                      <span className="compact-value">{spot.start_time || spot.end_time
-                        ? `${spot.start_time ? new Date(spot.start_time * 1000).toLocaleString() : ''} ~ ${spot.end_time ? new Date(spot.end_time * 1000).toLocaleString() : ''}`
-                        : t(language, 'alwaysActive') || '항상'}</span>
+                      <span className="compact-value">{(() => {
+                        const utc = spot.utc_offset || 0;
+                        const utcLabel = ` (UTC${utc >= 0 ? '+' : ''}${utc})`;
+                        const datePart = spot.start_time || spot.end_time
+                          ? `${spot.start_time ? new Date(spot.start_time * 1000).toLocaleDateString() : ''} ~ ${spot.end_time ? new Date(spot.end_time * 1000).toLocaleDateString() : ''}${utcLabel}`
+                          : t(language, 'alwaysActive');
+                        const dailyPart = (spot.daily_start_time > 0 || spot.daily_end_time > 0)
+                          ? ` | ${String(Math.floor(spot.daily_start_time / 60)).padStart(2, '0')}:${String(spot.daily_start_time % 60).padStart(2, '0')}~${String(Math.floor(spot.daily_end_time / 60)).padStart(2, '0')}:${String(spot.daily_end_time % 60).padStart(2, '0')}`
+                          : '';
+                        return datePart + dailyPart;
+                      })()}</span>
+                    </div>
+                    <div className="spot-compact-row">
+                      <span className="compact-label">⏱️ {t(language, 'cooldown')}</span>
+                      <span className="compact-value">{cdText}</span>
+                    </div>
+                    <div className="spot-compact-row">
+                      <span className="compact-label">🔄 {t(language, 'duplicateClaims')}</span>
+                      <span className="compact-value">{spot.allow_duplicate_claims ? t(language, 'allowed') : t(language, 'notAllowed')}</span>
                     </div>
                     <div className="spot-compact-row">
                       <span className="compact-label">🎯 {t(language, 'stamp')}</span>
@@ -381,12 +429,39 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
       </div>
     );
+  }
+
+  const spotClosed = isSpotClosed(selectedSpot);
+  const spotActive = !spotClosed && isWithinActiveTime(selectedSpot);
+
+  // 영업시간 표시 텍스트
+  const formatDailyTime = (minutes) =>
+    `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+
+  const hasDaily = (selectedSpot.daily_start_time > 0 || selectedSpot.daily_end_time > 0);
+  const hasDate = (selectedSpot.start_time || selectedSpot.end_time);
+
+  let hoursText = t(language, 'alwaysActive');
+  if (hasDate || hasDaily) {
+    const parts = [];
+    const utc = selectedSpot.utc_offset || 0;
+    const utcLabel = `(UTC${utc >= 0 ? '+' : ''}${utc})`;
+    if (hasDate) {
+      const s = selectedSpot.start_time ? new Date(selectedSpot.start_time * 1000).toLocaleDateString() : '';
+      const e = selectedSpot.end_time ? new Date(selectedSpot.end_time * 1000).toLocaleDateString() : '';
+      parts.push(`${s} ~ ${e} ${utcLabel}`);
+    }
+    if (hasDaily) {
+      parts.push(`${formatDailyTime(selectedSpot.daily_start_time)}~${formatDailyTime(selectedSpot.daily_end_time)}`);
+    }
+    hoursText = parts.join(' | ');
   }
 
   // 2단계: 텔레그램 입력 및 클레임
@@ -399,12 +474,21 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
         </button>
         <div className="kiosk-header-content">
           <h2>{selectedSpot.name}</h2>
-          <p>{t(language, 'enterTelegramToReceiveTON').replace('{amount}', selectedSpot.reward)}</p>
-          <p style={{
-            fontSize: '13px',
-            color: '#aaa',
-            marginTop: '8px'
-          }}>
+          <div className="kiosk-active-status">
+            <span className={`spot-status-badge ${spotClosed ? 'closed' : spotActive ? 'active' : 'inactive'}`}>
+              {spotClosed ? t(language, 'closedStatus') : spotActive ? t(language, 'activeStatus') : t(language, 'outsideActiveTime')}
+            </span>
+            <span className="kiosk-hours-text">🕐 {hoursText}</span>
+            <span className="kiosk-hours-text">⏱ {t(language, 'cooldown')}: {selectedSpot.cooldown >= 3600
+              ? `${Math.floor(selectedSpot.cooldown / 3600)}${t(language, 'hoursUnit')}${selectedSpot.cooldown % 3600 > 0 ? ` ${Math.floor((selectedSpot.cooldown % 3600) / 60)}${t(language, 'minutesUnit')}` : ''}`
+              : selectedSpot.cooldown > 0
+                ? `${Math.floor(selectedSpot.cooldown / 60)}${t(language, 'minutesUnit')}`
+                : t(language, 'none')}</span>
+          </div>
+          {spotActive && (
+            <p>{t(language, 'enterTelegramToReceiveTON').replace('{amount}', selectedSpot.reward)}</p>
+          )}
+          <p style={{ fontSize: '12px', color: '#aaa', marginTop: '4px' }}>
             💬 {t(language, 'notificationInfo')} <strong style={{ color: '#0088CC' }}>@TokamonBot</strong> <strong style={{ color: '#0088CC' }}>/start</strong> {t(language, 'sendStartCommand')}
           </p>
         </div>
@@ -464,7 +548,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
           <button
             className="btn-primary btn-with-spinner"
             onClick={handleClaim}
-            disabled={loading || !wallet || telegramUsername.replace('@', '').length < 5}
+            disabled={loading || !wallet || !spotActive || telegramUsername.replace('@', '').length < 5}
           >
             {loading && <Spinner size={18} />}
             {loading ? t(language, 'processing') : `${selectedSpot.reward} TON ${t(language, 'receive')}`}

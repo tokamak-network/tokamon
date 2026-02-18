@@ -24,6 +24,12 @@ export default defineConfig({
   root: '.',
   publicDir: 'public',
   plugins: [react(), basicSsl(), sharedCjsToEsm()],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    include: ['src/**/*.test.{js,jsx,ts,tsx}'],
+    setupFiles: ['./src/setupTests.js'],
+  },
   server: {
     https: true,
     host: true,
