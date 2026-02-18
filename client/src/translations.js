@@ -225,8 +225,8 @@ export const translations = {
     // Faucet / 지갑 메뉴
     getETH: 'TON 받기',
     getTON: 'TON 받기',
-    getETHComplete: '100 TON 받기 완료!',
-    getTONComplete: '100 TON 받기 완료!',
+    getETHComplete: '1 TON 받기 완료!',
+    getTONComplete: '1 TON 받기 완료!',
     getETHFailed: 'TON 받기 실패',
     getTONFailed: 'TON 받기 실패',
     disconnectWallet: '연결 끊기',
@@ -539,8 +539,8 @@ export const translations = {
     // Faucet / Wallet Menu
     getETH: 'Get TON',
     getTON: 'Get TON',
-    getETHComplete: '100 TON received!',
-    getTONComplete: '100 TON received!',
+    getETHComplete: '1 TON received!',
+    getTONComplete: '1 TON received!',
     getETHFailed: 'Failed to get TON',
     getTONFailed: 'Failed to get TON',
     disconnectWallet: 'Disconnect',

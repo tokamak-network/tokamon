@@ -14,7 +14,7 @@ import Toast from './components/Toast';
 import { Spinner } from './components/Spinner';
 import { getSpots, getTelegramBalance } from './api';
 import { getBalance as getContractBalance, resetContractCache } from './contract';
-import { getETH, resetFaucetCache } from './faucet';
+import { getETH, checkFaucetBalance, resetFaucetCache } from './faucet';
 import { t } from './translations';
 import useGeolocation from './hooks/useGeolocation';
 import useToast from './hooks/useToast';
@@ -200,29 +200,6 @@ export default function App() {
     }
   }, []);
 
-  // MetaMask 계정 변경 감지
-  useEffect(() => {
-    if (!window.ethereum) return;
-    const handleAccountsChanged = (accounts) => {
-      resetContractCache();
-      resetFaucetCache();
-      if (accounts.length === 0) {
-        setWallet(null);
-      } else {
-        setWallet(accounts[0]);
-      }
-    };
-    const handleChainChanged = () => {
-      fetchNetworkInfo();
-    };
-    window.ethereum.on('accountsChanged', handleAccountsChanged);
-    window.ethereum.on('chainChanged', handleChainChanged);
-    return () => {
-      window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-      window.ethereum.removeListener('chainChanged', handleChainChanged);
-    };
-  }, [fetchNetworkInfo]);
-
   // 잔액 갱신 (TON + ETH)
   const refreshBalance = useCallback(async () => {
     if (!wallet) return;
@@ -291,6 +268,30 @@ export default function App() {
     }, 30000);
     return () => clearInterval(interval);
   }, [role, refreshSpots, refreshTelegramBalance]);
+
+  // MetaMask 계정/체인 변경 감지
+  useEffect(() => {
+    if (!window.ethereum) return;
+    const handleAccountsChanged = (accounts) => {
+      resetContractCache();
+      resetFaucetCache();
+      if (accounts.length === 0) {
+        setWallet(null);
+      } else {
+        setWallet(accounts[0]);
+      }
+    };
+    const handleChainChanged = () => {
+      fetchNetworkInfo();
+      refreshBalance();
+    };
+    window.ethereum.on('accountsChanged', handleAccountsChanged);
+    window.ethereum.on('chainChanged', handleChainChanged);
+    return () => {
+      window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+      window.ethereum.removeListener('chainChanged', handleChainChanged);
+    };
+  }, [fetchNetworkInfo, refreshBalance]);
 
   // 지갑 연결 시 잔액/히스토리 로드
   useEffect(() => {
@@ -369,6 +370,7 @@ export default function App() {
     setMessage(null);
     try {
       console.log('ETH 받기 시작...');
+      await checkFaucetBalance();
       showToast('info', t(language, 'approveInMetaMask'));
       await getETH();
       showToast('success', t(language, 'getETHComplete'));

@@ -29,7 +29,7 @@ export default {
         backgroundColor: "#0f0f0f",
       },
       package: "com.tokamak.tokamon",
-      googleServicesFile: "./google-services.json",
+      googleServicesFile: process.env.GOOGLE_SERVICES_JSON || "./google-services.json",
       edgeToEdgeEnabled: true,
       permissions: ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
       config: {
@@ -40,6 +40,11 @@ export default {
     },
     web: {
       favicon: "./assets/favicon.png",
+    },
+    extra: {
+      eas: {
+        projectId: "11e487be-3c7c-438c-8386-82068bf972ac",
+      },
     },
     plugins: [
       [

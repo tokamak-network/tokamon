@@ -197,8 +197,21 @@ function LocateButton({ userPos }) {
 }
 
 export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectSpot, initialCenter, createMode, pinPos, onMapClick, onConfirmAddSpot, wallet, role, language = 'ko', mapView, onViewChange }) {
-  const center = mapView || initialCenter || { lat: 37.5665, lng: 126.978 };
+  const firstSpot = spots?.length > 0 ? { lat: spots[0].lat, lng: spots[0].lng } : null;
+  const center = mapView || initialCenter || firstSpot;
   const zoom = mapView?.zoom || 16;
+
+  if (!center) {
+    return (
+      <div className="map-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f3f4f6' }}>
+        <div style={{ textAlign: 'center', color: '#6b7280', padding: '20px' }}>
+          <div style={{ fontSize: '40px', marginBottom: '12px' }}>📍</div>
+          <div style={{ fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{t(language, 'locationDenied')}</div>
+          <div style={{ fontSize: '13px' }}>{t(language, 'locationUnavailable')}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="map-container">

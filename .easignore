@@ -1,0 +1,50 @@
+# EAS Build ignore (overrides .gitignore for EAS uploads)
+# app/.env is intentionally NOT ignored so env vars are included in builds
+
+node_modules/
+.expo/
+dist/
+web-build/
+build/
+coverage/
+
+# IDE
+.idea/
+.vscode/
+.claude/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Native generated
+app/ios/
+app/android/
+
+# Contracts build artifacts
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+
+# Secrets (keep app/.env but exclude everything else)
+**/admin_keys.json
+**/*_keys.json
+**/private-key.txt
+**/secrets.json
+**/credentials.json
+**/serviceAccountKey.json
+
+# Misc
+.DS_Store
+*.tmp
+*.temp
+.cache/
+temp/
+anvil-state.json

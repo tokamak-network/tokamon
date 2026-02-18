@@ -191,7 +191,7 @@ Cloud Run min-instances 대비 **e2-micro 무료 티어**로 24시간 리스너 
 ## 7. 모노레포 구조
 
 ```
-firebase-test/
+tokamon/
 ├── client/           # 웹 (React/Vite) – Firestore 실시간 Listen
 ├── app/              # 모바일 (Flutter) – Firestore 실시간 Listen
 ├── listener-server/  # GCE 블록체인 이벤트 → Firestore

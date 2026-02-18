@@ -1,5 +1,5 @@
 {
-  "name": "firebase-test",
+  "name": "tokamon",
   "private": true,
   "version": "0.0.0",
   "workspaces": [
@@ -17,10 +17,12 @@
     "deploy": "npm run build && mkdir -p functions/shared && cp shared/networks.js functions/shared/networks.js && firebase deploy",
     "serve": "npm run build && firebase serve",
     "android": "cd app && npx expo run:android",
-    "ios": "cd app && npx expo run:ios"
+    "ios": "cd app && npx expo run:ios",
+    "postinstall": "cd app && npm install --legacy-peer-deps"
   },
   "dependencies": {
     "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
     "ethers": "^6.16.0",
     "expo-secure-store": "^15.0.8",
     "express": "^5.2.1"

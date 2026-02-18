@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "slug": "tokamon",
+    "extra": {
+      "eas": {
+        "projectId": "11e487be-3c7c-438c-8386-82068bf972ac"
+      }
+    }
+  }
+}
