@@ -68,11 +68,12 @@ export default function MapScreen({ route, wallet, pushToken, receivedCode, lang
     }
   }, [userPos]);
 
-  // Auto-center to first spot if no GPS after loading spots
+  // Auto-center to first active spot if no GPS after loading spots
   useEffect(() => {
-    if (!hasCentered.current && !userPos && spots.length > 0 && mapRef.current) {
+    const visibleSpots = spots.filter(s => s.remaining >= s.reward && !isSpotClosed(s) && isWithinActiveTime(s));
+    if (!hasCentered.current && !userPos && visibleSpots.length > 0 && mapRef.current) {
       hasCentered.current = true;
-      const firstSpot = spots[0];
+      const firstSpot = visibleSpots[0];
       console.log('[MapScreen] no GPS, centering to first spot:', firstSpot.lat, firstSpot.lng);
       mapRef.current.animateToRegion({
         latitude: firstSpot.lat,
@@ -135,7 +136,8 @@ export default function MapScreen({ route, wallet, pushToken, receivedCode, lang
     }, 500);
   }, []);
 
-  const activeSpotCount = spots.filter(s => s.active && s.remaining >= s.reward).length;
+  const activeSpots = spots.filter(s => s.remaining >= s.reward && !isSpotClosed(s) && isWithinActiveTime(s));
+  const activeSpotCount = activeSpots.length;
 
   return (
     <View style={styles.container}>
@@ -203,8 +205,8 @@ export default function MapScreen({ route, wallet, pushToken, receivedCode, lang
           </>
         )}
 
-        {/* Spot markers */}
-        {spots.map((spot) => (
+        {/* Spot markers (active only) */}
+        {activeSpots.map((spot) => (
           <SpotMarker
             key={spot.id}
             spot={spot}
