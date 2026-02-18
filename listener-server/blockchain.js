@@ -156,7 +156,7 @@ async function init() {
         try {
           const parsed = contract.interface.parseLog({ topics: ev.topics, data: ev.data });
           if (!parsed) continue;
-          if (parsed.name === 'SpotCreated' || parsed.name === 'Redeposited' ||
+          if (parsed.name === 'SpotCreated' || parsed.name === 'SpotUpdated' || parsed.name === 'Redeposited' ||
               parsed.name === 'CooldownUpdated' || parsed.name === 'AllowDuplicateClaimsUpdated') {
             const id = Number(parsed.args[0]);
             const meta = await fetchFullSpotFromContract(id);
@@ -188,6 +188,20 @@ async function init() {
     const id = Number(spotId);
     const blockNum = ev?.log?.blockNumber ?? '?';
     console.log(`[이벤트 수신] SpotCreated | spotId=${id} creator=${String(creator).slice(0,10)}... reward=${fromWei(reward)} deposit=${fromWei(deposit)} name="${name}" block=${blockNum}`);
+    const meta = await fetchFullSpotFromContract(id);
+    if (meta) {
+      spotMetadata[id] = meta;
+      saveMetadata();
+      await syncSpotToFirestore(id, meta);
+    }
+    if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
+  });
+
+  console.log('[이벤트 등록] SpotUpdated 리스너 등록');
+  contract.on('SpotUpdated', async (spotId, ev) => {
+    const id = Number(spotId);
+    const blockNum = ev?.log?.blockNumber ?? '?';
+    console.log(`[이벤트 수신] SpotUpdated | spotId=${id} block=${blockNum}`);
     const meta = await fetchFullSpotFromContract(id);
     if (meta) {
       spotMetadata[id] = meta;
@@ -393,7 +407,7 @@ async function init() {
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
   });
 
-  console.log('[이벤트 등록 완료] 12개 이벤트 리스너 등록됨');
+  console.log('[이벤트 등록 완료] 13개 이벤트 리스너 등록됨');
 }
 
 // ─── 컨트랙트 조회 함수들 ───
