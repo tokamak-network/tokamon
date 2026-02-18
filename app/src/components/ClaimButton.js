@@ -52,6 +52,14 @@ export default function ClaimButton({
       const result = await verifyAndClaimDevice(deviceId, spot.id, code);
       const total = (result.reward || 0) + (result.bonus || 0);
       Alert.alert('', t(language, 'claimSuccess').replace('{amount}', total.toFixed(4)));
+
+      // 지갑 미연결 시 경고
+      if (!result.has_linked_wallet) {
+        setTimeout(() => {
+          Alert.alert('', t(language, 'walletLinkWarning'));
+        }, 500);
+      }
+
       setClaimPhase('idle');
       pendingSpotId.current = null;
       onClaimed?.();

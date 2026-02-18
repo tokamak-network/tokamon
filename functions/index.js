@@ -13,6 +13,7 @@ const express = require('express');
 const admin = require('firebase-admin');
 const path = require('path');
 const fs = require('fs');
+const { ethers } = require('ethers');
 const { collectionPath, DEFAULT_NETWORK, listNetworks, getNetwork, getContracts } = require('./shared/networks');
 
 admin.initializeApp();
@@ -512,14 +513,46 @@ app.post('/api/telegram/hash', async (req, res) => {
   }
 });
 
-// GET /api/telegram/username/:hash — 텔레그램 해시로 username 조회
-app.get('/api/telegram/username/:hash', async (req, res) => {
+// POST /api/telegram/username — 텔레그램 해시로 username 조회 (지갑 서명 필수)
+app.post('/api/telegram/username', async (req, res) => {
   try {
-    const { hash } = req.params;
-    if (!hash || !/^[0-9a-fA-F]{64}$/.test(hash)) {
-      return res.status(400).json({ error: '올바르지 않은 해시입니다' });
+    const { hash, signature } = req.body;
+
+    if (!hash || !/^[a-f0-9]{64}$/i.test(hash)) {
+      return res.status(400).json({ error: 'Invalid hash format' });
     }
 
+    if (!signature) {
+      return res.status(400).json({ error: 'Signature is required' });
+    }
+
+    // 서명에서 지갑 주소 복원
+    const message = `Verify telegram username for hash: ${hash}`;
+    let recoveredAddress;
+    try {
+      recoveredAddress = ethers.verifyMessage(message, signature);
+    } catch {
+      return res.status(400).json({ error: 'Invalid signature' });
+    }
+
+    // Firestore에서 이 해시에 매핑된 지갑 조회
+    const linkSnap = await db.collection(col(req, 'telegram_wallet_links'))
+      .where('telegram_hash', '==', hash)
+      .limit(1)
+      .get();
+
+    if (linkSnap.empty) {
+      return res.status(404).json({ error: 'No wallet linked to this hash' });
+    }
+
+    const linkedWallet = linkSnap.docs[0].id; // doc ID = wallet address
+
+    // 서명자와 매핑된 지갑이 일치하는지 확인
+    if (recoveredAddress.toLowerCase() !== linkedWallet.toLowerCase()) {
+      return res.status(403).json({ error: 'Signature does not match linked wallet' });
+    }
+
+    // 검증 통과 — username 조회
     const doc = await db.collection(col(req, 'telegram_hash_map')).doc(hash).get();
     if (!doc.exists) {
       return res.json({ telegram_username: null });
@@ -528,36 +561,7 @@ app.get('/api/telegram/username/:hash', async (req, res) => {
     res.json({ telegram_username: '@' + doc.data().username });
   } catch (err) {
     console.error('텔레그램 username 조회 에러:', err.message);
-    res.status(500).json({ error: '조회에 실패했습니다.' });
-  }
-});
-
-// GET /api/telegram/linked/:wallet — 지갑에 연결된 텔레그램 계정 조회
-app.get('/api/telegram/linked/:wallet', async (req, res) => {
-  try {
-    const { wallet } = req.params;
-    if (!wallet || !/^0x[0-9a-fA-F]{40}$/.test(wallet)) {
-      return res.status(400).json({ error: '올바르지 않은 지갑 주소입니다' });
-    }
-
-    const linkDoc = await db.collection(col(req, 'telegram_wallet_links')).doc(wallet.toLowerCase()).get();
-    if (!linkDoc.exists) {
-      return res.json({ linked: false, telegram_hash: null, telegram_username: null });
-    }
-
-    const { telegram_hash } = linkDoc.data();
-    let username = null;
-    if (telegram_hash) {
-      const hashDoc = await db.collection(col(req, 'telegram_hash_map')).doc(telegram_hash).get();
-      if (hashDoc.exists) {
-        username = '@' + hashDoc.data().username;
-      }
-    }
-
-    res.json({ linked: true, telegram_hash, telegram_username: username });
-  } catch (err) {
-    console.error('텔레그램 연결 조회 에러:', err.message);
-    res.status(500).json({ error: '조회에 실패했습니다.' });
+    res.status(500).json({ error: 'Failed to fetch username' });
   }
 });
 

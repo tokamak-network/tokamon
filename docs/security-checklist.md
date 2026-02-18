@@ -42,6 +42,8 @@ Tokamon 보안 점검 결과 및 조치 현황.
 | 17 | 시도 횟수 우회 차단 | Medium | Done | `attempts < MAX_VERIFY_ATTEMPTS`를 UPDATE WHERE 절에 포함 |
 | 18 | device_hash 노출 정리 | Medium | Done | WalletScreen 미사용 참조 제거. HistoryScreen은 컨트랙트 호출에 필요하여 유지 (온체인 공개 데이터) |
 | 19 | FCM 실패 시 무한 대기 방지 | Medium | Done | `sendPushNotification` 반환값 확인, `false`면 502 응답. 클라이언트는 에러 Alert 표시 후 idle 복귀 |
+| 20 | Functions username 인증 | High | Done | `functions/index.js`도 `POST /username` 서명 검증으로 변경. `GET /linked/:wallet` 삭제. Firestore에서 `telegram_wallet_links` 조회 |
+| 21 | 텔레그램 라우트 마운트 | High | Done | `listener-server/routes/telegram.js`가 미마운트 상태(dead code) → `index.js`에 `app.use('/api/telegram', telegramRoutes(db))` 추가 |
 
 ## Penetration Testing Checklist
 
@@ -72,12 +74,19 @@ Tokamon 보안 점검 결과 및 조치 현황.
 - [ ] 코드가 FCM 푸시로만 전달되는지 확인 (API 응답에 미포함)
 - [ ] FCM 실패 시 502 응답 확인: 잘못된 FCM 토큰으로 `request-code` → 502 응답, 클라이언트 idle 복귀
 
-### 텔레그램 API
+### 텔레그램 API (listener-server)
 
 - [ ] 텔레그램 Rate Limiting 확인: 같은 username으로 1분 내 11회째 `/balance` → 429 응답
 - [ ] username 조회 서명 검증: 잘못된 서명으로 `POST /username` → 403 응답
 - [ ] username 조회 타인 지갑 서명: 매핑되지 않은 지갑으로 서명 → 403 응답
 - [ ] 삭제된 엔드포인트 확인: `GET /api/telegram/linked/:wallet` → 404 응답
+
+### 텔레그램 API (Firebase Functions)
+
+- [ ] Functions username 서명 검증: 잘못된 서명으로 `POST /api/telegram/username` → 400/403 응답
+- [ ] Functions username 타인 지갑 서명: 매핑되지 않은 지갑 서명 → 403 응답
+- [ ] Functions 삭제된 엔드포인트: `GET /api/telegram/linked/:wallet` → 404 응답
+- [ ] Functions 삭제된 엔드포인트: `GET /api/telegram/username/:hash` → 404 응답
 
 ### 스마트 컨트랙트
 

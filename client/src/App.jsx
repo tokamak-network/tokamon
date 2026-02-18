@@ -138,7 +138,7 @@ export default function App() {
   }, [showWalletMenu, showNetworkMenu]);
 
   // 네트워크 변경 시 데이터 새로고침
-  const handleNetworkSwitch = useCallback((newNetworkId) => {
+  const handleNetworkSwitch = useCallback(async (newNetworkId) => {
     setSelectedNetwork(newNetworkId);
     setNetworkId(newNetworkId);
     setRpcUrl(getRpcUrl());
@@ -147,7 +147,36 @@ export default function App() {
     setSelectedSpot(null);
     resetContractCache();
     resetFaucetCache();
-  }, []);
+
+    // MetaMask 체인 전환
+    if (window.ethereum && wallet) {
+      const config = getAllNetworks().find((n) => n.id === newNetworkId);
+      if (config) {
+        const chainIdHex = '0x' + config.chainId.toString(16);
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: chainIdHex }],
+          });
+        } catch (switchErr) {
+          // 체인이 MetaMask에 없으면 추가
+          if (switchErr.code === 4902) {
+            try {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                  chainId: chainIdHex,
+                  chainName: config.name,
+                  rpcUrls: [config.id === 'local' ? `http://${window.location.hostname}:8999` : config.rpcUrl],
+                  nativeCurrency: config.nativeCurrency,
+                }],
+              });
+            } catch {}
+          }
+        }
+      }
+    }
+  }, [wallet]);
 
   // 네트워크 변경 리스너
   useEffect(() => {
@@ -211,7 +240,7 @@ export default function App() {
     } catch (err) {
       console.error('잔액 조회 실패:', err.message);
     }
-  }, [wallet]);
+  }, [wallet, networkId]);
 
   // 텔레그램 잔액 갱신
   const refreshTelegramBalance = useCallback(async () => {

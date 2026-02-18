@@ -260,12 +260,21 @@ module.exports = function(db) {
         stamp: result.stamp,
       });
 
+      // 지갑 연결 여부 확인 (클라이언트 경고용)
+      let hasLinkedWallet = false;
+      try {
+        const wallet = await blockchain.getDeviceLinkedWallet(deviceHash);
+        const zeroAddr = '0x0000000000000000000000000000000000000000';
+        hasLinkedWallet = !!wallet && wallet !== zeroAddr;
+      } catch (_) {}
+
       res.json({
         success: true,
         reward: result.reward,
         bonus: result.bonus,
         stamp: result.stamp,
         balance: result.balance,
+        has_linked_wallet: hasLinkedWallet,
       });
     } catch (err) {
       console.error('device verify-and-claim 에러:', err.message);

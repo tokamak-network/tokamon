@@ -7,6 +7,7 @@ const { init, onTelegramClaimed, onDeviceClaimed } = require('./blockchain');
 const blockchain = require('./blockchain');
 const { initBot, sendClaimNotification } = require('./telegram-bot');
 const deviceRoutes = require('./routes/device');
+const telegramRoutes = require('./routes/telegram');
 const { hashTelegramId, isValidTelegramUsername } = require('./utils');
 const { saveWalletTelegramLink, saveTelegramHashMap } = require('./firebase-admin');
 
@@ -171,6 +172,9 @@ function startHttpServer(db) {
 
   // 디바이스 클레임 라우트
   app.use('/api/device', deviceRoutes(db));
+
+  // 텔레그램 라우트 (verify-token, link-wallet, username 등)
+  app.use('/api/telegram', telegramRoutes(db));
 
   app.listen(LISTENER_PORT, () => {
     console.log(`[Listener HTTP] 포트 ${LISTENER_PORT}에서 실행 중`);
