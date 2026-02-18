@@ -10,11 +10,11 @@
 ```
 1. 앱 시작 → expo-notifications로 FCM 토큰 발급 + 푸시 권한 요청
 2. 맵에서 스팟 근처(10m) → 하단 시트에서 클레임 버튼 탭
-3. 앱 → 서버: POST /api/device/request-code { fcm_token, spot_id, lat, lng }
+3. 앱 → 서버: POST /api/device/request-code { device_id, fcm_token, spot_id, lat, lng }
 4. 서버: 거리/잔액/쿨다운 검증 → 6자리 인증번호 생성 → FCM 푸시 전송
 5. 앱: 푸시 수신 → 인증번호 입력 UI 표시 (자동 채우기 지원)
-6. 앱 → 서버: POST /api/device/verify-and-claim { fcm_token, spot_id, code }
-7. 서버: 코드 검증 → claimByDevice(spotId, sha256(SALT+fcm_token)) 호출
+6. 앱 → 서버: POST /api/device/verify-and-claim { device_id, spot_id, code }
+7. 서버: 코드 검증 → claimByDevice(spotId, sha256(SALT+device_id)) 호출
 8. 보상이 deviceBalances[hash]에 적립
 9. "나의 토카몬" 탭에서 지갑 연결 → 출금 가능
 ```
@@ -29,7 +29,7 @@
 |------|------|------|
 | `listener-server/blockchain.js` | 수정 | `claimByDevice`, `getDeviceBalance`, `getDeviceStampInfo`, `linkDeviceToWallet` 함수 추가. `DeviceClaimed`, `DeviceLinked` 이벤트 리스너 등록. |
 | `listener-server/firebase-admin.js` | 수정 | `sendPushNotification(fcmToken, title, body, data)` FCM 푸시 전송 함수, `saveDeviceClaimEvent()` Firestore 저장 함수 추가. |
-| `listener-server/routes/device.js` | **신규** | 디바이스 클레임 라우트 4개 엔드포인트 (`request-code`, `verify-and-claim`, `balance`, `link-wallet`). |
+| `listener-server/routes/device.js` | **신규** | 디바이스 클레임 라우트 6개 엔드포인트 (`request-code`, `verify-and-claim`, `balance`, `stamp-info`, `request-link-code`, `verify-and-link`). |
 | `listener-server/index.js` | 수정 | `device_verify_codes` SQLite 테이블 생성, `app.use('/api/device', deviceRoutes(db))` 마운트, CORS 모바일 앱 지원. |
 
 ### 모바일 앱
@@ -58,7 +58,7 @@
 
 **Request:**
 ```json
-{ "fcm_token": "ExponentPushToken[...]", "spot_id": 1, "lat": 37.495, "lng": 127.063 }
+{ "device_id": "device_ios_xxx...", "fcm_token": "ExponentPushToken[...]", "spot_id": 1, "lat": 37.495, "lng": 127.063 }
 ```
 
 **Response:**
@@ -72,12 +72,12 @@
 
 **Request:**
 ```json
-{ "fcm_token": "ExponentPushToken[...]", "spot_id": 1, "code": "123456" }
+{ "device_id": "device_ios_xxx...", "spot_id": 1, "code": "123456" }
 ```
 
 **Response:**
 ```json
-{ "success": true, "reward": 0.01, "bonus": 0, "stamp": 1, "balance": 0.01 }
+{ "success": true, "reward": 0.01, "bonus": 0, "stamp": 1, "balance": 0.01, "has_linked_wallet": false }
 ```
 
 ### POST /api/device/balance
@@ -85,7 +85,7 @@
 
 **Request:**
 ```json
-{ "fcm_token": "ExponentPushToken[...]" }
+{ "device_id": "device_ios_xxx..." }
 ```
 
 **Response:**
@@ -93,17 +93,30 @@
 { "balance": 0.05, "device_hash": "abc123..." }
 ```
 
-### POST /api/device/link-wallet
-디바이스를 지갑에 연결
+### POST /api/device/request-link-code
+지갑 연결용 인증 코드 요청 + FCM 푸시 전송
 
 **Request:**
 ```json
-{ "fcm_token": "ExponentPushToken[...]", "wallet_address": "0x..." }
+{ "device_id": "device_ios_xxx...", "fcm_token": "ExponentPushToken[...]", "wallet_address": "0x..." }
 ```
 
 **Response:**
 ```json
-{ "success": true, "device_hash": "abc123...", "wallet": "0x...", "transferred_amount": 0.05 }
+{ "success": true }
+```
+
+### POST /api/device/verify-and-link
+코드 검증 + linkDeviceToWallet 호출
+
+**Request:**
+```json
+{ "device_id": "device_ios_xxx...", "wallet_address": "0x...", "code": "123456" }
+```
+
+**Response:**
+```json
+{ "success": true, "wallet": "0x..." }
 ```
 
 ---
@@ -125,11 +138,17 @@ CREATE TABLE IF NOT EXISTS device_verify_codes (
   code TEXT PRIMARY KEY,
   device_hash TEXT NOT NULL,
   spot_id INTEGER NOT NULL,
+  wallet_address TEXT,
   created_at INTEGER NOT NULL,
   expires_at INTEGER NOT NULL,
-  verified BOOLEAN DEFAULT 0
+  verified BOOLEAN DEFAULT 0,
+  attempts INTEGER DEFAULT 0
 );
 ```
+
+- `spot_id = -1`: 지갑 연결 요청 (센티넬값)
+- `wallet_address`: 지갑 연결 요청 시에만 사용
+- `attempts`: 인증 코드 검증 시도 횟수 (최대 5회)
 
 ### device_claim_events (Firestore)
 ```

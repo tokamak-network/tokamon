@@ -35,8 +35,6 @@ cp .env.example .env
 | **RPC_URL** | testnet/production | EVM RPC URL (로컬: `http://127.0.0.1:8999`) |
 | **PRIVATE_KEY** | testnet/production | 배포용 지갑 개인키 |
 | **CHAIN_ID** | production | 대상 체인 ID (로컬: 1337) |
-| **FAUCET_ETH** | testnet 선택 | Faucet 초기 ETH (기본: 1 ETH) |
-| **FAUCET_TON** | testnet 선택 | Faucet 초기 TON (기본: 10,000) |
 
 ### 2.2 listener-server (`listener-server/.env`)
 
