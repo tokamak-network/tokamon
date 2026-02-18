@@ -112,7 +112,7 @@ contract TokamonTest is Test {
         });
 
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 0, true, meta
+            1 ether, 5, 1 ether, 0, true, meta
         );
 
         Tokamon.Spot memory spot = tokamon.getSpot(spotId);
@@ -138,7 +138,7 @@ contract TokamonTest is Test {
         });
 
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 0, false, meta
+            1 ether, 5, 1 ether, 0, false, meta
         );
 
         Tokamon.Spot memory spot = tokamon.getSpot(spotId);
@@ -161,7 +161,7 @@ contract TokamonTest is Test {
         });
 
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 0, false, meta
+            1 ether, 5, 1 ether, 0, false, meta
         );
 
         Tokamon.Spot memory spot = tokamon.getSpot(spotId);
@@ -365,7 +365,7 @@ contract TokamonTest is Test {
 
     function test_RevertOnZeroDeposit() public {
         vm.expectRevert(Tokamon.InvalidInput.selector);
-        tokamon.createSpotSelf{value: 0}(1 ether, 5, 0, 0, false, _defaultMeta());
+        tokamon.createSpotSelf{value: 0}(1 ether, 5, 1 ether, 0, false, _defaultMeta());
     }
 
     function test_RevertOnZeroReward() public {
@@ -373,9 +373,15 @@ contract TokamonTest is Test {
         tokamon.createSpotSelf{value: 10 ether}(0, 5, 0, 0, false, _defaultMeta());
     }
 
-    function test_RevertOnZeroStampGoal() public {
+    function test_ZeroStampGoalAllowed() public {
+        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 0, 0, 0, false, _defaultMeta());
+        Tokamon.Spot memory s = tokamon.getSpot(spotId);
+        assertEq(s.stampGoal, 0);
+    }
+
+    function test_RevertOnStampGoalWithZeroBonus() public {
         vm.expectRevert(Tokamon.InvalidInput.selector);
-        tokamon.createSpotSelf{value: 10 ether}(1 ether, 0, 0, 0, false, _defaultMeta());
+        tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, false, _defaultMeta());
     }
 
     // ─── dailyStartTime 경계값 테스트 ───
@@ -394,7 +400,7 @@ contract TokamonTest is Test {
         });
 
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 0, false, meta
+            1 ether, 5, 1 ether, 0, false, meta
         );
 
         Tokamon.Spot memory spot = tokamon.getSpot(spotId);
@@ -416,7 +422,7 @@ contract TokamonTest is Test {
         });
 
         vm.expectRevert(Tokamon.InvalidInput.selector);
-        tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, false, meta);
+        tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, false, meta);
     }
 
     function test_RevertOnInvalidDailyEndTime() public {
@@ -431,7 +437,7 @@ contract TokamonTest is Test {
         });
 
         vm.expectRevert(Tokamon.InvalidInput.selector);
-        tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, false, meta);
+        tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, false, meta);
     }
 
     function test_RevertOnInvalidUtcOffset() public {
@@ -446,7 +452,7 @@ contract TokamonTest is Test {
         });
 
         vm.expectRevert(Tokamon.InvalidInput.selector);
-        tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, false, meta);
+        tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, false, meta);
     }
 
     function test_RevertOnNegativeUtcOffsetTooLow() public {
@@ -461,7 +467,7 @@ contract TokamonTest is Test {
         });
 
         vm.expectRevert(Tokamon.InvalidInput.selector);
-        tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, false, meta);
+        tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, false, meta);
     }
 
     function test_ValidBoundaryUtcOffset() public {
@@ -471,7 +477,7 @@ contract TokamonTest is Test {
             lat: 0, lng: 0, startDate: 0, endDate: 0,
             dailyStartTime: 0, dailyEndTime: 0, utcOffset: -12
         });
-        uint256 id1 = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, false, meta1);
+        uint256 id1 = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, false, meta1);
         assertEq(tokamon.getSpot(id1).utcOffset, -12);
 
         // UTC+14 (최대)
@@ -480,7 +486,7 @@ contract TokamonTest is Test {
             lat: 0, lng: 0, startDate: 0, endDate: 0,
             dailyStartTime: 0, dailyEndTime: 0, utcOffset: 14
         });
-        uint256 id2 = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, false, meta2);
+        uint256 id2 = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, false, meta2);
         assertEq(tokamon.getSpot(id2).utcOffset, 14);
     }
 
@@ -493,7 +499,7 @@ contract TokamonTest is Test {
         });
 
         vm.expectRevert(Tokamon.InvalidInput.selector);
-        tokamon.updateSpot(spotId, 1 ether, 5, 0, 0, false, badMeta);
+        tokamon.updateSpot(spotId, 1 ether, 5, 1 ether, 0, false, badMeta);
     }
 
     // ─── 추가 쿨다운 테스트 ───
@@ -741,7 +747,7 @@ contract TokamonTest is Test {
     function test_ClaimRevertBeforeStartDate() public {
         Tokamon.SpotMetadata memory meta = _timedMeta();  // startDate=1700000000
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 0, true, meta
+            1 ether, 5, 1 ether, 0, true, meta
         );
 
         // block.timestamp=1 → startDate 이전
@@ -752,7 +758,7 @@ contract TokamonTest is Test {
     function test_ClaimRevertAfterEndDate() public {
         Tokamon.SpotMetadata memory meta = _timedMeta();  // endDate=1800000000
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 0, true, meta
+            1 ether, 5, 1 ether, 0, true, meta
         );
 
         vm.warp(1800000001);  // endDate 이후
@@ -763,7 +769,7 @@ contract TokamonTest is Test {
     function test_ClaimRevertOutsideDailyHours() public {
         Tokamon.SpotMetadata memory meta = _timedMeta();  // 09:00~18:00 UTC+9
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 0, true, meta
+            1 ether, 5, 1 ether, 0, true, meta
         );
 
         // 07:00 KST (22:00 UTC 전날) → startDate 범위 내이지만 영업시간 외
@@ -780,7 +786,7 @@ contract TokamonTest is Test {
     function test_ClaimSucceedsDuringDailyHours() public {
         Tokamon.SpotMetadata memory meta = _timedMeta();  // 09:00~18:00 UTC+9
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 0, true, meta
+            1 ether, 5, 1 ether, 0, true, meta
         );
 
         // 12:00 KST = minuteOfDay 720
@@ -796,7 +802,7 @@ contract TokamonTest is Test {
     function test_CanClaimReturnsFalseOutsideTime() public {
         Tokamon.SpotMetadata memory meta = _timedMeta();
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 0, true, meta
+            1 ether, 5, 1 ether, 0, true, meta
         );
 
         // startDate 이전
@@ -818,7 +824,7 @@ contract TokamonTest is Test {
             dailyStartTime: 1320, dailyEndTime: 360, utcOffset: 9
         });
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 0, true, meta
+            1 ether, 5, 1 ether, 0, true, meta
         );
 
         // (1700000000 + 32400) % 86400 = 1700032400 % 86400 = 26000
@@ -1397,7 +1403,7 @@ contract TokamonTest is Test {
 
     function test_CreateSpotRevertDepositLessThanReward() public {
         vm.expectRevert(Tokamon.InvalidInput.selector);
-        tokamon.createSpotSelf{value: 0.5 ether}(1 ether, 5, 0, 0, false, _defaultMeta());
+        tokamon.createSpotSelf{value: 0.5 ether}(1 ether, 5, 1 ether, 0, false, _defaultMeta());
     }
 
     function test_UpdateAllowDuplicateClaims() public {
@@ -1608,7 +1614,7 @@ contract TokamonTest is Test {
         uint64 startDate = 1771372800; // Feb 18 00:00 UTC (UTC 정규화)
         uint64 endDate = 1774051199;   // Mar 20 23:59:59 UTC (UTC 정규화)
         Tokamon.SpotMetadata memory meta = _kstMeta(startDate, endDate, 0, 0);
-        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, true, meta);
+        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, true, meta);
 
         // Feb 18 00:00 KST = Feb 17 15:00 UTC
         // localTime = 1771340400 + 32400 = 1771372800 >= 1771372800 → active
@@ -1627,7 +1633,7 @@ contract TokamonTest is Test {
         uint64 startDate = 1771372800; // Feb 18 00:00 UTC (UTC 정규화)
         uint64 endDate = 1774051199;   // Mar 20 23:59:59 UTC (UTC 정규화)
         Tokamon.SpotMetadata memory meta = _kstMeta(startDate, endDate, 0, 0);
-        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, true, meta);
+        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, true, meta);
 
         // Mar 20 23:59:59 KST = Mar 20 14:59:59 UTC
         // localTime = 1774018799 + 32400 = 1774051199 <= 1774051199 → active
@@ -1649,7 +1655,7 @@ contract TokamonTest is Test {
         uint64 startDate = 1771372800; // Feb 18 00:00 UTC (UTC 정규화)
         uint64 endDate = 1774051199;   // Mar 20 23:59:59 UTC (UTC 정규화)
         Tokamon.SpotMetadata memory meta = _estMeta(startDate, endDate, 0, 0);
-        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, true, meta);
+        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, true, meta);
 
         // Feb 17 23:59:59 EST = Feb 18 04:59:59 UTC
         // localTime = 1771390799 - 18000 = 1771372799 < 1771372800 → inactive
@@ -1674,7 +1680,7 @@ contract TokamonTest is Test {
         uint16 dailyEnd = 551;         // 09:11
 
         Tokamon.SpotMetadata memory meta = _kstMeta(startDate, endDate, dailyStart, dailyEnd);
-        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, true, meta);
+        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, true, meta);
 
         // 09:05 KST on Feb 18 = 00:05 UTC on Feb 18
         uint256 feb18_utcMidnight = 1771372800;
@@ -1713,7 +1719,7 @@ contract TokamonTest is Test {
         uint16 dailyEnd = 1080;        // 18:00
 
         Tokamon.SpotMetadata memory meta = _estMeta(startDate, endDate, dailyStart, dailyEnd);
-        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, true, meta);
+        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, true, meta);
 
         uint256 feb18_utcMidnight = 1771372800;
 
@@ -1741,7 +1747,7 @@ contract TokamonTest is Test {
     function test_UTC0_DailyTimeBoundary() public {
         // UTC+0 09:00~18:00
         Tokamon.SpotMetadata memory meta = _utcMeta(1700000000, 1800000000, 540, 1080);
-        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, true, meta);
+        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, true, meta);
 
         // UTC midnight: Nov 15 00:00 UTC = 1700006400
         uint256 utcMidnight = 1700006400;
@@ -1773,7 +1779,7 @@ contract TokamonTest is Test {
             dailyStartTime: 540, dailyEndTime: 1080,
             utcOffset: 14
         });
-        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, true, meta);
+        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, true, meta);
 
         // _localTimeToUtc 헬퍼: 로컬 시각 → UTC 타임스탬프 변환
         // 09:00 UTC+14 = UTC 19:00 previous day
@@ -1796,7 +1802,7 @@ contract TokamonTest is Test {
             dailyStartTime: 540, dailyEndTime: 1080,
             utcOffset: -12
         });
-        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, true, meta);
+        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, true, meta);
 
         // 09:00 UTC-12 = UTC 21:00
         vm.warp(_localTimeToUtc(1700006400, 540, -12));
@@ -1812,7 +1818,7 @@ contract TokamonTest is Test {
         uint64 endDate = 1774051199;   // Mar 20 23:59:59 UTC (UTC 정규화)
         Tokamon.SpotMetadata memory meta = _kstMeta(startDate, endDate, 1320, 360);
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 1800, true, meta
+            1 ether, 5, 1 ether, 1800, true, meta
         );
 
         bytes32 deviceHash = keccak256("nightDevice");
@@ -1852,7 +1858,7 @@ contract TokamonTest is Test {
         uint64 endDate = 1774051199;   // Mar 20 23:59:59 UTC (UTC 정규화)
         Tokamon.SpotMetadata memory meta = _kstMeta(startDate, endDate, 540, 1080);
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 3600, false, meta // allowDuplicateClaims=false
+            1 ether, 5, 1 ether, 3600, false, meta // allowDuplicateClaims=false
         );
 
         bytes32 tgHash = keccak256("noDupTg");
@@ -1880,7 +1886,7 @@ contract TokamonTest is Test {
         uint64 endDate = 1774051199;   // Mar 20 23:59:59 UTC (UTC 정규화)
         Tokamon.SpotMetadata memory meta = _kstMeta(startDate, endDate, 540, 1080);
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 3600, true, meta
+            1 ether, 5, 1 ether, 3600, true, meta
         );
 
         bytes32 tgHash = keccak256("dupTg");
@@ -1918,7 +1924,7 @@ contract TokamonTest is Test {
         uint64 endDate = 1774051199;   // Mar 20 23:59:59 UTC (UTC 정규화)
         Tokamon.SpotMetadata memory meta = _kstMeta(startDate, endDate, 545, 551);
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 3600, true, meta
+            1 ether, 5, 1 ether, 3600, true, meta
         );
 
         bytes32 tgHash = keccak256("sameTg");
@@ -1956,7 +1962,7 @@ contract TokamonTest is Test {
         uint64 endDate = 1774051199;   // Mar 20 23:59:59 UTC (UTC 정규화)
         Tokamon.SpotMetadata memory meta = _kstMeta(startDate, endDate, 540, 1080);
         uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(
-            1 ether, 5, 0, 7200, true, meta
+            1 ether, 5, 1 ether, 7200, true, meta
         );
 
         bytes32 tgHash = keccak256("crossTg");
@@ -2024,15 +2030,15 @@ contract TokamonTest is Test {
 
         // KST (UTC+9) 09:00~18:00 → 로컬 09:00, 활성
         Tokamon.SpotMetadata memory kstMeta = _kstMeta(1700000000, 1800000000, 540, 1080);
-        uint256 kstSpot = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, true, kstMeta);
+        uint256 kstSpot = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, true, kstMeta);
 
         // EST (UTC-5) 09:00~18:00 → 로컬 19:00, 비활성 (1080 이후)
         Tokamon.SpotMetadata memory estMeta = _estMeta(1700000000, 1800000000, 540, 1080);
-        uint256 estSpot = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, true, estMeta);
+        uint256 estSpot = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, true, estMeta);
 
         // UTC+0 09:00~18:00 → 로컬 00:00, 비활성 (540 이전)
         Tokamon.SpotMetadata memory utcMeta = _utcMeta(1700000000, 1800000000, 540, 1080);
-        uint256 utcSpot = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, true, utcMeta);
+        uint256 utcSpot = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, true, utcMeta);
 
         vm.warp(baseTimestamp);
 
@@ -2050,7 +2056,7 @@ contract TokamonTest is Test {
     function test_MidnightBoundaryCrossing() public {
         // KST 야간 23:50~00:10 (매일 20분 운영)
         Tokamon.SpotMetadata memory meta = _kstMeta(1700000000, 1800000000, 1430, 10);
-        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 0, 0, true, meta);
+        uint256 spotId = tokamon.createSpotSelf{value: 10 ether}(1 ether, 5, 1 ether, 0, true, meta);
 
         // _localTimeToUtc 헬퍼로 정확한 UTC 타임스탬프 계산
         // 23:55 KST → minuteOfDay=1435, >= 1430 → active (night shift)

@@ -185,8 +185,10 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         bool allowDuplicateClaims,
         SpotMetadata calldata meta
     ) internal returns (uint256) {
-        if (reward == 0 || depositAmt < reward || stampGoal == 0) revert InvalidInput();
+        if (reward == 0 || depositAmt < reward) revert InvalidInput();
+        if (stampGoal > 0 && stampBonus == 0) revert InvalidInput();
         if (meta.dailyStartTime >= 1440 || meta.dailyEndTime >= 1440) revert InvalidInput();
+        if (meta.startDate > meta.endDate && meta.endDate != 0) revert InvalidInput();
         if (meta.utcOffset < -12 || meta.utcOffset > 14) revert InvalidInput();
 
         uint256 spotId = nextSpotId;
@@ -517,8 +519,10 @@ contract Tokamon is Initializable, UUPSUpgradeable {
         Spot storage spot = spots[spotId];
         if (spot.reward == 0) revert SpotNotFound();
         if (spot.creator != msg.sender) revert NotSpotCreator();
-        if (reward == 0 || stampGoal == 0) revert InvalidInput();
+        if (reward == 0) revert InvalidInput();
+        if (stampGoal > 0 && stampBonus == 0) revert InvalidInput();
         if (meta.dailyStartTime >= 1440 || meta.dailyEndTime >= 1440) revert InvalidInput();
+        if (meta.startDate > meta.endDate && meta.endDate != 0) revert InvalidInput();
         if (meta.utcOffset < -12 || meta.utcOffset > 14) revert InvalidInput();
 
         spot.reward = reward;
