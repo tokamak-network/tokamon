@@ -17,7 +17,9 @@ async function parseJson(res) {
   }
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.error || `API error: ${res.status}`);
+    const err = new Error(data.error || `API error: ${res.status}`);
+    err.data = data;
+    throw err;
   }
   return data;
 }
@@ -59,63 +61,80 @@ export async function getTelegramBalance(telegramUsername) {
   return parseJson(res);
 }
 
-export async function getTelegramLinked(account) {
-  const res = await fetch(withNetwork(`${API_BASE}/telegram/linked/${account}`));
+export async function getTelegramUsername(hash, signature) {
+  const hashHex = hash.startsWith('0x') ? hash.slice(2) : hash;
+  const res = await fetch(withNetwork(`${API_BASE}/telegram/username`), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ hash: hashHex, signature }),
+  });
   return parseJson(res);
 }
 
 // ─── Device API (listener-server direct) ───
 
-export async function requestDeviceCode(fcmToken, spotId, lat, lng) {
+// 푸시 필요: device_id (식별) + fcm_token (푸시 전송)
+export async function requestDeviceCode(deviceId, fcmToken, spotId, lat, lng) {
   const res = await fetch(`${getListenerUrl()}/api/device/request-code`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fcm_token: fcmToken, spot_id: spotId, lat, lng }),
+    body: JSON.stringify({ device_id: deviceId, fcm_token: fcmToken, spot_id: spotId, lat, lng }),
   });
   return parseJson(res);
 }
 
-export async function verifyAndClaimDevice(fcmToken, spotId, code) {
+// 식별만: device_id
+export async function verifyAndClaimDevice(deviceId, spotId, code) {
   const res = await fetch(`${getListenerUrl()}/api/device/verify-and-claim`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fcm_token: fcmToken, spot_id: spotId, code }),
+    body: JSON.stringify({ device_id: deviceId, spot_id: spotId, code }),
   });
   return parseJson(res);
 }
 
-export async function getDeviceBalance(fcmToken) {
+export async function getDeviceStampInfo(deviceId, spotId) {
+  const res = await fetch(`${getListenerUrl()}/api/device/stamp-info`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ device_id: deviceId, spot_id: spotId }),
+  });
+  return parseJson(res);
+}
+
+export async function getDeviceBalance(deviceId) {
   const res = await fetch(`${getListenerUrl()}/api/device/balance`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fcm_token: fcmToken }),
+    body: JSON.stringify({ device_id: deviceId }),
   });
   return parseJson(res);
 }
 
-export async function getDeviceBalanceByListenerUrl(fcmToken, listenerUrl) {
+export async function getDeviceBalanceByListenerUrl(deviceId, listenerUrl) {
   const res = await fetch(`${listenerUrl}/api/device/balance`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fcm_token: fcmToken }),
+    body: JSON.stringify({ device_id: deviceId }),
   });
   return parseJson(res);
 }
 
-export async function requestWalletLinkCode(fcmToken, walletAddress) {
+// 푸시 필요: device_id + fcm_token
+export async function requestWalletLinkCode(deviceId, fcmToken, walletAddress) {
   const res = await fetch(`${getListenerUrl()}/api/device/request-link-code`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fcm_token: fcmToken, wallet_address: walletAddress }),
+    body: JSON.stringify({ device_id: deviceId, fcm_token: fcmToken, wallet_address: walletAddress }),
   });
   return parseJson(res);
 }
 
-export async function verifyAndLinkWallet(fcmToken, walletAddress, code) {
+export async function verifyAndLinkWallet(deviceId, walletAddress, code) {
   const res = await fetch(`${getListenerUrl()}/api/device/verify-and-link`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fcm_token: fcmToken, wallet_address: walletAddress, code }),
+    body: JSON.stringify({ device_id: deviceId, wallet_address: walletAddress, code }),
   });
   return parseJson(res);
 }

@@ -134,7 +134,7 @@ async function sendPushNotification(fcmToken, title, body, data = {}) {
       },
     };
     const result = await admin.messaging().send(message);
-    console.log('[FCM] 푸시 전송 성공:', result);
+    console.log('[FCM] 푸시 전송 성공');
     return true;
   } catch (e) {
     console.error('[FCM] 푸시 전송 실패:', e.message);

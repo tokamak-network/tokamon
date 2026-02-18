@@ -36,6 +36,7 @@ export const translations = {
     times: '회',
     cooldown: '쿨다운',
     hours: '시간',
+    minutes: '분',
     stampGoalAchievement: '스탬프',
     stampGoalAchievement2: '회 달성 시',
 
@@ -109,6 +110,7 @@ export const translations = {
     waitingApproval: '승인 대기 중...',
     stampProgress: '스탬프 {current}/{goal}',
     stampBonusLabel: '달성 시 +{bonus} TON',
+    cannotClaimNow: '현재 발행할 수 없습니다 (시간 또는 잔액)',
     nextClaimIn: '다음 클레임까지 {time}',
     tonExhausted: 'TON 소진',
     activeStatus: '활성중',
@@ -191,6 +193,7 @@ export const translations = {
     times: 'times',
     cooldown: 'Cooldown',
     hours: 'hrs',
+    minutes: 'min',
     stampGoalAchievement: 'Stamp',
     stampGoalAchievement2: 'times bonus',
 
@@ -264,6 +267,7 @@ export const translations = {
     waitingApproval: 'Waiting for approval...',
     stampProgress: 'Stamp {current}/{goal}',
     stampBonusLabel: 'Bonus +{bonus} TON',
+    cannotClaimNow: 'Cannot claim right now (time or balance)',
     nextClaimIn: 'Next claim in {time}',
     tonExhausted: 'TON Exhausted',
     activeStatus: 'Active',

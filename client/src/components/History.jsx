@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { t } from '../translations';
-import { getTelegramBalance, getWalletLinkedTelegram, claimTelegramToWallet, unlinkTelegram, getWalletLinkedDevice, getDeviceBalance, claimDeviceToWallet, unlinkDevice } from '../contract';
+import { getTelegramBalance, getWalletLinkedTelegram, claimTelegramToWallet, unlinkTelegram, getWalletLinkedDevice, getDeviceBalance, claimDeviceToWallet, unlinkDevice, getSignerAndContract } from '../contract';
 import { Spinner } from './Spinner';
 import { getSelectedNetwork } from '../networkStore';
 
@@ -48,10 +48,17 @@ export default function History({ history, balance = 0, account, language = 'ko'
       if (isLinked) {
         setTelegramHash(hash);
 
-        // hash로 직접 username 조회 (0x 제거)
+        // hash로 직접 username 조회 (서명 필수)
         const hashHex = hash.startsWith('0x') ? hash.slice(2) : hash;
         try {
-          const response = await fetch(`/api/telegram/username/${hashHex}?network=${getSelectedNetwork()}`);
+          const message = `Verify telegram username for hash: ${hashHex}`;
+          const { signer } = await getSignerAndContract();
+          const signature = await signer.signMessage(message);
+          const response = await fetch(`/api/telegram/username?network=${getSelectedNetwork()}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hash: hashHex, signature }),
+          });
           const data = await response.json();
           if (data.telegram_username) {
             setLinkedTelegram(data.telegram_username);

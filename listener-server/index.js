@@ -95,6 +95,13 @@ if (!process.env.TELEGRAM_HASH_SALT) {
   console.error('❌ TELEGRAM_HASH_SALT 환경변수가 설정되지 않았습니다. .env 파일을 확인하세요.');
   process.exit(1);
 }
+if (!process.env.DEVICE_HASH_SALT) {
+  console.error('❌ DEVICE_HASH_SALT 환경변수가 설정되지 않았습니다. .env 파일을 확인하세요.');
+  process.exit(1);
+}
+if (process.env.DEVICE_HASH_SALT === process.env.TELEGRAM_HASH_SALT) {
+  console.warn('⚠️  DEVICE_HASH_SALT와 TELEGRAM_HASH_SALT가 동일합니다. 보안을 위해 서로 다른 값을 사용하세요.');
+}
 
 const LISTENER_PORT = process.env.LISTENER_PORT || 3001;
 
@@ -108,10 +115,13 @@ function startHttpServer(db) {
     app.set('trust proxy', 1);
   }
 
-  // 프로덕션 HTTPS 리다이렉트
+  // 프로덕션 HTTPS 강제 (API는 리다이렉트 대신 차단 — HTTP 요청 시 평문 노출 방지)
   if (IS_PROD) {
     app.use((req, res, next) => {
       if (req.headers['x-forwarded-proto'] !== 'https') {
+        if (req.path.startsWith('/api/')) {
+          return res.status(403).json({ error: 'HTTPS required' });
+        }
         return res.redirect(301, 'https://' + req.headers.host + req.url);
       }
       next();
@@ -157,39 +167,7 @@ function startHttpServer(db) {
   // [#8] JSON body size 명시적 제한
   app.use(express.json({ limit: '10kb' }));
 
-  // [#3] Rate Limiting
-  const rateLimitMap = new Map();
-  const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-  const RATE_LIMIT_MAX = 30; // 분당 최대 30회
-
-  // 주기적으로 만료된 rate limit 항목 정리
-  setInterval(() => {
-    const now = Date.now();
-    for (const [ip, entry] of rateLimitMap) {
-      if (now - entry.start > RATE_LIMIT_WINDOW_MS) {
-        rateLimitMap.delete(ip);
-      }
-    }
-  }, RATE_LIMIT_WINDOW_MS);
-
-  app.use((req, res, next) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
-    const now = Date.now();
-    const entry = rateLimitMap.get(ip);
-
-    if (!entry || now - entry.start > RATE_LIMIT_WINDOW_MS) {
-      rateLimitMap.set(ip, { start: now, count: 1 });
-      return next();
-    }
-
-    entry.count++;
-    if (entry.count > RATE_LIMIT_MAX) {
-      return res.status(429).json({ error: '요청이 너무 많습니다.' });
-    }
-    return next();
-  });
-
-  // (notify-claim은 블록체인 이벤트 기반으로 이동 — API 삭제됨)
+  // Rate Limiting: device_id 기준으로 각 엔드포인트에서 개별 적용 (routes/device.js)
 
   // 디바이스 클레임 라우트
   app.use('/api/device', deviceRoutes(db));

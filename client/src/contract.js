@@ -28,7 +28,7 @@ const ABI = [
 let cachedContract = null;
 let cachedSigner = null;
 
-async function getSignerAndContract() {
+export async function getSignerAndContract() {
   if (cachedContract && cachedSigner) return { signer: cachedSigner, contract: cachedContract };
 
   const walletProv = getWalletProvider();

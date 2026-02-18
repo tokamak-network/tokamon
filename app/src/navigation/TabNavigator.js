@@ -33,7 +33,7 @@ function TabIcon({ routeName, focused, color }) {
   );
 }
 
-export default function TabNavigator({ wallet, pushToken, receivedCode, language, networkId, onLanguageChange, onWalletDisconnect, onNetworkChange }) {
+export default function TabNavigator({ wallet, deviceId, pushToken, receivedCode, language, networkId, onLanguageChange, onWalletDisconnect, onNetworkChange }) {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -85,6 +85,7 @@ export default function TabNavigator({ wallet, pushToken, receivedCode, language
           <MapScreen
             {...props}
             wallet={wallet}
+            deviceId={deviceId}
             pushToken={pushToken}
             receivedCode={receivedCode}
             language={language}
@@ -126,6 +127,7 @@ export default function TabNavigator({ wallet, pushToken, receivedCode, language
         {(props) => (
           <WalletScreen
             {...props}
+            deviceId={deviceId}
             pushToken={pushToken}
             receivedCode={receivedCode}
             language={language}

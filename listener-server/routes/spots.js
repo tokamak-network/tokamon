@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error('스팟 목록 에러:', err.message);
-    res.status(500).json({ error: '스팟 목록 조회 실패' });
+    res.status(500).json({ error: 'Failed to fetch spots' });
   }
 });
 
@@ -33,25 +33,25 @@ router.post('/:id/allow-duplicate-claims', async (req, res) => {
     const { allow } = req.body;
 
     if (allow === undefined || allow === null) {
-      return res.status(400).json({ error: 'allow 값을 입력해주세요' });
+      return res.status(400).json({ error: 'allow value is required' });
     }
 
     // 스팟 존재 확인
     const spot = await blockchain.getSpot(spotId);
     if (!spot || spot.reward === 0) {
-      return res.status(404).json({ error: '스팟을 찾을 수 없습니다' });
+      return res.status(404).json({ error: 'Spot not found' });
     }
 
     await blockchain.updateAllowDuplicateClaims(spotId, allow);
 
     res.json({
-      message: `중복 발행 허용 여부가 ${allow ? '활성화' : '비활성화'}되었습니다`,
+      message: `Duplicate claims ${allow ? 'enabled' : 'disabled'}`,
       spot_id: spotId,
       allow_duplicate_claims: allow,
     });
   } catch (err) {
     console.error('중복 발행 설정 에러:', err.message);
-    res.status(500).json({ error: err.message || '중복 발행 설정 실패' });
+    res.status(500).json({ error: err.message || 'Failed to update duplicate claims setting' });
   }
 });
 

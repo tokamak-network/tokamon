@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
-import { getTelegramLinked, getDeviceBalance as getDeviceBalanceApi } from '../services/api';
+import { getTelegramUsername, getDeviceBalance as getDeviceBalanceApi } from '../services/api';
 import {
   getWalletLinkedTelegram,
   getTelegramBalanceContract,
@@ -19,9 +19,10 @@ import {
   getWalletLinkedDevice,
   claimDeviceToWalletContract,
 } from '../services/contract';
+import { getSigner } from '../services/wallet';
 import { t } from '../utils/translations';
 
-export default function HistoryScreen({ wallet, pushToken, language = 'ko', onBalanceChange }) {
+export default function HistoryScreen({ wallet, deviceId, language = 'ko', onBalanceChange }) {
   const [refreshing, setRefreshing] = useState(false);
   // Telegram state
   const [linkedTelegram, setLinkedTelegram] = useState(null);
@@ -38,10 +39,10 @@ export default function HistoryScreen({ wallet, pushToken, language = 'ko', onBa
   const [deviceLinking, setDeviceLinking] = useState(false);
 
   const fetchDeviceInfo = useCallback(async () => {
-    if (!pushToken) return;
+    if (!deviceId) return;
     setDeviceLoading(true);
     try {
-      const data = await getDeviceBalanceApi(pushToken);
+      const data = await getDeviceBalanceApi(deviceId);
       setDeviceBalance(data.balance || 0);
       setDeviceHash(data.device_hash || null);
 
@@ -61,7 +62,7 @@ export default function HistoryScreen({ wallet, pushToken, language = 'ko', onBa
     } finally {
       setDeviceLoading(false);
     }
-  }, [pushToken, wallet]);
+  }, [deviceId, wallet]);
 
   const fetchLinkedTelegram = useCallback(async () => {
     if (!wallet) return;
@@ -74,8 +75,12 @@ export default function HistoryScreen({ wallet, pushToken, language = 'ko', onBa
       if (isLinked) {
         setTelegramHash(hash);
         try {
-          const data = await getTelegramLinked(wallet);
-          if (data.linked && data.telegram_username) {
+          const hashHex = hash.startsWith('0x') ? hash.slice(2) : hash;
+          const message = `Verify telegram username for hash: ${hashHex}`;
+          const signer = getSigner();
+          const signature = await signer.signMessage(message);
+          const data = await getTelegramUsername(hash, signature);
+          if (data.telegram_username) {
             setLinkedTelegram(data.telegram_username);
           } else {
             setLinkedTelegram(t(language, 'connected'));
@@ -152,7 +157,7 @@ export default function HistoryScreen({ wallet, pushToken, language = 'ko', onBa
   };
 
   // 지갑 미연결이지만 디바이스 토큰이 있는 경우
-  if (!wallet && pushToken) {
+  if (!wallet && deviceId) {
     return (
       <ScrollView
         style={styles.container}
@@ -232,7 +237,7 @@ export default function HistoryScreen({ wallet, pushToken, language = 'ko', onBa
       </View>
 
       {/* Device balance section */}
-      {pushToken && (
+      {deviceId && (
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionIcon}>📱</Text>

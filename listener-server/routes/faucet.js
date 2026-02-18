@@ -10,18 +10,18 @@ router.post('/eth', async (req, res) => {
   try {
     const { address } = req.body;
     if (!address) {
-      return res.status(400).json({ error: '지갑 주소가 필요합니다' });
+      return res.status(400).json({ error: 'Wallet address is required' });
     }
 
     await blockchain.sendETH(address, FAUCET_ETH_AMOUNT);
 
     res.json({
-      message: `${FAUCET_ETH_AMOUNT} ETH가 지급되었습니다!`,
+      message: `${FAUCET_ETH_AMOUNT} ETH sent!`,
       amount: FAUCET_ETH_AMOUNT,
     });
   } catch (err) {
     console.error('ETH Faucet 에러:', err.message);
-    res.status(500).json({ error: 'ETH 충전 실패' });
+    res.status(500).json({ error: 'ETH faucet failed' });
   }
 });
 
@@ -30,14 +30,14 @@ router.get('/balance', async (req, res) => {
   try {
     const { address } = req.query;
     if (!address) {
-      return res.status(400).json({ error: '지갑 주소가 필요합니다' });
+      return res.status(400).json({ error: 'Wallet address is required' });
     }
 
     const balance = await blockchain.getBalance(address);
     res.json({ balance });
   } catch (err) {
     console.error('잔액 조회 에러:', err.message);
-    res.status(500).json({ error: '잔액 조회 실패' });
+    res.status(500).json({ error: 'Failed to fetch balance' });
   }
 });
 

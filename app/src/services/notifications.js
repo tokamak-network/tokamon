@@ -1,7 +1,44 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import * as Application from 'expo-application';
+import * as SecureStore from 'expo-secure-store';
 
 const PUSH_TOKEN_KEY = 'fcm_push_token';
+const DEVICE_ID_KEY = 'device_unique_id';
+
+/**
+ * 디바이스 고유 ID 조회 (SecureStore 암호화 저장)
+ * Android: ANDROID_ID (앱 재설치에도 유지)
+ * iOS: identifierForVendor (앱 재설치에도 유지)
+ */
+export async function getDeviceId() {
+  // 캐시된 값이 있으면 재사용
+  try {
+    const saved = await SecureStore.getItemAsync(DEVICE_ID_KEY);
+    if (saved) return saved;
+  } catch (_) {}
+
+  let deviceId;
+  if (Platform.OS === 'android') {
+    deviceId = Application.androidId;
+  } else {
+    deviceId = await Application.getIosIdForVendorsAsync();
+  }
+
+  // fallback (에뮬레이터 등) — crypto 기반 랜덤 값
+  if (!deviceId) {
+    const randomBytes = new Uint8Array(16);
+    crypto.getRandomValues(randomBytes);
+    const hex = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+    deviceId = `fallback_${Platform.OS}_${hex}`;
+  }
+
+  try {
+    await SecureStore.setItemAsync(DEVICE_ID_KEY, deviceId);
+  } catch (_) {}
+
+  console.log('[Device] ID initialized');
+  return deviceId;
+}
 
 // expo-notifications 동적 로드 (설치되지 않은 환경에서도 앱 동작 보장)
 let Notifications = null;
@@ -30,13 +67,12 @@ try {
 }
 
 /**
- * 푸시 알림 권한 요청 + FCM 토큰 발급
- * AsyncStorage에 토큰 저장 (deviceHash 일관성 유지)
+ * 푸시 알림 권한 요청 + FCM 토큰 발급 (SecureStore 암호화 저장)
  */
 export async function registerForPushNotifications() {
   // 이미 저장된 토큰이 있으면 재사용 (단, 대체 토큰이면서 Notifications 사용 가능 시 재발급)
   try {
-    const saved = await AsyncStorage.getItem(PUSH_TOKEN_KEY);
+    const saved = await SecureStore.getItemAsync(PUSH_TOKEN_KEY);
     if (saved && !(saved.startsWith('device_') && Notifications)) {
       return saved;
     }
@@ -57,8 +93,8 @@ export async function registerForPushNotifications() {
         // FCM 네이티브 토큰 사용 (서버에서 admin.messaging().send() 직접 전송)
         const tokenData = await Notifications.getDevicePushTokenAsync();
         const token = tokenData.data;
-        await AsyncStorage.setItem(PUSH_TOKEN_KEY, token);
-        console.log('[Notifications] FCM 토큰 발급:', token.slice(0, 20) + '...');
+        await SecureStore.setItemAsync(PUSH_TOKEN_KEY, token);
+        console.log('[Notifications] FCM 토큰 발급 완료');
         return token;
       }
 
@@ -69,11 +105,14 @@ export async function registerForPushNotifications() {
   }
 
   // 권한 거부, FCM 미지원, 또는 expo-notifications 미설치 시 디바이스 ID 대체
-  const fallbackToken = `device_${Platform.OS}_${Date.now()}`;
+  const randomBytes = new Uint8Array(16);
+  crypto.getRandomValues(randomBytes);
+  const hex = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  const fallbackToken = `device_${Platform.OS}_${hex}`;
   try {
-    await AsyncStorage.setItem(PUSH_TOKEN_KEY, fallbackToken);
+    await SecureStore.setItemAsync(PUSH_TOKEN_KEY, fallbackToken);
   } catch (_) {}
-  console.log('[Notifications] 대체 토큰 사용:', fallbackToken);
+  console.log('[Notifications] 대체 토큰 사용');
   return fallbackToken;
 }
 
@@ -81,7 +120,7 @@ export async function registerForPushNotifications() {
  * 저장된 푸시 토큰 조회
  */
 export async function getSavedPushToken() {
-  return AsyncStorage.getItem(PUSH_TOKEN_KEY);
+  return SecureStore.getItemAsync(PUSH_TOKEN_KEY);
 }
 
 /**
@@ -96,13 +135,12 @@ export function setupNotificationListener(onCodeReceived) {
 
   // 앱이 포그라운드일 때 알림 수신
   const foregroundSub = Notifications.addNotificationReceivedListener((notification) => {
-    console.log('[Notifications] 알림 수신:', JSON.stringify(notification.request.content));
     const data = notification.request.content.data;
     if (data?.type === 'verify_code' && data?.code) {
-      console.log('[Notifications] 인증번호 수신:', data.code, 'spotId:', data.spot_id);
+      console.log('[Notifications] 인증번호 수신, spotId:', data.spot_id);
       onCodeReceived(data.code, data.spot_id);
     } else if (data?.type === 'wallet_link_code' && data?.code) {
-      console.log('[Notifications] 지갑 인증번호 수신:', data.code);
+      console.log('[Notifications] 지갑 인증번호 수신');
       onCodeReceived(data.code, 'wallet_link');
     }
   });

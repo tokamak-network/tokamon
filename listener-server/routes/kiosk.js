@@ -10,12 +10,12 @@ router.post('/balance', async (req, res) => {
     const { phone_number } = req.body;
 
     if (!phone_number) {
-      return res.status(400).json({ error: '핸드폰 번호를 입력해주세요' });
+      return res.status(400).json({ error: 'Phone number is required' });
     }
 
     // 핸드폰 번호 형식 검증
     if (!isValidPhoneNumber(phone_number)) {
-      return res.status(400).json({ error: '올바른 핸드폰 번호 형식이 아닙니다 (예: 01012345678)' });
+      return res.status(400).json({ error: 'Invalid phone number format (e.g. 01012345678)' });
     }
 
     // 핸드폰 번호 해싱
@@ -27,7 +27,7 @@ router.post('/balance', async (req, res) => {
     res.json({ balance });
   } catch (err) {
     console.error('잔액 조회 에러:', err.message);
-    res.status(500).json({ error: err.message || '잔액 조회 실패' });
+    res.status(500).json({ error: err.message || 'Failed to fetch balance' });
   }
 });
 
@@ -37,12 +37,12 @@ router.post('/stamp-info', async (req, res) => {
     const { phone_number, spot_id } = req.body;
 
     if (!phone_number || spot_id == null) {
-      return res.status(400).json({ error: '필수 항목을 입력해주세요' });
+      return res.status(400).json({ error: 'Required fields are missing' });
     }
 
     // 핸드폰 번호 형식 검증
     if (!isValidPhoneNumber(phone_number)) {
-      return res.status(400).json({ error: '올바른 핸드폰 번호 형식이 아닙니다' });
+      return res.status(400).json({ error: 'Invalid phone number format' });
     }
 
     // 핸드폰 번호 해싱
@@ -54,7 +54,7 @@ router.post('/stamp-info', async (req, res) => {
     res.json(stampInfo);
   } catch (err) {
     console.error('스탬프 정보 조회 에러:', err.message);
-    res.status(500).json({ error: err.message || '스탬프 정보 조회 실패' });
+    res.status(500).json({ error: err.message || 'Failed to fetch stamp info' });
   }
 });
 

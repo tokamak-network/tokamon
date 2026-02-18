@@ -26,11 +26,10 @@ import { getAllNetworks, getSelectedNetwork, setSelectedNetwork } from '../utils
 import { WEB_CLIENT_URL, WEB_CUSTOMER_PAGE_URL } from '../utils/constants';
 import { t } from '../utils/translations';
 
-export default function WalletScreen({ pushToken, receivedCode, language = 'ko', networkId, onNetworkChange }) {
+export default function WalletScreen({ deviceId, pushToken, receivedCode, language = 'ko', networkId, onNetworkChange }) {
   const [refreshing, setRefreshing] = useState(false);
   const [networkBalances, setNetworkBalances] = useState({});
   const [balancesLoading, setBalancesLoading] = useState(false);
-  const [deviceHash, setDeviceHash] = useState(null);
   const [linkedWallet, setLinkedWallet] = useState(null);
   const [walletInput, setWalletInput] = useState('');
   const [linkPhase, setLinkPhase] = useState('idle');
@@ -56,17 +55,16 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
 
   // 모든 네트워크의 잔액 조회
   const fetchAllBalances = useCallback(async () => {
-    if (!pushToken) return;
+    if (!deviceId) return;
     setBalancesLoading(true);
     const balances = {};
     await Promise.all(
       networks.map(async (net) => {
         try {
-          const data = await getDeviceBalanceByListenerUrl(pushToken, net.listenerUrl);
+          const data = await getDeviceBalanceByListenerUrl(deviceId, net.listenerUrl);
           balances[net.id] = data.balance || 0;
-          // 현재 네트워크의 device_hash + linked_wallet 저장
+          // 현재 네트워크의 linked_wallet 저장
           if (net.id === getSelectedNetwork()) {
-            setDeviceHash(data.device_hash || null);
             if (data.linked_wallet) {
               setLinkedWallet(data.linked_wallet);
             }
@@ -78,7 +76,7 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
     );
     setNetworkBalances(balances);
     setBalancesLoading(false);
-  }, [pushToken, networkId]);
+  }, [deviceId, networkId]);
 
   useEffect(() => {
     fetchAllBalances();
@@ -115,7 +113,7 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
     setWalletInputError('');
     setLinkPhase('requesting');
     try {
-      await requestWalletLinkCode(pushToken, addr);
+      await requestWalletLinkCode(deviceId, pushToken, addr);
       // 인증번호는 푸시로만 전달됨 → 푸시 수신 시 자동 검증
       setLinkPhase('waiting_code');
     } catch (err) {
@@ -127,7 +125,7 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
   const handleVerifyLink = async (code) => {
     setLinkPhase('verifying');
     try {
-      const result = await verifyAndLinkWallet(pushToken, walletInput.trim(), code);
+      const result = await verifyAndLinkWallet(deviceId, walletInput.trim(), code);
       if (result.success) {
         setLinkedWallet(walletInput.trim());
         setWalletInput('');
@@ -158,7 +156,7 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
       }
     >
       {/* Total Balance Card */}
-      {pushToken && (
+      {deviceId && (
         <View style={styles.totalBalanceCard}>
           <View style={styles.balanceHeaderRow}>
             <Text style={styles.totalBalanceLabel}>{t(language, 'deviceBalance')}</Text>
@@ -180,7 +178,7 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
       )}
 
       {/* TON Claim Guide */}
-      {pushToken && (
+      {deviceId && (
         <TouchableOpacity
           style={styles.claimGuideCard}
           onPress={() => Linking.openURL(WEB_CUSTOMER_PAGE_URL)}
@@ -193,7 +191,7 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
 
 
       {/* Multiverse Balances */}
-      {pushToken && (
+      {deviceId && (
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionIcon}>🌐</Text>
@@ -234,7 +232,7 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
       )}
 
       {/* Device Wallet Registration */}
-      {pushToken && (
+      {deviceId && (
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionIcon}>🔐</Text>

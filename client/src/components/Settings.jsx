@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { t } from '../translations';
 import { getSelectedNetwork, setSelectedNetwork, getAllNetworks } from '../networkStore';
+import { getWalletLinkedTelegram } from '../contract';
 
 function withNetwork(url) {
   const networkId = getSelectedNetwork();
@@ -24,11 +25,10 @@ export default function Settings({ onClose, account, language, onLanguageChange,
 
     setLoading(true);
     try {
-      const response = await fetch(withNetwork(`/api/telegram/linked/${account}`));
-      const data = await response.json();
-
-      if (data.linked && data.telegram_hash) {
-        setLinkedTelegram(data.telegram_hash);
+      const hash = await getWalletLinkedTelegram(account);
+      const zeroHash = '0x' + '0'.repeat(64);
+      if (hash && hash !== zeroHash) {
+        setLinkedTelegram(hash);
       } else {
         setLinkedTelegram(null);
       }

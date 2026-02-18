@@ -10,7 +10,7 @@ import { EthersAdapter } from '@reown/appkit-ethers-react-native';
 import TabNavigator from './src/navigation/TabNavigator';
 import IntroScreen from './src/screens/IntroScreen';
 import { initWallet, onWalletChange } from './src/services/wallet';
-import { registerForPushNotifications, setupNotificationListener } from './src/services/notifications';
+import { registerForPushNotifications, setupNotificationListener, getDeviceId } from './src/services/notifications';
 import { initNetwork, onNetworkChange, getAllNetworks } from './src/utils/networkStore';
 import { WALLETCONNECT_PROJECT_ID } from './src/utils/constants';
 
@@ -101,6 +101,7 @@ export default function App() {
   const [wallet, setWallet] = useState(null);
   const [language, setLanguage] = useState('ko');
   const [pushToken, setPushToken] = useState(null);
+  const [deviceId, setDeviceId] = useState(null);
   const [receivedCode, setReceivedCode] = useState(null);
   const [networkId, setNetworkId] = useState('local');
 
@@ -118,15 +119,15 @@ export default function App() {
       setWallet(address);
     });
 
-    // FCM 푸시 토큰 발급 (항상 토큰 반환 보장)
+    // 디바이스 고유 ID 조회 (ANDROID_ID / IDFV)
+    getDeviceId().then((id) => setDeviceId(id));
+
+    // FCM 푸시 토큰 발급 (푸시 알림 전송용)
     registerForPushNotifications()
       .then((token) => {
         if (token) setPushToken(token);
       })
-      .catch(() => {
-        const fallback = `device_fallback_${Date.now()}`;
-        setPushToken(fallback);
-      });
+      .catch(() => {});
 
     // FCM 알림 수신 리스너 (인증번호 자동 채우기)
     const cleanupNotifications = setupNotificationListener((code, spotId) => {
@@ -175,6 +176,7 @@ export default function App() {
             <StatusBar style="light" />
             <TabNavigator
               wallet={wallet}
+              deviceId={deviceId}
               pushToken={pushToken}
               receivedCode={receivedCode}
               language={language}

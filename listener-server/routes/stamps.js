@@ -10,12 +10,12 @@ router.get('/:spotId', async (req, res) => {
     const { user_address } = req.query;
 
     if (!user_address) {
-      return res.status(400).json({ error: 'user_address가 필요합니다' });
+      return res.status(400).json({ error: 'user_address is required' });
     }
 
     const spot = await blockchain.getSpot(spotId);
     if (!spot || spot.reward === 0) {
-      return res.status(404).json({ error: '스팟을 찾을 수 없습니다' });
+      return res.status(404).json({ error: 'Spot not found' });
     }
 
     const info = await blockchain.getStampInfo(spotId, user_address);
@@ -32,7 +32,7 @@ router.get('/:spotId', async (req, res) => {
     });
   } catch (err) {
     console.error('스탬프 조회 에러:', err.message);
-    res.status(500).json({ error: '스탬프 조회 실패' });
+    res.status(500).json({ error: 'Failed to fetch stamp info' });
   }
 });
 

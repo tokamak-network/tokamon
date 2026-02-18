@@ -9,7 +9,7 @@ import {
   PanResponder,
   Platform,
 } from 'react-native';
-import { getStampInfo } from '../services/api';
+import { getStampInfo, getDeviceStampInfo } from '../services/api';
 import StampProgress from './StampProgress';
 import ClaimButton from './ClaimButton';
 import { t } from '../utils/translations';
@@ -28,7 +28,7 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-export default function SpotDetailSheet({ spot, userPos, wallet, pushToken, receivedCode, onClose, onClaimed, language = 'ko' }) {
+export default function SpotDetailSheet({ spot, userPos, wallet, deviceId, pushToken, receivedCode, onClose, onClaimed, language = 'ko' }) {
   const [stampInfo, setStampInfo] = useState(null);
   const translateY = useState(new Animated.Value(SHEET_HEIGHT))[0];
 
@@ -41,7 +41,11 @@ export default function SpotDetailSheet({ spot, userPos, wallet, pushToken, rece
         friction: 9,
       }).start();
 
-      if (wallet) {
+      if (deviceId) {
+        getDeviceStampInfo(deviceId, spot.id)
+          .then(setStampInfo)
+          .catch(() => setStampInfo(null));
+      } else if (wallet) {
         getStampInfo(spot.id, wallet)
           .then(setStampInfo)
           .catch(() => setStampInfo(null));
@@ -53,7 +57,7 @@ export default function SpotDetailSheet({ spot, userPos, wallet, pushToken, rece
         useNativeDriver: true,
       }).start();
     }
-  }, [spot, wallet]);
+  }, [spot, wallet, deviceId]);
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
@@ -173,11 +177,13 @@ export default function SpotDetailSheet({ spot, userPos, wallet, pushToken, rece
         spot={spot}
         distance={distance}
         userPos={userPos}
+        deviceId={deviceId}
         pushToken={pushToken}
         receivedCode={receivedCode}
         isOwner={isOwner}
         isExhausted={isExhausted}
         isOnCooldown={isOnCooldown}
+        cooldownLeft={cooldownLeft}
         onClaimed={onClaimed}
         language={language}
       />
