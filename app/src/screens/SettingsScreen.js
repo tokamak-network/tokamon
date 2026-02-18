@@ -15,16 +15,25 @@ import * as Location from 'expo-location';
 import { disconnectWallet } from '../services/wallet';
 import { t } from '../utils/translations';
 import { setSelectedNetwork, getAllNetworks } from '../utils/networkStore';
+import { INITIAL_POS_LAT, INITIAL_POS_LON } from '../utils/constants';
 
 export default function SettingsScreen({ wallet, language, networkId: currentNetworkId, onLanguageChange, onWalletDisconnect, onNetworkChange }) {
   const [userPos, setUserPos] = useState(null);
 
   useEffect(() => {
     (async () => {
+      const envPos = { lat: INITIAL_POS_LAT, lng: INITIAL_POS_LON };
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return;
-      const loc = await Location.getCurrentPositionAsync({});
-      setUserPos({ lat: loc.coords.latitude, lng: loc.coords.longitude });
+      if (status !== 'granted') {
+        setUserPos(envPos);
+        return;
+      }
+      try {
+        const loc = await Location.getCurrentPositionAsync({});
+        setUserPos({ lat: loc.coords.latitude, lng: loc.coords.longitude });
+      } catch {
+        setUserPos(envPos);
+      }
     })();
   }, []);
 

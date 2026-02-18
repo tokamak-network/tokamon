@@ -21,15 +21,19 @@ export async function getDeviceId() {
   if (Platform.OS === 'android') {
     deviceId = Application.androidId;
   } else {
-    deviceId = await Application.getIosIdForVendorsAsync();
+    deviceId = await Application.getIosIdForVendorAsync();
   }
 
-  // fallback (에뮬레이터 등) — crypto 기반 랜덤 값
+  // fallback (에뮬레이터 등) — 랜덤 값
   if (!deviceId) {
-    const randomBytes = new Uint8Array(16);
-    crypto.getRandomValues(randomBytes);
-    const hex = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
-    deviceId = `fallback_${Platform.OS}_${hex}`;
+    try {
+      const randomBytes = new Uint8Array(16);
+      crypto.getRandomValues(randomBytes);
+      const hex = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+      deviceId = `fallback_${Platform.OS}_${hex}`;
+    } catch (_) {
+      deviceId = `fallback_${Platform.OS}_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    }
   }
 
   try {

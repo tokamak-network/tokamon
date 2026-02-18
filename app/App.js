@@ -120,7 +120,9 @@ export default function App() {
     });
 
     // 디바이스 고유 ID 조회 (ANDROID_ID / IDFV)
-    getDeviceId().then((id) => setDeviceId(id));
+    getDeviceId()
+      .then((id) => { if (id) setDeviceId(id); })
+      .catch((err) => console.error('[App] getDeviceId failed:', err));
 
     // FCM 푸시 토큰 발급 (푸시 알림 전송용)
     registerForPushNotifications()

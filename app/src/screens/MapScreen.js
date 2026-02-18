@@ -16,10 +16,11 @@ import SpotDetailSheet from '../components/SpotDetailSheet';
 import NetworkSelector from '../components/NetworkSelector';
 import { t } from '../utils/translations';
 import { isWithinActiveTime, isSpotClosed } from '../utils/spotUtils';
+import { INITIAL_POS_LAT, INITIAL_POS_LON } from '../utils/constants';
 
 const DEFAULT_REGION = {
-  latitude: 37.495,
-  longitude: 127.063,
+  latitude: INITIAL_POS_LAT,
+  longitude: INITIAL_POS_LON,
   latitudeDelta: 0.01,
   longitudeDelta: 0.01,
 };

@@ -21,6 +21,9 @@ export const WEB_CLIENT_URL = process.env.EXPO_PUBLIC_WEB_CLIENT_URL
 export const WEB_CUSTOMER_PAGE_URL = process.env.EXPO_PUBLIC_WEB_CUSTOMER_PAGE_URL
   || 'https://go.tokamon.io';
 
+export const INITIAL_POS_LAT = parseFloat(process.env.EXPO_PUBLIC_INITIAL_POS_LAT) || 37.495;
+export const INITIAL_POS_LON = parseFloat(process.env.EXPO_PUBLIC_INITIAL_POS_LON) || 127.063;
+
 // Contract ABI for client-side calls
 export const TOKAMON_ABI = [
   'function createSpotSelf(uint256 reward, uint128 stampGoal, uint128 stampBonus, uint48 cooldown, bool allowDuplicateClaims, tuple(string name, string description, int96 lat, int96 lng, uint64 startDate, uint64 endDate, uint16 dailyStartTime, uint16 dailyEndTime, int8 utcOffset) meta) payable returns (uint256)',
