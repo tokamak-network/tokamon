@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { TouchableOpacity, Text, View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, Text, View, StyleSheet, Alert, ActivityIndicator, Modal } from 'react-native';
 import { requestDeviceCode, verifyAndClaimDevice } from '../services/api';
 import { COLLECT_RADIUS } from '../utils/constants';
 import { t } from '../utils/translations';
@@ -20,6 +20,7 @@ export default function ClaimButton({
   const [claiming, setClaiming] = useState(false);
   const [claimPhase, setClaimPhase] = useState('idle'); // idle → requesting → waiting_code → verifying
   const [remainingCooldown, setRemainingCooldown] = useState(cooldownLeft);
+  const [showWalletWarning, setShowWalletWarning] = useState(false);
   const pendingSpotId = useRef(null);
 
   // 실시간 카운트다운
@@ -53,11 +54,9 @@ export default function ClaimButton({
       const total = (result.reward || 0) + (result.bonus || 0);
       Alert.alert('', t(language, 'claimSuccess').replace('{amount}', total.toFixed(4)));
 
-      // 지갑 미연결 시 경고
+      // 지갑 미연결 시 커스텀 모달 경고
       if (!result.has_linked_wallet) {
-        setTimeout(() => {
-          Alert.alert('', t(language, 'walletLinkWarning'));
-        }, 500);
+        setTimeout(() => setShowWalletWarning(true), 600);
       }
 
       setClaimPhase('idle');
@@ -78,10 +77,41 @@ export default function ClaimButton({
     }
   };
 
+  const walletWarningModal = (
+    <Modal
+      visible={showWalletWarning}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setShowWalletWarning(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalCard}>
+          <View style={styles.modalIconWrap}>
+            <Text style={styles.modalIcon}>🔐</Text>
+          </View>
+          <Text style={styles.modalTitle}>{t(language, 'walletWarningTitle')}</Text>
+          <Text style={styles.modalBody}>{t(language, 'walletWarningBody')}</Text>
+          <View style={styles.modalActionBox}>
+            <Text style={styles.modalActionIcon}>💡</Text>
+            <Text style={styles.modalActionText}>{t(language, 'walletWarningAction')}</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.modalBtn}
+            onPress={() => setShowWalletWarning(false)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.modalBtnText}>{t(language, 'confirm')}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+
   // 쿨다운 중: 비활성 버튼 + 남은 시간 표시
   if (isCoolingDown) {
     return (
       <View>
+        {walletWarningModal}
         <View style={[styles.button, styles.buttonCooldown]}>
           <View style={styles.buttonInner}>
             <Text style={styles.buttonText}>⏳ {t(language, 'cooldown')}</Text>
@@ -94,7 +124,7 @@ export default function ClaimButton({
     );
   }
 
-  if (!canClaim) return null;
+  if (!canClaim) return showWalletWarning ? walletWarningModal : null;
 
   const withinRange = distance === null || distance <= COLLECT_RADIUS;
 
@@ -145,6 +175,7 @@ export default function ClaimButton({
   if (claimPhase === 'requesting' || claimPhase === 'verifying' || claimPhase === 'waiting_code') {
     return (
       <View>
+        {walletWarningModal}
         <View style={[styles.button, styles.buttonDisabled]}>
           <View style={styles.buttonInner}>
             <View style={styles.loadingRow}>
@@ -174,6 +205,7 @@ export default function ClaimButton({
 
   return (
     <View>
+      {walletWarningModal}
       <TouchableOpacity
         style={[styles.button, !withinRange && styles.buttonDisabled]}
         onPress={handlePress}
@@ -284,5 +316,96 @@ const styles = StyleSheet.create({
   cancelBtnText: {
     color: '#888',
     fontSize: 13,
+  },
+  // 지갑 등록 안내 모달
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 28,
+  },
+  modalCard: {
+    backgroundColor: '#1a1a2e',
+    borderRadius: 24,
+    paddingTop: 28,
+    paddingBottom: 20,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 340,
+    borderWidth: 1,
+    borderColor: 'rgba(251,191,36,0.15)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 24,
+    elevation: 10,
+  },
+  modalIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(251,191,36,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalIcon: {
+    fontSize: 28,
+  },
+  modalTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+    marginBottom: 12,
+  },
+  modalBody: {
+    color: '#aaa',
+    fontSize: 14,
+    lineHeight: 22,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  modalActionBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(16,185,129,0.1)',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(16,185,129,0.15)',
+    width: '100%',
+  },
+  modalActionIcon: {
+    fontSize: 16,
+  },
+  modalActionText: {
+    color: '#10b981',
+    fontSize: 13,
+    fontWeight: '700',
+    flex: 1,
+  },
+  modalBtn: {
+    backgroundColor: '#fbbf24',
+    borderRadius: 14,
+    paddingVertical: 14,
+    width: '100%',
+    alignItems: 'center',
+    shadowColor: '#fbbf24',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  modalBtnText: {
+    color: '#1a1a2e',
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
 });
