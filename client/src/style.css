@@ -1528,244 +1528,195 @@ button.secondary {
 .settings-content {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
-}
-
-.settings-section {
-  margin-bottom: 32px;
-}
-
-.settings-section:last-child {
-  margin-bottom: 0;
-}
-
-.settings-section h3 {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #fff;
-}
-
-.settings-desc {
-  font-size: 13px;
-  color: #888;
-  margin-bottom: 16px;
-  line-height: 1.5;
-}
-
-.settings-input-group {
-  margin-bottom: 16px;
-}
-
-.settings-input-group label {
-  display: block;
-  font-size: 13px;
-  color: #aaa;
-  margin-bottom: 8px;
-  font-weight: 500;
-}
-
-.settings-input-group input {
-  width: 100%;
-  padding: 12px 16px;
-  border-radius: 10px;
-  border: 1px solid #333;
-  background: #222;
-  color: #fff;
-  font-size: 15px;
-  outline: none;
-  transition: all 0.2s;
-}
-
-.settings-input-group input:focus {
-  border-color: #3b82f6;
-  background: #2a2a2a;
-}
-
-.settings-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.btn-save,
-.btn-clear {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-save {
-  background: #3b82f6;
-  color: #fff;
-}
-
-.btn-save:active {
-  background: #2563eb;
-}
-
-.btn-clear {
-  background: #333;
-  color: #ccc;
-}
-
-.btn-clear:active {
-  background: #444;
-}
-
-.settings-saved-message {
-  background: #166534;
-  color: #4ade80;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-bottom: 16px;
-  text-align: center;
-  font-weight: 500;
-}
-
-/* 설정 - 텔레그램 연결 상태 */
-.settings-linked-telegram,
-.settings-no-telegram {
-  background: #222;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 16px;
-}
-
-.linked-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.status-icon {
-  font-size: 16px;
-}
-
-.status-text {
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-}
-
-.linked-hash {
-  font-size: 12px;
-  color: #888;
-  font-family: 'Courier New', monospace;
-  padding: 8px;
-  background: #1a1a1a;
-  border-radius: 6px;
-}
-
-/* 텔레그램 가이드 */
-.telegram-guide {
-  background: #1a1a2e;
-  border-left: 3px solid #0088cc;
-  border-radius: 8px;
-  padding: 14px;
-}
-
-.guide-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #0088cc;
-  margin-bottom: 10px;
-}
-
-.guide-steps {
-  margin-left: 18px;
-  font-size: 13px;
-  line-height: 2;
-  color: #e5e5e5;
-}
-
-.guide-steps li {
-  margin-bottom: 6px;
-}
-
-.guide-steps code {
-  background: #0d1117;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-  color: #4ade80;
-  font-weight: 600;
-}
-
-.wallet-code {
-  display: inline-block;
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* 간단한 언어 선택 */
-.settings-section-compact {
-  margin-bottom: 20px;
-}
-
-.language-selector-compact {
-  display: flex;
-  gap: 8px;
-}
-
-.lang-btn-compact {
-  flex: 1;
-  padding: 8px 12px;
-  background: #222;
-  border: 1px solid #333;
-  border-radius: 8px;
-  color: #ccc;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.lang-btn-compact:hover {
-  background: #2a2a2a;
-  border-color: #444;
-}
-
-.lang-btn-compact.active {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: #fff;
-  font-weight: 600;
-}
-
-.settings-info {
-  background: #222;
-  border-radius: 10px;
   padding: 16px;
 }
 
-.info-row {
+/* Settings card (모바일 앱 디자인 통일) */
+.s-card {
+  background: #12122a;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(167, 139, 250, 0.08);
+}
+
+.s-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.2px;
+}
+
+.s-card-icon {
+  font-size: 17px;
+}
+
+/* Wallet */
+.s-wallet-addr {
+  color: #aaa;
+  font-size: 12px;
+  font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+  word-break: break-all;
+  line-height: 1.6;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Language */
+.s-lang-row {
+  display: flex;
+  gap: 10px;
+}
+
+.s-lang-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #777;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.s-lang-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.s-lang-active {
+  background: rgba(79, 195, 247, 0.15);
+  border-color: rgba(79, 195, 247, 0.4);
+  color: #4FC3F7;
+  font-weight: 700;
+}
+
+.s-lang-flag {
+  font-size: 17px;
+}
+
+.s-check {
+  color: #4FC3F7;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.s-check-green {
+  color: #10b981;
+}
+
+/* Network / Multiverse */
+.s-network-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.s-network-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  width: 100%;
+  color: inherit;
+  font-size: inherit;
+}
+
+.s-network-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.s-network-active {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.s-network-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.s-dot-active {
+  background: #10b981;
+}
+
+.s-dot-inactive {
+  background: #555;
+}
+
+.s-network-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.s-network-name {
+  display: block;
+  color: #777;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.s-network-name-active {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.s-network-chain {
+  display: block;
+  color: #555;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+/* Info */
+.s-info-row {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  font-size: 14px;
+  align-items: center;
 }
 
-.info-row:not(:last-child) {
-  border-bottom: 1px solid #333;
-}
-
-.info-row span:first-child {
-  color: #888;
-}
-
-.info-row span:last-child {
-  color: #fff;
+.s-info-label {
+  color: #777;
+  font-size: 13px;
   font-weight: 500;
+}
+
+.s-info-value-badge {
+  background: rgba(255, 255, 255, 0.04);
+  padding: 3px 10px;
+  border-radius: 6px;
+  color: #ccc;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.s-powered {
+  text-align: center;
+  color: #444;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  padding: 16px 0 4px;
 }
 
 /* 지갑 연결 요청 안내 */

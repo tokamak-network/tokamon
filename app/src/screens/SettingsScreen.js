@@ -198,7 +198,7 @@ export default function SettingsScreen({ wallet, language, networkId: currentNet
         <View style={[styles.infoRow, styles.infoRowLast]}>
           <Text style={styles.infoLabel}>{t(language, 'version')}</Text>
           <View style={styles.infoValueBadge}>
-            <Text style={styles.infoValue}>1.0.0</Text>
+            <Text style={styles.infoValue}>0.1.0</Text>
           </View>
         </View>
       </View>

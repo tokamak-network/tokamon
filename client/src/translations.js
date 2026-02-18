@@ -61,7 +61,7 @@ export const translations = {
     
     // 내 토카몬
     walletAddress: '지갑 주소',
-    telegramAccount: 'Linked Telegram Username',
+    telegramAccount: '텔레그램 유저네임',
     telegramName: '텔레그램 이름',
     telegramConnected: '연결됨',
     telegramNotConnected: '연결 안됨',
@@ -123,7 +123,7 @@ export const translations = {
     network: '네트워크',
     myWallet: '내 지갑',
     loading: '조회 중...',
-    telegramAccountLink: '텔레그램 계정 연결',
+    telegramAccountLink: '텔레그램 유저네임 링크',
     connected: '연결됨',
     notConnected: '연결 안됨',
     connectionGuide: '연결 방법',
@@ -437,7 +437,7 @@ export const translations = {
     network: 'Network',
     myWallet: 'My Wallet',
     loading: 'Loading...',
-    telegramAccountLink: 'Telegram Account Link',
+    telegramAccountLink: 'Telegram Username Link',
     connected: 'Connected',
     notConnected: 'Not Connected',
     connectionGuide: 'How to Link',

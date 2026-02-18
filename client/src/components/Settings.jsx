@@ -1,43 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { t } from '../translations';
 import { getSelectedNetwork, setSelectedNetwork, getAllNetworks } from '../networkStore';
-import { getWalletLinkedTelegram } from '../contract';
-
-function withNetwork(url) {
-  const networkId = getSelectedNetwork();
-  const sep = url.includes('?') ? '&' : '?';
-  return `${url}${sep}network=${networkId}`;
-}
 
 export default function Settings({ onClose, account, language, onLanguageChange, onNetworkChange }) {
-  const [linkedTelegram, setLinkedTelegram] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const currentNetworkId = getSelectedNetwork();
 
-  // 연결된 텔레그램 ID 조회
-  useEffect(() => {
-    if (account) {
-      fetchLinkedTelegram();
-    }
-  }, [account]);
-
-  const fetchLinkedTelegram = async () => {
-    if (!account) return;
-
-    setLoading(true);
-    try {
-      const hash = await getWalletLinkedTelegram(account);
-      const zeroHash = '0x' + '0'.repeat(64);
-      if (hash && hash !== zeroHash) {
-        setLinkedTelegram(hash);
-      } else {
-        setLinkedTelegram(null);
-      }
-    } catch (err) {
-      console.error('텔레그램 연결 조회 실패:', err);
-      setLinkedTelegram(null);
-    } finally {
-      setLoading(false);
-    }
+  const handleNetworkChange = (id) => {
+    setSelectedNetwork(id);
+    if (onNetworkChange) onNetworkChange(id);
   };
 
   return (
@@ -49,100 +19,83 @@ export default function Settings({ onClose, account, language, onLanguageChange,
         </div>
 
         <div className="settings-content">
-          <div className="settings-section">
-            <h3>{t(language, 'telegramAccountLink')}</h3>
-
-            {account && (
-              <>
-                {loading ? (
-                  <div className="settings-loading">{t(language, 'loading')}</div>
-                ) : linkedTelegram ? (
-                  <div className="settings-linked-telegram">
-                    <div className="linked-status">
-                      <span className="status-icon">✅</span>
-                      <span className="status-text">{t(language, 'connected')}</span>
-                    </div>
-                    <div className="linked-hash">
-                      {linkedTelegram.slice(0, 8)}...{linkedTelegram.slice(-8)}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="settings-no-telegram">
-                    <div className="linked-status">
-                      <span className="status-icon">❌</span>
-                      <span className="status-text">{t(language, 'notConnected')}</span>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-
-            <div className="telegram-guide">
-              <div className="guide-title">💡 {t(language, 'connectionGuide')}</div>
-              <ol className="guide-steps">
-                <li>{t(language, 'guideStep1')} <code>@TokamonBot</code> {t(language, 'guideStep1_2')}</li>
-                <li><code>/start</code> {t(language, 'guideStep2')}</li>
-                <li><code>/link</code> {t(language, 'guideStep3')}</li>
-                <li>{t(language, 'guideStep4')} <code className="wallet-code">{account ? `${account.slice(0, 10)}...` : t(language, 'walletRequired')}</code></li>
-              </ol>
+          {/* My Wallet */}
+          {account && (
+            <div className="s-card">
+              <div className="s-card-title">
+                <span className="s-card-icon">💳</span>
+                <span>{t(language, 'myWallet')}</span>
+              </div>
+              <div className="s-wallet-addr">{account}</div>
             </div>
-          </div>
+          )}
 
-          <div className="settings-section settings-section-compact">
-            <h3>{t(language, 'languageSettings')}</h3>
-
-            <div className="language-selector-compact">
+          {/* Language */}
+          <div className="s-card">
+            <div className="s-card-title">
+              <span className="s-card-icon">🌐</span>
+              <span>{t(language, 'languageSettings')}</span>
+            </div>
+            <div className="s-lang-row">
               <button
-                className={`lang-btn-compact ${language === 'ko' ? 'active' : ''}`}
+                className={`s-lang-btn ${language === 'ko' ? 's-lang-active' : ''}`}
                 onClick={() => onLanguageChange('ko')}
               >
-                한국어
+                <span className="s-lang-flag">🇰🇷</span>
+                <span>한국어</span>
+                {language === 'ko' && <span className="s-check">✓</span>}
               </button>
               <button
-                className={`lang-btn-compact ${language === 'en' ? 'active' : ''}`}
+                className={`s-lang-btn ${language === 'en' ? 's-lang-active' : ''}`}
                 onClick={() => onLanguageChange('en')}
               >
-                English
+                <span className="s-lang-flag">🇺🇸</span>
+                <span>English</span>
+                {language === 'en' && <span className="s-check">✓</span>}
               </button>
             </div>
           </div>
 
-          <div className="settings-section">
-            <h3>{t(language, 'network')}</h3>
-            <div className="network-selector">
-              {getAllNetworks().map((net) => (
-                <button
-                  key={net.id}
-                  className={`lang-btn-compact ${getSelectedNetwork() === net.id ? 'active' : ''}`}
-                  onClick={() => {
-                    if (onNetworkChange) onNetworkChange(net.id);
-                  }}
-                >
-                  {net.name}
-                </button>
-              ))}
+          {/* Multiverse */}
+          <div className="s-card">
+            <div className="s-card-title">
+              <span className="s-card-icon">🌐</span>
+              <span>Multiverse</span>
+            </div>
+            <div className="s-network-list">
+              {getAllNetworks().map((net) => {
+                const isActive = currentNetworkId === net.id;
+                return (
+                  <button
+                    key={net.id}
+                    className={`s-network-item ${isActive ? 's-network-active' : ''}`}
+                    onClick={() => handleNetworkChange(net.id)}
+                  >
+                    <span className={`s-network-dot ${isActive ? 's-dot-active' : 's-dot-inactive'}`} />
+                    <div className="s-network-info">
+                      <span className={`s-network-name ${isActive ? 's-network-name-active' : ''}`}>{net.name}</span>
+                      <span className="s-network-chain">Chain ID: {net.chainId}</span>
+                    </div>
+                    {isActive && <span className="s-check s-check-green">✓</span>}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <div className="settings-section">
-            <h3>{t(language, 'information')}</h3>
-            <div className="settings-info">
-              <div className="info-row">
-                <span>{t(language, 'version')}</span>
-                <span>1.0.0</span>
-              </div>
-              <div className="info-row">
-                <span>{t(language, 'network')}</span>
-                <span>{getAllNetworks().find(n => n.id === getSelectedNetwork())?.name || getSelectedNetwork()}</span>
-              </div>
-              {account && (
-                <div className="info-row">
-                  <span>{t(language, 'myWallet')}</span>
-                  <span>{account.slice(0, 6)}...{account.slice(-4)}</span>
-                </div>
-              )}
+          {/* Information */}
+          <div className="s-card">
+            <div className="s-card-title">
+              <span className="s-card-icon">ℹ️</span>
+              <span>{t(language, 'information')}</span>
+            </div>
+            <div className="s-info-row">
+              <span className="s-info-label">{t(language, 'version')}</span>
+              <span className="s-info-value-badge">0.1.0</span>
             </div>
           </div>
+
+          <div className="s-powered">Powered by Tokamak Network</div>
         </div>
       </div>
     </div>

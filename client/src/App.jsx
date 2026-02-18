@@ -693,7 +693,6 @@ export default function App() {
           onLanguageChange={changeLanguage}
           onNetworkChange={(id) => {
             handleNetworkSwitch(id);
-            setShowSettings(false);
             refreshSpots();
           }}
           onClose={() => {
