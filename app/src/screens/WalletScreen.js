@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,16 +11,19 @@ import {
   ActivityIndicator,
   Platform,
   Linking,
+  KeyboardAvoidingView,
+  Keyboard,
 } from 'react-native';
-import * as Location from 'expo-location';
+import * as Clipboard from 'expo-clipboard';
+import Svg, { Path, Rect } from 'react-native-svg';
 import {
   getDeviceBalance as getDeviceBalanceApi,
   getDeviceBalanceByListenerUrl,
   requestWalletLinkCode,
   verifyAndLinkWallet,
 } from '../services/api';
-import { getAllNetworks, getSelectedNetwork } from '../utils/networkStore';
-import { WEB_CLIENT_URL } from '../utils/constants';
+import { getAllNetworks, getSelectedNetwork, setSelectedNetwork } from '../utils/networkStore';
+import { WEB_CLIENT_URL, WEB_CUSTOMER_PAGE_URL } from '../utils/constants';
 import { t } from '../utils/translations';
 
 export default function WalletScreen({ pushToken, receivedCode, language = 'ko', networkId, onNetworkChange }) {
@@ -28,23 +31,28 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
   const [networkBalances, setNetworkBalances] = useState({});
   const [balancesLoading, setBalancesLoading] = useState(false);
   const [deviceHash, setDeviceHash] = useState(null);
-  const [userPos, setUserPos] = useState(null);
   const [linkedWallet, setLinkedWallet] = useState(null);
   const [walletInput, setWalletInput] = useState('');
-  const [linkPhase, setLinkPhase] = useState('idle'); // idle | requesting | waiting_code | verifying
+  const [linkPhase, setLinkPhase] = useState('idle');
+  const scrollRef = useRef(null);
+  const inputRef = useRef(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      () => setKeyboardVisible(true),
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardVisible(false),
+    );
+    return () => { showSub.remove(); hideSub.remove(); };
+  }, []); // idle | requesting | waiting_code | verifying
   const [walletInputError, setWalletInputError] = useState('');
 
   const networks = getAllNetworks();
 
-  // GPS 위치 가져오기
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return;
-      const loc = await Location.getCurrentPositionAsync({});
-      setUserPos({ lat: loc.coords.latitude, lng: loc.coords.longitude });
-    })();
-  }, []);
 
   // 모든 네트워크의 잔액 조회
   const fetchAllBalances = useCallback(async () => {
@@ -135,9 +143,16 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
   const totalBalance = Object.values(networkBalances).reduce((sum, b) => sum + b, 0);
 
   return (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+    >
     <ScrollView
+      ref={scrollRef}
       style={styles.container}
       contentContainerStyle={styles.listContent}
+      keyboardShouldPersistTaps="handled"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4FC3F7" />
       }
@@ -158,21 +173,24 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
             </View>
           ) : (
             <Text style={styles.totalBalanceAmount}>
-              {totalBalance.toFixed(4)} <Text style={styles.totalBalanceUnit}>TON</Text>
+              {totalBalance.toFixed(2)} <Text style={styles.totalBalanceUnit}>TON</Text>
             </Text>
           )}
         </View>
       )}
 
-      {/* Current Location */}
-      {userPos && (
-        <View style={styles.locationRow}>
-          <Text style={styles.locationIcon}>📍</Text>
-          <Text style={styles.locationText}>
-            {userPos.lat.toFixed(6)}, {userPos.lng.toFixed(6)}
-          </Text>
-        </View>
+      {/* TON Claim Guide */}
+      {pushToken && (
+        <TouchableOpacity
+          style={styles.claimGuideCard}
+          onPress={() => Linking.openURL(WEB_CUSTOMER_PAGE_URL)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.claimGuideCardIcon}>💡</Text>
+          <Text style={styles.claimGuideCardText}>{t(language, 'tonClaimGuide')}</Text>
+        </TouchableOpacity>
       )}
+
 
       {/* Multiverse Balances */}
       {pushToken && (
@@ -186,22 +204,30 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
             const balance = networkBalances[net.id] || 0;
             const isActive = net.id === networkId;
             return (
-              <View key={net.id} style={[styles.networkBalanceRow, isActive && styles.networkBalanceRowActive]}>
+              <TouchableOpacity
+                key={net.id}
+                style={[styles.networkBalanceRow, isActive && styles.networkBalanceRowActive]}
+                onPress={async () => {
+                  await setSelectedNetwork(net.id);
+                  onNetworkChange(net.id);
+                }}
+                activeOpacity={0.7}
+              >
                 <View style={[styles.netDot, isActive ? styles.netDotActive : styles.netDotInactive]} />
                 <View style={styles.networkBalanceInfo}>
                   <Text style={[styles.networkBalanceName, isActive && styles.networkBalanceNameActive]}>
                     {net.name}
                   </Text>
-                  <Text style={styles.networkBalanceChain}>Chain ID: {net.chainId} (0x{net.chainId.toString(16)})</Text>
+                  <Text style={styles.networkBalanceChain}>Chain ID: {net.chainId}</Text>
                 </View>
                 {balancesLoading ? (
                   <ActivityIndicator size="small" color="#666" />
                 ) : (
                   <Text style={[styles.networkBalanceAmount, balance > 0 && styles.networkBalanceAmountPositive]}>
-                    {balance.toFixed(4)} <Text style={styles.networkBalanceUnit}>TON</Text>
+                    {balance.toFixed(2)} <Text style={styles.networkBalanceUnit}>TON</Text>
                   </Text>
                 )}
-              </View>
+              </TouchableOpacity>
             );
           })}
         </View>
@@ -224,13 +250,14 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
                 <Text style={styles.walletAddress} numberOfLines={1}>{linkedWallet}</Text>
               </View>
               <View style={styles.claimGuideBox}>
-                <Text style={styles.claimGuideText}>{t(language, 'claimViaWebGuide')}</Text>
-                <Text
-                  style={styles.claimGuideUrl}
-                  onPress={() => Linking.openURL(WEB_CLIENT_URL)}
-                >
-                  {WEB_CLIENT_URL}
+                <Text style={styles.claimGuideText}>
+                  {t(language, 'claimViaWebGuideBefore')}
+                  <Text style={styles.claimGuideLink} onPress={() => Linking.openURL(WEB_CUSTOMER_PAGE_URL)}>
+                    {t(language, 'claimViaWebGuideLink')}
+                  </Text>
+                  {t(language, 'claimViaWebGuideAfter')}
                 </Text>
+                <Text style={styles.claimGuideWarning}>{t(language, 'noExchangeAddressWarning')}</Text>
               </View>
             </View>
           ) : linkPhase === 'requesting' || linkPhase === 'waiting_code' || linkPhase === 'verifying' ? (
@@ -254,12 +281,22 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
           ) : (
             <View>
               <Text style={styles.guideText}>{t(language, 'enterWalletToLink')}</Text>
+              <Text style={styles.warningText}>{t(language, 'noExchangeAddressWarning')}</Text>
               <TextInput
+                ref={inputRef}
                 style={[styles.walletInput, walletInputError ? styles.walletInputError : null]}
                 value={walletInput}
                 onChangeText={(text) => {
                   setWalletInput(text);
                   if (walletInputError) setWalletInputError('');
+                }}
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollRef.current?.scrollToEnd({ animated: true });
+                  }, 400);
+                  setTimeout(() => {
+                    scrollRef.current?.scrollToEnd({ animated: true });
+                  }, 700);
                 }}
                 placeholder="0x..."
                 placeholderTextColor="#555"
@@ -282,7 +319,9 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
         </View>
       )}
 
+      {keyboardVisible && <View style={{ height: 200 }} />}
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -298,21 +337,16 @@ const styles = StyleSheet.create({
   // Total Balance Card
   totalBalanceCard: {
     backgroundColor: '#12122a',
-    borderRadius: 20,
-    padding: 24,
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     marginTop: 12,
-    alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(251,191,36,0.15)',
-    shadowColor: '#fbbf24',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 6,
   },
   totalBalanceLabel: {
     color: '#999',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -321,31 +355,52 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: '100%',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   refreshBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: 'rgba(255,255,255,0.06)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   refreshBtnText: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#999',
   },
   totalBalanceAmount: {
     color: '#fbbf24',
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: '800',
     letterSpacing: -0.5,
+    textAlign: 'center',
   },
   totalBalanceUnit: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: '#d4a017',
+  },
+  // Claim Guide Card
+  claimGuideCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: 'rgba(59,130,246,0.08)',
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(59,130,246,0.15)',
+  },
+  claimGuideCardIcon: {
+    fontSize: 16,
+  },
+  claimGuideCardText: {
+    flex: 1,
+    color: '#8bb8f0',
+    fontSize: 13,
+    lineHeight: 19,
   },
   // Section
   section: {
@@ -452,6 +507,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginBottom: 10,
   },
+  warningText: {
+    color: '#f59e0b',
+    fontSize: 12,
+    marginBottom: 10,
+  },
   actionBtn: {
     backgroundColor: '#10b981',
     paddingVertical: 14,
@@ -496,6 +556,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
   },
+  claimGuideLink: {
+    color: '#60a5fa',
+    textDecorationLine: 'underline',
+  },
+  claimGuideWarning: {
+    color: '#f59e0b',
+    fontSize: 12,
+    marginTop: 8,
+    lineHeight: 18,
+  },
   claimGuideUrl: {
     color: '#60a5fa',
     fontSize: 13,
@@ -514,20 +584,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
-  locationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 8,
-    paddingHorizontal: 4,
-  },
-  locationIcon: {
+  copyIcon: {
     fontSize: 13,
-  },
-  locationText: {
-    color: '#888',
-    fontSize: 12,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    opacity: 0.5,
   },
   loadingRow: {
     flexDirection: 'row',
