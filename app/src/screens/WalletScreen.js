@@ -107,14 +107,9 @@ export default function WalletScreen({ pushToken, receivedCode, language = 'ko',
     setWalletInputError('');
     setLinkPhase('requesting');
     try {
-      const result = await requestWalletLinkCode(pushToken, addr);
-      if (result.debug_code) {
-        // FCM 전송 실패 시 debug_code로 자동 인증
-        setLinkPhase('verifying');
-        await handleVerifyLink(result.debug_code);
-      } else {
-        setLinkPhase('waiting_code');
-      }
+      await requestWalletLinkCode(pushToken, addr);
+      // 인증번호는 푸시로만 전달됨 → 푸시 수신 시 자동 검증
+      setLinkPhase('waiting_code');
     } catch (err) {
       Alert.alert('Error', err.message || 'Request failed');
       setLinkPhase('idle');

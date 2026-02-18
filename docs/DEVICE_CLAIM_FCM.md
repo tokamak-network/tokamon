@@ -63,9 +63,9 @@
 
 **Response:**
 ```json
-{ "success": true, "message": "인증 코드가 전송되었습니다" }
+{ "success": true }
 ```
-FCM 미지원 환경에서는 `debug_code` 필드가 포함됨.
+인증번호는 FCM 푸시로만 전달됩니다. (보안상 API 응답에는 코드 미포함)
 
 ### POST /api/device/verify-and-claim
 코드 검증 + claimByDevice 호출
@@ -156,10 +156,34 @@ CREATE TABLE IF NOT EXISTS device_verify_codes (
 
 ---
 
+## EAS Build APK에서 FCM 푸시 사용하기
+
+EAS Build로 만든 APK를 스토어 등록 없이 설치해도 **인증번호 푸시는 사용 가능합니다.** (Expo Go와 달리 standalone 빌드이므로 FCM 지원)
+
+### 필수 조건
+
+1. **`app/google-services.json`** – Firebase Console에서 Android 앱 등록 후 다운로드한 파일을 `app/` 폴더에 둠  
+2. **Firebase에 EAS 서명 키 SHA-1 등록**  
+   - EAS Build는 Play Store와 다른 keystore로 서명함  
+   - Firebase Console → 프로젝트 설정 → Android 앱 → 지문(SHA-1) 추가  
+   - EAS의 SHA-1 확인:
+     ```bash
+     cd app && npx eas credentials
+     # Android → Production/Preview → Keystore에서 SHA-1 복사
+     ```
+   - 해당 SHA-1을 Firebase Android 앱에 추가
+
+위 두 가지가 맞으면 EAS Build APK에서도 인증번호 푸시가 정상 동작합니다.
+
+### 인증번호는 푸시로만 전달
+
+**모바일에서는 인증번호를 푸시로만 전달합니다.** API 응답에 코드를 포함하지 않으므로, FCM 푸시가 정상 동작해야 클레임/지갑 연결이 가능합니다. Firebase SHA-1 등록이 필수입니다.
+
+---
+
 ## 참고
 
 - FCM은 완전 무료 (메시지 수 무제한)
 - 타노스 L2 가스비 사실상 무료 (`claimByDevice` ~55,000 gas, 비용 ≈ 0 TON)
 - FCM 토큰이 변경되면 `deviceHash`가 달라짐 → `AsyncStorage`에 토큰 고정 저장하여 해결
-- 개발 환경에서 FCM이 안 될 경우 `debug_code` 반환으로 테스트 가능
-- Expo Go에서는 FCM 토큰 대신 fallback 디바이스 ID(`device_ios_timestamp`)를 사용
+- Expo Go에서는 FCM 토큰 대신 fallback 디바이스 ID(`device_ios_timestamp`)를 사용 → **실제 푸시는 오지 않으므로**, 테스트 시 EAS Build APK 사용 권장

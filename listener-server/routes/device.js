@@ -112,16 +112,15 @@ module.exports = function(db) {
         );
       });
 
-      // FCM 푸시 전송
-      const sent = await sendPushNotification(
+      // FCM 푸시 전송 (모바일: 인증번호는 푸시로만 전달)
+      await sendPushNotification(
         fcm_token,
         'Tokamon Verification',
         `Verification code: ${code}`,
         { type: 'verify_code', code, spot_id: String(spot_id) }
       );
 
-      // 같은 기기에서 요청/인증하므로 코드를 직접 반환하여 자동 인증
-      res.json({ success: true, debug_code: code });
+      res.json({ success: true });
     } catch (err) {
       console.error('device request-code 에러:', err.message);
       res.status(500).json({ error: '인증 코드 요청 실패' });
@@ -263,16 +262,15 @@ module.exports = function(db) {
         );
       });
 
-      // FCM 푸시 전송
-      const sent = await sendPushNotification(
+      // FCM 푸시 전송 (모바일: 인증번호는 푸시로만 전달)
+      await sendPushNotification(
         fcm_token,
         'Tokamon Wallet Verification',
         `Verification code: ${code}`,
         { type: 'wallet_link_code', code, wallet_address }
       );
 
-      // 지갑 연결은 같은 기기에서 요청/인증하므로 코드를 직접 반환하여 자동 인증
-      res.json({ success: true, debug_code: code });
+      res.json({ success: true });
     } catch (err) {
       console.error('device request-link-code 에러:', err.message);
       res.status(500).json({ error: '인증 코드 요청 실패' });

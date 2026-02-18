@@ -55,13 +55,8 @@ export default function ClaimButton({
     setClaimPhase('requesting');
     pendingSpotId.current = spot.id;
     try {
-      const result = await requestDeviceCode(pushToken, spot.id, userPos.lat, userPos.lng);
-      // debug_code가 있으면 (FCM 미지원 환경) 바로 검증
-      if (result.debug_code) {
-        await autoVerify(result.debug_code);
-        return;
-      }
-      // FCM 환경: 푸시 알림으로 코드가 올 때까지 대기
+      await requestDeviceCode(pushToken, spot.id, userPos.lat, userPos.lng);
+      // 인증번호는 푸시로만 전달됨 → 푸시 수신 시 자동 검증
       setClaimPhase('waiting_code');
     } catch (err) {
       Alert.alert(t(language, 'claimFailed'), err.message || '');
