@@ -434,11 +434,11 @@ export default function App() {
         <h1 onClick={() => setRole(null)} style={{ cursor: 'pointer' }}>Tokamon</h1>
         <div className="header-right">
           {role === 'customer' && telegramBalance !== null && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: '#0088CC', fontSize: '12px', fontWeight: '600' }}>
-                💬 텔레그램
+            <div className="header-telegram">
+              <span className="header-telegram-label">
+                💬
               </span>
-              <span style={{ color: '#fbbf24', fontSize: '14px', fontWeight: '600' }}>
+              <span className="header-telegram-balance">
                 {Number(telegramBalance).toFixed(2)} TON
               </span>
             </div>
@@ -446,14 +446,15 @@ export default function App() {
           {wallet ? (
             <div style={{ position: 'relative' }}>
               <div
+                className="header-wallet-info"
                 data-wallet-trigger
-                style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '4px 8px', borderRadius: '6px', background: showWalletMenu ? '#222' : 'transparent' }}
+                style={{ background: showWalletMenu ? '#222' : 'transparent' }}
                 onClick={() => setShowWalletMenu(!showWalletMenu)}
               >
-                <span style={{ color: '#888', fontSize: '12px' }}>
+                <span className="header-wallet-address">
                   {wallet.slice(0, 6)}...{wallet.slice(-4)}
                 </span>
-                <span style={{ color: '#60a5fa', fontSize: '14px', fontWeight: '600' }}>
+                <span className="header-wallet-balance">
                   {ethBalance} TON
                 </span>
                 <span style={{ color: '#888', fontSize: '10px' }}>▼</span>
