@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { t } from '../translations';
 import { getTelegramBalance, getWalletLinkedTelegram, claimTelegramToWallet, unlinkTelegram, getWalletLinkedDevice, getDeviceBalance, claimDeviceToWallet, unlinkDevice, getSignerAndContract } from '../contract';
 import { Spinner } from './Spinner';
@@ -26,10 +26,12 @@ export default function History({ history, balance = 0, account, language = 'ko'
   const [deviceClaiming, setDeviceClaiming] = useState(false);
   const [deviceLoading, setDeviceLoading] = useState(false);
   const [deviceUnlinking, setDeviceUnlinking] = useState(false);
+  const fetchingRef = useRef(false);
 
   // 연결된 텔레그램 ID & 기기 조회
   useEffect(() => {
-    if (account) {
+    if (account && !fetchingRef.current) {
+      fetchingRef.current = true;
       fetchLinkedTelegram();
       fetchLinkedDevice();
     }
@@ -48,7 +50,7 @@ export default function History({ history, balance = 0, account, language = 'ko'
       if (isLinked) {
         setTelegramHash(hash);
 
-        // hash로 직접 username 조회 (서명 필수)
+        // hash로 username 조회 (서명 필수)
         const hashHex = hash.startsWith('0x') ? hash.slice(2) : hash;
         try {
           const message = `Verify telegram username for hash: ${hashHex}`;
