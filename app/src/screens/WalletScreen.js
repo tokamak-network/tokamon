@@ -33,6 +33,7 @@ export default function WalletScreen({ deviceId, pushToken, receivedCode, langua
   const [linkedWallet, setLinkedWallet] = useState(null);
   const [walletInput, setWalletInput] = useState('');
   const [linkPhase, setLinkPhase] = useState('idle');
+  const [isChangingWallet, setIsChangingWallet] = useState(false);
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
@@ -129,6 +130,7 @@ export default function WalletScreen({ deviceId, pushToken, receivedCode, langua
       if (result.success) {
         setLinkedWallet(walletInput.trim());
         setWalletInput('');
+        setIsChangingWallet(false);
         Alert.alert('', t(language, 'walletLinkSuccess'));
       }
     } catch (err) {
@@ -239,7 +241,7 @@ export default function WalletScreen({ deviceId, pushToken, receivedCode, langua
             <Text style={styles.sectionLabel}>{t(language, 'deviceWalletLink')}</Text>
           </View>
 
-          {linkedWallet ? (
+          {linkedWallet && !isChangingWallet && linkPhase === 'idle' ? (
             <View>
               <View style={styles.linkedBadge}>
                 <Text style={styles.linkedText}>{t(language, 'walletLinked')}</Text>
@@ -257,6 +259,17 @@ export default function WalletScreen({ deviceId, pushToken, receivedCode, langua
                 </Text>
                 <Text style={styles.claimGuideWarning}>{t(language, 'noExchangeAddressWarning')}</Text>
               </View>
+              <TouchableOpacity
+                style={[styles.actionBtn, styles.changeBtn]}
+                onPress={() => {
+                  setIsChangingWallet(true);
+                  setWalletInput('');
+                  setWalletInputError('');
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.actionBtnText}>{t(language, 'changeWallet')}</Text>
+              </TouchableOpacity>
             </View>
           ) : linkPhase === 'requesting' || linkPhase === 'waiting_code' || linkPhase === 'verifying' ? (
             <View>
@@ -270,7 +283,7 @@ export default function WalletScreen({ deviceId, pushToken, receivedCode, langua
               </View>
               <TouchableOpacity
                 style={[styles.actionBtn, styles.cancelBtn]}
-                onPress={() => setLinkPhase('idle')}
+                onPress={() => { setLinkPhase('idle'); setIsChangingWallet(false); }}
                 activeOpacity={0.7}
               >
                 <Text style={styles.actionBtnText}>{t(language, 'cancel')}</Text>
@@ -278,7 +291,15 @@ export default function WalletScreen({ deviceId, pushToken, receivedCode, langua
             </View>
           ) : (
             <View>
-              <Text style={styles.guideText}>{t(language, 'enterWalletToLink')}</Text>
+              {isChangingWallet && linkedWallet && (
+                <View style={styles.currentWalletBox}>
+                  <Text style={styles.currentWalletLabel}>{t(language, 'currentWallet')}</Text>
+                  <Text style={styles.currentWalletAddr} numberOfLines={1}>{linkedWallet}</Text>
+                </View>
+              )}
+              <Text style={styles.guideText}>
+                {isChangingWallet ? t(language, 'enterNewWallet') : t(language, 'enterWalletToLink')}
+              </Text>
               <Text style={styles.warningText}>{t(language, 'noExchangeAddressWarning')}</Text>
               <TextInput
                 ref={inputRef}
@@ -312,6 +333,15 @@ export default function WalletScreen({ deviceId, pushToken, receivedCode, langua
               >
                 <Text style={styles.actionBtnText}>{t(language, 'registerWallet')}</Text>
               </TouchableOpacity>
+              {isChangingWallet && (
+                <TouchableOpacity
+                  style={[styles.actionBtn, styles.cancelBtn]}
+                  onPress={() => { setIsChangingWallet(false); setWalletInput(''); setWalletInputError(''); }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.actionBtnText}>{t(language, 'cancel')}</Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </View>
@@ -620,5 +650,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#555',
     shadowColor: 'transparent',
     marginTop: 12,
+  },
+  changeBtn: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+    shadowColor: 'transparent',
+    marginTop: 14,
+  },
+  currentWalletBox: {
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  currentWalletLabel: {
+    color: '#666',
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  currentWalletAddr: {
+    color: '#888',
+    fontSize: 12,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
 });

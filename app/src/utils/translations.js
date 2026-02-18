@@ -149,6 +149,9 @@ export const translations = {
     claimViaWebGuideLink: '웹고객페이지 ( https://go.tokamon.io )',
     claimViaWebGuideAfter: ' 월렛 메뉴에서 지갑을 연결하고 클레임하세요.',
     openWebWallet: '웹 월렛 페이지 열기',
+    changeWallet: '주소 변경',
+    enterNewWallet: '변경할 지갑 주소를 입력하세요',
+    currentWallet: '현재 등록 주소',
 
     currentLocation: '현재 위치',
 
@@ -310,6 +313,9 @@ export const translations = {
     claimViaWebGuideLink: 'web customer page ( https://go.tokamon.io )',
     claimViaWebGuideAfter: '.',
     openWebWallet: 'Open Web Wallet Page',
+    changeWallet: 'Change Address',
+    enterNewWallet: 'Enter new wallet address',
+    currentWallet: 'Current Address',
 
     currentLocation: 'Current Location',
 
