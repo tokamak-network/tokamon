@@ -62,3 +62,20 @@ forge script script/DeployProduction.s.sol:DeployProduction \
   --rpc-url $RPC_URL \
   --broadcast
 ```
+
+## 배포된 컨트랙트 주소
+
+### Thanos Sepolia
+
+| 항목 | 값 |
+|------|-----|
+| 네트워크 | Thanos Sepolia |
+| Chain ID | `111551119090` |
+| RPC URL | `https://rpc.thanos-sepolia.tokamak.network` |
+| 탐색기 | https://explorer.thanos-sepolia.tokamak.network |
+| Tokamon | `0xA7cDf6657cE30A2316126d8F9952b9A6f17db9b7` |
+| Faucet | `0x049CD8ACdEFD7E72971112048FBF22A0aeFf0547` |
+| Owner | `0x796C1f28c777b8a5851D356EBbc9DeC2ee51137F` |
+| ClaimManager | `0xA42C3599f9a36e7CDdFeBA712EE31A6aaa9b7777` |
+
+> 컨트랙트 주소는 `shared/networks.js`에서 관리됩니다 (Single Source of Truth).

@@ -6,7 +6,7 @@ pragma solidity ^0.8.22;
  * @notice 테스트용 네이티브 TON을 사용자에게 지급하는 컨트랙트
  */
 contract Faucet {
-    uint256 public constant AMOUNT = 100 ether;
+    uint256 public constant AMOUNT = 1 ether;
 
     error InsufficientBalance();
     error TransferFailed();

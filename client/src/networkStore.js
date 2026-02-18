@@ -28,7 +28,9 @@ export function getNetworkConfig() {
 }
 
 export function getAllNetworks() {
-  return Object.entries(networks).map(([id, net]) => ({ id, ...net }));
+  return Object.entries(networks)
+    .filter(([, net]) => import.meta.env.DEV || !net.dev)
+    .map(([id, net]) => ({ id, ...net }));
 }
 
 export function onNetworkChange(fn) {

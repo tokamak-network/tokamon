@@ -13,6 +13,7 @@ const networks = {
     name: 'Local (Anvil)',
     rpcUrl: 'http://127.0.0.1:8999',
     nativeCurrency: { name: 'TON', symbol: 'TON', decimals: 18 },
+    dev: true,
   },
   'thanos-sepolia': {
     chainId: 111551119090,
@@ -26,16 +27,16 @@ const networks = {
 // null = 아직 배포되지 않음
 const contracts = {
   local: {
-    tokamon: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
-    faucet: '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
-  },
-  'thanos-sepolia': {
     tokamon: null,
     faucet: null,
   },
+  'thanos-sepolia': {
+    tokamon: "0xA7cDf6657cE30A2316126d8F9952b9A6f17db9b7",
+    faucet: "0x049CD8ACdEFD7E72971112048FBF22A0aeFf0547",
+  },
 };
 
-const DEFAULT_NETWORK = 'local';
+const DEFAULT_NETWORK = 'thanos-sepolia';
 
 function getNetwork(networkId) {
   const net = networks[networkId];
