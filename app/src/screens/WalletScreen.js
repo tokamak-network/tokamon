@@ -98,7 +98,7 @@ export default function WalletScreen({ deviceId, pushToken, receivedCode, langua
     ) {
       handleVerifyLink(receivedCode.code);
     }
-  }, [receivedCode]);
+  }, [receivedCode, linkPhase]);
 
   const handleRequestLinkCode = async () => {
     const addr = walletInput.trim();
