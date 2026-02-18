@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,25 @@ import {
   Alert,
   Platform,
 } from 'react-native';
+import Svg, { Path, Rect } from 'react-native-svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Clipboard from 'expo-clipboard';
+import * as Location from 'expo-location';
 import { disconnectWallet } from '../services/wallet';
 import { t } from '../utils/translations';
 import { setSelectedNetwork, getAllNetworks } from '../utils/networkStore';
 
 export default function SettingsScreen({ wallet, language, networkId: currentNetworkId, onLanguageChange, onWalletDisconnect, onNetworkChange }) {
+  const [userPos, setUserPos] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') return;
+      const loc = await Location.getCurrentPositionAsync({});
+      setUserPos({ lat: loc.coords.latitude, lng: loc.coords.longitude });
+    })();
+  }, []);
 
   const handleLanguageChange = async (lang) => {
     await AsyncStorage.setItem('language', lang);
@@ -23,6 +36,17 @@ export default function SettingsScreen({ wallet, language, networkId: currentNet
   const handleNetworkChange = async (id) => {
     await setSelectedNetwork(id);
     onNetworkChange?.(id);
+  };
+
+  const handleCopyNetworkInfo = async (net, e) => {
+    e?.stopPropagation?.();
+    const text = `${net.name}\nChain ID: ${net.chainId}\nRPC URL: ${net.rpcUrl}`;
+    try {
+      await Clipboard.setStringAsync(text);
+      Alert.alert('', t(language, 'copied'));
+    } catch (_) {
+      Alert.alert('', t(language, 'copyFailed'));
+    }
   };
 
   const handleDisconnect = () => {
@@ -45,6 +69,33 @@ export default function SettingsScreen({ wallet, language, networkId: currentNet
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {/* Current Location */}
+      {userPos && (
+        <View style={styles.section}>
+          <View style={styles.sectionTitleRow}>
+            <Text style={styles.sectionTitleIcon}>📍</Text>
+            <Text style={styles.sectionTitle}>{t(language, 'currentLocation')}</Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.infoRow, styles.infoRowLast]}
+            onPress={() => {
+              const coords = `${userPos.lat.toFixed(6)}, ${userPos.lng.toFixed(6)}`;
+              Clipboard.setStringAsync(coords);
+              Alert.alert('', t(language, 'copied'));
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.infoValueMono}>
+              {userPos.lat.toFixed(6)}, {userPos.lng.toFixed(6)}
+            </Text>
+            <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <Rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <Path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </Svg>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Language Settings */}
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
@@ -89,35 +140,51 @@ export default function SettingsScreen({ wallet, language, networkId: currentNet
         </View>
       </View>
 
-      {/* Network Selection */}
+      {/* Multiverse */}
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
           <Text style={styles.sectionTitleIcon}>🌐</Text>
-          <Text style={styles.sectionTitle}>{t(language, 'network')}</Text>
+          <Text style={styles.sectionTitle}>Multiverse</Text>
         </View>
         <View style={styles.networkRow}>
           {getAllNetworks().map((net) => (
-            <TouchableOpacity
+            <View
               key={net.id}
               style={[styles.networkBtn, currentNetworkId === net.id && styles.networkBtnActive]}
-              onPress={() => handleNetworkChange(net.id)}
-              activeOpacity={0.7}
             >
-              <View style={[styles.networkDot, currentNetworkId === net.id ? styles.networkDotActive : styles.networkDotInactive]} />
-              <View style={styles.networkBtnInfo}>
-                <Text
-                  style={[
-                    styles.networkBtnText,
-                    currentNetworkId === net.id && styles.networkBtnTextActive,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {net.name}
-                </Text>
-                <Text style={styles.networkBtnChain}>Chain ID: {net.chainId}</Text>
-              </View>
-              {currentNetworkId === net.id && <Text style={styles.networkCheck}>✓</Text>}
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.networkBtnTouchable}
+                onPress={() => handleNetworkChange(net.id)}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.networkDot, currentNetworkId === net.id ? styles.networkDotActive : styles.networkDotInactive]} />
+                <View style={styles.networkBtnInfo}>
+                  <View style={styles.networkNameRow}>
+                    <Text
+                      style={[
+                        styles.networkBtnText,
+                        currentNetworkId === net.id && styles.networkBtnTextActive,
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {net.name}
+                    </Text>
+                    <TouchableOpacity
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      onPress={(e) => handleCopyNetworkInfo(net, e)}
+                    >
+                      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                        <Rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <Path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </Svg>
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.networkBtnChain}>Chain ID: {net.chainId}</Text>
+                  <Text style={styles.networkBtnRpc} numberOfLines={1}>RPC: {net.rpcUrl}</Text>
+                </View>
+                {currentNetworkId === net.id && <Text style={styles.networkCheck}>✓</Text>}
+              </TouchableOpacity>
+            </View>
           ))}
         </View>
       </View>
@@ -277,11 +344,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 10,
     backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  networkBtnTouchable: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
   },
   networkBtnActive: {
     backgroundColor: 'rgba(16,185,129,0.12)',
@@ -289,6 +358,11 @@ const styles = StyleSheet.create({
   },
   networkBtnInfo: {
     flex: 1,
+  },
+  networkNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   networkBtnText: {
     color: '#777',
@@ -303,6 +377,12 @@ const styles = StyleSheet.create({
     color: '#555',
     fontSize: 11,
     marginTop: 2,
+  },
+  networkBtnRpc: {
+    color: '#555',
+    fontSize: 10,
+    marginTop: 4,
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
   networkCheck: {
     color: '#10b981',
@@ -332,6 +412,11 @@ const styles = StyleSheet.create({
     color: '#4FC3F7',
     fontSize: 12,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  locationValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   poweredBy: {
     alignItems: 'center',

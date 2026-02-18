@@ -8,6 +8,8 @@ export const translations = {
     delete: '삭제',
     cancel: '취소',
     confirm: '확인',
+    copied: '복사되었습니다',
+    copyFailed: '복사 실패',
 
     // 헤더
     appName: 'Tokamon',
@@ -136,8 +138,16 @@ export const translations = {
     walletLinkSuccess: '지갑이 연결되었습니다!',
     invalidWalletAddress: '올바른 이더리움 주소를 입력해주세요 (0x...)',
     sameWalletError: '이미 연결된 주소와 동일합니다',
-    claimViaWebGuide: '적립된 TON을 지갑으로 받으려면 웹 고객페이지의 월렛 메뉴에서 지갑을 연결하고 클레임하세요.',
+    noExchangeAddressWarning: '⚠️ 직접 클레임해야 하므로, 거래소에 있는 주소는 사용하지 마세요.',
+    claimViaWebGuideBefore: '적립된 TON을 지갑으로 받으려면 ',
+    claimViaWebGuideLink: '웹고객페이지 ( https://go.tokamon.io )',
+    claimViaWebGuideAfter: ' 월렛 메뉴에서 지갑을 연결하고 클레임하세요.',
     openWebWallet: '웹 월렛 페이지 열기',
+
+    currentLocation: '현재 위치',
+
+    // 안내 메시지
+    tonClaimGuide: '적립된 TON은 아래 지갑 등록하시고, 웹 고객 페이지 ( https://go.tokamon.io ) 에서 클레임할 수 있습니다.',
 
     // GPS
     gpsLoading: '위치를 찾고 있습니다...',
@@ -153,6 +163,8 @@ export const translations = {
     delete: 'Delete',
     cancel: 'Cancel',
     confirm: 'Confirm',
+    copied: 'Copied',
+    copyFailed: 'Copy failed',
 
     // Header
     appName: 'Tokamon',
@@ -281,8 +293,16 @@ export const translations = {
     walletLinkSuccess: 'Wallet linked successfully!',
     invalidWalletAddress: 'Please enter a valid Ethereum address (0x...)',
     sameWalletError: 'Same as the currently linked address',
-    claimViaWebGuide: 'To claim your TON to wallet, connect your wallet and claim from the Wallet menu on the web customer page.',
+    noExchangeAddressWarning: '⚠️ Do not use an exchange address — you must be able to claim directly.',
+    claimViaWebGuideBefore: 'To claim your TON to wallet, connect your wallet and claim from the Wallet menu on ',
+    claimViaWebGuideLink: 'web customer page ( https://go.tokamon.io )',
+    claimViaWebGuideAfter: '.',
     openWebWallet: 'Open Web Wallet Page',
+
+    currentLocation: 'Current Location',
+
+    // Guide
+    tonClaimGuide: 'To claim your TON, register your wallet below, then claim on the web customer page ( https://go.tokamon.io ).',
 
     // GPS
     gpsLoading: 'Finding your location...',
