@@ -1,216 +1,134 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Image, StyleSheet, Animated, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Defs, LinearGradient as SvgGradient, Stop, Text as SvgText } from 'react-native-svg';
 
 const { width, height } = Dimensions.get('window');
 
-// Floating particle component
-function Particle({ delay, startX, startY, size, color, duration }) {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(0.3)).current;
-
-  useEffect(() => {
-    const animate = () => {
-      opacity.setValue(0);
-      translateY.setValue(0);
-      scale.setValue(0.3);
-
-      Animated.sequence([
-        Animated.delay(delay),
-        Animated.parallel([
-          Animated.sequence([
-            Animated.timing(opacity, { toValue: 0.7, duration: duration * 0.3, useNativeDriver: true }),
-            Animated.timing(opacity, { toValue: 0, duration: duration * 0.7, useNativeDriver: true }),
-          ]),
-          Animated.timing(translateY, { toValue: -height * 0.4, duration, useNativeDriver: true }),
-          Animated.timing(scale, { toValue: 1.2, duration, useNativeDriver: true }),
-        ]),
-      ]).start(animate);
-    };
-    animate();
-  }, []);
-
-  return (
-    <Animated.View
-      style={[
-        styles.particle,
-        {
-          left: startX,
-          top: startY,
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: color,
-          opacity,
-          transform: [{ translateY }, { scale }],
-        },
-      ]}
-    />
-  );
-}
-
-const PARTICLES = [
-  { delay: 0, startX: width * 0.15, startY: height * 0.7, size: 6, color: '#a78bfa', duration: 3000 },
-  { delay: 400, startX: width * 0.75, startY: height * 0.65, size: 4, color: '#ec4899', duration: 3500 },
-  { delay: 800, startX: width * 0.4, startY: height * 0.8, size: 8, color: '#fbbf24', duration: 2800 },
-  { delay: 200, startX: width * 0.6, startY: height * 0.75, size: 5, color: '#4FC3F7', duration: 3200 },
-  { delay: 600, startX: width * 0.25, startY: height * 0.85, size: 3, color: '#10b981', duration: 3600 },
-  { delay: 1000, startX: width * 0.85, startY: height * 0.6, size: 5, color: '#a78bfa', duration: 2600 },
-  { delay: 300, startX: width * 0.5, startY: height * 0.72, size: 7, color: '#ec4899', duration: 3100 },
-  { delay: 700, startX: width * 0.1, startY: height * 0.9, size: 4, color: '#fbbf24', duration: 2900 },
-];
-
 export default function IntroScreen({ onFinish }) {
-  const logoScale = useRef(new Animated.Value(0.2)).current;
-  const logoOpacity = useRef(new Animated.Value(0)).current;
-  const logoRotate = useRef(new Animated.Value(-0.05)).current;
-  const logoBounce = useRef(new Animated.Value(0)).current;
+  const bgOpacity = useRef(new Animated.Value(0)).current;
+  const bgScale = useRef(new Animated.Value(1.1)).current;
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
   const titleOpacity = useRef(new Animated.Value(0)).current;
-  const titleTranslateY = useRef(new Animated.Value(20)).current;
+  const titleTranslateY = useRef(new Animated.Value(30)).current;
   const subtitleOpacity = useRef(new Animated.Value(0)).current;
-  const subtitleTranslateY = useRef(new Animated.Value(15)).current;
+  const subtitleTranslateY = useRef(new Animated.Value(20)).current;
   const taglineOpacity = useRef(new Animated.Value(0)).current;
-  const glowOpacity = useRef(new Animated.Value(0)).current;
   const fadeOut = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Bouncing loop animation
-    const bounceLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(logoBounce, { toValue: -18, duration: 280, useNativeDriver: true }),
-        Animated.timing(logoBounce, { toValue: 0, duration: 200, useNativeDriver: true }),
-        Animated.timing(logoBounce, { toValue: -10, duration: 220, useNativeDriver: true }),
-        Animated.timing(logoBounce, { toValue: 0, duration: 180, useNativeDriver: true }),
-        Animated.delay(300),
-      ]),
-    );
+    // Background image fade-in with slow zoom
+    Animated.parallel([
+      Animated.timing(bgOpacity, { toValue: 1, duration: 800, useNativeDriver: true }),
+      Animated.timing(bgScale, { toValue: 1, duration: 3000, useNativeDriver: true }),
+    ]).start();
 
+    // Logo + text sequence
     Animated.sequence([
-      Animated.delay(200),
-      // Glow appears first
-      Animated.timing(glowOpacity, {
-        toValue: 0.6,
-        duration: 500,
-        useNativeDriver: true,
-      }),
-      // Logo springs in with subtle rotation
+      Animated.delay(400),
+      // Bottom overlay
+      Animated.timing(overlayOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
+      // Title
       Animated.parallel([
-        Animated.spring(logoScale, {
-          toValue: 1,
-          tension: 30,
-          friction: 5,
-          useNativeDriver: true,
-        }),
-        Animated.timing(logoOpacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.spring(logoRotate, {
-          toValue: 0,
-          tension: 40,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-      ]),
-    ]).start(() => {
-      // Start bounce after logo appears
-      bounceLoop.start();
-    });
-
-    // Title, subtitle, tagline, then fade out
-    Animated.sequence([
-      Animated.delay(1400),
-      Animated.parallel([
-        Animated.timing(titleOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+        Animated.timing(titleOpacity, { toValue: 1, duration: 500, useNativeDriver: true }),
         Animated.spring(titleTranslateY, { toValue: 0, tension: 50, friction: 8, useNativeDriver: true }),
       ]),
+      // Subtitle
       Animated.parallel([
-        Animated.timing(subtitleOpacity, { toValue: 1, duration: 350, useNativeDriver: true }),
+        Animated.timing(subtitleOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
         Animated.spring(subtitleTranslateY, { toValue: 0, tension: 50, friction: 8, useNativeDriver: true }),
       ]),
-      Animated.timing(taglineOpacity, { toValue: 0.5, duration: 300, useNativeDriver: true }),
+      // Tagline
+      Animated.timing(taglineOpacity, { toValue: 0.6, duration: 300, useNativeDriver: true }),
+      // Hold, then fade out
       Animated.delay(1200),
       Animated.timing(fadeOut, { toValue: 0, duration: 500, useNativeDriver: true }),
     ]).start(() => {
-      bounceLoop.stop();
       onFinish();
     });
   }, []);
 
-  const rotate = logoRotate.interpolate({
-    inputRange: [-0.05, 0],
-    outputRange: ['-3deg', '0deg'],
-  });
-
   return (
     <Animated.View style={[styles.container, { opacity: fadeOut }]}>
-      <LinearGradient
-        colors={['#0a0a1a', '#0f0f2e', '#1a0a2e', '#0f0f0f']}
-        locations={[0, 0.3, 0.7, 1]}
-        style={StyleSheet.absoluteFill}
+      {/* Dark base */}
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0a0a1a' }]} />
+
+      {/* Full-screen background image with zoom effect */}
+      <Animated.Image
+        source={require('../../assets/splash-bg.png')}
+        style={[
+          styles.bgImage,
+          {
+            opacity: bgOpacity,
+            transform: [{ scale: bgScale }],
+          },
+        ]}
+        resizeMode="cover"
       />
 
-      {/* Floating particles */}
-      {PARTICLES.map((p, i) => (
-        <Particle key={i} {...p} />
-      ))}
-
-      {/* Glow behind logo */}
-      <Animated.View style={[styles.glowOuter, { opacity: glowOpacity }]}>
+      {/* Top gradient overlay for title readability */}
+      <Animated.View style={[styles.topOverlay, { opacity: overlayOpacity }]}>
         <LinearGradient
-          colors={['transparent', 'rgba(167,139,250,0.15)', 'rgba(236,72,153,0.1)', 'transparent']}
-          style={styles.glowGradient}
+          colors={['rgba(10,10,26,0.92)', 'rgba(10,10,26,0.6)', 'transparent']}
+          locations={[0, 0.6, 1]}
+          style={StyleSheet.absoluteFill}
         />
       </Animated.View>
 
-      {/* Logo */}
-      <Animated.View
-        style={[
-          styles.logoContainer,
-          {
-            opacity: logoOpacity,
-            transform: [{ scale: logoScale }, { rotate }, { translateY: logoBounce }],
-          },
-        ]}
-      >
-        {/* Logo glow ring */}
-        <Animated.View style={[styles.logoGlow, { opacity: glowOpacity }]} />
-        <Image
-          source={require('../../assets/tokamon-logo.png')}
-          style={styles.logo}
-          resizeMode="contain"
+      {/* Bottom gradient overlay for text readability */}
+      <Animated.View style={[styles.bottomOverlay, { opacity: overlayOpacity }]}>
+        <LinearGradient
+          colors={['transparent', 'rgba(10,10,26,0.6)', 'rgba(10,10,26,0.92)']}
+          locations={[0, 0.4, 1]}
+          style={StyleSheet.absoluteFill}
         />
       </Animated.View>
 
-      {/* Title */}
-      <Animated.Text
-        style={[
-          styles.title,
-          {
+      {/* All text at top */}
+      <View style={styles.textContainer}>
+        <Animated.View
+          style={{
             opacity: titleOpacity,
             transform: [{ translateY: titleTranslateY }],
-          },
-        ]}
-      >
-        Tokamon
-      </Animated.Text>
+          }}
+        >
+          <Svg height="52" width="250">
+            <Defs>
+              <SvgGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <Stop offset="0%" stopColor="#a78bfa" />
+                <Stop offset="50%" stopColor="#ec4899" />
+                <Stop offset="100%" stopColor="#fbbf24" />
+              </SvgGradient>
+            </Defs>
+            <SvgText
+              fill="url(#titleGrad)"
+              fontSize="42"
+              fontWeight="800"
+              letterSpacing={3}
+              x="125"
+              y="42"
+              textAnchor="middle"
+            >
+              Tokamon
+            </SvgText>
+          </Svg>
+        </Animated.View>
 
-      {/* Subtitle */}
-      <Animated.Text
-        style={[
-          styles.subtitle,
-          {
-            opacity: subtitleOpacity,
-            transform: [{ translateY: subtitleTranslateY }],
-          },
-        ]}
-      >
-        Visit stores, earn TON
-      </Animated.Text>
+        <Animated.Text
+          style={[
+            styles.subtitle,
+            {
+              opacity: subtitleOpacity,
+              transform: [{ translateY: subtitleTranslateY }],
+            },
+          ]}
+        >
+          Visit stores, earn TON
+        </Animated.Text>
 
-      {/* Tagline */}
+      </View>
+
+      {/* Tagline at bottom */}
       <Animated.Text style={[styles.tagline, { opacity: taglineOpacity }]}>
         Powered by Tokamak Network
       </Animated.Text>
@@ -221,51 +139,25 @@ export default function IntroScreen({ onFinish }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  particle: {
-    position: 'absolute',
-  },
-  glowOuter: {
-    position: 'absolute',
+  bgImage: {
+    ...StyleSheet.absoluteFillObject,
     width: width,
-    height: width,
-    alignItems: 'center',
-    justifyContent: 'center',
+    height: height,
   },
-  glowGradient: {
-    width: width * 0.8,
-    height: width * 0.8,
-    borderRadius: width * 0.4,
-  },
-  logoContainer: {
-    width: width * 0.6,
-    height: width * 0.6,
-    marginBottom: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoGlow: {
+  topOverlay: {
     position: 'absolute',
-    width: width * 0.5,
-    height: width * 0.5,
-    borderRadius: width * 0.25,
-    backgroundColor: 'rgba(167,139,250,0.12)',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: height * 0.2,
   },
-  logo: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'transparent',
-  },
-  title: {
-    color: '#fff',
-    fontSize: 42,
-    fontWeight: '800',
-    letterSpacing: 3,
-    textShadowColor: 'rgba(167,139,250,0.5)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
+  textContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: height * 0.1,
+    alignItems: 'center',
   },
   subtitle: {
     color: '#4FC3F7',
@@ -273,15 +165,20 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontWeight: '600',
     letterSpacing: 1,
-    textShadowColor: 'rgba(79,195,247,0.3)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    textShadowColor: 'rgba(0,0,0,0.6)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 8,
   },
   tagline: {
-    color: '#888',
-    fontSize: 12,
-    marginTop: 40,
-    fontWeight: '400',
+    position: 'absolute',
+    bottom: height * 0.12,
+    alignSelf: 'center',
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
     letterSpacing: 0.5,
+    textShadowColor: 'rgba(0,0,0,0.9)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 10,
   },
 });

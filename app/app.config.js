@@ -8,9 +8,9 @@ export default {
     userInterfaceStyle: "dark",
     newArchEnabled: true,
     splash: {
-      image: "./assets/splash-icon.png",
-      resizeMode: "contain",
-      backgroundColor: "#0f0f0f",
+      image: "./assets/splash-bg.png",
+      resizeMode: "cover",
+      backgroundColor: "#0a0a1a",
     },
     ios: {
       bundleIdentifier: "com.tokamak.tokamon",
