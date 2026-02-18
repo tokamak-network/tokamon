@@ -7,4 +7,5 @@ export const TOKAMON_ABI = [
   'function nextSpotId() view returns (uint256)',
   'function redepositSelf(uint256 spotId) payable',
   'function createSpotSelf(uint256 reward, uint128 stampGoal, uint128 stampBonus, uint48 cooldown, bool allowDuplicateClaims, tuple(string name, string description, int96 lat, int96 lng, uint64 startDate, uint64 endDate, uint16 dailyStartTime, uint16 dailyEndTime, int8 utcOffset) meta) payable returns (uint256)',
+  'function updateSpot(uint256 spotId, uint256 reward, uint128 stampGoal, uint128 stampBonus, uint48 cooldown, bool allowDuplicateClaims, tuple(string name, string description, int96 lat, int96 lng, uint64 startDate, uint64 endDate, uint16 dailyStartTime, uint16 dailyEndTime, int8 utcOffset) meta)',
 ];

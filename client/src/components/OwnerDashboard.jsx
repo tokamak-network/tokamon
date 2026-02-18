@@ -3,6 +3,7 @@ import { redepositSelf, updateCooldown, updateAllowDuplicateClaims } from '../co
 import { Spinner } from './Spinner';
 import { t } from '../translations';
 import { isWithinActiveTime, isSpotClosed } from '../spotUtils';
+import EditSpot from './EditSpot';
 
 export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet, onRedeposited, language = 'ko', showToast }) {
   const [selectedSpotId, setSelectedSpotId] = useState(null);
@@ -14,6 +15,7 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
   const [updatingCooldown, setUpdatingCooldown] = useState(false);
   const [duplicateClaimsSpotId, setDuplicateClaimsSpotId] = useState(null);
   const [updatingDuplicateClaims, setUpdatingDuplicateClaims] = useState(false);
+  const [editSpotId, setEditSpotId] = useState(null);
 
   if (!wallet) {
     return (
@@ -275,6 +277,13 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                   >
                     {t(language, 'duplicateClaimSettings')}
                   </button>
+                  <button
+                    className="secondary"
+                    style={{ flex: 1, marginTop: 0, minWidth: '45%' }}
+                    onClick={() => { setEditSpotId(spot.id); setSelectedSpotId(null); }}
+                  >
+                    {t(language, 'editSpot')}
+                  </button>
                 </div>
               )}
 
@@ -360,6 +369,23 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
           )}
         </>
       )}
+      {editSpotId != null && (() => {
+        const spotToEdit = mySpots.find((s) => s.id === editSpotId);
+        if (!spotToEdit) return null;
+        return (
+          <EditSpot
+            spot={spotToEdit}
+            language={language}
+            showToast={showToast}
+            onUpdated={() => {
+              setEditSpotId(null);
+              setSelectedSpotId(null);
+              onRedeposited();
+            }}
+            onCancel={() => setEditSpotId(null)}
+          />
+        );
+      })()}
     </div>
   );
 }

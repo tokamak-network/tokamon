@@ -59,7 +59,10 @@ export default function SpotInfo({ spot, userPos, wallet, role, language = 'ko',
 
   const handleRedeposit = async () => {
     const amount = Number(redepositAmount);
-    if (!amount || amount <= 0) return;
+    if (!amount || amount <= 0) {
+      showToast?.('warning', t(language, 'enterValidAmount'));
+      return;
+    }
     setRedepositing(true);
     try {
       await redepositSelf(spot.id, amount);

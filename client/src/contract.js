@@ -7,6 +7,7 @@ const COORD_SCALE = 1_000_000;
 // 최소 ABI — 클라이언트에서 호출할 함수만 포함
 const ABI = [
   'function createSpotSelf(uint256 reward, uint128 stampGoal, uint128 stampBonus, uint48 cooldown, bool allowDuplicateClaims, tuple(string name, string description, int96 lat, int96 lng, uint64 startDate, uint64 endDate, uint16 dailyStartTime, uint16 dailyEndTime, int8 utcOffset) meta) payable returns (uint256)',
+  'function updateSpot(uint256 spotId, uint256 reward, uint128 stampGoal, uint128 stampBonus, uint48 cooldown, bool allowDuplicateClaims, tuple(string name, string description, int96 lat, int96 lng, uint64 startDate, uint64 endDate, uint16 dailyStartTime, uint16 dailyEndTime, int8 utcOffset) meta)',
   'function redepositSelf(uint256 spotId) payable',
   'function updateCooldown(uint256 spotId, uint48 newCooldown) external',
   'function updateAllowDuplicateClaims(uint256 spotId, bool allow) external',
@@ -93,6 +94,35 @@ export async function createSpotSelf(depositTon, rewardTon, stampGoal, stampBonu
   // 이벤트 파싱 실패 시 nextSpotId - 1
   const nextId = await contract.nextSpotId();
   return Number(nextId) - 1;
+}
+
+// 스팟 수정: 점주가 직접 트랜잭션 서명
+export async function updateSpot(spotId, rewardTon, stampGoal, stampBonus, cooldown, allowDuplicateClaims, metadata) {
+  const { name, description, lat, lng, startDate, endDate, dailyStartTime, dailyEndTime, utcOffset } = metadata;
+  const { contract } = await getSignerAndContract();
+
+  const meta = {
+    name,
+    description: description || '',
+    lat: Math.round(lat * COORD_SCALE),
+    lng: Math.round(lng * COORD_SCALE),
+    startDate: startDate || 0,
+    endDate: endDate || 0,
+    dailyStartTime: dailyStartTime || 0,
+    dailyEndTime: dailyEndTime || 0,
+    utcOffset: utcOffset || 0,
+  };
+
+  const tx = await contract.updateSpot(
+    spotId,
+    ethers.parseEther(String(rewardTon)),
+    stampGoal,
+    ethers.parseEther(String(stampBonus)),
+    cooldown,
+    allowDuplicateClaims,
+    meta,
+  );
+  await tx.wait();
 }
 
 // 재예치: 점주가 직접 트랜잭션 서명

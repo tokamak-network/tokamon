@@ -234,6 +234,21 @@ export const translations = {
     pressChargeButton: '충전 버튼을 눌러주세요',
     connectWalletToCreateSpot: '스팟을 만들려면 지갑을 연결해주세요',
 
+    // 스팟 수정
+    editSpot: '스팟 수정',
+    editSpotTitle: '스팟 수정',
+    saveChanges: '변경사항 저장',
+    spotUpdateSuccess: '스팟이 수정되었습니다!',
+    spotUpdateFailed: '스팟 수정 실패',
+    latitude: '위도',
+    longitude: '경도',
+    errorInvalidCoordinates: '올바른 좌표를 입력해주세요',
+    errorOpenBeforeClose: '영업 시작 시간이 종료 시간보다 빨라야 합니다',
+    errorStartNotAfterEnd: '시작일이 종료일보다 늦을 수 없습니다',
+    errorBonusRequiredWithGoal: '스탬프 목표가 설정되면 달성 보너스는 0보다 커야 합니다',
+    errorInvalidDailyTime: '영업 시간이 유효하지 않습니다',
+    errorInvalidUtcOffset: 'UTC 오프셋은 -12 ~ +14 범위여야 합니다',
+
     // 매장 키오스크
     storeKiosk: '매장 키오스크',
     selectSpotForReward: '리워드를 받을 스팟을 선택하세요',
@@ -532,6 +547,21 @@ export const translations = {
     insufficientBalance: 'Insufficient balance',
     pressChargeButton: 'Press the charge button',
     connectWalletToCreateSpot: 'Connect wallet to create a spot',
+
+    // Spot Edit
+    editSpot: 'Edit Spot',
+    editSpotTitle: 'Edit Spot',
+    saveChanges: 'Save Changes',
+    spotUpdateSuccess: 'Spot updated successfully!',
+    spotUpdateFailed: 'Spot update failed',
+    latitude: 'Latitude',
+    longitude: 'Longitude',
+    errorInvalidCoordinates: 'Please enter valid coordinates',
+    errorOpenBeforeClose: 'Opening time must be before closing time',
+    errorStartNotAfterEnd: 'Start date cannot be after end date',
+    errorBonusRequiredWithGoal: 'Achievement bonus must be greater than 0 when stamp goal is set',
+    errorInvalidDailyTime: 'Daily hours are invalid',
+    errorInvalidUtcOffset: 'UTC offset must be between -12 and +14',
 
     // Store Kiosk
     storeKiosk: 'Store Kiosk',

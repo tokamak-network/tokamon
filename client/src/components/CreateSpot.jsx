@@ -19,6 +19,8 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
   const [form, setForm] = useState({
     name: '',
     description: '',
+    lat: String(pinPos.lat),
+    lng: String(pinPos.lng),
     start_date: toLocalDate(now),
     end_date: toLocalDate(nextMonth),
     daily_start_time: '09:00',
@@ -45,23 +47,33 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
 
   const handleSubmit = async () => {
     if (!form.name.trim()) return showToast('warning', t(language, 'errorNameRequired'));
-    if (!pinPos) return showToast('warning', t(language, 'errorSelectLocation'));
+    const lat = Number(form.lat);
+    const lng = Number(form.lng);
+    if (isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)) return showToast('warning', t(language, 'errorSelectLocation'));
     if (deposit < MIN_DEPOSIT) return showToast('warning', `${t(language, 'errorMinDeposit')} ${MIN_DEPOSIT} TON`);
     if (balance < deposit) return showToast('warning', `${t(language, 'errorInsufficientBalance')} (${Number(balance).toFixed(2)} TON)`);
     if (reward <= 0) return showToast('warning', t(language, 'errorRewardPositive'));
-    if (stampGoal < 1) return showToast('warning', t(language, 'errorStampGoalMin'));
+    if (stampGoal < 0) return showToast('warning', t(language, 'errorStampGoalMin'));
     if (stampBonus < 0) return showToast('warning', t(language, 'errorBonusMin'));
+    if (stampGoal > 0 && stampBonus <= 0) return showToast('warning', t(language, 'errorBonusRequiredWithGoal'));
+
+    // 시간 파싱: HH:MM → 자정 기준 분
+    const parseTimeToMinutes = (timeStr) => {
+      if (!timeStr) return 0;
+      const [h, m] = timeStr.split(':').map(Number);
+      return h * 60 + m;
+    };
+    const dailyStart = parseTimeToMinutes(form.daily_start_time);
+    const dailyEnd = parseTimeToMinutes(form.daily_end_time);
+    if (dailyStart >= 1440 || dailyEnd >= 1440) return showToast('warning', t(language, 'errorInvalidDailyTime'));
+    if (form.start_date && form.end_date && form.start_date > form.end_date) return showToast('warning', t(language, 'errorStartNotAfterEnd'));
+    const sameDay = !form.start_date || !form.end_date || form.start_date === form.end_date;
+    if (sameDay && (dailyStart > 0 || dailyEnd > 0) && dailyStart >= dailyEnd) return showToast('warning', t(language, 'errorOpenBeforeClose'));
+    const utcOffset = Number(form.utc_offset) || 0;
+    if (utcOffset < -12 || utcOffset > 14) return showToast('warning', t(language, 'errorInvalidUtcOffset'));
 
     setSubmitting(true);
     try {
-      // 시간 파싱: HH:MM → 자정 기준 분
-      const parseTimeToMinutes = (timeStr) => {
-        if (!timeStr) return 0;
-        const [h, m] = timeStr.split(':').map(Number);
-        return h * 60 + m;
-      };
-      const dailyStart = parseTimeToMinutes(form.daily_start_time);
-      const dailyEnd = parseTimeToMinutes(form.daily_end_time);
 
       const spotId = await createSpotSelf(
         deposit,
@@ -73,8 +85,8 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
         {
           name: form.name.trim(),
           description: form.description.trim(),
-          lat: pinPos.lat,
-          lng: pinPos.lng,
+          lat,
+          lng,
           startDate: form.start_date ? Math.floor(new Date(form.start_date + 'T00:00:00Z').getTime() / 1000) : 0,
           endDate: form.end_date ? Math.floor(new Date(form.end_date + 'T23:59:59Z').getTime() / 1000) : 0,
           dailyStartTime: dailyStart,
@@ -98,9 +110,6 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <h2>{t(language, 'createSpotTitle')}</h2>
-        <p style={{ color: '#aaa', fontSize: 13, marginBottom: 4 }}>
-          {t(language, 'location')}: {pinPos.lat.toFixed(5)}, {pinPos.lng.toFixed(5)}
-        </p>
         <p style={{ color: '#fbbf24', fontSize: 13, marginBottom: 12 }}>
           {t(language, 'myBalance')}: {Number(balance).toFixed(2)} TON
         </p>
@@ -110,6 +119,17 @@ export default function CreateSpot({ pinPos, wallet, balance, onClose, onCreated
 
         <label>{t(language, 'storeDescription')}</label>
         <input value={form.description} onChange={update('description')} placeholder={t(language, 'storeDescPlaceholder')} />
+
+        <div className="time-row">
+          <div>
+            <label>{t(language, 'latitude')}</label>
+            <input type="number" value={form.lat} onChange={update('lat')} step="0.00001" />
+          </div>
+          <div>
+            <label>{t(language, 'longitude')}</label>
+            <input type="number" value={form.lng} onChange={update('lng')} step="0.00001" />
+          </div>
+        </div>
 
         <div className="time-row">
           <div>
