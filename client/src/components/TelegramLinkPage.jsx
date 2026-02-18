@@ -162,6 +162,7 @@ export default function TelegramLinkPage() {
                         <li>MetaMask 등에서 지갑 주소를 복사하여 붙여넣으세요</li>
                         <li>연결하면 텔레그램 잔액이 자동으로 지갑으로 이전됩니다</li>
                         <li>이후 지갑으로 Tokamon 웹을 이용할 수 있습니다</li>
+                        <li><strong>⚠️ 직접 클레임해야 하므로, 거래소에 있는 주소는 사용하지 마세요.</strong></li>
                     </ul>
                 </div>
             </div>

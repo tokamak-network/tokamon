@@ -296,6 +296,8 @@ Please enter your Ethereum address.
 
 Example: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
 
+⚠️ Do not use an exchange address — you must be able to claim directly.
+
 Type /cancel to cancel
       `);
     } catch (err) {
@@ -338,6 +340,8 @@ Current balance: ${balance.toFixed(2)} TON
 
 Please enter your new Ethereum address.
 (Format: starts with 0x, 20-byte address)
+
+⚠️ Do not use an exchange address — you must be able to claim directly.
 
 Type /cancel to cancel
       `);
