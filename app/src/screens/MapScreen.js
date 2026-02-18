@@ -15,6 +15,7 @@ import SpotMarker from '../components/SpotMarker';
 import SpotDetailSheet from '../components/SpotDetailSheet';
 import NetworkSelector from '../components/NetworkSelector';
 import { t } from '../utils/translations';
+import { isWithinActiveTime, isSpotClosed } from '../utils/spotUtils';
 
 const DEFAULT_REGION = {
   latitude: 37.495,
