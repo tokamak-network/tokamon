@@ -131,8 +131,8 @@ export default function SpotInfo({ spot, userPos, wallet, role, language = 'ko',
         </div>
       )}
 
-      <div className={`status ${isExhausted || isSpotClosed(spot) ? 'inactive' : spot.active && isWithinActiveTime(spot) ? 'active' : 'inactive'}`}>
-        {isExhausted ? t(language, 'tonExhausted') : isSpotClosed(spot) ? t(language, 'closedStatus') : !isWithinActiveTime(spot) ? t(language, 'outsideActiveTime') : spot.active ? t(language, 'activeStatus') : t(language, 'inactive')}
+      <div className={`status ${isExhausted || isSpotClosed(spot) ? 'inactive' : isWithinActiveTime(spot) ? 'active' : 'inactive'}`}>
+        {isExhausted ? t(language, 'tonExhausted') : isSpotClosed(spot) ? t(language, 'closedStatus') : isWithinActiveTime(spot) ? t(language, 'activeStatus') : t(language, 'outsideActiveTime')}
       </div>
 
       {/* Owner redeposit - only show for owner role when wallet connected and is actual owner */}

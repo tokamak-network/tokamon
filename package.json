@@ -1,36 +1,32 @@
 {
-  "name": "tokamon",
+  "name": "tokamon-go",
   "private": true,
   "version": "0.0.0",
-  "workspaces": [
-    "client",
-    "listener-server"
-  ],
   "scripts": {
-    "dev": "npm run dev -w client",
-    "build": "npm run build -w client",
+    "dev": "cd client && npm run dev",
+    "build": "cd client && npm run build",
     "emulators": "JAVA_HOME=/usr/local/opt/openjdk@21 PATH=/usr/local/opt/openjdk@21/bin:$PATH firebase emulators:start --project tokamon-go",
-    "listener": "NETWORK=local FIRESTORE_EMULATOR_HOST=localhost:8080 npm run start -w listener-server",
-    "listener:prod": "npm run start -w listener-server",
-    "listener:thanos-sepolia": "NETWORK=thanos-sepolia npm run start -w listener-server",
+    "listener": "cd listener-server && NETWORK=local FIRESTORE_EMULATOR_HOST=localhost:8080 npm run start",
+    "listener:prod": "cd listener-server && npm run start",
+    "listener:thanos-sepolia": "cd listener-server && NETWORK=thanos-sepolia npm run start",
     "copy-contracts": "node scripts/copy-contracts.js",
-    "deploy": "npm run build && mkdir -p functions/shared && cp shared/networks.js functions/shared/networks.js && firebase deploy",
-    "serve": "npm run build && firebase serve",
+    "deploy": "cd client && npm run build && cd .. && mkdir -p functions/shared && cp shared/networks.js functions/shared/networks.js && firebase deploy",
+    "serve": "cd client && npm run build && cd .. && firebase serve",
     "android": "cd app && npx expo run:android",
-    "ios": "cd app && npx expo run:ios",
-    "postinstall": "cd app && npm install --legacy-peer-deps"
-  },
-  "dependencies": {
-    "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
-    "ethers": "^6.16.0",
-    "expo-secure-store": "^15.0.8",
-    "express": "^5.2.1"
+    "ios": "cd app && npx expo run:ios"
   },
   "devDependencies": {
     "jest": "^30.2.0",
-    "jsdom": "^25.0.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  }
+    "jsdom": "^25.0.1"
+  },
+  "description": "Firebase Hosting/Functions/Firestore + 블록체인 리스너 기반 웹 서비스 모노레포입니다. 멀티체인을 지원하며, `shared/networks.js`에서 네트워크 설정을 관리합니다.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib",
+    "test": "tests"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

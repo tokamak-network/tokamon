@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MapScreen from '../screens/MapScreen';
 import SpotListScreen from '../screens/SpotListScreen';
 import WalletScreen from '../screens/WalletScreen';
@@ -34,6 +35,9 @@ function TabIcon({ routeName, focused, color }) {
 }
 
 export default function TabNavigator({ wallet, deviceId, pushToken, receivedCode, language, networkId, onLanguageChange, onWalletDisconnect, onNetworkChange }) {
+  const insets = useSafeAreaInsets();
+  const bottomPadding = Platform.OS === 'ios' ? 24 : insets.bottom + 4;
+  const tabHeight = Platform.OS === 'ios' ? 88 : 56 + insets.bottom + 4;
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -44,9 +48,9 @@ export default function TabNavigator({ wallet, deviceId, pushToken, receivedCode
           backgroundColor: '#111122',
           borderTopColor: 'rgba(167,139,250,0.15)',
           borderTopWidth: 1,
-          paddingBottom: Platform.OS === 'ios' ? 24 : 8,
-          paddingTop: 8,
-          height: Platform.OS === 'ios' ? 88 : 64,
+          paddingBottom: bottomPadding,
+          paddingTop: 6,
+          height: tabHeight,
           shadowColor: '#a78bfa',
           shadowOffset: { width: 0, height: -4 },
           shadowOpacity: 0.1,

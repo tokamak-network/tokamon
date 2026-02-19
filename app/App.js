@@ -1,6 +1,6 @@
 import 'react-native-get-random-values';
 import '@walletconnect/react-native-compat';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -103,7 +103,7 @@ export default function App() {
   const [pushToken, setPushToken] = useState(null);
   const [deviceId, setDeviceId] = useState(null);
   const [receivedCode, setReceivedCode] = useState(null);
-  const [networkId, setNetworkId] = useState('local');
+  const [networkId, setNetworkId] = useState('thanos-sepolia');
 
   useEffect(() => {
     AsyncStorage.getItem('language').then((lang) => {
@@ -157,7 +157,10 @@ export default function App() {
         {showIntro ? (
           <>
             <StatusBar style="light" />
-            <IntroScreen onFinish={() => setShowIntro(false)} />
+            <IntroScreen
+              onReady={() => {}}
+              onFinish={() => setShowIntro(false)}
+            />
           </>
         ) : (
           <NavigationContainer

@@ -2,6 +2,7 @@ export default {
   expo: {
     name: "Tokamon",
     slug: "tokamon",
+    owner: "zena.p",
     version: "0.1.0",
     orientation: "portrait",
     icon: "./assets/icon.png",

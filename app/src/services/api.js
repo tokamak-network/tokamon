@@ -112,12 +112,19 @@ export async function getDeviceBalance(deviceId) {
 }
 
 export async function getDeviceBalanceByListenerUrl(deviceId, listenerUrl) {
-  const res = await fetch(`${listenerUrl}/api/device/balance`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ device_id: deviceId }),
-  });
-  return parseJson(res);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const res = await fetch(`${listenerUrl}/api/device/balance`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ device_id: deviceId }),
+      signal: controller.signal,
+    });
+    return parseJson(res);
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 // 푸시 필요: device_id + fcm_token

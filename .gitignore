@@ -116,6 +116,13 @@ latest/
 app/android/
 app/ios/
 
+# EAS build config (contains API keys / project IDs)
+app.json
+app/eas.json
+
+# Network config (contains service URLs)
+app/src/utils/networkStore.js
+
 # Stray symlinks or misplaced packages
 /react
 /react-dom

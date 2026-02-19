@@ -370,8 +370,7 @@ export default function App() {
     setMessage(null);
     try {
       console.log('ETH 받기 시작...');
-      await checkFaucetBalance();
-      showToast('info', t(language, 'approveInMetaMask'));
+      showToast('info', t(language, 'processing'));
       await getETH();
       showToast('success', t(language, 'getETHComplete'));
       refreshBalance();

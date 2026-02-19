@@ -3,6 +3,7 @@ import { TouchableOpacity, Text, View, StyleSheet, Alert, ActivityIndicator, Mod
 import { requestDeviceCode, verifyAndClaimDevice } from '../services/api';
 import { COLLECT_RADIUS } from '../utils/constants';
 import { t } from '../utils/translations';
+import { isWithinActiveTime } from '../utils/spotUtils';
 
 function formatCooldownTime(seconds, language) {
   const h = Math.floor(seconds / 3600);
@@ -38,7 +39,7 @@ export default function ClaimButton({
 
   const hasDevice = !!deviceId;
   const isCoolingDown = isOnCooldown && remainingCooldown > 0;
-  const canClaim = hasDevice && !isOwner && !isExhausted && !isCoolingDown && spot.active;
+  const canClaim = hasDevice && !isOwner && !isExhausted && !isCoolingDown && isWithinActiveTime(spot);
 
   // FCM 푸시 알림에서 인증번호 수신 시 자동으로 검증+클레임
   useEffect(() => {

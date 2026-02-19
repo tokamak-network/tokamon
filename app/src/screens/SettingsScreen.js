@@ -239,14 +239,14 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
-    padding: 16,
-    paddingBottom: 40,
+    padding: 12,
+    paddingBottom: 32,
   },
   section: {
     backgroundColor: '#12122a',
     borderRadius: 16,
-    padding: 18,
-    marginBottom: 12,
+    padding: 14,
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: 'rgba(167,139,250,0.08)',
     shadowColor: '#000',
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 12,
+    marginBottom: 8,
   },
   sectionTitleIcon: {
     fontSize: 18,

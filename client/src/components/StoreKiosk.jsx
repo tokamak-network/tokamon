@@ -26,6 +26,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
   const [wallet, setWallet] = useState(null);
   const [contract, setContract] = useState(null);
   const [stampCount, setStampCount] = useState(null);
+  const [cooldownLeft, setCooldownLeft] = useState(0);
   const [cachedHash, setCachedHash] = useState(null);
 
   // 스팟 목록 로드
@@ -117,6 +118,29 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
     setBalance(null);
   };
 
+  // 텔레그램 username 입력 시 자동으로 쿨다운/스탬프 조회
+  useEffect(() => {
+    const username = telegramUsername.replace('@', '').trim();
+    if (username.length < 5 || !selectedSpot) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(withNetwork(`${API}/api/telegram/stamp-info`), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ telegram_username: username, spot_id: selectedSpot.id }),
+        });
+        if (res.ok) {
+          const info = await res.json();
+          setStampCount(info.stamps);
+          setCooldownLeft(info.cooldown_remaining || 0);
+        }
+      } catch (_) {}
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [telegramUsername, selectedSpot]);
+
   // 텔레그램 username 입력 핸들러
   const handleUsernameChange = (e) => {
     let value = e.target.value;
@@ -126,6 +150,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
     }
     setTelegramUsername(value);
     setStampCount(null);
+    setCooldownLeft(0);
     setCachedHash(null);
     setBalance(null);
   };
@@ -137,6 +162,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
     setSelectedSpot(null);
     setMessage('');
     setStampCount(null);
+    setCooldownLeft(0);
     setCachedHash(null);
   };
 
@@ -180,11 +206,12 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
       setCachedHash(telegramHash);
       setMessage('');
 
-      // 스탬프 정보 조회
+      // 스탬프 + 쿨다운 정보 조회
       if (selectedSpot) {
         try {
           const info = await contract.getTelegramStampInfo(selectedSpot.id, telegramHash);
           setStampCount(Number(info[0]));
+          setCooldownLeft(Number(info[3]));
         } catch (_) {}
       }
     } catch (err) {
@@ -248,6 +275,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
         let errMsg = validateData.error;
         // 서버 에러를 번역된 메시지로 변환
         if (validateData.cooldown_remaining > 0) {
+          setCooldownLeft(validateData.cooldown_remaining);
           const h = Math.floor(validateData.cooldown_remaining / 3600);
           const m = Math.floor((validateData.cooldown_remaining % 3600) / 60);
           const timeStr = h > 0
@@ -295,6 +323,9 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
       setBalance(balanceTon);
 
       setMessage(`✅ ${selectedSpot.reward} TON ${t(language, 'claimCompleted')}${bonusText}`);
+
+      // 클레임 성공 후 쿨다운 설정
+      setCooldownLeft(selectedSpot.cooldown || 0);
 
       // 컨트랙트에서 직접 최신 remaining 조회
       try {
@@ -380,7 +411,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
                 <div
                   key={spot.id}
                   className={`spot-card-compact${closed ? ' spot-closed' : ''}`}
-                  onClick={() => { setSelectedSpot(spot); setStampCount(null); }}
+                  onClick={() => { setSelectedSpot(spot); setStampCount(null); setCooldownLeft(0); }}
                 >
                   <div className="spot-compact-header">
                     <div className="spot-compact-title">
@@ -537,6 +568,19 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
           </div>
         )}
 
+        {cooldownLeft > 0 && (
+          <div className="message-large error">
+            {(() => {
+              const h = Math.floor(cooldownLeft / 3600);
+              const m = Math.floor((cooldownLeft % 3600) / 60);
+              const timeStr = h > 0
+                ? `${h}${t(language, 'hoursUnit')} ${m}${t(language, 'minutesUnit')}`
+                : `${m}${t(language, 'minutesUnit')}`;
+              return t(language, 'cooldownInProgress').replace('{time}', timeStr);
+            })()}
+          </div>
+        )}
+
         <div className="action-buttons">
           <button
             className="btn-secondary"
@@ -548,7 +592,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
           <button
             className="btn-primary btn-with-spinner"
             onClick={handleClaim}
-            disabled={loading || !wallet || !spotActive || telegramUsername.replace('@', '').length < 5}
+            disabled={loading || !wallet || !spotActive || cooldownLeft > 0 || telegramUsername.replace('@', '').length < 5}
           >
             {loading && <Spinner size={18} />}
             {loading ? t(language, 'processing') : `${selectedSpot.reward} TON ${t(language, 'receive')}`}

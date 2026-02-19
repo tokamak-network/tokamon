@@ -326,8 +326,8 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
                   }}
                 >
                   <span className="spot-list-item-name">{spot.name}</span>
-                  <span className={`spot-list-item-status ${isExhausted ? 'exhausted' : spot.active ? 'active' : 'inactive'}`}>
-                    {isExhausted ? t(language, 'exhausted') : spot.active ? t(language, 'active') : t(language, 'inactive')}
+                  <span className={`spot-list-item-status ${isExhausted ? 'exhausted' : isSpotClosed(spot) ? 'closed' : isWithinActiveTime(spot) ? 'active' : 'inactive'}`}>
+                    {isExhausted ? t(language, 'exhausted') : isSpotClosed(spot) ? t(language, 'closedStatus') : isWithinActiveTime(spot) ? t(language, 'active') : t(language, 'outsideActiveTime')}
                   </span>
                   <span className="spot-list-item-claims">{claimsLeft}{t(language, 'times')}</span>
                 </button>

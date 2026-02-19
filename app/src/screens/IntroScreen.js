@@ -5,7 +5,7 @@ import Svg, { Defs, LinearGradient as SvgGradient, Stop, Text as SvgText } from 
 
 const { width, height } = Dimensions.get('window');
 
-export default function IntroScreen({ onFinish }) {
+export default function IntroScreen({ onFinish, onReady }) {
   const bgOpacity = useRef(new Animated.Value(0)).current;
   const bgScale = useRef(new Animated.Value(1.1)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
@@ -17,6 +17,9 @@ export default function IntroScreen({ onFinish }) {
   const fadeOut = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    // 네이티브 스플래시 숨기기 (IntroScreen 준비 완료)
+    if (onReady) onReady();
+
     // Background image fade-in with slow zoom
     Animated.parallel([
       Animated.timing(bgOpacity, { toValue: 1, duration: 800, useNativeDriver: true }),

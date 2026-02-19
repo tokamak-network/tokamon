@@ -13,6 +13,7 @@ import { getStampInfo, getDeviceStampInfo } from '../services/api';
 import StampProgress from './StampProgress';
 import ClaimButton from './ClaimButton';
 import { t } from '../utils/translations';
+import { isWithinActiveTime, isSpotClosed } from '../utils/spotUtils';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SHEET_HEIGHT = 380;
@@ -84,10 +85,14 @@ export default function SpotDetailSheet({ spot, userPos, wallet, deviceId, pushT
   const stampGoal = spot.stamp_goal || 1;
   const claimsLeft = spot.reward > 0 ? Math.floor(spot.remaining / spot.reward) : 0;
 
-  const statusColor = isExhausted ? '#6b7280' : spot.active ? '#059669' : '#ef4444';
+  const closed = isSpotClosed(spot);
+  const active = !closed && !isExhausted && isWithinActiveTime(spot);
+  const statusColor = isExhausted ? '#6b7280' : closed ? '#6b7280' : active ? '#059669' : '#ef4444';
   const statusLabel = isExhausted
     ? t(language, 'tonExhausted')
-    : spot.active
+    : closed
+    ? t(language, 'closedStatus')
+    : active
     ? t(language, 'activeStatus')
     : t(language, 'inactiveStatus');
 
