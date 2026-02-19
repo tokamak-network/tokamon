@@ -8,6 +8,7 @@ const blockchain = require('./blockchain');
 const { initBot, sendClaimNotification } = require('./telegram-bot');
 const deviceRoutes = require('./routes/device');
 const telegramRoutes = require('./routes/telegram');
+const faucetRoutes = require('./routes/faucet');
 const { hashTelegramId, isValidTelegramUsername } = require('./utils');
 const { saveWalletTelegramLink, saveTelegramHashMap } = require('./firebase-admin');
 
@@ -175,6 +176,9 @@ function startHttpServer(db) {
 
   // 텔레그램 라우트 (verify-token, link-wallet, username 등)
   app.use('/api/telegram', telegramRoutes(db));
+
+  // Faucet 라우트
+  app.use('/api/faucet', faucetRoutes);
 
   app.listen(LISTENER_PORT, () => {
     console.log(`[Listener HTTP] 포트 ${LISTENER_PORT}에서 실행 중`);

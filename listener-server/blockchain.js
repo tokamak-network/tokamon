@@ -533,6 +533,20 @@ async function getStampInfo(spotId, userAddress) {
 }
 
 
+// ─── Faucet (Anvil 전용) ───
+
+const ANVIL_PRIVATE_KEY = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+
+async function sendETH(toAddress, amountETH) {
+  const httpProvider = new ethers.JsonRpcProvider(RPC_URL);
+  const anvilWallet = new ethers.Wallet(ANVIL_PRIVATE_KEY, httpProvider);
+  await anvilWallet.sendTransaction({
+    to: toAddr(toAddress),
+    value: toWei(amountETH),
+  });
+  return amountETH;
+}
+
 // ─── 텔레그램 관련 ───
 
 async function getTelegramBalance(telegramHash) {
@@ -716,7 +730,7 @@ module.exports = {
   getAllSpots,
   getBalance,
   getStampInfo,
-
+  sendETH,
   getTelegramBalance,
   getTelegramStampInfo,
   getTelegramLinkedWallet,
