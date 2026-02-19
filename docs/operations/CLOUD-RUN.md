@@ -6,7 +6,7 @@
 |------|-----|
 | 프로젝트 | `tokamon-go` |
 | 리전 | `asia-northeast3` (서울) |
-| 서비스 URL | https://listener-server-370459866598.asia-northeast3.run.app |
+| 서비스 URL | Cloud Run 콘솔에서 확인 |
 | 이미지 | `gcr.io/tokamon-go/listener-server` |
 | 인스턴스 | 항상 1개 (`--min-instances 1 --max-instances 1`) |
 | CPU | 1 vCPU, 항상 활성 (`--no-cpu-throttling`) |
@@ -58,24 +58,33 @@ gcloud run revisions list \
 
 ### 3. 웹 콘솔
 
-- **Cloud Run 대시보드** (요청 수, 지연시간, 에러율, CPU/메모리):
-  https://console.cloud.google.com/run/detail/asia-northeast3/listener-server/metrics?project=tokamon-go
+- **Cloud Run 대시보드** (요청 수, 지연시간, 에러율, CPU/메모리): GCP 콘솔 → Cloud Run → listener-server → Metrics
 
-- **Cloud Logging** (로그 뷰어):
-  https://console.cloud.google.com/logs/query?project=tokamon-go
+- **Cloud Logging** (로그 뷰어): GCP 콘솔 → Logging → Logs Explorer
 
 ### 4. API 엔드포인트 헬스체크
 
 ```bash
 # 스팟 목록 조회로 서비스 동작 확인
-curl https://listener-server-370459866598.asia-northeast3.run.app/api/spots
+curl $(gcloud run services describe listener-server --project tokamon-go --region asia-northeast3 --format='value(status.url)')/api/spots
 ```
 
 ---
 
 ## 재배포
 
-코드 변경 후 재배포할 때:
+### 방법 1: 소스 빌드 (간편, 권장)
+
+```bash
+# 프로젝트 루트에서 실행
+cp listener-server/Dockerfile Dockerfile
+gcloud run deploy listener-server --source . --region asia-northeast3 --project tokamon-go
+rm Dockerfile
+```
+
+> Cloud Build가 Dockerfile을 감지하여 자동으로 이미지 빌드 + 배포합니다.
+
+### 방법 2: Docker 수동 빌드
 
 ```bash
 # 1. 이미지 빌드 (레포 루트에서 실행, amd64 필수)
@@ -139,7 +148,7 @@ WebSocket이 끊기면 컨테이너가 자동 재시작되며, 놓친 블록의 
 
 ## 모니터링 알림 정책
 
-Cloud Monitoring에 3개 알림이 설정되어 있으며, `zena@tokamak.network`으로 이메일 발송됩니다.
+Cloud Monitoring에 3개 알림이 설정되어 있으며, 이메일로 발송됩니다.
 
 | 알림 | 조건 | 알림 채널 |
 |------|------|-----------|
@@ -147,7 +156,7 @@ Cloud Monitoring에 3개 알림이 설정되어 있으며, `zena@tokamak.network
 | 메모리 사용량 80% 초과 | 메모리 사용률 > 80% (5분 지속) | 이메일 |
 | 에러 로그 다량 발생 | 5분 내 에러 5건 이상 | 이메일 |
 
-알림 관리: https://console.cloud.google.com/monitoring/alerting?project=tokamon-go
+알림 관리: GCP 콘솔 → Monitoring → Alerting
 
 ### 알림 채널 추가/변경
 
