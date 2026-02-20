@@ -218,7 +218,7 @@ export default function History({ history, balance = 0, account, language = 'ko'
             <span className="telegram-icon-large">💬</span>
             <span className="telegram-section-title">{t(language, 'telegramAccount')}</span>
           </div>
-          
+
           <div className="telegram-info-content">
             <div className="telegram-account-info">
               <div className="telegram-label">{t(language, 'telegramName')}</div>
@@ -295,6 +295,16 @@ export default function History({ history, balance = 0, account, language = 'ko'
                 <div className="telegram-value telegram-linked">
                   <span className="telegram-icon">✅</span>
                   <span className="telegram-username">{linkedDevice.slice(0, 10)}...{linkedDevice.slice(-8)}</span>
+                  <span
+                    onClick={(deviceUnlinking || deviceClaiming) ? undefined : handleUnlinkDevice}
+                    style={{
+                      color: '#888', fontSize: '11px', textDecoration: 'underline',
+                      cursor: (deviceUnlinking || deviceClaiming) ? 'default' : 'pointer', marginLeft: '8px',
+                      opacity: (deviceUnlinking || deviceClaiming) ? 0.5 : 1,
+                    }}
+                  >
+                    {deviceUnlinking ? t(language, 'processing') : t(language, 'unlinkDevice')}
+                  </span>
                 </div>
               ) : (
                 <div className="telegram-not-linked-container">
