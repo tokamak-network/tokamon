@@ -5,9 +5,25 @@
 | 구성 요소 | 호스팅 | 설명 |
 |-----------|--------|------|
 | 클라이언트 웹 | Firebase Hosting | React + Vite SPA |
-| API (계약 주소, 스팟 등) | Firebase Cloud Functions | `/api/**` 처리 |
-| 리스너 서버 | Cloud Run (`asia-northeast3`) | 블록체인 이벤트 리스너 + 텔레그램 봇 + Faucet |
+| API (계약 주소, 스팟 등) | Firebase Cloud Functions | `/api/**` 처리 (Firestore에서 읽기) |
+| 리스너 서버 | Cloud Run (`asia-northeast3`) | 블록체인 이벤트 → Firestore 동기화 + 텔레그램 봇 + 디바이스 API |
 | 앱 (React Native) | EAS Build | Expo + React Native |
+
+### 데이터 흐름
+
+```
+블록체인 컨트랙트
+  ↓ (WebSocket 이벤트)
+리스너 서버 (Cloud Run)
+  ↓ (syncSpotToFirestore)
+Firestore (spot_metadata)
+  ↓ (읽기)
+Firebase Functions (/api/spots)
+  ↓ (HTTP)
+클라이언트 웹 / 앱
+```
+
+> 리스너 서버가 Firestore에 연결되지 않으면 스팟 데이터가 클라이언트에 반영되지 않는다.
 
 ---
 
@@ -15,17 +31,24 @@
 
 ```bash
 # 빌드
-npm run build -w client
+cd client && npm run build
 
-# 배포
-firebase deploy --only hosting
+# 배포 (프로젝트 루트에서)
+firebase deploy --only hosting --project tokamon-go
 ```
 
-- URL: Firebase Hosting 콘솔에서 확인
+- 기본 URL: https://tokamon-go.web.app
+- 커스텀 도메인: https://go.tokamon.io (Firebase Console에서 등록 필요)
 - `firebase.json`의 rewrites 설정:
   - `/api/faucet/**` → Cloud Run (listener-server)
   - `/api/**` → Cloud Functions (api)
   - `**` → `/index.html` (SPA)
+
+### 커스텀 도메인 추가 시
+
+1. 도메인 등록업체(가비아 등)에서 CNAME 레코드 설정
+2. Firebase Console → Hosting → 커스텀 도메인 추가 (SSL 인증서 자동 발급)
+3. **리스너 서버의 `CORS_ALLOWED_ORIGINS`에 새 도메인 추가 필수**
 
 ### 로그 확인
 
@@ -43,6 +66,8 @@ firebase deploy --only functions
 npm run deploy
 ```
 
+> `/api/spots`는 Firestore의 `spot_metadata`에서 읽는다. 리스너 서버가 Firestore에 동기화해야 데이터가 갱신됨.
+
 ### 로그 확인
 
 ```bash
@@ -59,52 +84,111 @@ gcloud functions logs read api --project tokamon-go --limit 30
 
 상세 내용: [CLOUD-RUN.md](./CLOUD-RUN.md)
 
-### 재배포
+### 필수 환경변수
+
+배포 전 반드시 확인:
+
+| 변수 | 값 | 설명 |
+|------|-----|------|
+| `NODE_ENV` | `production` | 프로덕션 CORS 활성화, 에러 메시지 최소화 |
+| `NETWORK` | `thanos-sepolia` | 블록체인 네트워크 선택 |
+| `FIREBASE_PROJECT_ID` | `tokamon-go` | **Firestore 연결 필수** (없으면 동기화 불가) |
+| `CORS_ALLOWED_ORIGINS` | `https://tokamon-go.web.app,...` | 허용할 웹 origin (콤마 구분) |
+| `TELEGRAM_BOT_TOKEN` | Secret Manager | 텔레그램 봇 토큰 |
+| `TELEGRAM_HASH_SALT` | Secret Manager | 텔레그램 ID 해싱 솔트 |
+| `DEVICE_HASH_SALT` | Secret Manager | 디바이스 ID 해싱 솔트 |
+| `SIGNER_PRIVATE_KEY` | Secret Manager | claimManager 개인키 |
+
+### 재배포 (Docker 수동 빌드)
 
 ```bash
-# 프로젝트 루트에서
-cp listener-server/Dockerfile Dockerfile
-gcloud run deploy listener-server --source . --region asia-northeast3 --project tokamon-go
-rm Dockerfile
+# 1. Docker Desktop 실행 확인
+
+# 2. 이미지 빌드 (프로젝트 루트에서, amd64 필수)
+docker build --platform linux/amd64 \
+  -f listener-server/Dockerfile \
+  -t gcr.io/tokamon-go/listener-server .
+
+# 3. 이미지 푸시
+docker push gcr.io/tokamon-go/listener-server
+
+# 4. Cloud Run 배포
+gcloud run deploy listener-server \
+  --image gcr.io/tokamon-go/listener-server \
+  --project tokamon-go \
+  --region asia-northeast3
+
+# 5. 이전 리비전 삭제 (텔레그램 봇 polling 충돌 방지)
+gcloud run revisions list --service listener-server \
+  --project tokamon-go --region asia-northeast3
+gcloud run revisions delete <이전-리비전-이름> \
+  --project tokamon-go --region asia-northeast3 --quiet
 ```
 
-### 로그 확인
+### 배포 후 확인사항
 
 ```bash
-# 최근 로그
-gcloud run services logs read listener-server \
-  --project tokamon-go --region asia-northeast3 --limit 50
+# 1. 로그에서 정상 시작 확인
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=listener-server" \
+  --project tokamon-go --limit 20 --format="value(textPayload)"
 
-# 실시간 스트리밍
-gcloud logging tail "resource.type=cloud_run_revision AND resource.labels.service_name=listener-server" \
-  --project tokamon-go
+# 확인할 로그:
+# ✅ [Firebase] Admin SDK 초기화 완료 (Application Default Credentials)
+# ✅ [Blockchain] 연결 완료
+# ✅ 텔레그램 봇 초기화 완료
+# ✅ [이벤트 등록 완료] 12개 이벤트 리스너 등록됨
+# ❌ [Firestore] DB 미연결 → FIREBASE_PROJECT_ID 환경변수 확인
 
-# 에러만
-gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=listener-server AND severity>=ERROR" \
-  --project tokamon-go --limit 20
+# 2. 환경변수 확인
+gcloud run services describe listener-server \
+  --region asia-northeast3 --project tokamon-go \
+  --format="value(spec.template.spec.containers[0].env)"
+```
+
+### 주의사항: 텔레그램 봇 충돌
+
+텔레그램 봇은 `polling: true` 모드로 동작. 같은 봇 토큰으로 2개 인스턴스가 동시에 뜨면 충돌 발생.
+배포 후 **이전 리비전을 반드시 삭제**하여 봇 인스턴스가 1개만 실행되도록 한다.
+
+### 주의사항: RPC 장애 시 배포 실패
+
+새 리비전 시작 시 WebSocket RPC 연결이 필요. RPC 서버(`rpc.thanos-sepolia.tokamak.network`)가 불안정하면 컨테이너 시작 실패.
+
+```bash
+# RPC 상태 확인
+curl -s -o /dev/null -w "%{http_code}" -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+  https://rpc.thanos-sepolia.tokamak.network
+# 200이면 정상
 ```
 
 ### 환경변수 업데이트
 
 ```bash
+# 개별 추가/수정 (기존 값 유지)
+gcloud run services update listener-server \
+  --region asia-northeast3 --project tokamon-go \
+  --update-env-vars "KEY=value"
+
 # 값에 콤마가 포함된 경우 ^||^ 구분자 사용
 gcloud run services update listener-server \
   --region asia-northeast3 --project tokamon-go \
-  --set-env-vars="^||^KEY1=value1||KEY2=value2,with,commas"
+  --set-env-vars="^||^CORS_ALLOWED_ORIGINS=https://tokamon-go.web.app,https://go.tokamon.io"
 ```
 
-> 주의: `--set-env-vars`는 기존 env vars를 덮어씁니다. Secret 참조는 유지됩니다.
+> `--set-env-vars`는 기존 env vars를 덮어쓴다. `--update-env-vars`는 지정한 키만 추가/수정.
 
-### 서비스 상태 확인
+### 로그 확인
 
 ```bash
-gcloud run services describe listener-server \
-  --project tokamon-go --region asia-northeast3
+# 최근 로그
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=listener-server" \
+  --project tokamon-go --limit 30 --format="table(timestamp,textPayload)" --freshness=10m
 
-# 환경변수 확인
-gcloud run services describe listener-server \
-  --region asia-northeast3 --project tokamon-go \
-  --format="value(spec.template.spec.containers[0].env)"
+# 에러만
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=listener-server AND severity>=ERROR" \
+  --project tokamon-go --limit 20
 ```
 
 ---
@@ -172,9 +256,30 @@ npm run emulators
 
 ---
 
+## 트러블슈팅
+
+### 스팟 수정이 클라이언트에 반영 안 됨
+
+1. 리스너 서버 로그에서 `[Firestore] DB 미연결` 확인 → `FIREBASE_PROJECT_ID` 환경변수 추가
+2. `SpotUpdated` 이벤트 수신 확인 → WebSocket 연결 상태 확인
+3. Firestore Console에서 `spot_metadata` 컬렉션 데이터 직접 확인
+
+### Cloud Run 배포 실패 (컨테이너 시작 불가)
+
+1. RPC 서버 상태 확인 (위 curl 명령어)
+2. 로그에서 `Unexpected server response: 502` → RPC 장애, 복구 후 재시도
+3. Docker Desktop 실행 확인
+
+### 텔레그램 봇 응답 없음
+
+1. 로그에서 `409 Conflict: terminated by other getUpdates request` → 이전 리비전 삭제
+2. `TELEGRAM_BOT_TOKEN` 환경변수 확인
+
+---
+
 ## 웹 콘솔 링크
 
-- **Firebase Console**: GCP 콘솔 → Firebase → tokamon-go
+- **Firebase Console**: https://console.firebase.google.com/project/tokamon-go
 - **Cloud Run 대시보드**: GCP 콘솔 → Cloud Run → listener-server → Metrics
 - **Cloud Logging**: GCP 콘솔 → Logging → Logs Explorer
 - **모니터링 알림**: GCP 콘솔 → Monitoring → Alerting
