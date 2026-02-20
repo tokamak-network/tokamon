@@ -69,7 +69,7 @@ const selectedSpotIcon = new L.Icon({
   className: 'selected-spot-marker',
 });
 
-// 내 스팟 (점주 본인 소유) - 매장관리자 로그인 시 구분용 (핑크 테두리)
+// 내 스팟 (본인 소유) - 스팟 생성자 로그인 시 구분용 (핑크 테두리)
 const mySpotIcon = new L.DivIcon({
   className: 'my-spot-marker',
   html: '<div class="my-spot-pin" style="width:38px;height:38px;border-radius:50%;border:3px solid #ec4899;box-shadow:0 2px 8px rgba(236,72,153,0.5);overflow:hidden;"><img src="/marker-blue.png" style="width:100%;height:100%;"/></div>',
@@ -85,7 +85,7 @@ function getSpotIcon(spot, wallet, role, selectedSpot) {
   if (isExhausted) return exhaustedIcon;
   if (isSpotClosed(spot)) return closedIcon;
   if (!spot.active || !isWithinActiveTime(spot)) return inactiveIcon;
-  // 매장관리자: 활성 상태인 내 스팟만 핑크 테두리 표시
+  // 스팟 생성자: 활성 상태인 내 스팟만 핑크 테두리 표시
   if (role === 'owner') {
     const normalizeAddr = (a) => (a || '').toString().toLowerCase();
     const isMine = wallet && normalizeAddr(spot.creator_address || spot.creator) === normalizeAddr(wallet);
@@ -312,7 +312,7 @@ export default function Map({ userPos, gpsStatus, spots, selectedSpot, onSelectS
                 click: () => {
                   if (!createMode) {
                     if (role === 'owner') {
-                      console.log('[매장관리자] 지도 스팟 상세정보 조회:', spot);
+                      console.log('[스팟 생성자] 지도 스팟 상세정보 조회:', spot);
                     }
                     onSelectSpot(spot);
                   }

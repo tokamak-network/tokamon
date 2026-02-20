@@ -1858,7 +1858,7 @@ button.secondary {
   50% { transform: scale(1.2); opacity: 0.8; }
 }
 
-/* 매장 키오스크 (기본) */
+/* 스팟 키오스크 (기본) */
 .store-kiosk {
   display: flex;
   flex-direction: column;

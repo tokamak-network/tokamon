@@ -258,7 +258,7 @@ export default function StoreKiosk({ language = 'ko', onLanguageChange }) {
       }
       const { telegram_hash: telegramHash } = await hashRes.json();
 
-      // 서버에서 검증 먼저 수행 (키오스크는 매장 내에 있으므로 스팟 위치 사용)
+      // 서버에서 검증 먼저 수행 (키오스크는 스팟 내에 있으므로 스팟 위치 사용)
       const validateRes = await fetch(withNetwork(`${API}/api/telegram/validate-claim`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
