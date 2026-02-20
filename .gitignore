@@ -59,8 +59,11 @@ contracts/broadcast/
 **/Tokamon.json
 **/Faucet.json
 
-# Server generated & sensitive data
+# Contract address (로컬 배포 시 생성)
 server/contract-address.json
+listener-server/contract-address.json
+
+# Server generated files
 server/tokamon.db
 server/admin_keys.json
 server/spot-metadata.json
@@ -70,6 +73,11 @@ server/nohup.out
 # Client logs
 client/*.log
 client/nohup.out
+
+# Client build artifacts
+client/dist/
+client/build/
+client/node_modules/
 
 # Private keys & secrets (CRITICAL - NEVER COMMIT!)
 **/admin_keys.json
@@ -116,13 +124,6 @@ latest/
 app/android/
 app/ios/
 
-# EAS build config (contains API keys / project IDs)
-app.json
-app/eas.json
-
-# Network config (contains service URLs)
-app/src/utils/networkStore.js
-
 # Stray symlinks or misplaced packages
 /react
 /react-dom
@@ -134,9 +135,9 @@ logs/
 anvil-state.json
 
 # Backup files
+backup/
 *.backup
 *.bak
-*~
 
 # Firebase
 .firebase/
@@ -144,11 +145,11 @@ firebase-debug.log
 firestore-debug.log
 ui-debug.log
 
-# Listener-server runtime/generated files
-listener-server/contract-address.json
+# Listener-server generated files
 listener-server/last-block*.json
 listener-server/spot-metadata*.json
 listener-server/firebase-debug.log
+listener-server/telegram.db
 
 # Functions build artifacts (copied from shared/)
 functions/shared/
@@ -162,8 +163,13 @@ client/index_old.html
 # Project status (local notes)
 STATUS.md
 
+# Bridge scripts
+bridge-scripts/
 
-# Firebase
+# EAS config files
+app/eas.json
+app/app.config.js
+
+# Firebase service files
 google-services.json
 GoogleService-Info.plist
-bridge-scripts/
