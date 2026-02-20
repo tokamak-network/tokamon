@@ -16,6 +16,7 @@ export default {
     ios: {
       bundleIdentifier: "com.tokamak.tokamon",
       supportsTablet: true,
+      googleServicesFile: process.env.GOOGLE_SERVICES_PLIST || "./GoogleService-Info.plist",
       infoPlist: {
         NSLocationWhenInUseUsageDescription:
           "Tokamon needs your location to find nearby spots and enable claims within range.",
@@ -48,6 +49,9 @@ export default {
       },
     },
     plugins: [
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging",
+      "./plugins/withModularHeaders",
       [
         "expo-location",
         {

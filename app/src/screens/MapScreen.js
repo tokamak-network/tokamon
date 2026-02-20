@@ -90,8 +90,9 @@ export default function MapScreen({ route, wallet, deviceId, pushToken, received
     const incoming = route?.params?.selectedSpot;
     if (incoming && mapRef.current) {
       setSelectedSpot(incoming);
+      // 하단 시트에 가리지 않도록 스팟을 화면 상단 1/3 지점에 표시
       mapRef.current.animateToRegion({
-        latitude: incoming.lat,
+        latitude: incoming.lat - 0.0015,
         longitude: incoming.lng,
         latitudeDelta: 0.005,
         longitudeDelta: 0.005,
@@ -101,8 +102,9 @@ export default function MapScreen({ route, wallet, deviceId, pushToken, received
 
   const handleSpotPress = (spot) => {
     setSelectedSpot(spot);
+    // 하단 시트에 가리지 않도록 스팟을 화면 상단 1/3 지점에 표시
     mapRef.current?.animateToRegion({
-      latitude: spot.lat,
+      latitude: spot.lat - 0.0015,
       longitude: spot.lng,
       latitudeDelta: 0.005,
       longitudeDelta: 0.005,
@@ -130,7 +132,7 @@ export default function MapScreen({ route, wallet, deviceId, pushToken, received
   const navigateToSpot = useCallback((spot) => {
     setSelectedSpot(spot);
     mapRef.current?.animateToRegion({
-      latitude: spot.lat,
+      latitude: spot.lat - 0.0015,
       longitude: spot.lng,
       latitudeDelta: 0.005,
       longitudeDelta: 0.005,

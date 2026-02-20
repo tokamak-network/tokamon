@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "370459866598",
+    "project_id": "tokamon-go",
+    "storage_bucket": "tokamon-go.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:370459866598:android:e3242136acfe7c7e2e5227",
+        "android_client_info": {
+          "package_name": "com.tokamak.tokamon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEjNVtx6JWxE_RxPWkaagS5VavRbW8VbQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
