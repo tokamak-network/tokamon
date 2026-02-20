@@ -168,9 +168,11 @@ STATUS.md
 bridge-scripts/
 
 # EAS config files
-app/eas.json
-app/app.config.js
+# app/eas.json
+# app/app.config.js
 
-# Firebase service files
-google-services.json
-GoogleService-Info.plist
+# Firebase service files (allow app/ copies for EAS build)
+# google-services.json
+# GoogleService-Info.plist
+# !app/google-services.json
+# !app/GoogleService-Info.plist
