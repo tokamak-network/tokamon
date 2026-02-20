@@ -66,7 +66,7 @@ export const translations = {
     telegramStep2: '입력 (최초 1회)',
     telegramStep3: '입력',
     telegramStep4: '이 지갑 주소 입력:',
-    telegramNote: '연결 후 매장에서 TON을 받을 수 있습니다!',
+    telegramNote: '연결 후 스팟에서 TON을 모을 수 있습니다!',
 
     // 설정
     myTelegramId: '내 텔레그램 아이디',
@@ -146,7 +146,7 @@ export const translations = {
     sameWalletError: '이미 연결된 주소와 동일합니다',
     noExchangeAddressWarning: '⚠️ 직접 클레임해야 하므로, 거래소에 있는 주소는 사용하지 마세요.',
     claimViaWebGuideBefore: '적립된 TON을 지갑으로 받으려면 ',
-    claimViaWebGuideLink: '웹고객페이지 ( https://go.tokamon.io )',
+    claimViaWebGuideLink: '웹페이지 ( https://go.tokamon.io )',
     claimViaWebGuideAfter: ' 월렛 메뉴에서 지갑을 연결하고 클레임하세요.',
     openWebWallet: '웹 월렛 페이지 열기',
     changeWallet: '주소 변경',
@@ -156,7 +156,7 @@ export const translations = {
     currentLocation: '현재 위치',
 
     // 안내 메시지
-    tonClaimGuide: '적립된 TON은 아래 지갑 등록하시고, 웹 고객 페이지 ( https://go.tokamon.io ) 에서 클레임할 수 있습니다.',
+    tonClaimGuide: '적립된 TON은 아래 지갑 등록하시고, 웹페이지 ( https://go.tokamon.io ) 에서 클레임할 수 있습니다.',
 
     // GPS
     gpsLoading: '위치를 찾고 있습니다...',
@@ -230,7 +230,7 @@ export const translations = {
     telegramStep2: 'Send (first time only)',
     telegramStep3: 'Send',
     telegramStep4: 'Enter this wallet address:',
-    telegramNote: 'After linking, you can receive TON at stores!',
+    telegramNote: 'After linking, you can collect TON at spots!',
 
     // Settings
     myTelegramId: 'My Telegram ID',
