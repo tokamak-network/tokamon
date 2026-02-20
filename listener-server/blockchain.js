@@ -736,13 +736,10 @@ async function checkWalletAvailability(walletAddress, requestType, requesterHash
   } else if (requestType === 'device') {
     const linkedHash = await contract.getWalletLinkedDevice(wallet);
     if (linkedHash !== ZERO_BYTES32 && linkedHash !== fullRequesterHash) {
-      const balance = await contract.getDeviceBalance(linkedHash);
-      if (balance > 0n) {
-        return {
-          available: false,
-          reason: 'This wallet is already in use by another device. Please use a different wallet address.',
-        };
-      }
+      return {
+        available: false,
+        reason: 'This wallet is already linked to another device. Please use a different wallet address or unlink the existing device first.',
+      };
     }
   }
 
