@@ -74,13 +74,9 @@ try {
  * 푸시 알림 권한 요청 + FCM 토큰 발급 (SecureStore 암호화 저장)
  */
 export async function registerForPushNotifications() {
-  // 이미 저장된 토큰이 있으면 재사용 (단, 대체 토큰이면서 Notifications 사용 가능 시 재발급)
-  try {
-    const saved = await SecureStore.getItemAsync(PUSH_TOKEN_KEY);
-    if (saved && !(saved.startsWith('device_') && Notifications)) {
-      return saved;
-    }
-  } catch (_) {}
+  // FCM 토큰은 앱 재설치 시 무효화되지만 iOS Keychain(SecureStore)에는 남아있을 수 있음
+  // → 항상 새로 발급받되, 실패 시에만 캐시된 값 사용
+  // 대체 토큰(device_*)이면서 Notifications 사용 가능 시에도 재발급 시도
 
   // expo-notifications가 있으면 FCM 토큰 시도
   if (Notifications) {
