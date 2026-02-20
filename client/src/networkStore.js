@@ -33,6 +33,13 @@ export function getAllNetworks() {
     .map(([id, net]) => ({ id, ...net }));
 }
 
+export function getNetworkByChainId(chainId) {
+  for (const [id, net] of Object.entries(networks)) {
+    if (net.chainId === chainId) return { id, ...net };
+  }
+  return null;
+}
+
 export function onNetworkChange(fn) {
   listeners.add(fn);
   return () => listeners.delete(fn);

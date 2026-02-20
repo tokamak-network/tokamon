@@ -19,7 +19,7 @@ import { t } from './translations';
 import useGeolocation from './hooks/useGeolocation';
 import useToast from './hooks/useToast';
 import { isWithinActiveTime, isSpotClosed } from './spotUtils';
-import { getNetworkConfig, getSelectedNetwork, setSelectedNetwork, getAllNetworks, onNetworkChange } from './networkStore';
+import { getNetworkConfig, getSelectedNetwork, setSelectedNetwork, getAllNetworks, getNetworkByChainId, onNetworkChange } from './networkStore';
 
 // RPC URL을 현재 네트워크 설정에서 가져오기
 function getRpcUrl() {
@@ -281,8 +281,21 @@ export default function App() {
         setWallet(accounts[0]);
       }
     };
-    const handleChainChanged = () => {
-      fetchNetworkInfo();
+    const handleChainChanged = (chainIdHex) => {
+      const newChainId = parseInt(chainIdHex, 16);
+      const matched = getNetworkByChainId(newChainId);
+      if (matched) {
+        setSelectedNetwork(matched.id);
+        setNetworkId(matched.id);
+        setRpcUrl(getRpcUrl());
+        resetContractCache();
+        resetFaucetCache();
+        setSpots([]);
+        setSelectedSpot(null);
+      } else {
+        showToast('warning', '지원하지 않는 네트워크입니다');
+      }
+      setChainId(newChainId);
       refreshBalance();
     };
     window.ethereum.on('accountsChanged', handleAccountsChanged);
@@ -291,7 +304,7 @@ export default function App() {
       window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
       window.ethereum.removeListener('chainChanged', handleChainChanged);
     };
-  }, [fetchNetworkInfo, refreshBalance]);
+  }, [showToast, refreshBalance]);
 
   // 지갑 연결 시 잔액/히스토리 로드
   useEffect(() => {
@@ -343,6 +356,19 @@ export default function App() {
       if (address) {
         setWallet(address);
         await fetchNetworkInfo();
+        // 메타마스크의 현재 체인과 앱 네트워크 동기화
+        if (window.ethereum) {
+          const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' });
+          const currentChainId = parseInt(chainIdHex, 16);
+          const matched = getNetworkByChainId(currentChainId);
+          if (matched && matched.id !== getSelectedNetwork()) {
+            setSelectedNetwork(matched.id);
+            setNetworkId(matched.id);
+            setRpcUrl(getRpcUrl());
+            resetContractCache();
+            resetFaucetCache();
+          }
+        }
       }
     } finally {
       setConnecting(false);
