@@ -120,7 +120,8 @@ temp/
 cmdtools.zip
 latest/
 
-# React Native generated native folders (app/)
+# React Native generated native folders
+android/
 app/android/
 app/ios/
 
