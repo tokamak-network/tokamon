@@ -193,6 +193,13 @@ router.post('/link-wallet', telegramRateLimit(5, req => req.body?.token), async 
       try {
         // 컨트랙트에 연결
         const telegramHash = hashTelegramId(row.telegram_username);
+
+        // 다른 텔레그램 유저가 이 지갑을 쓰고 있고 잔액이 있으면 차단
+        const walletCheck = await blockchain.checkWalletAvailability(wallet_address, 'telegram', telegramHash);
+        if (!walletCheck.available) {
+          return res.status(409).json({ error: walletCheck.reason });
+        }
+
         const result = await blockchain.linkTelegramToWallet(telegramHash, wallet_address);
 
         // 토큰 사용 처리

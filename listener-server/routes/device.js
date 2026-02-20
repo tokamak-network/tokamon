@@ -346,6 +346,13 @@ module.exports = function(db) {
       }
 
       const deviceHash = hashDeviceId(device_id);
+
+      // 다른 디바이스가 이 지갑을 쓰고 있고 잔액이 있으면 차단
+      const walletCheck = await blockchain.checkWalletAvailability(wallet_address, 'device', deviceHash);
+      if (!walletCheck.available) {
+        return res.status(409).json({ error: walletCheck.reason });
+      }
+
       const now = Math.floor(Date.now() / 1000);
 
       // 기존 미사용 코드가 있으면 무효화 (중복 요청 방지)
@@ -425,6 +432,12 @@ module.exports = function(db) {
           return res.status(400).json({ error: 'Too many attempts. Please request a new code' });
         }
         return res.status(400).json({ error: 'Invalid or expired verification code' });
+      }
+
+      // 다른 디바이스가 이 지갑을 쓰고 있고 잔액이 있으면 차단 (코드 발급 후 상태 변경 가능하므로 재검증)
+      const walletCheck = await blockchain.checkWalletAvailability(wallet_address, 'device', deviceHash);
+      if (!walletCheck.available) {
+        return res.status(409).json({ error: walletCheck.reason });
       }
 
       // linkDeviceToWallet 호출

@@ -714,6 +714,41 @@ async function canClaimDevice(spotId, deviceHash) {
   };
 }
 
+// ─── 지갑 주소 가용성 체크 (다른 사람이 쓰고 있고 + 잔액 있으면 → 차단) ───
+
+const ZERO_BYTES32 = '0x' + '0'.repeat(64);
+
+async function checkWalletAvailability(walletAddress, requestType, requesterHash) {
+  const wallet = toAddr(walletAddress);
+  const fullRequesterHash = '0x' + requesterHash;
+
+  if (requestType === 'telegram') {
+    const linkedHash = await contract.getWalletLinkedTelegram(wallet);
+    if (linkedHash !== ZERO_BYTES32 && linkedHash !== fullRequesterHash) {
+      const balance = await contract.getTelegramBalance(linkedHash);
+      if (balance > 0n) {
+        return {
+          available: false,
+          reason: 'This wallet is already in use by another Telegram account. Please use a different wallet address.',
+        };
+      }
+    }
+  } else if (requestType === 'device') {
+    const linkedHash = await contract.getWalletLinkedDevice(wallet);
+    if (linkedHash !== ZERO_BYTES32 && linkedHash !== fullRequesterHash) {
+      const balance = await contract.getDeviceBalance(linkedHash);
+      if (balance > 0n) {
+        return {
+          available: false,
+          reason: 'This wallet is already in use by another device. Please use a different wallet address.',
+        };
+      }
+    }
+  }
+
+  return { available: true };
+}
+
 // ─── 스팟 설정 ───
 
 async function updateAllowDuplicateClaims(spotId, allow) {
@@ -745,5 +780,6 @@ module.exports = {
   linkDeviceToWallet,
   canClaimTelegram,
   canClaimDevice,
+  checkWalletAvailability,
   updateAllowDuplicateClaims,
 };
