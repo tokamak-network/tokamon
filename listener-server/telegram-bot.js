@@ -2,7 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const crypto = require('crypto');
 const blockchain = require('./blockchain');
 const { hashTelegramId, isValidEthAddress } = require('./utils');
-const { saveTelegramHashMap, saveWalletTelegramLink } = require('./firebase-admin');
+const { saveTelegramHashMap, saveWalletTelegramLink, saveTelegramUser } = require('./firebase-admin');
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const WEB_URL = process.env.WEB_URL || 'http://localhost:5173';
@@ -51,6 +51,8 @@ function initBot(database) {
           console.error('chat_id DB 저장 실패:', err);
         } else {
           console.log(`✅ @${username}의 chat_id 저장: ${chatId}`);
+          // Firestore에도 동기화 (컨테이너 재시작 시 복원용)
+          saveTelegramUser(username, chatId, now, now);
         }
       });
     }
@@ -198,8 +200,12 @@ Please try again or type /cancel to cancel.
         // 텔레그램 해시 생성
         const telegramHash = hashTelegramId(username);
 
-        // 현재 잔액 확인
-        const currentBalance = await blockchain.getTelegramBalance(telegramHash);
+        // 다른 텔레그램 유저가 이 지갑을 쓰고 있고 잔액이 있으면 차단
+        const walletCheck = await blockchain.checkWalletAvailability(address, 'telegram', telegramHash);
+        if (!walletCheck.available) {
+          userStates.delete(username);
+          return bot.sendMessage(chatId, `❌ ${walletCheck.reason}\n\nPlease use a different wallet address.\nType /link to try again.`);
+        }
 
         // 블록체인에 연결
         bot.sendMessage(chatId, '⏳ Linking your wallet...');

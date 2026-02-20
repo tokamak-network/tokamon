@@ -10,7 +10,7 @@ const deviceRoutes = require('./routes/device');
 const telegramRoutes = require('./routes/telegram');
 const faucetRoutes = require('./routes/faucet');
 const { hashTelegramId, isValidTelegramUsername } = require('./utils');
-const { saveWalletTelegramLink, saveTelegramHashMap } = require('./firebase-admin');
+const { saveWalletTelegramLink, saveTelegramHashMap, saveTelegramUser, getAllTelegramUsers } = require('./firebase-admin');
 
 const DB_PATH = process.env.DATABASE_PATH
   ? path.isAbsolute(process.env.DATABASE_PATH)
@@ -204,11 +204,41 @@ async function syncTelegramDataToFirestore(db) {
             count++;
           }
         }
-        if (count > 0) console.log(`[동기화] SQLite → Firestore: ${count}건 동기화 완료`);
-        resolve();
+        // 3. telegram_users (chat_id) 동기화
+        db.all('SELECT username, chat_id, first_seen, last_seen FROM telegram_users', async (err3, rows3) => {
+          if (!err3 && rows3 && rows3.length > 0) {
+            for (const row of rows3) {
+              await saveTelegramUser(row.username, row.chat_id, row.first_seen, row.last_seen);
+              count++;
+            }
+          }
+          if (count > 0) console.log(`[동기화] SQLite → Firestore: ${count}건 동기화 완료`);
+          resolve();
+        });
       });
     });
   });
+}
+
+// Firestore → SQLite 복원 (컨테이너 재시작 시 telegram_users 복구)
+async function restoreTelegramUsersFromFirestore(db) {
+  const users = await getAllTelegramUsers();
+  if (users.length === 0) return;
+  let count = 0;
+  for (const user of users) {
+    await new Promise((resolve) => {
+      db.run(`
+        INSERT INTO telegram_users (username, chat_id, first_seen, last_seen)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(username)
+        DO UPDATE SET chat_id = ?, last_seen = MAX(last_seen, ?)
+      `, [user.username, user.chat_id, user.first_seen, user.last_seen, user.chat_id, user.last_seen], (err) => {
+        if (!err) count++;
+        resolve();
+      });
+    });
+  }
+  if (count > 0) console.log(`[복원] Firestore → SQLite: telegram_users ${count}건 복원 완료`);
 }
 
 async function main() {
@@ -217,7 +247,10 @@ async function main() {
     const db = await initTelegramDb();
     await init();
 
-    // SQLite → Firestore 동기화 (에뮬레이터 재시작 시 데이터 복구)
+    // Firestore → SQLite 복원 (컨테이너 재시작 시 telegram_users 복구)
+    await restoreTelegramUsersFromFirestore(db);
+
+    // SQLite → Firestore 동기화
     await syncTelegramDataToFirestore(db);
 
     initBot(db);

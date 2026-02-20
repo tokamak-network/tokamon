@@ -200,6 +200,36 @@ async function syncDeviceBalance(deviceHash, balance) {
   }
 }
 
+async function saveTelegramUser(username, chatId, firstSeen, lastSeen) {
+  if (!db) return;
+  try {
+    await db.collection(col('telegram_users')).doc(username).set({
+      chat_id: chatId,
+      first_seen: firstSeen,
+      last_seen: lastSeen,
+      updated_at: new Date().toISOString(),
+    }, { merge: true });
+  } catch (e) {
+    console.error('[Firestore] telegram_users 저장 실패:', e.message);
+  }
+}
+
+async function getAllTelegramUsers() {
+  if (!db) return [];
+  try {
+    const snapshot = await db.collection(col('telegram_users')).get();
+    return snapshot.docs.map(doc => ({
+      username: doc.id,
+      chat_id: doc.data().chat_id,
+      first_seen: doc.data().first_seen,
+      last_seen: doc.data().last_seen,
+    }));
+  } catch (e) {
+    console.error('[Firestore] telegram_users 조회 실패:', e.message);
+    return [];
+  }
+}
+
 module.exports = {
   db,
   NETWORK_ID,
@@ -213,4 +243,6 @@ module.exports = {
   sendPushNotification,
   saveDeviceClaimEvent,
   syncDeviceBalance,
+  saveTelegramUser,
+  getAllTelegramUsers,
 };
