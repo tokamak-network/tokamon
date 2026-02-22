@@ -33,6 +33,9 @@ yarn-error.*
 # local env files
 .env*.local
 
+# credentials
+credentials.json
+
 # Firebase (EAS 빌드에 필요하므로 커밋 허용)
 # google-services.json
 # GoogleService-Info.plist

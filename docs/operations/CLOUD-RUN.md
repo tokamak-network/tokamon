@@ -23,6 +23,7 @@
 | `TELEGRAM_HASH_SALT` | Secret Manager | 텔레그램 ID 해싱 솔트 |
 | `DEVICE_HASH_SALT` | Secret Manager | 디바이스 ID 해싱 솔트 |
 | `SIGNER_PRIVATE_KEY` | Secret Manager | claimManager 개인키 |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | Secret Manager (`FIREBASE_SERVICE_ACCOUNT_KEY`) | Firebase Admin SDK 서비스 계정 키 (FCM 푸시 전송용) |
 
 ---
 
@@ -120,6 +121,40 @@ gcloud run deploy listener-server \
 
 ## 트러블슈팅
 
+### 긴급 조치: 서버 응답 없음 (504 타임아웃)
+
+앱에서 "Network request error" 또는 서버 504 에러가 발생하면:
+
+```bash
+# 1. 서버 상태 확인 (응답이 안 오면 서버가 멈춘 것)
+curl -m 10 -X POST https://listener-server-370459866598.asia-northeast3.run.app/api/device/balance \
+  -H "Content-Type: application/json" -d '{"device_id":"healthcheck"}'
+
+# 2. 최근 에러 로그 확인
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="listener-server" AND severity>=ERROR' \
+  --project tokamon-go --limit 10 --format=json --freshness=1h
+
+# 3. 서버 재시작 (기존 이미지로 재배포)
+gcloud run deploy listener-server \
+  --image gcr.io/tokamon-go/listener-server \
+  --project tokamon-go --region asia-northeast3
+
+# 4. 재시작 후 정상 동작 확인
+curl -m 10 -X POST https://listener-server-370459866598.asia-northeast3.run.app/api/device/balance \
+  -H "Content-Type: application/json" -d '{"device_id":"healthcheck"}'
+```
+
+### 긴급 조치: ECONNRESET / 텔레그램 봇 충돌
+
+`[polling_error] EFATAL: Error: read ECONNRESET` 에러 발생 시 서버가 멈출 수 있음.
+
+```bash
+# 서버 재시작으로 복구
+gcloud run deploy listener-server \
+  --image gcr.io/tokamon-go/listener-server \
+  --project tokamon-go --region asia-northeast3
+```
+
 ### 컨테이너 크래시 반복
 
 ```bash
@@ -155,6 +190,7 @@ Cloud Monitoring에 3개 알림이 설정되어 있으며, 이메일로 발송�
 | 인스턴스 다운 | 인스턴스 수 < 1 (2분 지속) | 이메일 |
 | 메모리 사용량 80% 초과 | 메모리 사용률 > 80% (5분 지속) | 이메일 |
 | 에러 로그 다량 발생 | 5분 내 에러 5건 이상 | 이메일 |
+| 5xx 에러 발생 | 1분 내 5xx 응답 1건 이상 | 이메일 |
 
 알림 관리: GCP 콘솔 → Monitoring → Alerting
 

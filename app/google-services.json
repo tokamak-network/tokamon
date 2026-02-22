@@ -7,15 +7,18 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:370459866598:android:e3242136acfe7c7e2e5227",
+        "mobilesdk_app_id": "1:370459866598:android:01f2b2db3646eeaa2e5227",
         "android_client_info": {
-          "package_name": "com.tokamak.tokamon"
+          "package_name": "io.tokamak.tokamon"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
           "current_key": "AIzaSyBEjNVtx6JWxE_RxPWkaagS5VavRbW8VbQ"
+        },
+        {
+          "current_key": "AIzaSyAvvxgfkOIrhUKVzAAXTZ4n43nI4mI2XjY"
         }
       ],
       "services": {

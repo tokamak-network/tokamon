@@ -14,8 +14,9 @@ const NETWORK_ID = process.env.NETWORK || DEFAULT_NETWORK;
 
 // Firestore 초기화 우선순위:
 // 1. 에뮬레이터 (FIRESTORE_EMULATOR_HOST)
-// 2. serviceAccountKey.json 파일
-// 3. Application Default Credentials (클라우드 환경 IAM)
+// 2. Secret Manager 환경변수 (FIREBASE_SERVICE_ACCOUNT_JSON)
+// 3. serviceAccountKey.json 파일
+// 4. Application Default Credentials (클라우드 환경 IAM)
 if (process.env.FIRESTORE_EMULATOR_HOST) {
   // 에뮬레이터 모드: Firestore는 에뮬레이터 사용, FCM은 서비스 계정 키가 있으면 실제 인증 사용
   if (fs.existsSync(serviceAccountPath)) {
@@ -30,6 +31,13 @@ if (process.env.FIRESTORE_EMULATOR_HOST) {
   }
   db = admin.firestore();
   console.log(`[Firebase] Firestore 에뮬레이터 연결: ${process.env.FIRESTORE_EMULATOR_HOST}`);
+} else if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+  db = admin.firestore();
+  console.log('[Firebase] Admin SDK 초기화 완료 (Secret Manager 환경변수)');
 } else if (fs.existsSync(serviceAccountPath)) {
   admin.initializeApp({
     credential: admin.credential.cert(require(serviceAccountPath)),
@@ -38,6 +46,7 @@ if (process.env.FIRESTORE_EMULATOR_HOST) {
   console.log('[Firebase] Admin SDK 초기화 완료 (serviceAccountKey)');
 } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS || process.env.GCLOUD_PROJECT || process.env.FIREBASE_PROJECT_ID) {
   admin.initializeApp({
+    credential: admin.credential.applicationDefault(),
     projectId: process.env.FIREBASE_PROJECT_ID || process.env.GCLOUD_PROJECT,
   });
   db = admin.firestore();
@@ -138,6 +147,7 @@ async function sendPushNotification(fcmToken, title, body, data = {}) {
     return true;
   } catch (e) {
     console.error('[FCM] 푸시 전송 실패:', e.message);
+    console.error('[FCM] 에러 코드:', e.code, '상세:', JSON.stringify(e.errorInfo || {}));
     return false;
   }
 }

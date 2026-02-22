@@ -14,7 +14,7 @@ export default {
       backgroundColor: "#0a0a1a",
     },
     ios: {
-      bundleIdentifier: "com.tokamak.tokamon",
+      bundleIdentifier: "io.tokamak.tokamon",
       supportsTablet: true,
       googleServicesFile: process.env.GOOGLE_SERVICES_PLIST || "./GoogleService-Info.plist",
       infoPlist: {
@@ -30,7 +30,7 @@ export default {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#0f0f0f",
       },
-      package: "com.tokamak.tokamon",
+      package: "io.tokamak.tokamon",
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON || "./google-services.json",
       edgeToEdgeEnabled: true,
       permissions: ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
@@ -63,7 +63,6 @@ export default {
         "expo-notifications",
         {
           icon: "./assets/icon.png",
-          color: "#0f0f0f",
         },
       ],
     ],
