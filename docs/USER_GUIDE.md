@@ -1,11 +1,20 @@
 # Tokamon User Guide
 
-## App (iOS - TestFlight)
+## App Download
 
-### Download
+### iOS (TestFlight)
 
 1. Install **TestFlight** from the App Store on your iPhone
 2. Tap the invite link → Install the Tokamon app
+
+### Android (APK)
+
+1. Scan the QR code or open the download link below
+
+   <img src="images/tokamon-go-android.png" alt="Android APK QR Code" width="200" />
+
+   Download: https://expo.dev/accounts/zena.p/projects/tokamon/builds/bc74aa6c-5c94-41d7-9af1-c3cbef6b40c6
+2. Open the APK → Allow installation from unknown sources if prompted → Install
 
 ### Collecting TON
 
