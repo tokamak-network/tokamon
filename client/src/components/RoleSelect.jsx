@@ -65,7 +65,11 @@ export default function RoleSelect({ onSelect, language = 'ko' }) {
       </div>
 
       <div className="role-select-footer">
-        <p>{t(language, 'connectSafely')}</p>
+        <div className="role-select-links">
+          <a href="https://tokamon.io" target="_blank" rel="noopener noreferrer">tokamon.io</a>
+          <span className="link-divider">·</span>
+          <a href="https://github.com/tokamak-network/tokamon/blob/main/docs/USER_GUIDE.md" target="_blank" rel="noopener noreferrer">User Guide</a>
+        </div>
       </div>
     </div>
   );

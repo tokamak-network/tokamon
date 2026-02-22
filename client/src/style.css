@@ -1316,6 +1316,30 @@ button.secondary {
   font-weight: 500;
 }
 
+.role-select-links {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.role-select-links a {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 12px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.role-select-links a:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.role-select-links .link-divider {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 12px;
+}
+
 /* 역할 전환 버튼 */
 .role-switch-btn {
   width: auto;
