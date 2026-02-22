@@ -9,11 +9,9 @@
 
 ### Android (APK)
 
-1. Scan the QR code or open the download link below
+1. Scan the QR code or [download the APK](https://expo.dev/accounts/zena.p/projects/tokamon/builds/bc74aa6c-5c94-41d7-9af1-c3cbef6b40c6)
 
    <img src="images/tokamon-go-android.png" alt="Android APK QR Code" width="200" />
-
-   Download: https://expo.dev/accounts/zena.p/projects/tokamon/builds/bc74aa6c-5c94-41d7-9af1-c3cbef6b40c6
 2. Open the APK → Allow installation from unknown sources if prompted → Install
 
 ### Collecting TON
