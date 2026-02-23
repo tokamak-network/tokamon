@@ -12,9 +12,6 @@ const LOCAL_HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
 export const API_BASE = process.env.EXPO_PUBLIC_API_BASE
   || `http://${LOCAL_HOST}:5002/api`;
 
-export const WALLETCONNECT_PROJECT_ID = process.env.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID
-  || '';
-
 export const WEB_CLIENT_URL = process.env.EXPO_PUBLIC_WEB_CLIENT_URL
   || `http://${LOCAL_HOST}:5173`;
 
