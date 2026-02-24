@@ -1,0 +1,1019 @@
+[
+  {
+    "name": "Starbucks",
+    "lat": 13.7421275,
+    "lng": 100.5516431,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7352875,
+    "lng": 100.5615096,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7474662,
+    "lng": 100.5802717,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7379474,
+    "lng": 100.5586902,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7264429,
+    "lng": 100.5854862,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7193108,
+    "lng": 100.584748,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7324619,
+    "lng": 100.5675733,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7434161,
+    "lng": 100.5623857,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.5837764,
+    "lng": 100.6092398,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.6203921,
+    "lng": 100.6206757,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.6327931,
+    "lng": 100.7114131,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.6459465,
+    "lng": 100.6810255,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.6691267,
+    "lng": 100.6340678,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.6875773,
+    "lng": 100.6473656,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.6898881,
+    "lng": 100.647371,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.6944307,
+    "lng": 100.6479265,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.741577,
+    "lng": 100.6252419,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7295953,
+    "lng": 100.5691937,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7310974,
+    "lng": 100.5695344,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7319723,
+    "lng": 100.5761118,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.734743,
+    "lng": 100.5767158,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7357031,
+    "lng": 100.5628939,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7377291,
+    "lng": 100.5601586,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7418012,
+    "lng": 100.5539926,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7424509,
+    "lng": 100.552664,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7434881,
+    "lng": 100.5567802,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7219075,
+    "lng": 100.5662462,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7423854,
+    "lng": 100.5722451,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.746929,
+    "lng": 100.5735994,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7437575,
+    "lng": 100.5872717,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7323654,
+    "lng": 100.5602251,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7430536,
+    "lng": 100.6010588,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7130258,
+    "lng": 100.6009249,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7383991,
+    "lng": 100.5607373,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7146966,
+    "lng": 100.5916603,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #35"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.718785,
+    "lng": 100.5685401,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #36"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.6986104,
+    "lng": 100.6048001,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #37"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7141655,
+    "lng": 100.5930424,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #38"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.6551075,
+    "lng": 100.6455967,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #39"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.6386637,
+    "lng": 100.7430053,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #40"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.6603531,
+    "lng": 100.6617383,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #41"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.6703891,
+    "lng": 100.6146805,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #42"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.6703765,
+    "lng": 100.6096668,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #43"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7489491,
+    "lng": 100.5606651,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #44"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.6686062,
+    "lng": 100.6340629,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks Coffee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7328472,
+    "lng": 100.582001,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #46"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7302821,
+    "lng": 100.5683994,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Starbucks"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7446279,
+    "lng": 100.5638192,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #48"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7223599,
+    "lng": 100.5806834,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #49"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7370584,
+    "lng": 100.571555,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #50"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7053349,
+    "lng": 100.6014658,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #51"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7313564,
+    "lng": 100.5668345,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Sukhumvit Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.7482436,
+    "lng": 100.5837003,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Bangkok #53"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.75,
+    "lng": 100.55,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Vanit Place"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.74,
+    "lng": 100.52,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Im Park Sam Yan"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.74,
+    "lng": 100.6,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "A Link Square"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.86,
+    "lng": 100.63,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Ease Park"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.72,
+    "lng": 100.57,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Camp Davis"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.72,
+    "lng": 100.52,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Robinson Bangrak"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.69,
+    "lng": 100.5,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Tree on 3"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.86,
+    "lng": 100.61,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "The JAS Ramintra"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.74,
+    "lng": 100.51,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Grand China Hotel"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.73,
+    "lng": 100.54,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Abdulrahim Place"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.8,
+    "lng": 100.61,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Central East Ville-Fashion Zone"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.75,
+    "lng": 100.57,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Show DC"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.65,
+    "lng": 100.65,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Sikarin Hospital"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.76,
+    "lng": 100.47,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Ideo Mobi Charan-Interchange"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.72,
+    "lng": 100.73,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Paseo Mall Ladkrabang"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.71,
+    "lng": 100.52,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Vanilla Moon"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.83,
+    "lng": 100.63,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "The Walk Kaset Nawamintra"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.69,
+    "lng": 100.41,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "The X Place"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.64,
+    "lng": 100.63,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "JAS Urban Srinakarin"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.75,
+    "lng": 100.53,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Siam Square 1"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.67,
+    "lng": 100.64,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Little Walk Bangna"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.73,
+    "lng": 100.56,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "CTI Tower"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.71,
+    "lng": 100.38,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Victoria Garden"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.86,
+    "lng": 100.65,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Plearnary Mall Watcharapol"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.75,
+    "lng": 100.54,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Gaysorn Shopping Centre"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.9,
+    "lng": 100.53,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Central Chaengwattana"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.84,
+    "lng": 100.57,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Kasetsart University"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.73,
+    "lng": 100.57,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "UBC 2"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.77,
+    "lng": 100.41,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "The Paseo Park Kanchanaphisek"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.79,
+    "lng": 100.63,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Happy Avenue Ladprao 101"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.82,
+    "lng": 100.59,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "The JAS Wanghin"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.81,
+    "lng": 100.56,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Sun Towers"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.73,
+    "lng": 100.53,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Ideo Q Chula-Samyan"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.74,
+    "lng": 100.55,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Central Embassy"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.67,
+    "lng": 100.63,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Central Bangna 1st Floor"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.77,
+    "lng": 100.64,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "The Mall Bangkapi-4th Floor"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.71,
+    "lng": 100.49,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Riverside Plaza"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.77,
+    "lng": 100.54,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Phyathai 2 Hospital"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.72,
+    "lng": 100.53,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Sathorn Square"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.76,
+    "lng": 100.57,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "The Ninth Towers"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.81,
+    "lng": 100.69,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Amorini"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.77,
+    "lng": 100.67,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Paseo Town Ramkhamhaeng"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.67,
+    "lng": 100.45,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "The Bright Rama 2"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.77,
+    "lng": 100.57,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "The Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.74,
+    "lng": 100.54,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Mercury Ville"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.74,
+    "lng": 100.5,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Yodpiman River Walk"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.76,
+    "lng": 100.44,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Food Villa"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.76,
+    "lng": 100.56,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Fortune Town"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.75,
+    "lng": 100.5,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Wangburapha"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.72,
+    "lng": 100.46,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Phyathai 3 Hospital"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.74,
+    "lng": 100.56,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Grand President Hotel"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.83,
+    "lng": 100.66,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Lotus Sukhapiban 1"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.71,
+    "lng": 100.45,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Metro West Town"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.8,
+    "lng": 100.62,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "SCG Experience"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.69,
+    "lng": 100.65,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Ha Ha"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.83,
+    "lng": 100.68,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "Fashion Island-2nd Floor"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.81,
+    "lng": 100.54,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "SCG Head Office 3"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.74,
+    "lng": 100.53,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "MBK-Pathumwan Princess Hotel"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.76,
+    "lng": 100.8,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "V Market"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 13.84,
+    "lng": 100.53,
+    "city": "Bangkok",
+    "country": "TH",
+    "utcOffset": 7,
+    "branch": "The Rest Area at Prachachuen"
+  }
+]

@@ -1,0 +1,3350 @@
+[
+  {
+    "name": "Starbucks",
+    "lat": 40.7032771,
+    "lng": -74.0141339,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "State St & Pearl Streets"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7043817,
+    "lng": -74.0130472,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "2 Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7046071,
+    "lng": -74.0091159,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Pearl & Hanover"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6862203,
+    "lng": -73.9909614,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Smith St & Wyckoff St"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7047913,
+    "lng": -74.0071236,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "99 Wall Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.69176,
+    "lng": -73.9885471,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "348 Fulton Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.701976,
+    "lng": -73.9868733,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Jay Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.5865941,
+    "lng": -74.1678707,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "2505 Richmond Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.5639129,
+    "lng": -74.1151804,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #9"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.5641436,
+    "lng": -74.1143881,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Stop & Shop Staten Island 581"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6941122,
+    "lng": -73.9867868,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "6 Metro Tech at Jay Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.5952532,
+    "lng": -74.0000236,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Caesar's Bay Shopping Center"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6949243,
+    "lng": -73.9830118,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Gold St & Johnson Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6924431,
+    "lng": -73.9912239,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Court St & Joralemon"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6668209,
+    "lng": -73.9818315,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "7th Avenue and 9th St"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6693658,
+    "lng": -73.9898225,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "4th Avenue & 11th St.-Park Slope"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6939213,
+    "lng": -74.1725981,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "EWR Terminal C Gate 84"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7026645,
+    "lng": -73.9908577,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Main St & Front St"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.542095,
+    "lng": -74.2069354,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Woodrow Shopping Plaza"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6893231,
+    "lng": -73.9809019,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "395 Flatbush Avenue Extension"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6771044,
+    "lng": -73.9829762,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "4th Avenue & Union St."
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7027759,
+    "lng": -74.012773,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #22"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6957951,
+    "lng": -74.1730196,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "EWR Terminal C Gate 93"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.696193,
+    "lng": -74.1774904,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "EWR Term. C Concourse 2-3 Conn"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6885615,
+    "lng": -74.1771229,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "EWR Terminal B Gate 40 - 47"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6891039,
+    "lng": -73.9859325,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Hoyt St & Schermerhorn St"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6948861,
+    "lng": -74.176483,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "EWR PRE-SECURITY Term. C Midle"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6192573,
+    "lng": -74.0329705,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "3rd Avenue & 92nd St"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6315574,
+    "lng": -74.0275898,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "3rd Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.5216465,
+    "lng": -74.2355418,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "106 Page Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6827402,
+    "lng": -74.2338914,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Vermella Union / Morris Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6780173,
+    "lng": -74.2339287,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Kean University Thompson Libra"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6945558,
+    "lng": -73.9939731,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "134 Montague Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6191734,
+    "lng": -73.989937,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "65th St & 18th Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6049946,
+    "lng": -73.9985584,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "1971 86th Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.5267073,
+    "lng": -74.2015551,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "5801 Amboy Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6449025,
+    "lng": -74.074711,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Empire Outlet Staten Island"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7026356,
+    "lng": -74.0117836,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Water St @ Broad (inside)"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6842024,
+    "lng": -74.1872225,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "EWR Terminal A Gate 28"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.5696295,
+    "lng": -74.1097618,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #40"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6195737,
+    "lng": -74.2487113,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #41"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6985605,
+    "lng": -74.2519142,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #42"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6303301,
+    "lng": -74.1060547,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #43"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6977158,
+    "lng": -74.1788376,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #44"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.5883437,
+    "lng": -74.10292,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #45"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6122522,
+    "lng": -74.132582,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #46"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7491,
+    "lng": -73.983903,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "35th & 5th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7481846,
+    "lng": -73.985687,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Empire State Building Reserve"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7272065,
+    "lng": -73.9954808,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.715522,
+    "lng": -74.008983,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Chambers and West Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7675105,
+    "lng": -73.9829426,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "58th & Eighth"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7676336,
+    "lng": -73.9812871,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "59th & Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.8313966,
+    "lng": -74.0890726,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "East Rutherford, Route 17"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7566623,
+    "lng": -73.9858678,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "43rd & Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7490233,
+    "lng": -73.9822288,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "36th & Madison"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.739372,
+    "lng": -74.002526,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "8th Avenue just south of 14th St"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7337954,
+    "lng": -74.0064644,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Hudson Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7580159,
+    "lng": -73.9889989,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #58"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7644259,
+    "lng": -73.9810737,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #59"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.719348,
+    "lng": -73.9899978,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Allen & Delancey"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.8130952,
+    "lng": -73.9843469,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Edgewater"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7405189,
+    "lng": -73.984262,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #62"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7101916,
+    "lng": -74.0079702,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Nassau & Fulton"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.722517,
+    "lng": -73.997904,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Spring Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.757236,
+    "lng": -73.9891169,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Port Authority South Wing"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7051728,
+    "lng": -74.011298,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "55 Broad Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7308318,
+    "lng": -73.983183,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "1st Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.771384,
+    "lng": -73.9824717,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "63rd & Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7330404,
+    "lng": -73.9997548,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #69"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7332121,
+    "lng": -74.0026862,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Grove Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7411054,
+    "lng": -74.0012613,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "8th & 16th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7451876,
+    "lng": -73.9988416,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "West 23rd and 8th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7694073,
+    "lng": -73.9848933,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "59th & Columbus"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7777547,
+    "lng": -73.9826132,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "70th & Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7268477,
+    "lng": -74.0001615,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #75"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7342526,
+    "lng": -73.9923138,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "University Place"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7608044,
+    "lng": -73.9837222,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "49th & Seventh"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.75555,
+    "lng": -73.9840554,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "43rd & Sixth"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7438766,
+    "lng": -73.9887987,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "26th & Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7452192,
+    "lng": -73.9908474,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "27th & 6th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7620837,
+    "lng": -73.9833543,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Pickup - 52nd & 7th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7590282,
+    "lng": -73.9926029,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "43rd & 9th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7263081,
+    "lng": -74.0331745,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Jersey City - Waterfront"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7604406,
+    "lng": -73.987191,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "47th & 8th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7748547,
+    "lng": -73.9841451,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "66th and Amsterdam"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7663043,
+    "lng": -73.9829515,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #86"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7116433,
+    "lng": -74.0066898,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Park Row at Beekman St"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.8299257,
+    "lng": -74.1367495,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Clifton Route 3"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7871789,
+    "lng": -74.0462003,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Secaucus Plaza Drive"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7182651,
+    "lng": -74.007295,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "West Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.86046,
+    "lng": -74.1978175,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #91"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7810251,
+    "lng": -73.981008,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "75th & Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7469335,
+    "lng": -73.9933215,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "28th & 7th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7829394,
+    "lng": -74.0070787,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "West New York"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7370022,
+    "lng": -73.9896034,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #95"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.712179,
+    "lng": -74.008181,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #96"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7435815,
+    "lng": -73.9920821,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "24th & 6th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7636783,
+    "lng": -73.9823708,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "54th and Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7480793,
+    "lng": -73.9892846,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "31st & 6th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7622096,
+    "lng": -73.9874605,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "49th btwn 8th & 9th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7416112,
+    "lng": -74.005149,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York Roastery"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7189006,
+    "lng": -74.0025174,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Broadway & Canal"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.8397392,
+    "lng": -74.2079395,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Upper Montclair"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.8231863,
+    "lng": -74.156104,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Nutley"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7160533,
+    "lng": -74.0332033,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Jersey City, Exchange Place"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.8142576,
+    "lng": -74.2202081,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Montclair - Church & South Par"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7061594,
+    "lng": -74.008845,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #107"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7351434,
+    "lng": -73.9897998,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #108"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.738516,
+    "lng": -74.1708283,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Shoppes on Broad"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7417897,
+    "lng": -73.9807467,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "East 28th Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7323956,
+    "lng": -74.0629413,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Journal Square - Path Plaza"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7193798,
+    "lng": -74.0416979,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Grove Point"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7510948,
+    "lng": -74.025413,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Hoboken - 12th & Hudson"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.719848,
+    "lng": -74.0049417,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #114"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.8887336,
+    "lng": -74.2599315,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Willowbrook Mall Food Court"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.8902963,
+    "lng": -74.2579047,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Macy's Willowbrook Mall 1st Fl"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7268161,
+    "lng": -73.9831737,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Avenue A & Saint Marks"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.8050643,
+    "lng": -74.0779554,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Hilton Meadowlands"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7083708,
+    "lng": -74.0074301,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "100 William Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.758148,
+    "lng": -73.9824848,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "6th Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7596521,
+    "lng": -73.9852254,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "47th & Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7366716,
+    "lng": -74.0301652,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Newark St. Hoboken"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7406046,
+    "lng": -74.0301442,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Hoboken, Washington St."
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7518367,
+    "lng": -73.9902569,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "35th & 7th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7531459,
+    "lng": -73.9851227,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "6th between 39th and 40th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7555697,
+    "lng": -73.9802192,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "45th & 5th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7570592,
+    "lng": -73.9811663,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "46th between 6th and 5th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.715754,
+    "lng": -74.003128,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Lafayette & Worth"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7526738,
+    "lng": -73.9950505,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "34th St. bwtn 8th & 9th Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7418737,
+    "lng": -73.9933052,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "22nd & 6th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7416427,
+    "lng": -73.9903239,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "23rd btwn 5th & 6th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7330316,
+    "lng": -73.9809522,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "17th & 1st"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7691681,
+    "lng": -73.9882442,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "57th & Tenth"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7728466,
+    "lng": -73.9898648,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "61st & West End Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.740175,
+    "lng": -73.9868031,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Park Avenue South"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.8086083,
+    "lng": -74.0720547,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "American Dream Mall Sct A Lvl"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7515183,
+    "lng": -73.9949349,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Moynihan Train Hall;Moynihan Train Station- 8th Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7340576,
+    "lng": -74.1640557,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Newark Penn Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7452485,
+    "lng": -73.9822953,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "29th & Park"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7197342,
+    "lng": -73.9991471,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "157 Lafayette"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7137611,
+    "lng": -74.009094,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Church Street & Murray"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7526793,
+    "lng": -73.992874,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "35th & 8th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7743106,
+    "lng": -73.98082,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Pickup - 67th St & Columbus Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7092166,
+    "lng": -74.0141592,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Carlisle and Washington"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7543258,
+    "lng": -73.9871718,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "40th & Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7148605,
+    "lng": -74.0059829,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Broadway & Reade"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7535964,
+    "lng": -73.9992946,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "33rd and 10th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7296098,
+    "lng": -73.9963468,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "West 4th Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7404072,
+    "lng": -74.0050369,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "678 Hudson Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7517217,
+    "lng": -73.987791,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Pickup - Broadway btwn 36th &"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7974713,
+    "lng": -74.2011807,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Glen Ridge"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7061571,
+    "lng": -74.0056905,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Water & Maiden"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7543433,
+    "lng": -74.0022171,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "35 Hudson Yards"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7536851,
+    "lng": -73.9884107,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #155"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7109261,
+    "lng": -74.0103462,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "195 Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7257767,
+    "lng": -74.0055352,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Spring & Varick"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7505083,
+    "lng": -73.9933551,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Penn Station - Amtrak"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.755991,
+    "lng": -73.9904415,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "8th Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7293401,
+    "lng": -74.0049942,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Varick Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7927202,
+    "lng": -73.9984786,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #161"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7585572,
+    "lng": -73.9865632,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #162"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7417125,
+    "lng": -74.0053593,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #163"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7379164,
+    "lng": -73.9883261,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #164"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.757443,
+    "lng": -73.9846875,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #165"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7637149,
+    "lng": -73.9852986,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "New York #166"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0270545,
+    "lng": -118.501788,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "7th & Montana"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0360394,
+    "lng": -118.4777237,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Wilshire & 26th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0624873,
+    "lng": -118.4473927,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Broxton & Weyburn"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0668178,
+    "lng": -118.4101526,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Wilshire & Santa Monica"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1867524,
+    "lng": -118.6242294,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Fallbrook & Victory"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1877801,
+    "lng": -118.5992363,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Victory & Canoga"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0594135,
+    "lng": -118.444746,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Westwood & Lindbrook"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0391125,
+    "lng": -118.554115,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Vons Pacific Palisades 2266"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.157097,
+    "lng": -118.60558,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Topanga Canyon & Dumetz"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1724315,
+    "lng": -118.447529,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Burbank & Van Nuys"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.2145339,
+    "lng": -118.4484706,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Van Nuys & Michaels"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1909034,
+    "lng": -118.604521,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Westfield Topanga - Level 1"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1786969,
+    "lng": -118.603642,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Marriott Warner Center Lobby"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1685777,
+    "lng": -118.6158486,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ventura & Shoup"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1692326,
+    "lng": -118.6054837,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Topanga Canyon & Ventura"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1549938,
+    "lng": -118.6430369,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Calabasas Road & Park Granada"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.2507414,
+    "lng": -118.6063101,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Topanga Canyon & Lassen"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1607091,
+    "lng": -118.5103836,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ventura & Louise"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1702927,
+    "lng": -118.5404429,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ventura Boulevard"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1578817,
+    "lng": -118.6347795,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Mulholland & Calabasas"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0627064,
+    "lng": -118.443909,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Target LA Westwood 2774"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0634774,
+    "lng": -118.443976,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ralphs Westwood 759"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.3087345,
+    "lng": -118.4315248,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Foothill & Hubbard"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0659131,
+    "lng": -118.4433221,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Los Angeles #24"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0348721,
+    "lng": -118.4489665,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ralphs Los Angeles 210"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.027236,
+    "lng": -118.4277171,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Sepulveda & National"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1749692,
+    "lng": -118.4664895,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Target Van Nuys 1307"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.2417479,
+    "lng": -118.5358022,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Reseda & Plummer"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0431542,
+    "lng": -118.4316119,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Olympic & Westwood"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0258476,
+    "lng": -118.4334197,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ralphs Los Angeles 709"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.2015889,
+    "lng": -118.4304878,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Sherman Way & Woodman"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0459546,
+    "lng": -118.4510394,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Santa Monica Boulevard & Purdue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.2014492,
+    "lng": -118.4682946,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Sherman Way & Sepulveda"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0242483,
+    "lng": -118.4916864,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Wilshire & 11th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.27515,
+    "lng": -118.5635422,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Rinaldi & Corbin"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0478491,
+    "lng": -118.4914692,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "26th & San Vicente Boulevard"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0537556,
+    "lng": -118.4660759,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "San Vicente & Barrington"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1531695,
+    "lng": -118.6452634,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Los Angeles #38"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0327368,
+    "lng": -118.4753012,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Santa Monica & 26th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0273185,
+    "lng": -118.4748682,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Colorado & Cloverfield"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1576794,
+    "lng": -118.4916304,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ventura & Hayvenhurst"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.0644996,
+    "lng": -118.4694073,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Los Angeles #42"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.040322,
+    "lng": -118.4633584,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Santa Monica & Bundy"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1705686,
+    "lng": -118.5700901,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ventura Boulevard"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1527397,
+    "lng": -118.4571543,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Kester Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.77,
+    "lng": -73.95,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "80th & Second"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.71,
+    "lng": -74.01,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Nassau & Fulton"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.76,
+    "lng": -73.99,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "49th & 8th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.73,
+    "lng": -74.01,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Spring and Varick"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.79,
+    "lng": -73.97,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "95th & Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.63,
+    "lng": -74.03,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Bay Ridge Pkwy & 3rd Ave"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.75,
+    "lng": -73.99,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Macy's 6th Floor"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.63,
+    "lng": -73.95,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Target Brooklyn College"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.78,
+    "lng": -73.95,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "87th & Third"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.75,
+    "lng": -74,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "26th between 10th and 11th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.68,
+    "lng": -73.98,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Target Atlantic Terminal T-1849"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.77,
+    "lng": -73.98,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "57th & Eighth"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.79,
+    "lng": -73.98,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "88th & Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.8,
+    "lng": -73.97,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "99th & Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.76,
+    "lng": -73.97,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "63rd & Lexington"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.69,
+    "lng": -73.98,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "395 Flatbush Ave Extension"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.73,
+    "lng": -73.99,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "15th & 3rd"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.73,
+    "lng": -74,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Broadway and Bond"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.82,
+    "lng": -73.96,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "124th and Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.75,
+    "lng": -73.98,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "34th & Park"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.76,
+    "lng": -73.98,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "45th & 5th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.61,
+    "lng": -73.92,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Kings Plaza Mall"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.79,
+    "lng": -73.95,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "96th & Lexington"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7,
+    "lng": -74.01,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Pearl & Hanover"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.74,
+    "lng": -74,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "8th & 16th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.85,
+    "lng": -73.84,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Eastchester Rd. & Morris Park Ave."
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.74,
+    "lng": -73.98,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "32nd & 2nd"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.69,
+    "lng": -73.97,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "394 Myrtle Ave"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.74,
+    "lng": -73.99,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "23rd & Park"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.77,
+    "lng": -73.96,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "76th & Second"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.82,
+    "lng": -73.84,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Throgs Neck Shopping Center"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.78,
+    "lng": -73.97,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "81st & Columbus"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.69,
+    "lng": -73.99,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Court St & Dean St"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.73,
+    "lng": -73.98,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "17th & 1st"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.8,
+    "lng": -73.93,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Target East River Plaza T-2380"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.58,
+    "lng": -73.99,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Cropsey Ave & Hart Place"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.76,
+    "lng": -74,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Level 3 Jacob Javits Cemt"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.83,
+    "lng": -73.92,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "161st & Morris Ave"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.68,
+    "lng": -73.97,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "164 Park Place"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.76,
+    "lng": -73.96,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "63rd & 3rd Ave"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.88,
+    "lng": -73.91,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "230th & Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.61,
+    "lng": -73.96,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "1417 Kings Highway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.72,
+    "lng": -74.01,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "W Broadway & Leonard Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.61,
+    "lng": -74,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "1971 86th Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.89,
+    "lng": -73.9,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Manhattan College - Thomas Hall Stu"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.72,
+    "lng": -73.99,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "3rd St & First Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.81,
+    "lng": -73.95,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "125th & Adam Clayton"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.82,
+    "lng": -73.94,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "145th & Bradhurst"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.78,
+    "lng": -73.98,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "76th & Columbus"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.75,
+    "lng": -73.97,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "42nd & 2nd"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.8,
+    "lng": -73.96,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "110th & Manhattan"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.72,
+    "lng": -74,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Broadway & Canal"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.85,
+    "lng": -73.94,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "181st & Fort Washington"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.67,
+    "lng": -73.96,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Franklin Ave & Eastern Pkwy"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.82,
+    "lng": -73.93,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Target Bronx Terminal T-2475"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.62,
+    "lng": -74.03,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "514 86th St"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.62,
+    "lng": -73.99,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "65th St & 18th Ave"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.6,
+    "lng": -74,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Caesar's Bay Shopping Center"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.71,
+    "lng": -74.02,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Brookfield Place 2"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.78,
+    "lng": -73.96,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "87th & Lexington"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.86,
+    "lng": -73.89,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Fordham Plaza"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.84,
+    "lng": -73.86,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Metropolitan Ave & Wood Ave"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.7,
+    "lng": -73.99,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Main St & Front St"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.62,
+    "lng": -73.94,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Flatbush Ave & Kings Hwy"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.87,
+    "lng": -73.91,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Target Riverdale T-1798"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.89,
+    "lng": -73.91,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "235th & Johnson Ave"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.76,
+    "lng": -73.95,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Roosevelt Island"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.81,
+    "lng": -73.96,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "114th & Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.73,
+    "lng": -73.95,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "910 Manhattan Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.71,
+    "lng": -74,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "John & Water Streets"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.84,
+    "lng": -73.94,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "168th & Broadway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.58,
+    "lng": -73.96,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "607 Brighton Beach Ave"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.72,
+    "lng": -73.96,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "154 N Seventh St"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.71,
+    "lng": -73.95,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Union Ave & Ainslie St"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.67,
+    "lng": -73.98,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "164 7th Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.77,
+    "lng": -73.99,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "57th & Tenth"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.87,
+    "lng": -73.93,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Broadway & Dyckman"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 40.65,
+    "lng": -73.87,
+    "city": "New York",
+    "country": "US",
+    "utcOffset": -5,
+    "branch": "Target Gateway T-1401"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.09,
+    "lng": -118.34,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Highland & Willoughby"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.04,
+    "lng": -118.43,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Teavana - Westside Pavilion"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.98,
+    "lng": -118.37,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ralph's - Los Angeles #185"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1,
+    "lng": -118.29,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Vermont & Prospect"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.06,
+    "lng": -118.45,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Broxton & Weyburn"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.95,
+    "lng": -118.39,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Residence Inn @ LAX"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.05,
+    "lng": -118.25,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "6th & Spring"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1,
+    "lng": -118.34,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Sunset & La Brea"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.97,
+    "lng": -118.42,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Loyola Marymount University - Libra"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.04,
+    "lng": -118.44,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Olympic & Sawtelle"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.08,
+    "lng": -118.38,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Target LA Beverly T-2775"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.02,
+    "lng": -118.44,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "National & Barrington"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.06,
+    "lng": -118.44,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Target LA Westwood T-2774"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.05,
+    "lng": -118.4,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ralph's - Los Angeles #198"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.07,
+    "lng": -118.29,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Vons-Los Angeles #2261"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.02,
+    "lng": -118.35,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ralphs - Los Angeles #283"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.04,
+    "lng": -118.27,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Olympic & Figueroa (LA LIVE)"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.95,
+    "lng": -118.41,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "LAX Terminal- 3"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.14,
+    "lng": -118.22,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Colorado & Eagle Rock, Eagle Rock"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.06,
+    "lng": -118.27,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Wilshire & Union"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.95,
+    "lng": -118.4,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "LAX - Terminal 2 Arrivals"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.07,
+    "lng": -118.34,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "4th and La Brea"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.06,
+    "lng": -118.21,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Health Science Campus - USC"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.96,
+    "lng": -118.42,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Lincoln & 84th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.06,
+    "lng": -118.35,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ralphs Los Angeles #289"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.98,
+    "lng": -118.12,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Slauson & I-5, Commerce"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1,
+    "lng": -118.26,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Glendale & Fletcher"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.04,
+    "lng": -118.33,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Crenshaw & Washington, Los Angeles"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.05,
+    "lng": -118.26,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Figueroa & 7th (FIGat7th)"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34,
+    "lng": -118.43,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Venice & Centinela"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.07,
+    "lng": -118.32,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Larchmont & Beverly"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.06,
+    "lng": -118.24,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Dwntn LA Union Station Main Concrse"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.98,
+    "lng": -118.25,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Gage & Compton, Huntington Park"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.94,
+    "lng": -118.4,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "LAX T6 Evenings and Reserve"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.13,
+    "lng": -118.44,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "N Beverly Glen & Beverly Glen Crcl"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.99,
+    "lng": -118.31,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Western & Slauson"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.06,
+    "lng": -118.29,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Vermont & Wilshire"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.07,
+    "lng": -118.17,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Barnes And Noble @ Cal State Univ L"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.02,
+    "lng": -118.33,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Crenshaw & Coliseum, Los Angeles"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.03,
+    "lng": -118.4,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "National & Castle Heights"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.11,
+    "lng": -118.27,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Griffith Park & Hyperion"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.96,
+    "lng": -118.4,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ralphs - Los Angeles #209"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.06,
+    "lng": -118.36,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Fairfax & Olympic"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1,
+    "lng": -118.32,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Sunset & Gower"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.13,
+    "lng": -118.26,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Los Feliz & Seneca"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.08,
+    "lng": -118.34,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Beverly & Detroit"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1,
+    "lng": -118.35,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ralph's- Hollywood, CA #100"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.99,
+    "lng": -118.26,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Central & Slauson"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.12,
+    "lng": -118.22,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Eagle Rock & York, Eagle Rock"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.08,
+    "lng": -118.36,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Melrose & Stanley"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.06,
+    "lng": -118.3,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Wilshire & Normandie"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.02,
+    "lng": -118.37,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Target Los Angeles T-1306"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.02,
+    "lng": -118.22,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Olympic & Soto"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.05,
+    "lng": -118.24,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "2nd & Central"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.05,
+    "lng": -118.38,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Pico & Robertson"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.04,
+    "lng": -118.25,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "9th & Santee"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.03,
+    "lng": -118.43,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Vons-Los Angeles #2077"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1,
+    "lng": -118.31,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Hollywood & Western"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.03,
+    "lng": -118.39,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Venice & Culver"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.06,
+    "lng": -118.34,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Wilshire & Highland"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.08,
+    "lng": -118.33,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Vons-Los Angeles #2229"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.14,
+    "lng": -118.19,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Vons- Los Angeles #2655"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.02,
+    "lng": -118.28,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Trojan Grounds @ USC"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.05,
+    "lng": -118.34,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Pico & San Vicente"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.07,
+    "lng": -118.36,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "3rd & Fairfax (Farmers Market)"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.03,
+    "lng": -118.45,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ralphs Los Angeles #210"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.03,
+    "lng": -118.28,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Figueroa & 28th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.98,
+    "lng": -118.39,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Promenade at Howard Hughes Center"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.1,
+    "lng": -118.37,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Sunset & Crescent Heights"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.06,
+    "lng": -118.47,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Barrington & Sunset"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.04,
+    "lng": -118.26,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "12th & Hill"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.06,
+    "lng": -118.25,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Grand & 1st (Grand Park)"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.06,
+    "lng": -118.31,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Wilshire & Serrano"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.06,
+    "lng": -118.28,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "6th & Occidental"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.12,
+    "lng": -118.26,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Glendale & Glenfeliz"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.98,
+    "lng": -118.41,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Jefferson & Centinela"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.05,
+    "lng": -118.47,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "San Vicente & Barrington"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.03,
+    "lng": -118.24,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Alameda & 14th"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.13,
+    "lng": -118.35,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Cahuenga & Barham"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.03,
+    "lng": -118.37,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "La Cienega & Jefferson"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.04,
+    "lng": -118.47,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Ralph's - Los Angeles #44"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.03,
+    "lng": -118.18,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "3rd & Gage, Los Angeles"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.11,
+    "lng": -118.18,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Figueroa & York"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 33.95,
+    "lng": -118.38,
+    "city": "Los Angeles",
+    "country": "US",
+    "utcOffset": -8,
+    "branch": "Marriott Los Angeles Int'l Airport"
+  }
+]

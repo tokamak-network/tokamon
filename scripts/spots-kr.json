@@ -1,0 +1,2476 @@
+[
+  {
+    "name": "Starbucks",
+    "lat": 37.563812,
+    "lng": 126.9650606,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Starbucks Coffee",
+    "_dist": 13350.851877898107
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5664234,
+    "lng": 126.9463094,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seoul #2",
+    "_dist": 15251.045682882394
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5791108,
+    "lng": 126.8919699,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seoul #3",
+    "_dist": 21220.389505996452
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5839406,
+    "lng": 127.0295354,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Starbucks",
+    "_dist": 10598.889355694968
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.6232343,
+    "lng": 127.0610277,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seoul #5",
+    "_dist": 14269.946280133943
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5706285,
+    "lng": 126.9834365,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seoul #6",
+    "_dist": 12247.933923784629
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.574181,
+    "lng": 126.9730103,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seoul #7",
+    "_dist": 13368.757776013903
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5742361,
+    "lng": 126.9735655,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seoul #8",
+    "_dist": 13326.568421199583
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5825048,
+    "lng": 127.0022088,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seoul #9",
+    "_dist": 11885.966919523826
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 126.96,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gyeonggi Univ.",
+    "_dist": 13583.94217964833
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.63,
+    "lng": 127.06,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Wolgae Emart",
+    "_dist": 15023.324104205538
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 127.13,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Olympic Park North Gate",
+    "_dist": 8357.010059823086
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.57,
+    "lng": 126.99,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seoul Theater",
+    "_dist": 11679.99576797934
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.62,
+    "lng": 127.02,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Mia Newtown",
+    "_dist": 14722.609182478365
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 127,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Daehan Theater",
+    "_dist": 10110.351385585389
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 127.04,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Apgujeong Center",
+    "_dist": 4707.159136889112
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.57,
+    "lng": 126.95,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yonsei east gate",
+    "_dist": 15118.974209251193
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.49,
+    "lng": 127.12,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Garak bondong",
+    "_dist": 6293.161617184136
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.55,
+    "lng": 127.16,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Myeongil E-Mart",
+    "_dist": 12345.645351295912
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.58,
+    "lng": 126.97,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Space Bon",
+    "_dist": 14048.557475413854
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 126.86,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hwagok DT",
+    "_dist": 23141.394364645013
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 126.92,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "National Assemble Station",
+    "_dist": 16403.35902003033
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.48,
+    "lng": 126.95,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seoul Nat'l Univ. Station",
+    "_dist": 12703.725718859296
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.48,
+    "lng": 126.98,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sadang",
+    "_dist": 9411.032735040473
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.49,
+    "lng": 126.93,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sillim",
+    "_dist": 14827.68063926362
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 127.02,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Dosan Main Street",
+    "_dist": 5585.782052677161
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 127.03,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Ulji Hospital Sageori",
+    "_dist": 4659.80591226758
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5,
+    "lng": 127.03,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Montessori",
+    "_dist": 3764.7495454548875
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 126.91,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Mangwon Station Line 6",
+    "_dist": 18516.164158378808
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.57,
+    "lng": 126.98,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Youngpoong Bookstore",
+    "_dist": 12480.635846782769
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 127.13,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gangdong Station",
+    "_dist": 8931.424474291985
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.57,
+    "lng": 126.93,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yeonhui DT",
+    "_dist": 17013.204317235206
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.59,
+    "lng": 127.06,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hoegi Station Sageori",
+    "_dist": 10585.431646371548
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.55,
+    "lng": 126.96,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Mapo Trapalace",
+    "_dist": 13025.527211595772
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.49,
+    "lng": 126.92,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Boramae Town",
+    "_dist": 15937.041229162043
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 127.01,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Dongguk Univ. station",
+    "_dist": 9370.359392253878
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 126.91,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yeongdeungpo Bon-dong",
+    "_dist": 17268.38241237528
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 126.9,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yangpyeongdong",
+    "_dist": 18566.66709832424
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.58,
+    "lng": 126.89,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sangam Digitalcube",
+    "_dist": 21460.161395945066
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.33,
+    "lng": 127.62,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gwangnaru",
+    "_dist": 64420.0183727078
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.58,
+    "lng": 126.92,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Myongji University",
+    "_dist": 18530.132680043163
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.33,
+    "lng": 126.6,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Itaewon Street",
+    "_dist": 54600.07973565729
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.64,
+    "lng": 127.03,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gangbuk-gu office sageori",
+    "_dist": 16551.4139317461
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.48,
+    "lng": 126.89,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gasan Great",
+    "_dist": 19327.50028172344
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.48,
+    "lng": 126.88,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gasan V-Tower",
+    "_dist": 20433.752399890822
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.48,
+    "lng": 126.93,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sillim Podo Mall",
+    "_dist": 14908.064500128614
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.55,
+    "lng": 126.92,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hongdae-samgeory",
+    "_dist": 17070.32041702805
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 127.09,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gangbyeon Station",
+    "_dist": 5825.480507219663
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 126.98,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Myeong Dong Entrance",
+    "_dist": 11766.178017521348
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 127.14,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gildong Intersection",
+    "_dist": 9351.932802367197
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 126.88,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Mokdong Paragon",
+    "_dist": 20741.9590959977
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.57,
+    "lng": 126.97,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Munhwa Ilbo",
+    "_dist": 13325.70602782498
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 126.97,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Dongbu ichondong",
+    "_dist": 10751.735261808417
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.58,
+    "lng": 127,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Daehakro Hongdae",
+    "_dist": 11803.815363686452
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 127.07,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Konkuk Univ. Entrance",
+    "_dist": 5079.799517697062
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.37,
+    "lng": 127.23,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Wolgok Station",
+    "_dist": 23090.225229304495
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.3,
+    "lng": 127.05,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Central City",
+    "_dist": 21663.588787179844
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 126.92,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yeouido station",
+    "_dist": 16174.166474350748
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.55,
+    "lng": 126.85,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gangseo I'Park",
+    "_dist": 24480.55614441896
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.58,
+    "lng": 126.99,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Anguk Station",
+    "_dist": 12498.392982300194
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 127.01,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hannam dong",
+    "_dist": 7114.693046084213
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 127.08,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Jayang Sageori",
+    "_dist": 5351.466447619243
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5,
+    "lng": 126.99,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Bangbae Cafe Street",
+    "_dist": 8179.683315386831
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 126.95,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Mapo Acro Tower",
+    "_dist": 13564.881243121981
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.33,
+    "lng": 126.75,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Shinlim Intersection",
+    "_dist": 39308.474368004296
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 126.97,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Namyoungdong",
+    "_dist": 11532.435264939091
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.47,
+    "lng": 126.9,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Geumcheon Doksan",
+    "_dist": 18354.42647265226
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.32,
+    "lng": 126.53,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Mokdong 5 Apt Complex",
+    "_dist": 62312.66942717231
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 127.03,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Apgujeong 2",
+    "_dist": 5401.88088909803
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.59,
+    "lng": 127.01,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Samseongyo",
+    "_dist": 12131.20823084014
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 127.03,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hakdong Station",
+    "_dist": 4087.965892715057
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 126.89,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Mullae-dong",
+    "_dist": 19462.177964966275
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 126.89,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seonyudo station",
+    "_dist": 19904.110709600045
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.32,
+    "lng": 127.02,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Soonchunhyang Gate",
+    "_dist": 19983.804471121497
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5,
+    "lng": 127.11,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Songpa Sageori",
+    "_dist": 5194.918588389394
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.49,
+    "lng": 127.13,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Munjeong Rodeo",
+    "_dist": 7399.913049488128
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.57,
+    "lng": 127,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Jewelry City",
+    "_dist": 10933.55071054252
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5,
+    "lng": 126.95,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Soongsil Univ.",
+    "_dist": 12612.228159211409
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 126.97,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seosomun Baejae",
+    "_dist": 12659.032946477964
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 127.12,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Cheonho Station",
+    "_dist": 8038.377519126408
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.46,
+    "lng": 127.04,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hi-Brand",
+    "_dist": 4651.866844611942
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.55,
+    "lng": 126.94,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sogang University",
+    "_dist": 15020.043246942245
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.31,
+    "lng": 127.76,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Olympic APT",
+    "_dist": 79983.67167828696
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 126.93,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yoido IFC Mall - B3",
+    "_dist": 15327.785787255534
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.59,
+    "lng": 127,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hansungdaeipgu-station",
+    "_dist": 12711.482334488433
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.33,
+    "lng": 126.55,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Mapo dongkyo",
+    "_dist": 59858.57964519464
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.3,
+    "lng": 127.22,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yeoksam Posco",
+    "_dist": 27727.866653242527
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 127.01,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Newcore Gangnam",
+    "_dist": 6176.5690427613745
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.63,
+    "lng": 126.92,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gupabal Station",
+    "_dist": 21892.154922255
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.57,
+    "lng": 127.02,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Dongmyoap station",
+    "_dist": 9652.750444303776
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 126.89,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "D Cube City - 2F",
+    "_dist": 19333.236799357128
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 126.85,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Kkachisan-station",
+    "_dist": 24020.240988384245
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.39,
+    "lng": 127.34,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Nowon Station",
+    "_dist": 32818.16696800712
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.31,
+    "lng": 126.54,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yeongdeungpo-Shinsegae Dept Store A",
+    "_dist": 61619.13237899393
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 126.88,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Mokdong",
+    "_dist": 20979.980770726157
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.61,
+    "lng": 126.97,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Jongro Pyeongchang",
+    "_dist": 16477.552765505174
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.58,
+    "lng": 126.98,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gyeongbokgung Intersection",
+    "_dist": 13249.671586118446
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.59,
+    "lng": 127.02,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sungshin Womens University",
+    "_dist": 11628.191739905797
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 127.03,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Wangsimni Station",
+    "_dist": 8146.477468206975
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 126.94,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Artreon Shinchon",
+    "_dist": 15506.799319654021
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.63,
+    "lng": 127.03,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Mia station",
+    "_dist": 15471.799415065007
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 126.95,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Ewha Univ. ECC",
+    "_dist": 14534.78775696454
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 126.93,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Shinchon Ogeori",
+    "_dist": 16496.235786990746
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.6,
+    "lng": 127.09,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sangbong",
+    "_dist": 12052.749858019886
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.61,
+    "lng": 127.08,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Mookdong E-Mart",
+    "_dist": 12928.684199870879
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 126.87,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Mokdong 7 Apt Complex",
+    "_dist": 21832.980491449183
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.6,
+    "lng": 126.92,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Eunpyeong E-Mart",
+    "_dist": 19756.85878726702
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.31,
+    "lng": 127.61,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Jamsil",
+    "_dist": 64032.31438219241
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.49,
+    "lng": 126.99,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Bangbae",
+    "_dist": 8175.163187363166
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5,
+    "lng": 126.91,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yeongdeungpo Singil DT",
+    "_dist": 17048.65329402973
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 127.1,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gwangjang",
+    "_dist": 6457.433943912067
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 127.04,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hakdong Sageori",
+    "_dist": 3832.860699268894
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.48,
+    "lng": 127.12,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Garden 5 E-Mart",
+    "_dist": 6480.289896293331
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.34,
+    "lng": 127.01,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sindang Station",
+    "_dist": 18169.564197855518
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.58,
+    "lng": 127.04,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Cheongnyangni Station",
+    "_dist": 9821.047660000027
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.49,
+    "lng": 127.01,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gyodae",
+    "_dist": 5961.371749857537
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.6,
+    "lng": 127.03,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sungbuk Jongam",
+    "_dist": 12265.545203536707
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.49,
+    "lng": 127.03,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gangnam woosung sageori",
+    "_dist": 3754.9185264134517
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 127.12,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Songpa DT",
+    "_dist": 6497.379097759211
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5,
+    "lng": 126.93,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Borame Daekyo",
+    "_dist": 14830.17326736249
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.3,
+    "lng": 127.35,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "New samsung station",
+    "_dist": 38449.9802228811
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 127.13,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Bangi Station",
+    "_dist": 7574.349156197074
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.59,
+    "lng": 126.98,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Samcheongdong",
+    "_dist": 14064.335147457405
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.6,
+    "lng": 127.06,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hankuk Univ. of Foreign Studies",
+    "_dist": 11694.754770408805
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.55,
+    "lng": 126.95,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gongduk Station",
+    "_dist": 14014.311582807028
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 126.83,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sinwol DT",
+    "_dist": 26213.006640598036
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.48,
+    "lng": 127.01,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seoul Arts Center",
+    "_dist": 6158.589703820291
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 126.9,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hi-Tech City",
+    "_dist": 18227.78854222297
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.31,
+    "lng": 127.13,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gangnam Avenue",
+    "_dist": 21790.049222982085
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 126.93,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yeouido Allianz",
+    "_dist": 15082.257494818015
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.59,
+    "lng": 127.05,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Kyunghee Univ.",
+    "_dist": 10683.910011789063
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.55,
+    "lng": 127.09,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Guui DT",
+    "_dist": 6806.698843051082
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.6,
+    "lng": 126.93,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Eunpyeong-gu Office Entrance",
+    "_dist": 18873.375403991533
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 127.04,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hanyang Univ.",
+    "_dist": 7703.38400574709
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 127.13,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Dunchondong",
+    "_dist": 7897.663650725171
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.48,
+    "lng": 126.9,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hotel Guro",
+    "_dist": 18221.70401307183
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.33,
+    "lng": 127.1,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sangil Dong",
+    "_dist": 18725.255863138544
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 126.88,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Omokgyo Station",
+    "_dist": 20561.185304841816
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.29,
+    "lng": 127.14,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seocho Paragon",
+    "_dist": 24256.57072094085
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 126.84,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Balsan Station",
+    "_dist": 25845.686780196196
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 127.05,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "E-Mart HQ",
+    "_dist": 5246.837441735706
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 127,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Shinsegae Gangnam 5F",
+    "_dist": 7250.212075519315
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 127.02,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Nonhyeon Station",
+    "_dist": 5118.460231359426
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 127.07,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Janghanpyeong-station",
+    "_dist": 7284.120752705784
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.58,
+    "lng": 127.09,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sagajeong Station",
+    "_dist": 9914.692488423027
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5,
+    "lng": 127,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Famille Park Dome",
+    "_dist": 7073.008492855586
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 126.99,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Myeongdong-gil",
+    "_dist": 10913.247689850114
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.48,
+    "lng": 127,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Bangbae Station",
+    "_dist": 7234.901322064401
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.59,
+    "lng": 127.03,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Korea Univ. Anam Hospital",
+    "_dist": 11212.83519632778
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.55,
+    "lng": 126.88,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yeomchang Station",
+    "_dist": 21273.32882132075
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 127.14,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gildong Station",
+    "_dist": 9868.605430352822
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.33,
+    "lng": 127.44,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gunja Station",
+    "_dist": 45615.23897931423
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.49,
+    "lng": 127.1,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Suseo",
+    "_dist": 4084.950812432208
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.65,
+    "lng": 127.08,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Junggye Bank Intersection",
+    "_dist": 17335.32172011773
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.39,
+    "lng": 127.26,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Ssangmoon-station",
+    "_dist": 24714.47841124721
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.56,
+    "lng": 126.86,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gayang E-Mart",
+    "_dist": 23722.946384039813
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.31,
+    "lng": 127.12,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "New Garosugil",
+    "_dist": 21439.482622955176
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.31,
+    "lng": 126.52,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Mokdong Hyperion",
+    "_dist": 63716.93350389764
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 126.99,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Itaewon Entrance",
+    "_dist": 9050.6462277573
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.65,
+    "lng": 127.06,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Junggye Station",
+    "_dist": 17242.677261376444
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 127.09,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Galleria Palace",
+    "_dist": 3396.5637252961587
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.3,
+    "lng": 127.45,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sincheon station",
+    "_dist": 48037.52990256684
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.49,
+    "lng": 127.02,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seochodong",
+    "_dist": 4856.602015814076
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.6,
+    "lng": 127,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hongdae Station",
+    "_dist": 13649.091879682208
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.61,
+    "lng": 127.03,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Miasageori Station",
+    "_dist": 13327.555107370465
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.58,
+    "lng": 127.03,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sinsuldong station",
+    "_dist": 10172.312772422792
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.59,
+    "lng": 127.07,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Jungrang Station",
+    "_dist": 10602.876644571612
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 126.9,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Time Square B2",
+    "_dist": 18364.4929453551
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.62,
+    "lng": 126.92,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yeonsinnae - Art Castle",
+    "_dist": 21146.1088888712
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 127.11,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "songpa-gu office",
+    "_dist": 5433.719273204358
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.49,
+    "lng": 126.89,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Shinsegae I&C",
+    "_dist": 19265.564957717124
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.55,
+    "lng": 126.91,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hapjeong station Prugio",
+    "_dist": 18110.47236104086
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5,
+    "lng": 126.84,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Oryudong Station",
+    "_dist": 24815.474388776194
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.48,
+    "lng": 126.97,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Nakseongdae DT",
+    "_dist": 10505.984348932532
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.31,
+    "lng": 127.36,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Dosan Daero",
+    "_dist": 38774.81831214633
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.62,
+    "lng": 127.06,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Kwangwoon University",
+    "_dist": 13913.724919660697
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.61,
+    "lng": 127.1,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Jungnang-gu office",
+    "_dist": 13424.274101044874
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5,
+    "lng": 127.01,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gyodae High Court",
+    "_dist": 5967.568947234655
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.57,
+    "lng": 126.84,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yangcheon Hyanggyo",
+    "_dist": 26178.67168402562
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 127.1,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Jamsil Station",
+    "_dist": 4929.624847794352
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.45,
+    "lng": 127.06,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Cheonggyesan Station",
+    "_dist": 4976.886490568068
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 126.96,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "chungang univ.",
+    "_dist": 11613.348145131391
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.3,
+    "lng": 127.33,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Samsung City Airport",
+    "_dist": 36635.10228100884
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 126.9,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Dangsan",
+    "_dist": 18832.202556790682
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.34,
+    "lng": 126.73,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Guro Digitalro",
+    "_dist": 40807.310903072255
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 126.96,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yongsan Station",
+    "_dist": 12138.315663222293
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 127.1,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seokchon West Lake",
+    "_dist": 4393.048501893554
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.3,
+    "lng": 126.97,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Suwon Sungkyunkwan University",
+    "_dist": 23974.545650335804
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.3,
+    "lng": 127.62,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seokchon Lake",
+    "_dist": 65442.98120608518
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.37,
+    "lng": 127.53,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seoul Womens Univ.",
+    "_dist": 53599.59329267314
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.48,
+    "lng": 127.02,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Nambu Terminal",
+    "_dist": 5096.749664247905
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 127.12,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Olympic Park south 4th gate",
+    "_dist": 6871.554492252869
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.55,
+    "lng": 126.97,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seoul Station Dongjadong",
+    "_dist": 12057.860056411644
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.54,
+    "lng": 126.84,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hwagok-dong",
+    "_dist": 25312.95069998764
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.55,
+    "lng": 126.99,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "N Seoul Tower",
+    "_dist": 10209.791826477744
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.53,
+    "lng": 126.91,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yeongdeungpo kt",
+    "_dist": 17483.236460679425
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.55,
+    "lng": 126.93,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seogang",
+    "_dist": 16039.534567436398
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.16,
+    "lng": 129.06,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Bujeon station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.17,
+    "lng": 129.17,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Haeundae E-Mart"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.16,
+    "lng": 129.14,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Zenith Square"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.18,
+    "lng": 129.21,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Dong Busan DT"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.14,
+    "lng": 129.1,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Kyungsung Univ."
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.18,
+    "lng": 129.11,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Suyoung Mangmi DT"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.17,
+    "lng": 129.14,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan BEXCO"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.15,
+    "lng": 129.11,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Namcheon"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.11,
+    "lng": 128.97,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hadan Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.19,
+    "lng": 129.08,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Choryang"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.17,
+    "lng": 129.07,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yangjeong station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.16,
+    "lng": 129.05,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seomyun Traders"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.23,
+    "lng": 129.08,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Univ. Main Gate"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.18,
+    "lng": 129.12,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Jaesong DT"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.16,
+    "lng": 129.15,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Bene City"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.62,
+    "lng": 129.3,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Jungang Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.16,
+    "lng": 129.18,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Dalmajigil"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.22,
+    "lng": 129.09,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Dongrae SK Hub"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.92,
+    "lng": 129.33,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Seomyun Jungangro"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.15,
+    "lng": 129.07,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "BIFC Mall"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.17,
+    "lng": 129.13,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Centum City Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.33,
+    "lng": 129.24,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Premium Outlets"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.17,
+    "lng": 129.18,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Jangsan Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.26,
+    "lng": 129.08,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan University of Foreign Studies"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.2,
+    "lng": 129.06,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Sajik"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.15,
+    "lng": 129.06,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seomyun Centralstar"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.19,
+    "lng": 129.1,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Daeyeon Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.14,
+    "lng": 129.05,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Hwamyeong Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.1,
+    "lng": 129.03,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gwangbok Jungangro"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.1,
+    "lng": 129.04,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Nampodong Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.94,
+    "lng": 129.1,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Dalmaji"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.11,
+    "lng": 128.96,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Dong-a University"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.15,
+    "lng": 129.02,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Gaegeum Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.2,
+    "lng": 129.2,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Songjeong Beach"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.08,
+    "lng": 128.9,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Myeongji Ocean City"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.65,
+    "lng": 129.1,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Daesin"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.12,
+    "lng": 129.04,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.2,
+    "lng": 129.08,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Gyodae station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.15,
+    "lng": 129.12,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gwangan Beach"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.21,
+    "lng": 129.06,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Seomyun"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.12,
+    "lng": 129.03,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Deokcheon Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.43,
+    "lng": 129.06,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Songdo Beach"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.2,
+    "lng": 129.11,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Allak DT"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.23,
+    "lng": 129.09,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Pusan Natl. Univ."
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.16,
+    "lng": 129.17,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan Paled Seas"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.12,
+    "lng": 128.96,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Ulsukdo Gangbyeon DT"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.33,
+    "lng": 129.18,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Ulsan Taehwagang"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.1,
+    "lng": 129.02,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Bumin Sageori"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5,
+    "lng": 126.72,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Busan University Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.16,
+    "lng": 129.16,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Harbor Town"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.16,
+    "lng": 129.04,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Dongeui Univ Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.16,
+    "lng": 128.98,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Sasang Station 2 Line"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.14,
+    "lng": 129.06,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Beomil Intersection"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.21,
+    "lng": 129.07,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Dongnae Minam DT"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.25,
+    "lng": 129.09,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gemjeong E-Mart"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.16,
+    "lng": 129.12,
+    "city": "Busan",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Gwangalli"
+  }
+]

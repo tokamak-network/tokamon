@@ -1,0 +1,272 @@
+[
+  {
+    "name": "Starbucks",
+    "lat": 35.7773446,
+    "lng": 139.6329122,
+    "city": "Tokyo",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "STARBUCKS"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.7763965,
+    "lng": 139.6321615,
+    "city": "Tokyo",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "STARBUCKS"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 36.27,
+    "lng": 139.38,
+    "city": "Tokyo",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Ota Nishiyajimacho"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.61,
+    "lng": 138.51,
+    "city": "Tokyo",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Kofu River City"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.69,
+    "lng": 139.7,
+    "city": "Tokyo",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "LUMINE EST Shinjuku"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.7,
+    "lng": 139.74,
+    "city": "Tokyo",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Kagurazakashita"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.61,
+    "lng": 138.54,
+    "city": "Tokyo",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "University of Yamanashi Hospital"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.65,
+    "lng": 139.7,
+    "city": "Tokyo",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Nakameguro TSUTAYA BOOKS"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.67,
+    "lng": 139.71,
+    "city": "Tokyo",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Harajuku"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 32.76,
+    "lng": 129.86,
+    "city": "Tokyo",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Boeisho (Ministry of Defense)"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 36.29,
+    "lng": 139.4,
+    "city": "Tokyo",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "AEON MALL Ota"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 35.68,
+    "lng": 139.77,
+    "city": "Tokyo",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Kyobashi Edogrand"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.67,
+    "lng": 135.5,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Nanba Walk"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.7,
+    "lng": 135.49,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Osaka Garden City"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.68,
+    "lng": 135.5,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Kita-Shinsaibashi"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.69,
+    "lng": 135.52,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Tanimachisuji NS Bldg."
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.65,
+    "lng": 135.51,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Abeno solaha"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.7,
+    "lng": 135.5,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Sakurabashi Plaza Bldg."
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.73,
+    "lng": 135.5,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Shin-Osaka Nissay Bldg."
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.69,
+    "lng": 135.49,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Nakanoshima Mitsui Bldg."
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.69,
+    "lng": 135.5,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Higobashi Minami"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.66,
+    "lng": 135.5,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Namba CITY"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.71,
+    "lng": 135.5,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Chayamachi Applause Tower"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.67,
+    "lng": 135.48,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "AEON MALL Osaka Dome City"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.68,
+    "lng": 135.51,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Sakaisuji Honmachi"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.66,
+    "lng": 135.53,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "JR Momodani Eki"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.69,
+    "lng": 135.53,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "OBP Matsushita IMP Bldg."
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.67,
+    "lng": 135.44,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Hotel Keihan Universal Tower"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.72,
+    "lng": 135.26,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "Sumiyoshi LIV"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 34.7,
+    "lng": 135.53,
+    "city": "Osaka",
+    "country": "JP",
+    "utcOffset": 9,
+    "branch": "AEON Kyobashi"
+  }
+]

@@ -1,0 +1,137 @@
+[
+  {
+    "name": "Starbucks",
+    "lat": 37.49,
+    "lng": 127.06,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Daechi Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5,
+    "lng": 127.06,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hanti Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5,
+    "lng": 127.07,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Hakyeoul Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.49,
+    "lng": 127.05,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Shinsegae Dogok"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5,
+    "lng": 127.05,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Seolleung Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 127.06,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Samsung"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.48,
+    "lng": 127.05,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Poi"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 127.05,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Samsung Hyundai Hill"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 127.08,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Asia Athletes Village"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.49,
+    "lng": 127.04,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yeoksam Lucky APT"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.5,
+    "lng": 127.04,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Technology Center"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 127.06,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "COEX intersection"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.48,
+    "lng": 127.04,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Yangjae Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.51,
+    "lng": 127.04,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Cha Hospital Intersection"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 37.52,
+    "lng": 127.05,
+    "city": "Seoul",
+    "country": "KR",
+    "utcOffset": 9,
+    "branch": "Cheongdam Sageori"
+  }
+]

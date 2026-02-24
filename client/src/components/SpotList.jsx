@@ -84,7 +84,7 @@ export default function SpotList({ spots, userPos, onSelect, language = 'ko' }) 
               onClick={() => onSelect(spot)}
             >
               <div className="spot-list-item-header">
-                <span className="spot-list-item-name">{spot.name}</span>
+                <span className="spot-list-item-name">{spot.name}{spot.description ? ` · ${spot.description}` : ''}</span>
                 <span
                   className={`spot-list-item-status ${isExhausted ? 'exhausted' : closed ? 'closed' : active ? 'active' : 'inactive'}`}
                 >
