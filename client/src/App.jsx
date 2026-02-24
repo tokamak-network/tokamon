@@ -397,13 +397,27 @@ export default function App() {
     try {
       console.log('ETH 받기 시작...');
       showToast('info', t(language, 'processing'));
-      await getETH();
+      const result = await getETH();
+      // 서버에서 최신 잔액 직접 조회 (MetaMask 캐시 우회)
+      try {
+        const res = await fetch(`/api/faucet/balance?address=${wallet}&network=${getSelectedNetwork()}`);
+        if (res.ok) {
+          const data = await res.json();
+          setEthBalance(Number(data.balance).toFixed(4));
+        }
+      } catch (_) {}
       showToast('success', t(language, 'getETHComplete'));
-      refreshBalance();
     } catch (err) {
       console.error('ETH faucet error:', err);
-      const errorMsg = err.reason || err.message || t(language, 'getETHFailed');
-      showToast('error', errorMsg);
+      if (err.message && err.message.startsWith('COOLDOWN:')) {
+        const seconds = parseInt(err.message.split(':')[1]);
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        showToast('warning', t(language, 'faucetCooldown', { hours, minutes }));
+      } else {
+        const errorMsg = err.reason || err.message || t(language, 'getETHFailed');
+        showToast('error', errorMsg);
+      }
     }
   };
 

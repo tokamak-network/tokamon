@@ -32,6 +32,11 @@ export async function getETH() {
     body: JSON.stringify({ address }),
   });
 
+  if (res.status === 429) {
+    const data = await res.json();
+    throw new Error(`COOLDOWN:${data.retryAfter}`);
+  }
+
   if (!res.ok) {
     const data = await res.json();
     throw new Error(data.error || 'ETH faucet failed');

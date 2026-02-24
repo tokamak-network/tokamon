@@ -9,6 +9,7 @@ const { initBot, sendClaimNotification } = require('./telegram-bot');
 const deviceRoutes = require('./routes/device');
 const telegramRoutes = require('./routes/telegram');
 const faucetRoutes = require('./routes/faucet');
+const spotsRoutes = require('./routes/spots');
 const { hashTelegramId, isValidTelegramUsername } = require('./utils');
 const { saveWalletTelegramLink, saveTelegramHashMap, saveTelegramUser, getAllTelegramUsers } = require('./firebase-admin');
 
@@ -82,6 +83,12 @@ function initTelegramDb() {
           )
         `);
         db.run(`CREATE INDEX IF NOT EXISTS idx_device_codes_expires ON device_verify_codes(expires_at)`);
+        db.run(`
+          CREATE TABLE IF NOT EXISTS faucet_claims (
+            address TEXT PRIMARY KEY,
+            last_claim INTEGER NOT NULL
+          )
+        `);
         // 기존 테이블에 새 컬럼 추가 (이미 존재하면 무시)
         db.run(`ALTER TABLE device_verify_codes ADD COLUMN wallet_address TEXT`, () => {});
         db.run(`ALTER TABLE device_verify_codes ADD COLUMN attempts INTEGER DEFAULT 0`, () => {});
@@ -177,8 +184,11 @@ function startHttpServer(db) {
   // 텔레그램 라우트 (verify-token, link-wallet, username 등)
   app.use('/api/telegram', telegramRoutes(db));
 
+  // Spots 라우트
+  app.use('/api/spots', spotsRoutes);
+
   // Faucet 라우트
-  app.use('/api/faucet', faucetRoutes);
+  app.use('/api/faucet', faucetRoutes(db));
 
   app.listen(LISTENER_PORT, () => {
     console.log(`[Listener HTTP] 포트 ${LISTENER_PORT}에서 실행 중`);

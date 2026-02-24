@@ -225,10 +225,11 @@ export const translations = {
     // Faucet / 지갑 메뉴
     getETH: 'TON 받기',
     getTON: 'TON 받기',
-    getETHComplete: '1 TON 받기 완료!',
-    getTONComplete: '1 TON 받기 완료!',
+    getETHComplete: '15 TON 요청 완료! 잠시 후 잔액에 반영됩니다.',
+    getTONComplete: '15 TON 요청 완료! 잠시 후 잔액에 반영됩니다.',
     getETHFailed: 'TON 받기 실패',
     getTONFailed: 'TON 받기 실패',
+    faucetCooldown: '오늘 이미 TON을 받았습니다. {hours}시간 {minutes}분 후 다시 시도하세요.',
     disconnectWallet: '연결 끊기',
     insufficientBalance: '잔액이 부족합니다',
     pressChargeButton: '충전 버튼을 눌러주세요',
@@ -539,10 +540,11 @@ export const translations = {
     // Faucet / Wallet Menu
     getETH: 'Get TON',
     getTON: 'Get TON',
-    getETHComplete: '1 TON received!',
-    getTONComplete: '1 TON received!',
+    getETHComplete: '15 TON requested! Balance will update shortly.',
+    getTONComplete: '15 TON requested! Balance will update shortly.',
     getETHFailed: 'Failed to get TON',
     getTONFailed: 'Failed to get TON',
+    faucetCooldown: 'Already claimed today. Try again in {hours}h {minutes}m.',
     disconnectWallet: 'Disconnect',
     insufficientBalance: 'Insufficient balance',
     pressChargeButton: 'Press the charge button',
@@ -631,6 +633,12 @@ export const translations = {
 };
 
 // 번역 함수
-export const t = (language, key) => {
-  return translations[language]?.[key] || translations['ko'][key] || key;
+export const t = (language, key, vars) => {
+  let str = translations[language]?.[key] || translations['ko'][key] || key;
+  if (vars) {
+    for (const [k, v] of Object.entries(vars)) {
+      str = str.replace(new RegExp(`\\{${k}\\}`, 'g'), v);
+    }
+  }
+  return str;
 };
