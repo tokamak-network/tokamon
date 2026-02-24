@@ -98,6 +98,7 @@ gcloud functions logs read api --project tokamon-go --limit 30
 | `TELEGRAM_HASH_SALT` | Secret Manager | 텔레그램 ID 해싱 솔트 |
 | `DEVICE_HASH_SALT` | Secret Manager | 디바이스 ID 해싱 솔트 |
 | `SIGNER_PRIVATE_KEY` | Secret Manager | claimManager 개인키 |
+| `SPOT_CREATER_PRIVATE_KEY` | Secret Manager | Faucet 지급용 지갑 개인키 (없으면 Anvil 기본키 fallback) |
 
 ### 재배포 (Docker 수동 빌드)
 
@@ -162,6 +163,19 @@ curl -s -o /dev/null -w "%{http_code}" -X POST \
   https://rpc.thanos-sepolia.tokamak.network
 # 200이면 정상
 ```
+
+### Faucet 관련 변경 (v697e290)
+
+Faucet이 15 TON / 1일 1회 제한으로 변경됨. 배포 시 `SPOT_CREATER_PRIVATE_KEY`가 Cloud Run에 등록되어 있어야 함.
+
+```bash
+# SPOT_CREATER_PRIVATE_KEY 등록 (최초 1회)
+gcloud run services update listener-server \
+  --region asia-northeast3 --project tokamon-go \
+  --update-env-vars "SPOT_CREATER_PRIVATE_KEY=0x실제비밀키"
+```
+
+> 이 키가 없으면 Anvil 기본키로 fallback되므로 테스트넷/메인넷에서는 반드시 설정 필요.
 
 ### 환경변수 업데이트
 
