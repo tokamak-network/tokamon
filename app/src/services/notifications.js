@@ -41,7 +41,6 @@ export async function getDeviceId() {
     await SecureStore.setItemAsync(DEVICE_ID_KEY, deviceId);
   } catch (_) {}
 
-  console.log('[Device] ID initialized');
   return deviceId;
 }
 
@@ -68,7 +67,6 @@ try {
   }
 } catch (_) {
   Notifications = null;
-  console.log('[Notifications] expo-notifications 미설치 - 대체 토큰 모드');
 }
 
 /**
@@ -85,7 +83,6 @@ export async function registerForPushNotifications() {
         authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
       if (!enabled) {
-        console.log('[Notifications] 푸시 알림 권한 거부됨 - 대체 토큰 사용');
         return generateFallbackToken();
       }
     }
@@ -94,7 +91,6 @@ export async function registerForPushNotifications() {
     const token = await messaging().getToken();
     if (token) {
       await SecureStore.setItemAsync(PUSH_TOKEN_KEY, token);
-      console.log('[Notifications] FCM 토큰 발급 완료 (length:', token.length, ')');
       return token;
     }
   } catch (e) {
@@ -118,7 +114,6 @@ function generateFallbackToken() {
   try {
     SecureStore.setItemAsync(PUSH_TOKEN_KEY, fallbackToken);
   } catch (_) {}
-  console.log('[Notifications] 대체 토큰 사용');
   return fallbackToken;
 }
 
@@ -141,10 +136,8 @@ export function setupNotificationListener(onCodeReceived) {
   const unsubFirebase = messaging().onMessage(async (remoteMessage) => {
     const data = remoteMessage.data;
     if (data?.type === 'verify_code' && data?.code) {
-      console.log('[Notifications] 인증번호 수신 (Firebase), spotId:', data.spot_id);
       onCodeReceived(data.code, data.spot_id);
     } else if (data?.type === 'wallet_link_code' && data?.code) {
-      console.log('[Notifications] 지갑 인증번호 수신 (Firebase)');
       onCodeReceived(data.code, 'wallet_link');
     }
   });
@@ -155,10 +148,8 @@ export function setupNotificationListener(onCodeReceived) {
     const foregroundSub = Notifications.addNotificationReceivedListener((notification) => {
       const data = notification.request.content.data;
       if (data?.type === 'verify_code' && data?.code) {
-        console.log('[Notifications] 인증번호 수신 (expo), spotId:', data.spot_id);
         onCodeReceived(data.code, data.spot_id);
       } else if (data?.type === 'wallet_link_code' && data?.code) {
-        console.log('[Notifications] 지갑 인증번호 수신 (expo)');
         onCodeReceived(data.code, 'wallet_link');
       }
     });
