@@ -199,19 +199,67 @@ function isWithinActiveTime(startDate, endDate, dailyStartTime, dailyEndTime, ut
   }
 }
 
-// GET /api/spots — 스팟 목록 + active (listener-server 호환)
+// GET /api/spots — 스팟 목록 + active (페이지네이션 지원, listener-server 호환)
+// 쿼리: lat, lng (거리 정렬), limit/offset (페이지네이션), filter (active/inactive)
+// 하위 호환: limit 없이 호출하면 전체 배열 반환
 app.get('/api/spots', async (req, res) => {
   try {
+    const { lat, lng, limit, offset, filter } = req.query;
+    const hasLocation = lat != null && lng != null;
+    const hasPagination = limit != null;
+
     const snap = await db.collection(col(req, 'spot_metadata')).get();
     const spots = snap.docs
       .map((d) => ({ ...d.data(), id: Number(d.id) || d.data().id }))
-      .filter((s) => s.id != null)
+      .filter((s) => s.id != null && (s.reward || 0) > 0)
       .sort((a, b) => a.id - b.id)
       .map((s) => ({
         ...s,
         active: (s.remaining || 0) > 0 && isWithinActiveTime(s.start_time, s.end_time, s.daily_start_time, s.daily_end_time, s.utc_offset),
       }));
-    res.json(spots);
+
+    // 필터 적용
+    let filtered;
+    if (filter === 'active') {
+      filtered = spots.filter((s) => s.active);
+    } else if (filter === 'inactive') {
+      filtered = spots.filter((s) => !s.active);
+    } else {
+      filtered = spots;
+    }
+
+    // 위치 기반 정렬 + 거리 계산
+    if (hasLocation) {
+      const userLat = parseFloat(lat);
+      const userLng = parseFloat(lng);
+      filtered = filtered.map((s) => ({
+        ...s,
+        distance: Math.round(haversineDistance(userLat, userLng, s.lat, s.lng)),
+      }));
+      filtered.sort((a, b) => a.distance - b.distance);
+    }
+
+    // 페이지네이션 없으면 전체 반환 (하위 호환)
+    if (!hasPagination) {
+      return res.json(filtered);
+    }
+
+    // 페이지네이션 적용
+    const rawLimit = parseInt(limit, 10);
+    const parsedLimit = Math.min(Math.max(Number.isNaN(rawLimit) ? 50 : rawLimit, 1), 200);
+    const parsedOffset = Math.max(parseInt(offset, 10) || 0, 0);
+    const total = filtered.length;
+    const paged = filtered.slice(parsedOffset, parsedOffset + parsedLimit);
+
+    res.json({
+      spots: paged,
+      pagination: {
+        total,
+        offset: parsedOffset,
+        limit: parsedLimit,
+        hasMore: parsedOffset + parsedLimit < total,
+      },
+    });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: '스팟 목록 조회에 실패했습니다.' });
