@@ -7,6 +7,9 @@ const {
   isWithinTimeRange,
   isWithinActiveTime,
   haversineDistance,
+  encodeGeoHash,
+  geoHashNeighbors,
+  expandGeoHashPrefixes,
 } = require('../utils');
 
 // ─── 해싱 ───
@@ -478,5 +481,114 @@ describe('haversineDistance', () => {
     const dist = haversineDistance(37.566535, 126.977969, 37.566800, 126.977969);
     expect(dist).toBeLessThan(50);
     expect(dist).toBeGreaterThan(20);
+  });
+});
+
+// ─── GeoHash ───
+
+describe('encodeGeoHash', () => {
+  test('서울 좌표 precision 5', () => {
+    // 서울 시청 (37.5665, 126.978)
+    const hash = encodeGeoHash(37.5665, 126.978, 5);
+    expect(hash).toHaveLength(5);
+    // 서울은 wydm 접두사 영역
+    expect(hash.startsWith('wy')).toBe(true);
+  });
+
+  test('알려진 좌표 검증 (0, 0)', () => {
+    const hash = encodeGeoHash(0, 0, 5);
+    expect(hash).toBe('s0000');
+  });
+
+  test('다른 precision', () => {
+    const h3 = encodeGeoHash(37.5665, 126.978, 3);
+    const h4 = encodeGeoHash(37.5665, 126.978, 4);
+    const h5 = encodeGeoHash(37.5665, 126.978, 5);
+    expect(h3).toHaveLength(3);
+    expect(h4).toHaveLength(4);
+    expect(h5).toHaveLength(5);
+    // 더 긴 해시는 짧은 해시의 접두사를 포함해야 함
+    expect(h4.startsWith(h3)).toBe(true);
+    expect(h5.startsWith(h4)).toBe(true);
+  });
+
+  test('가까운 좌표는 같은 해시 prefix 공유', () => {
+    // 서울 시청과 명동 (약 2km)
+    const h1 = encodeGeoHash(37.5665, 126.978, 4);
+    const h2 = encodeGeoHash(37.5636, 126.9869, 4);
+    // precision 4 (~39km 셀) 에서는 같은 셀
+    expect(h1).toBe(h2);
+  });
+
+  test('먼 좌표는 다른 해시', () => {
+    const seoul = encodeGeoHash(37.5665, 126.978, 3);
+    const newyork = encodeGeoHash(40.7128, -74.006, 3);
+    expect(seoul).not.toBe(newyork);
+  });
+
+  test('적도 근처 좌표', () => {
+    const hash = encodeGeoHash(0.1, 0.1, 5);
+    expect(hash).toHaveLength(5);
+    expect(hash.startsWith('s0')).toBe(true);
+  });
+
+  test('날짜변경선 근처 (lng=179.9)', () => {
+    const hash = encodeGeoHash(0, 179.9, 5);
+    expect(hash).toHaveLength(5);
+  });
+
+  test('날짜변경선 근처 (lng=-179.9)', () => {
+    const hash = encodeGeoHash(0, -179.9, 5);
+    expect(hash).toHaveLength(5);
+  });
+});
+
+describe('geoHashNeighbors', () => {
+  test('8개 이웃 반환', () => {
+    const center = encodeGeoHash(37.5665, 126.978, 4);
+    const neighbors = geoHashNeighbors(center);
+    expect(neighbors).toHaveLength(8);
+  });
+
+  test('이웃은 중심과 다른 해시', () => {
+    const center = encodeGeoHash(37.5665, 126.978, 4);
+    const neighbors = geoHashNeighbors(center);
+    neighbors.forEach((n) => {
+      expect(n).toHaveLength(4);
+    });
+    // 중심은 이웃에 포함되지 않음
+    expect(neighbors).not.toContain(center);
+  });
+
+  test('이웃에 중복 없음', () => {
+    const center = encodeGeoHash(37.5665, 126.978, 4);
+    const neighbors = geoHashNeighbors(center);
+    const unique = new Set(neighbors);
+    expect(unique.size).toBe(8);
+  });
+
+  test('적도 근처에서도 8개 이웃', () => {
+    const center = encodeGeoHash(0.01, 0.01, 4);
+    const neighbors = geoHashNeighbors(center);
+    expect(neighbors).toHaveLength(8);
+  });
+
+  test('날짜변경선 근처에서도 8개 이웃', () => {
+    const center = encodeGeoHash(10, 179.99, 4);
+    const neighbors = geoHashNeighbors(center);
+    expect(neighbors).toHaveLength(8);
+  });
+});
+
+describe('expandGeoHashPrefixes', () => {
+  test('9개 prefix 반환 (중심 + 8 이웃)', () => {
+    const prefixes = expandGeoHashPrefixes(37.5665, 126.978, 4);
+    expect(prefixes).toHaveLength(9);
+  });
+
+  test('첫 번째는 중심 해시', () => {
+    const prefixes = expandGeoHashPrefixes(37.5665, 126.978, 4);
+    const center = encodeGeoHash(37.5665, 126.978, 4);
+    expect(prefixes[0]).toBe(center);
   });
 });

@@ -88,6 +88,108 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// ─── GeoHash 인코딩/디코딩 ───
+
+const BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz';
+
+function encodeGeoHash(lat, lng, precision) {
+  precision = precision || 6;
+  let latMin = -90, latMax = 90;
+  let lngMin = -180, lngMax = 180;
+  let hash = '';
+  let bit = 0;
+  let ch = 0;
+  let isLng = true;
+
+  while (hash.length < precision) {
+    if (isLng) {
+      const mid = (lngMin + lngMax) / 2;
+      if (lng >= mid) {
+        ch |= (1 << (4 - bit));
+        lngMin = mid;
+      } else {
+        lngMax = mid;
+      }
+    } else {
+      const mid = (latMin + latMax) / 2;
+      if (lat >= mid) {
+        ch |= (1 << (4 - bit));
+        latMin = mid;
+      } else {
+        latMax = mid;
+      }
+    }
+    isLng = !isLng;
+    bit++;
+    if (bit === 5) {
+      hash += BASE32[ch];
+      bit = 0;
+      ch = 0;
+    }
+  }
+  return hash;
+}
+
+function decodeGeoHashBounds(hash) {
+  let latMin = -90, latMax = 90;
+  let lngMin = -180, lngMax = 180;
+  let isLng = true;
+
+  for (let i = 0; i < hash.length; i++) {
+    const idx = BASE32.indexOf(hash[i]);
+    for (let bit = 4; bit >= 0; bit--) {
+      if (isLng) {
+        const mid = (lngMin + lngMax) / 2;
+        if (idx & (1 << bit)) {
+          lngMin = mid;
+        } else {
+          lngMax = mid;
+        }
+      } else {
+        const mid = (latMin + latMax) / 2;
+        if (idx & (1 << bit)) {
+          latMin = mid;
+        } else {
+          latMax = mid;
+        }
+      }
+      isLng = !isLng;
+    }
+  }
+  return { latMin, latMax, lngMin, lngMax };
+}
+
+function geoHashNeighbors(hash) {
+  const bounds = decodeGeoHashBounds(hash);
+  const latCenter = (bounds.latMin + bounds.latMax) / 2;
+  const lngCenter = (bounds.lngMin + bounds.lngMax) / 2;
+  const latStep = bounds.latMax - bounds.latMin;
+  const lngStep = bounds.lngMax - bounds.lngMin;
+  const precision = hash.length;
+
+  const neighbors = [];
+  for (let dlat = -1; dlat <= 1; dlat++) {
+    for (let dlng = -1; dlng <= 1; dlng++) {
+      if (dlat === 0 && dlng === 0) continue;
+      let nLat = latCenter + dlat * latStep;
+      let nLng = lngCenter + dlng * lngStep;
+      // wrap longitude
+      if (nLng > 180) nLng -= 360;
+      if (nLng < -180) nLng += 360;
+      // clamp latitude
+      if (nLat > 90) nLat = 90;
+      if (nLat < -90) nLat = -90;
+      neighbors.push(encodeGeoHash(nLat, nLng, precision));
+    }
+  }
+  return neighbors;
+}
+
+function expandGeoHashPrefixes(lat, lng, precision) {
+  const center = encodeGeoHash(lat, lng, precision);
+  return [center, ...geoHashNeighbors(center)];
+}
+
 module.exports = {
   hashTelegramId,
   hashPhoneNumber,
@@ -97,4 +199,7 @@ module.exports = {
   isWithinTimeRange,
   isWithinActiveTime,
   haversineDistance,
+  encodeGeoHash,
+  geoHashNeighbors,
+  expandGeoHashPrefixes,
 };

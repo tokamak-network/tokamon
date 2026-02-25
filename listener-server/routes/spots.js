@@ -1,12 +1,49 @@
 const express = require('express');
 const blockchain = require('../blockchain');
-const { isWithinActiveTime, haversineDistance } = require('../utils');
+const { isWithinActiveTime, haversineDistance, expandGeoHashPrefixes } = require('../utils');
 
 const router = express.Router();
 
+// 단일 루프: active 플래그 + 필터 + 거리 계산을 한 번에 처리
+function processSpots(spots, filter, userLat, userLng) {
+  const result = [];
+  for (let i = 0; i < spots.length; i++) {
+    const s = spots[i];
+    const active = s.remaining > 0 && isWithinActiveTime(s.start_time, s.end_time, s.daily_start_time, s.daily_end_time, s.utc_offset);
+    if (filter === 'active' && !active) continue;
+    if (filter === 'inactive' && active) continue;
+    const entry = { ...s, active };
+    if (userLat != null) {
+      entry.distance = Math.round(haversineDistance(userLat, userLng, s.lat, s.lng));
+    }
+    result.push(entry);
+  }
+  return result;
+}
+
+// 적응형 GeoHash 검색: 좁은 범위에서 넓은 범위로 확대
+const ADAPTIVE_PRECISIONS = [5, 4, 3]; // ~5km → ~39km → ~156km
+
+function adaptiveGeoSearch(userLat, userLng, filter, needed) {
+  for (const precision of ADAPTIVE_PRECISIONS) {
+    const prefixes = expandGeoHashPrefixes(userLat, userLng, precision);
+    const candidates = blockchain.getSpotsByGeoHash(prefixes);
+    const processed = processSpots(candidates, filter, userLat, userLng);
+    if (processed.length >= needed) {
+      processed.sort((a, b) => a.distance - b.distance);
+      return processed;
+    }
+  }
+  // fallback: 전체 조회
+  const allSpots = blockchain.getAllSpotsCached();
+  const processed = processSpots(allSpots, filter, userLat, userLng);
+  processed.sort((a, b) => a.distance - b.distance);
+  return processed;
+}
+
 // GET /api/spots — 스팟 목록 (페이지네이션 지원)
 // 쿼리 파라미터:
-//   lat, lng  → 위치 기반 거리 정렬 (선택)
+//   lat, lng  → 위치 기반 거리 정렬 (선택) + GeoHash 적응형 검색
 //   limit     → 페이지 크기 (기본 50, 최대 200) — lat/lng와 함께 사용 시 페이지네이션 활성화
 //   offset    → 시작 위치 (기본 0)
 //   filter    → active / inactive (선택)
@@ -17,34 +54,22 @@ router.get('/', async (req, res) => {
     const hasLocation = lat != null && lng != null;
     const hasPagination = limit != null;
 
-    // 캐시에서 스팟 목록 가져오기 (RPC 호출 없음)
-    const allSpots = blockchain.getAllSpotsCached();
+    // 페이지네이션 파라미터 파싱 (필터링에 필요)
+    const rawLimit = parseInt(limit, 10);
+    const parsedLimit = Math.min(Math.max(Number.isNaN(rawLimit) ? 50 : rawLimit, 1), 200);
+    const parsedOffset = Math.max(parseInt(offset, 10) || 0, 0);
 
-    // active 플래그 추가
-    const spots = allSpots.map((s) => ({
-      ...s,
-      active: s.remaining > 0 && isWithinActiveTime(s.start_time, s.end_time, s.daily_start_time, s.daily_end_time, s.utc_offset),
-    }));
-
-    // 필터 적용
     let filtered;
-    if (filter === 'active') {
-      filtered = spots.filter((s) => s.active);
-    } else if (filter === 'inactive') {
-      filtered = spots.filter((s) => !s.active);
-    } else {
-      filtered = spots;
-    }
 
-    // 위치 기반 정렬 + 거리 계산
     if (hasLocation) {
       const userLat = parseFloat(lat);
       const userLng = parseFloat(lng);
-      filtered = filtered.map((s) => ({
-        ...s,
-        distance: Math.round(haversineDistance(userLat, userLng, s.lat, s.lng)),
-      }));
-      filtered.sort((a, b) => a.distance - b.distance);
+      const needed = parsedOffset + parsedLimit;
+      filtered = adaptiveGeoSearch(userLat, userLng, filter, needed);
+    } else {
+      // 위치 없으면 전체 조회
+      const allSpots = blockchain.getAllSpotsCached();
+      filtered = processSpots(allSpots, filter, null, null);
     }
 
     // 페이지네이션 없으면 전체 반환 (하위 호환)
@@ -53,9 +78,6 @@ router.get('/', async (req, res) => {
     }
 
     // 페이지네이션 적용
-    const rawLimit = parseInt(limit, 10);
-    const parsedLimit = Math.min(Math.max(Number.isNaN(rawLimit) ? 50 : rawLimit, 1), 200);
-    const parsedOffset = Math.max(parseInt(offset, 10) || 0, 0);
     const total = filtered.length;
     const paged = filtered.slice(parsedOffset, parsedOffset + parsedLimit);
 

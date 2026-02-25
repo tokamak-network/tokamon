@@ -2,9 +2,10 @@ const express = require('express');
 const blockchain = require('../blockchain');
 const spotsRouter = require('../routes/spots');
 
-// blockchain.getAllSpotsCached mock
+// blockchain mock
 jest.mock('../blockchain', () => ({
   getAllSpotsCached: jest.fn(),
+  getSpotsByGeoHash: jest.fn(),
   getSpot: jest.fn(),
   updateAllowDuplicateClaims: jest.fn(),
 }));
@@ -56,8 +57,17 @@ const MOCK_SPOTS = [
   { id: 9, name: '해운대', reward: 0.5, remaining: 100, lat: 35.1631, lng: 129.1635, start_time: 0, end_time: 0, daily_start_time: 0, daily_end_time: 0, utc_offset: 9, cooldown: 3600 },
 ];
 
+const { encodeGeoHash } = require('../utils');
+
 beforeEach(() => {
   blockchain.getAllSpotsCached.mockReturnValue(MOCK_SPOTS);
+  // getSpotsByGeoHash: 주어진 prefix에 매칭되는 스팟을 MOCK_SPOTS에서 필터
+  blockchain.getSpotsByGeoHash.mockImplementation((prefixes) => {
+    return MOCK_SPOTS.filter((s) => {
+      const hash = encodeGeoHash(s.lat, s.lng, 5);
+      return prefixes.some((p) => hash.startsWith(p));
+    });
+  });
 });
 
 // ─── 하위 호환 ───
@@ -188,5 +198,58 @@ describe('필터', () => {
       expect(s).toHaveProperty('distance');
     });
     expect(body.pagination.total).toBeLessThan(MOCK_SPOTS.length); // inactive 제외
+  });
+});
+
+// ─── GeoHash 인덱스 검색 ───
+
+describe('GeoHash 적응형 검색', () => {
+  test('위치 기반 검색 결과와 전체 검색 결과가 동일한 정렬 순서', async () => {
+    const app = createApp();
+    // GeoHash 검색 (위치 있음)
+    const { body: geoBody } = await request(app, '/api/spots?lat=37.5&lng=127.0&limit=200');
+    // 전체 fallback과 비교 — 거리순 정렬이 동일해야 함
+    for (let i = 1; i < geoBody.spots.length; i++) {
+      expect(geoBody.spots[i].distance).toBeGreaterThanOrEqual(geoBody.spots[i - 1].distance);
+    }
+  });
+
+  test('적응형 확대: 좁은 범위에 스팟 적으면 범위 확장', async () => {
+    // 뉴욕 좌표 — 한국 스팟만 있으므로 precision 5, 4, 3 모두 결과 적음 → fallback
+    const app = createApp();
+    const { body } = await request(app, '/api/spots?lat=40.7&lng=-74.0&limit=5');
+    // fallback으로 전체 스팟 반환
+    expect(body.spots.length).toBeGreaterThanOrEqual(5);
+    expect(body.spots[0]).toHaveProperty('distance');
+  });
+
+  test('getSpotsByGeoHash가 호출됨 (위치 기반 요청)', async () => {
+    const app = createApp();
+    await request(app, '/api/spots?lat=37.5&lng=127.0&limit=3');
+    expect(blockchain.getSpotsByGeoHash).toHaveBeenCalled();
+  });
+
+  test('위치 없는 요청은 getSpotsByGeoHash 호출 안함', async () => {
+    blockchain.getSpotsByGeoHash.mockClear();
+    const app = createApp();
+    await request(app, '/api/spots?limit=5');
+    expect(blockchain.getSpotsByGeoHash).not.toHaveBeenCalled();
+  });
+
+  test('GeoHash 검색에서도 filter=active 적용', async () => {
+    const app = createApp();
+    const { body } = await request(app, '/api/spots?lat=37.5&lng=127.0&limit=50&filter=active');
+    body.spots.forEach((s) => {
+      expect(s.active).toBe(true);
+    });
+    expect(body.spots.find((s) => s.id === 5)).toBeUndefined();
+  });
+
+  test('서울 근처에서 서울 스팟이 부산 스팟보다 먼저 나옴', async () => {
+    const app = createApp();
+    const { body } = await request(app, '/api/spots?lat=37.55&lng=126.98&limit=10');
+    const seoulSpotIdx = body.spots.findIndex((s) => s.name === '서울역');
+    const busanSpotIdx = body.spots.findIndex((s) => s.name === '부산역');
+    expect(seoulSpotIdx).toBeLessThan(busanSpotIdx);
   });
 });

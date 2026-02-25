@@ -199,6 +199,143 @@ function isWithinActiveTime(startDate, endDate, dailyStartTime, dailyEndTime, ut
   }
 }
 
+// ─── GeoHash 유틸 (listener-server/utils.js와 동일) ───
+
+const GEOHASH_BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz';
+
+function encodeGeoHash(lat, lng, precision) {
+  precision = precision || 6;
+  let latMin = -90, latMax = 90;
+  let lngMin = -180, lngMax = 180;
+  let hash = '';
+  let bit = 0;
+  let ch = 0;
+  let isLng = true;
+  while (hash.length < precision) {
+    if (isLng) {
+      const mid = (lngMin + lngMax) / 2;
+      if (lng >= mid) { ch |= (1 << (4 - bit)); lngMin = mid; } else { lngMax = mid; }
+    } else {
+      const mid = (latMin + latMax) / 2;
+      if (lat >= mid) { ch |= (1 << (4 - bit)); latMin = mid; } else { latMax = mid; }
+    }
+    isLng = !isLng;
+    bit++;
+    if (bit === 5) { hash += GEOHASH_BASE32[ch]; bit = 0; ch = 0; }
+  }
+  return hash;
+}
+
+function decodeGeoHashBounds(hash) {
+  let latMin = -90, latMax = 90, lngMin = -180, lngMax = 180;
+  let isLng = true;
+  for (let i = 0; i < hash.length; i++) {
+    const idx = GEOHASH_BASE32.indexOf(hash[i]);
+    for (let b = 4; b >= 0; b--) {
+      if (isLng) {
+        const mid = (lngMin + lngMax) / 2;
+        if (idx & (1 << b)) lngMin = mid; else lngMax = mid;
+      } else {
+        const mid = (latMin + latMax) / 2;
+        if (idx & (1 << b)) latMin = mid; else latMax = mid;
+      }
+      isLng = !isLng;
+    }
+  }
+  return { latMin, latMax, lngMin, lngMax };
+}
+
+function expandGeoHashPrefixes(lat, lng, precision) {
+  const center = encodeGeoHash(lat, lng, precision);
+  const bounds = decodeGeoHashBounds(center);
+  const latC = (bounds.latMin + bounds.latMax) / 2;
+  const lngC = (bounds.lngMin + bounds.lngMax) / 2;
+  const latStep = bounds.latMax - bounds.latMin;
+  const lngStep = bounds.lngMax - bounds.lngMin;
+  const neighbors = [center];
+  for (let dlat = -1; dlat <= 1; dlat++) {
+    for (let dlng = -1; dlng <= 1; dlng++) {
+      if (dlat === 0 && dlng === 0) continue;
+      let nLat = latC + dlat * latStep;
+      let nLng = lngC + dlng * lngStep;
+      if (nLng > 180) nLng -= 360;
+      if (nLng < -180) nLng += 360;
+      if (nLat > 90) nLat = 90;
+      if (nLat < -90) nLat = -90;
+      neighbors.push(encodeGeoHash(nLat, nLng, precision));
+    }
+  }
+  return neighbors;
+}
+
+// ─── 인메모리 스팟 캐시 (30초 TTL) ───
+
+const spotsCacheByNetwork = {};  // { networkId: { spots: [...], geoIndex: {...}, fetchedAt: timestamp } }
+const SPOTS_CACHE_TTL_MS = 30 * 1000;
+
+async function getCachedSpots(req) {
+  const networkId = req.networkId;
+  const cached = spotsCacheByNetwork[networkId];
+  if (cached && Date.now() - cached.fetchedAt < SPOTS_CACHE_TTL_MS) {
+    return cached;
+  }
+
+  const snap = await db.collection(col(req, 'spot_metadata')).get();
+  const spots = snap.docs
+    .map((d) => ({ ...d.data(), id: Number(d.id) || d.data().id }))
+    .filter((s) => s.id != null && (s.reward || 0) > 0)
+    .sort((a, b) => a.id - b.id);
+
+  // GeoHash 인덱스 구축
+  const geoIdx = {};
+  for (const s of spots) {
+    if (s.lat != null && s.lng != null) {
+      const hash = encodeGeoHash(s.lat, s.lng, 4);
+      if (!geoIdx[hash]) geoIdx[hash] = [];
+      geoIdx[hash].push(s);
+    }
+  }
+
+  const entry = { spots, geoIndex: geoIdx, fetchedAt: Date.now() };
+  spotsCacheByNetwork[networkId] = entry;
+  return entry;
+}
+
+function getSpotsByGeoHashFromCache(geoIdx, prefixes) {
+  const result = [];
+  const seen = new Set();
+  for (const prefix of prefixes) {
+    for (const key of Object.keys(geoIdx)) {
+      if (key.startsWith(prefix)) {
+        for (const s of geoIdx[key]) {
+          if (!seen.has(s.id)) {
+            seen.add(s.id);
+            result.push(s);
+          }
+        }
+      }
+    }
+  }
+  return result;
+}
+
+function processSpotsForApi(spots, filter, userLat, userLng) {
+  const result = [];
+  for (const s of spots) {
+    const active = (s.remaining || 0) > 0 && isWithinActiveTime(s.start_time, s.end_time, s.daily_start_time, s.daily_end_time, s.utc_offset);
+    if (filter === 'active' && !active) continue;
+    if (filter === 'inactive' && active) continue;
+    const entry = { ...s, active };
+    if (userLat != null) {
+      entry.distance = Math.round(haversineDistance(userLat, userLng, s.lat, s.lng));
+    }
+    result.push(entry);
+  }
+  return result;
+}
+
+const ADAPTIVE_PRECISIONS = [5, 4, 3];
+
 // GET /api/spots — 스팟 목록 + active (페이지네이션 지원, listener-server 호환)
 // 쿼리: lat, lng (거리 정렬), limit/offset (페이지네이션), filter (active/inactive)
 // 하위 호환: limit 없이 호출하면 전체 배열 반환
@@ -208,35 +345,38 @@ app.get('/api/spots', async (req, res) => {
     const hasLocation = lat != null && lng != null;
     const hasPagination = limit != null;
 
-    const snap = await db.collection(col(req, 'spot_metadata')).get();
-    const spots = snap.docs
-      .map((d) => ({ ...d.data(), id: Number(d.id) || d.data().id }))
-      .filter((s) => s.id != null && (s.reward || 0) > 0)
-      .sort((a, b) => a.id - b.id)
-      .map((s) => ({
-        ...s,
-        active: (s.remaining || 0) > 0 && isWithinActiveTime(s.start_time, s.end_time, s.daily_start_time, s.daily_end_time, s.utc_offset),
-      }));
+    const rawLimit = parseInt(limit, 10);
+    const parsedLimit = Math.min(Math.max(Number.isNaN(rawLimit) ? 50 : rawLimit, 1), 200);
+    const parsedOffset = Math.max(parseInt(offset, 10) || 0, 0);
 
-    // 필터 적용
+    const cached = await getCachedSpots(req);
     let filtered;
-    if (filter === 'active') {
-      filtered = spots.filter((s) => s.active);
-    } else if (filter === 'inactive') {
-      filtered = spots.filter((s) => !s.active);
-    } else {
-      filtered = spots;
-    }
 
-    // 위치 기반 정렬 + 거리 계산
     if (hasLocation) {
       const userLat = parseFloat(lat);
       const userLng = parseFloat(lng);
-      filtered = filtered.map((s) => ({
-        ...s,
-        distance: Math.round(haversineDistance(userLat, userLng, s.lat, s.lng)),
-      }));
-      filtered.sort((a, b) => a.distance - b.distance);
+      const needed = parsedOffset + parsedLimit;
+
+      // 적응형 GeoHash 검색
+      let found = null;
+      for (const precision of ADAPTIVE_PRECISIONS) {
+        const prefixes = expandGeoHashPrefixes(userLat, userLng, precision);
+        const candidates = getSpotsByGeoHashFromCache(cached.geoIndex, prefixes);
+        const processed = processSpotsForApi(candidates, filter, userLat, userLng);
+        if (processed.length >= needed) {
+          processed.sort((a, b) => a.distance - b.distance);
+          found = processed;
+          break;
+        }
+      }
+      if (!found) {
+        // fallback: 전체 조회
+        found = processSpotsForApi(cached.spots, filter, userLat, userLng);
+        found.sort((a, b) => a.distance - b.distance);
+      }
+      filtered = found;
+    } else {
+      filtered = processSpotsForApi(cached.spots, filter, null, null);
     }
 
     // 페이지네이션 없으면 전체 반환 (하위 호환)
@@ -245,9 +385,6 @@ app.get('/api/spots', async (req, res) => {
     }
 
     // 페이지네이션 적용
-    const rawLimit = parseInt(limit, 10);
-    const parsedLimit = Math.min(Math.max(Number.isNaN(rawLimit) ? 50 : rawLimit, 1), 200);
-    const parsedOffset = Math.max(parseInt(offset, 10) || 0, 0);
     const total = filtered.length;
     const paged = filtered.slice(parsedOffset, parsedOffset + parsedLimit);
 

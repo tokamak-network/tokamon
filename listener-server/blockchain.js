@@ -4,6 +4,7 @@ const { ethers } = require('ethers');
 console.log('[Blockchain] ethers 버전:', ethers.version, '| 경로:', require.resolve('ethers'));
 const { db, col, syncSpotToFirestore, saveTelegramClaimEvent, syncTelegramBalance, saveWalletTelegramLink, getTelegramUsernameByHash, syncDeviceBalance, NETWORK_ID } = require('./firebase-admin');
 const { getNetwork, getContracts, DEFAULT_NETWORK } = require('../shared/networks');
+const { encodeGeoHash } = require('./utils');
 
 // 네트워크 설정: NETWORK 환경변수 → shared/networks.js에서 로드
 const networkId = process.env.NETWORK || DEFAULT_NETWORK;
@@ -43,6 +44,39 @@ function onDeviceClaimed(callback) {
 
 // 스팟 메타데이터 캐시
 let spotMetadata = {};
+
+// GeoHash 공간 인덱스 (precision 4 = ~39km 셀)
+const GEOHASH_PRECISION = 4;
+let geoIndex = {};          // { "wydm": Set([spotId1, spotId2, ...]), ... }
+let cachedSpotArray = null;  // getAllSpotsCached() 결과 캐시
+
+function addToGeoIndex(spot) {
+  if (!spot || spot.lat == null || spot.lng == null) return;
+  const hash = encodeGeoHash(spot.lat, spot.lng, GEOHASH_PRECISION);
+  if (!geoIndex[hash]) geoIndex[hash] = new Set();
+  geoIndex[hash].add(spot.id);
+}
+
+function removeFromGeoIndex(spot) {
+  if (!spot || spot.lat == null || spot.lng == null) return;
+  const hash = encodeGeoHash(spot.lat, spot.lng, GEOHASH_PRECISION);
+  if (geoIndex[hash]) {
+    geoIndex[hash].delete(spot.id);
+    if (geoIndex[hash].size === 0) delete geoIndex[hash];
+  }
+}
+
+function rebuildGeoIndex() {
+  geoIndex = {};
+  for (const spot of Object.values(spotMetadata)) {
+    if (spot && spot.reward > 0) addToGeoIndex(spot);
+  }
+  console.log(`[GeoIndex] 재구축 완료: ${Object.keys(geoIndex).length}개 셀`);
+}
+
+function invalidateSpotArrayCache() {
+  cachedSpotArray = null;
+}
 
 function loadMetadata() {
   try {
@@ -150,6 +184,7 @@ async function init() {
 
   // 메타데이터 로드 (로컬 파일 → Firestore 폴백)
   loadMetadata();
+  if (Object.keys(spotMetadata).length > 0) rebuildGeoIndex();
   if (Object.keys(spotMetadata).length === 0 && db) {
     console.log('[복원] 로컬 캐시 없음 → Firestore에서 spot_metadata 복원 중...');
     try {
@@ -165,6 +200,7 @@ async function init() {
       });
       if (count > 0) {
         saveMetadata();
+        rebuildGeoIndex();
         console.log(`[복원] Firestore에서 ${count}개 스팟 복원 완료`);
       } else {
         console.log('[복원] Firestore에 스팟 데이터 없음');
@@ -202,6 +238,7 @@ async function init() {
       }
       if (recoveredCount > 0) {
         saveMetadata();
+        rebuildGeoIndex();
         console.log(`[복구] ${recoveredCount}개 이벤트 복구 완료`);
       } else {
         console.log('[복구] 놓친 이벤트 없음');
@@ -221,6 +258,8 @@ async function init() {
     const meta = await fetchFullSpotFromContract(id);
     if (meta) {
       spotMetadata[id] = meta;
+      addToGeoIndex(meta);
+      invalidateSpotArrayCache();
       saveMetadata();
       await syncSpotToFirestore(id, meta);
     }
@@ -232,9 +271,13 @@ async function init() {
     const id = Number(spotId);
     const blockNum = ev?.log?.blockNumber ?? '?';
     console.log(`[이벤트 수신] SpotUpdated | spotId=${id} block=${blockNum}`);
+    const oldMeta = spotMetadata[id];
     const meta = await fetchFullSpotFromContract(id);
     if (meta) {
+      if (oldMeta) removeFromGeoIndex(oldMeta);
       spotMetadata[id] = meta;
+      addToGeoIndex(meta);
+      invalidateSpotArrayCache();
       saveMetadata();
       await syncSpotToFirestore(id, meta);
     }
@@ -249,6 +292,8 @@ async function init() {
     const meta = await fetchFullSpotFromContract(id);
     if (meta) {
       spotMetadata[id] = meta;
+      addToGeoIndex(meta);
+      invalidateSpotArrayCache();
       saveMetadata();
       await syncSpotToFirestore(id, meta);
     }
@@ -263,6 +308,8 @@ async function init() {
     const meta = await fetchFullSpotFromContract(id);
     if (meta) {
       spotMetadata[id] = meta;
+      addToGeoIndex(meta);
+      invalidateSpotArrayCache();
       saveMetadata();
       await syncSpotToFirestore(id, meta);
     }
@@ -277,6 +324,8 @@ async function init() {
     const meta = await fetchFullSpotFromContract(id);
     if (meta) {
       spotMetadata[id] = meta;
+      addToGeoIndex(meta);
+      invalidateSpotArrayCache();
       saveMetadata();
       await syncSpotToFirestore(id, meta);
     }
@@ -312,6 +361,8 @@ async function init() {
     const meta = await fetchFullSpotFromContract(id);
     if (meta) {
       spotMetadata[id] = meta;
+      addToGeoIndex(meta);
+      invalidateSpotArrayCache();
       saveMetadata();
       await syncSpotToFirestore(id, meta);
     }
@@ -351,6 +402,8 @@ async function init() {
     const meta = await fetchFullSpotFromContract(id);
     if (meta) {
       spotMetadata[id] = meta;
+      addToGeoIndex(meta);
+      invalidateSpotArrayCache();
       saveMetadata();
       await syncSpotToFirestore(id, meta);
     }
@@ -529,7 +582,29 @@ async function getSpot(spotId) {
 }
 
 function getAllSpotsCached() {
-  return Object.values(spotMetadata).filter(s => s && s.reward > 0);
+  if (!cachedSpotArray) {
+    cachedSpotArray = Object.values(spotMetadata).filter(s => s && s.reward > 0);
+  }
+  return cachedSpotArray;
+}
+
+function getSpotsByGeoHash(prefixes) {
+  const result = [];
+  const seen = new Set();
+  for (const prefix of prefixes) {
+    for (const key of Object.keys(geoIndex)) {
+      if (key.startsWith(prefix)) {
+        for (const id of geoIndex[key]) {
+          if (!seen.has(id)) {
+            seen.add(id);
+            const s = spotMetadata[id];
+            if (s && s.reward > 0) result.push(s);
+          }
+        }
+      }
+    }
+  }
+  return result;
 }
 
 async function getAllSpots() {
@@ -789,6 +864,7 @@ module.exports = {
   fetchSpotFromContract: fetchFullSpotFromContract,
   getSpot,
   getAllSpotsCached,
+  getSpotsByGeoHash,
   getAllSpots,
   getBalance,
   getStampInfo,
