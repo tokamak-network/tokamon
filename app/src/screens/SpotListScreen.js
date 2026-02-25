@@ -24,18 +24,25 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
   const [total, setTotal] = useState(0);
   const { userPos } = useLocation();
   const offsetRef = useRef(0);
+  const userPosRef = useRef(userPos);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    userPosRef.current = userPos;
+  }, [userPos]);
 
   const fetchSpots = useCallback(async (reset = true) => {
     try {
       const newOffset = reset ? 0 : offsetRef.current;
+      const pos = userPosRef.current;
       const params = {
         limit: PAGE_SIZE,
         offset: newOffset,
         filter,
       };
-      if (userPos) {
-        params.lat = userPos.lat;
-        params.lng = userPos.lng;
+      if (pos) {
+        params.lat = pos.lat;
+        params.lng = pos.lng;
       }
       const data = await getSpots(params);
 
@@ -51,11 +58,13 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
       offsetRef.current = pagination.offset + pagination.limit;
     } catch (err) {
       console.warn('Failed to fetch spots:', err.message);
+    } finally {
+      setLoading(false);
     }
-  }, [filter, userPos, networkId]);
+  }, [filter, networkId]);
 
   useEffect(() => {
-    setSpots([]);
+    setLoading(true);
     offsetRef.current = 0;
     setHasMore(true);
     fetchSpots(true);
@@ -84,7 +93,7 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
     navigation.navigate('MapTab', { selectedSpot: spot });
   };
 
-  const renderSpotCard = ({ item: spot }) => {
+  const renderSpotCard = useCallback(({ item: spot }) => {
     const isExhausted = spot.remaining < spot.reward;
     const closed = isSpotClosed(spot);
     const active = spot.active !== undefined ? spot.active : (!closed && !isExhausted && isWithinActiveTime(spot));
@@ -169,15 +178,25 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
         </View>
       </TouchableOpacity>
     );
-  };
+  }, [language, navigation]);
 
   const renderFooter = () => {
-    if (!loadingMore) return null;
-    return (
-      <View style={styles.footerLoader}>
-        <ActivityIndicator size="small" color="#4FC3F7" />
-      </View>
-    );
+    if (loadingMore) {
+      return (
+        <View style={styles.footerLoader}>
+          <ActivityIndicator size="small" color="#4FC3F7" />
+          <Text style={styles.footerText}>{spots.length} / {total}</Text>
+        </View>
+      );
+    }
+    if (spots.length > 0 && total > 0 && !hasMore) {
+      return (
+        <View style={styles.footerLoader}>
+          <Text style={styles.footerText}>{spots.length} / {total}</Text>
+        </View>
+      );
+    }
+    return null;
   };
 
   return (
@@ -254,6 +273,10 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
         onEndReached={onEndReached}
         onEndReachedThreshold={0.3}
         ListFooterComponent={renderFooter}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        initialNumToRender={10}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -262,7 +285,7 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
           />
         }
         ListEmptyComponent={
-          !refreshing && (
+          !refreshing && !loading && (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>
                 {filter === 'active'
@@ -482,5 +505,10 @@ const styles = StyleSheet.create({
   footerLoader: {
     paddingVertical: 16,
     alignItems: 'center',
+    gap: 6,
+  },
+  footerText: {
+    color: '#555',
+    fontSize: 12,
   },
 });
