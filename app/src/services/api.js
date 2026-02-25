@@ -24,8 +24,17 @@ async function parseJson(res) {
   return data;
 }
 
-export async function getSpots() {
-  const res = await fetch(withNetwork(`${API_BASE}/spots`), {
+export async function getSpots({ lat, lng, limit, offset, filter } = {}) {
+  let url = `${API_BASE}/spots`;
+  const params = new URLSearchParams();
+  if (lat != null) params.set('lat', lat);
+  if (lng != null) params.set('lng', lng);
+  if (limit != null) params.set('limit', limit);
+  if (offset != null) params.set('offset', offset);
+  if (filter) params.set('filter', filter);
+  const qs = params.toString();
+  if (qs) url += `?${qs}`;
+  const res = await fetch(withNetwork(url), {
     cache: 'no-store',
     headers: { 'Cache-Control': 'no-cache' },
   });

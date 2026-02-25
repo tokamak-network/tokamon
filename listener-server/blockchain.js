@@ -505,6 +505,10 @@ async function getSpot(spotId) {
   }
 }
 
+function getAllSpotsCached() {
+  return Object.values(spotMetadata).filter(s => s && s.reward > 0);
+}
+
 async function getAllSpots() {
   const nextId = Number(await contract.nextSpotId());
   const spots = [];
@@ -761,6 +765,7 @@ module.exports = {
   onDeviceClaimed,
   fetchSpotFromContract: fetchFullSpotFromContract,
   getSpot,
+  getAllSpotsCached,
   getAllSpots,
   getBalance,
   getStampInfo,
