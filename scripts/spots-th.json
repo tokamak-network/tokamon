@@ -6,7 +6,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Grand 5",
+    "address": "87 Grand 5 Hotel & Plaza Sukhumvit"
   },
   {
     "name": "Starbucks",
@@ -24,7 +25,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Bangkok Plaza-BKH2",
+    "address": "2, Bangkok Hospital,  Bangkok Plaz Bldg"
   },
   {
     "name": "Starbucks",
@@ -33,7 +35,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Grammy",
+    "address": "50, Grammy Place"
   },
   {
     "name": "Starbucks",
@@ -60,7 +63,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Emporium Tower",
+    "address": "662"
   },
   {
     "name": "Starbucks",
@@ -69,7 +73,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Grammy",
+    "address": "50, Grammy Place"
   },
   {
     "name": "Starbucks",
@@ -78,7 +83,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Robinson Samutprakarn",
+    "address": "Sukhumvit rd."
   },
   {
     "name": "Starbucks",
@@ -87,7 +93,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Lotus Srinakarin-Samut Prakarn",
+    "address": "Lotus Srinakarin, No. 9"
   },
   {
     "name": "Starbucks",
@@ -96,7 +103,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Market Village Suvarnabhumi",
+    "address": "99/28 Moo1 Rachathewa"
   },
   {
     "name": "Starbucks",
@@ -105,7 +113,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Mega Bangna",
+    "address": "38,39"
   },
   {
     "name": "Starbucks",
@@ -114,7 +123,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Central Bangna 1st Floor",
+    "address": "1093, G Floor Central City Bangna Bangna"
   },
   {
     "name": "Starbucks",
@@ -123,7 +133,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Seacon Square",
+    "address": "904, 2nd Floor Seacon Square"
   },
   {
     "name": "Starbucks",
@@ -132,7 +143,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Seacon Square",
+    "address": "904, 2nd Floor Seacon Square"
   },
   {
     "name": "Starbucks",
@@ -159,7 +171,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks"
+    "branch": "Emporium Tower",
+    "address": "662"
   },
   {
     "name": "Starbucks",
@@ -168,7 +181,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Emporium Tower",
+    "address": "662"
   },
   {
     "name": "Starbucks",
@@ -177,7 +191,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Samitivej Hospital",
+    "address": "133, Samitivej Hospital"
   },
   {
     "name": "Starbucks",
@@ -204,7 +219,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Grammy",
+    "address": "50, Grammy Place"
   },
   {
     "name": "Starbucks",
@@ -213,7 +229,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Grand 5",
+    "address": "87 Grand 5 Hotel & Plaza Sukhumvit"
   },
   {
     "name": "Starbucks",
@@ -222,7 +239,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Grand 5",
+    "address": "87 Grand 5 Hotel & Plaza Sukhumvit"
   },
   {
     "name": "Starbucks",
@@ -240,7 +258,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Camp Davis",
+    "address": "88, Camp Davis"
   },
   {
     "name": "Starbucks",
@@ -249,7 +268,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks"
+    "branch": "Srinakharinwirot University",
+    "address": "Srinakharinwirot university No. 114"
   },
   {
     "name": "Starbucks",
@@ -276,7 +296,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "CTI Tower",
+    "address": "Ratchadapisek Rd."
   },
   {
     "name": "Starbucks",
@@ -285,7 +306,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "A Link Square",
+    "address": "44 Soi Sukhumvit 71,Ramkhamhaeng rd."
   },
   {
     "name": "Starbucks",
@@ -303,7 +325,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Grammy",
+    "address": "50, Grammy Place"
   },
   {
     "name": "Starbucks",
@@ -321,7 +344,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Bangkok #36"
+    "branch": "Camp Davis",
+    "address": "88, Camp Davis"
   },
   {
     "name": "Starbucks",
@@ -366,7 +390,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Bangkok #41"
+    "branch": "At United Bangna",
+    "address": "Bangna-Trad Road, Bang Keaw, Bang Plea"
   },
   {
     "name": "Starbucks",
@@ -402,7 +427,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks Coffee"
+    "branch": "Central Bangna 1st Floor",
+    "address": "1093, G Floor Central City Bangna Bangna"
   },
   {
     "name": "Starbucks",
@@ -411,7 +437,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Bangkok #46"
+    "branch": "Samitivej Hospital",
+    "address": "133, Samitivej Hospital"
   },
   {
     "name": "Starbucks",
@@ -420,7 +447,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Starbucks"
+    "branch": "Emporium Tower",
+    "address": "662"
   },
   {
     "name": "Starbucks",
@@ -438,7 +466,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Bangkok #49"
+    "branch": "Bangkok Mediplex",
+    "address": "Mediplex building, No. 2"
   },
   {
     "name": "Starbucks",
@@ -447,7 +476,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Bangkok #50"
+    "branch": "Srinakharinwirot University",
+    "address": "Srinakharinwirot university No. 114"
   },
   {
     "name": "Starbucks",
@@ -465,7 +495,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Sukhumvit Road"
+    "branch": "Emporium Tower",
+    "address": "662"
   },
   {
     "name": "Starbucks",
@@ -474,7 +505,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Bangkok #53"
+    "branch": "Bangkok Plaza-BKH2",
+    "address": "2, Bangkok Hospital,  Bangkok Plaz Bldg"
   },
   {
     "name": "Starbucks",
@@ -483,7 +515,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Vanit Place"
+    "branch": "Vanit Place",
+    "address": "1126/1 New Petchburi Rd"
   },
   {
     "name": "Starbucks",
@@ -492,7 +525,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Im Park Sam Yan"
+    "branch": "Im Park Sam Yan",
+    "address": "272 Soi Chula 22"
   },
   {
     "name": "Starbucks",
@@ -501,7 +535,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "A Link Square"
+    "branch": "A Link Square",
+    "address": "44 Soi Sukhumvit 71,Ramkhamhaeng rd."
   },
   {
     "name": "Starbucks",
@@ -510,7 +545,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Ease Park"
+    "branch": "Ease Park",
+    "address": "Ramintra Road"
   },
   {
     "name": "Starbucks",
@@ -519,7 +555,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Camp Davis"
+    "branch": "Camp Davis",
+    "address": "88, Camp Davis"
   },
   {
     "name": "Starbucks",
@@ -528,7 +565,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Robinson Bangrak"
+    "branch": "Robinson Bangrak",
+    "address": "Charoenkrung Road, Bangrak"
   },
   {
     "name": "Starbucks",
@@ -537,7 +575,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Tree on 3"
+    "branch": "Tree on 3",
+    "address": "Rama 3 rd."
   },
   {
     "name": "Starbucks",
@@ -546,7 +585,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "The JAS Ramintra"
+    "branch": "The JAS Ramintra",
+    "address": "Ladplakhao Road, Bangkhen district"
   },
   {
     "name": "Starbucks",
@@ -555,7 +595,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Grand China Hotel"
+    "branch": "Grand China Hotel",
+    "address": "215 Yaowarat Road,Samphantawong"
   },
   {
     "name": "Starbucks",
@@ -564,7 +605,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Abdulrahim Place"
+    "branch": "Life Center",
+    "address": "1, Q House Lumpini Building"
   },
   {
     "name": "Starbucks",
@@ -573,7 +615,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Central East Ville-Fashion Zone"
+    "branch": "Central East Ville-Fashion Zone",
+    "address": "Praditmanootham Road"
   },
   {
     "name": "Starbucks",
@@ -582,7 +625,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Show DC"
+    "branch": "Ital Thai Tower",
+    "address": "2034 ItalThai Tower,1 F Retail Hall"
   },
   {
     "name": "Starbucks",
@@ -591,7 +635,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Sikarin Hospital"
+    "branch": "Sikarin Hospital",
+    "address": "4/29 moo 10 Sinakharin rd, Bangna,"
   },
   {
     "name": "Starbucks",
@@ -600,7 +645,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Ideo Mobi Charan-Interchange"
+    "branch": "Ideo Mobi Charan-Interchange",
+    "address": "531/1-2 Ideo Mobi Charan-Interchange, Ch"
   },
   {
     "name": "Starbucks",
@@ -609,7 +655,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Paseo Mall Ladkrabang"
+    "branch": "Paseo Mall Ladkrabang",
+    "address": "318/5 Ladkrabang Rd. Ladgrabang"
   },
   {
     "name": "Starbucks",
@@ -618,7 +665,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Vanilla Moon"
+    "branch": "Vanilla Moon",
+    "address": "Chan Rd. Yannawa"
   },
   {
     "name": "Starbucks",
@@ -627,7 +675,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "The Walk Kaset Nawamintra"
+    "branch": "The Walk Kaset Nawamintra",
+    "address": "505,507,509,511,511/1, 511/2"
   },
   {
     "name": "Starbucks",
@@ -636,7 +685,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "The X Place"
+    "branch": "The X Place",
+    "address": "Kanchanapisek Road, Bangkae"
   },
   {
     "name": "Starbucks",
@@ -645,7 +695,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "JAS Urban Srinakarin"
+    "branch": "JAS Urban Srinakarin",
+    "address": "Srinakarin Road"
   },
   {
     "name": "Starbucks",
@@ -654,7 +705,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Siam Square 1"
+    "branch": "Mahboonkrong",
+    "address": "444, 1st Floor  (1A06-07) MBK Tower"
   },
   {
     "name": "Starbucks",
@@ -663,7 +715,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Little Walk Bangna"
+    "branch": "Little Walk Bangna",
+    "address": "769-769/3 Bangna-Trad Bangna"
   },
   {
     "name": "Starbucks",
@@ -672,7 +725,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "CTI Tower"
+    "branch": "CTI Tower",
+    "address": "Ratchadapisek Rd."
   },
   {
     "name": "Starbucks",
@@ -681,7 +735,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Victoria Garden"
+    "branch": "Victoria Garden",
+    "address": "Phetkasem Road, Laksong Sub-district"
   },
   {
     "name": "Starbucks",
@@ -690,7 +745,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Plearnary Mall Watcharapol"
+    "branch": "Plearnary Mall Watcharapol",
+    "address": "Watcharapol rd., Tha Rang"
   },
   {
     "name": "Starbucks",
@@ -699,7 +755,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Gaysorn Shopping Centre"
+    "branch": "Central World Plaza-Third Floor",
+    "address": "4, 4/1 & 4/2, Shop A305, 3rd Fl Zone A"
   },
   {
     "name": "Starbucks",
@@ -708,7 +765,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Central Chaengwattana"
+    "branch": "Central Chaengwattana",
+    "address": "Chaengwattana Rd"
   },
   {
     "name": "Starbucks",
@@ -717,7 +775,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Kasetsart University"
+    "branch": "Kasetsart University",
+    "address": "50 Ngam Wong Wan Rd,"
   },
   {
     "name": "Starbucks",
@@ -726,7 +785,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "UBC 2"
+    "branch": "Emporium Tower",
+    "address": "662"
   },
   {
     "name": "Starbucks",
@@ -735,7 +795,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "The Paseo Park Kanchanaphisek"
+    "branch": "The Paseo Park Kanchanaphisek",
+    "address": "8/14 Kanchanaphisek Road, Sala Thammasop"
   },
   {
     "name": "Starbucks",
@@ -744,7 +805,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Happy Avenue Ladprao 101"
+    "branch": "Happy Avenue Ladprao 101",
+    "address": "787/101 Soi Ladprao 101  Ladprao Rd."
   },
   {
     "name": "Starbucks",
@@ -753,7 +815,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "The JAS Wanghin"
+    "branch": "The JAS Wanghin",
+    "address": "Ladprao - Wanghin Road"
   },
   {
     "name": "Starbucks",
@@ -762,7 +825,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Sun Towers"
+    "branch": "Sun Towers",
+    "address": "123 Vibhavadi-Rangsit rd."
   },
   {
     "name": "Starbucks",
@@ -771,7 +835,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Ideo Q Chula-Samyan"
+    "branch": "Convent",
+    "address": "1/3, Sivadon Building"
   },
   {
     "name": "Starbucks",
@@ -780,7 +845,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Central Embassy"
+    "branch": "Grand 5",
+    "address": "87 Grand 5 Hotel & Plaza Sukhumvit"
   },
   {
     "name": "Starbucks",
@@ -789,7 +855,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Central Bangna 1st Floor"
+    "branch": "Central Bangna 1st Floor",
+    "address": "1093, G Floor Central City Bangna Bangna"
   },
   {
     "name": "Starbucks",
@@ -798,7 +865,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "The Mall Bangkapi-4th Floor"
+    "branch": "Vejthani Hospital",
+    "address": "Vejthani Hospital, No.1"
   },
   {
     "name": "Starbucks",
@@ -807,7 +875,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Riverside Plaza"
+    "branch": "Riverside Plaza",
+    "address": "257/6 Charoennakorn rd."
   },
   {
     "name": "Starbucks",
@@ -816,7 +885,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Phyathai 2 Hospital"
+    "branch": "Phyathai 2 Hospital",
+    "address": "943 Phaholyothin Road"
   },
   {
     "name": "Starbucks",
@@ -825,7 +895,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Sathorn Square"
+    "branch": "Bangkok City",
+    "address": "179, 1st Floor  BKK City Tower"
   },
   {
     "name": "Starbucks",
@@ -834,7 +905,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "The Ninth Towers"
+    "branch": "Central Rama 9",
+    "address": "9/9, 1st Floor (unit no. 115)"
   },
   {
     "name": "Starbucks",
@@ -843,7 +915,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Amorini"
+    "branch": "Amorini",
+    "address": "1 Suansiam Rd Kannayao Kannayao"
   },
   {
     "name": "Starbucks",
@@ -852,7 +925,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Paseo Town Ramkhamhaeng"
+    "branch": "Paseo Town Ramkhamhaeng",
+    "address": "C101,C201 Ramkhamhaeng Rd.,"
   },
   {
     "name": "Starbucks",
@@ -861,7 +935,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "The Bright Rama 2"
+    "branch": "The Bright Rama 2",
+    "address": "15/9 Rama2 Rd"
   },
   {
     "name": "Starbucks",
@@ -870,7 +945,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "The Street"
+    "branch": "Siam Future Esplanade",
+    "address": "99 Unit G04, Esplanade"
   },
   {
     "name": "Starbucks",
@@ -879,7 +955,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Mercury Ville"
+    "branch": "B2S (Chidlom2)",
+    "address": "1027, 7th Flr Central Chidlom Dept Store"
   },
   {
     "name": "Starbucks",
@@ -888,7 +965,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Yodpiman River Walk"
+    "branch": "Yodpiman River Walk",
+    "address": "390/17"
   },
   {
     "name": "Starbucks",
@@ -897,7 +975,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Food Villa"
+    "branch": "Food Villa",
+    "address": "Ratchaphruek Road, Banglamad, Talingchan"
   },
   {
     "name": "Starbucks",
@@ -906,7 +985,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Fortune Town"
+    "branch": "Fortune Town",
+    "address": "1 Ratchadaphisek Rd,"
   },
   {
     "name": "Starbucks",
@@ -915,7 +995,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Wangburapha"
+    "branch": "Wangburapha",
+    "address": "661,663 Chakpetch rd."
   },
   {
     "name": "Starbucks",
@@ -924,7 +1005,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Phyathai 3 Hospital"
+    "branch": "Phyathai 3 Hospital",
+    "address": "111 Phet Kasem Road"
   },
   {
     "name": "Starbucks",
@@ -933,7 +1015,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Grand President Hotel"
+    "branch": "Grammy",
+    "address": "50, Grammy Place"
   },
   {
     "name": "Starbucks",
@@ -942,7 +1025,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Lotus Sukhapiban 1"
+    "branch": "Lotus Sukhapiban 1",
+    "address": "629/1 Nawamintr road, Nuanchan"
   },
   {
     "name": "Starbucks",
@@ -951,7 +1035,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Metro West Town"
+    "branch": "Metro West Town",
+    "address": "212/2 Kalapapruek rd."
   },
   {
     "name": "Starbucks",
@@ -960,7 +1045,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "SCG Experience"
+    "branch": "CDC",
+    "address": "Crytal Design Center, Room No.Z2.143"
   },
   {
     "name": "Starbucks",
@@ -969,7 +1055,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Ha Ha"
+    "branch": "Seacon Square",
+    "address": "904, 2nd Floor Seacon Square"
   },
   {
     "name": "Starbucks",
@@ -978,7 +1065,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "Fashion Island-2nd Floor"
+    "branch": "Fashion Island-2nd Floor",
+    "address": "5/5-6, Fashion Island"
   },
   {
     "name": "Starbucks",
@@ -987,7 +1075,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "SCG Head Office 3"
+    "branch": "SCG Head Office 3",
+    "address": "Headquaters 1Siam Cement Road, Bangsue"
   },
   {
     "name": "Starbucks",
@@ -996,7 +1085,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "MBK-Pathumwan Princess Hotel"
+    "branch": "MBK-SF Cinema City",
+    "address": "444, B1 Room 7th Floor MBK Center"
   },
   {
     "name": "Starbucks",
@@ -1005,7 +1095,8 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "V Market"
+    "branch": "V Market",
+    "address": "Chalongkrung Road"
   },
   {
     "name": "Starbucks",
@@ -1014,6 +1105,7 @@
     "city": "Bangkok",
     "country": "TH",
     "utcOffset": 7,
-    "branch": "The Rest Area at Prachachuen"
+    "branch": "The Rest Area at Prachachuen",
+    "address": "Prachachuen rd."
   }
 ]

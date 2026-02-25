@@ -23,8 +23,9 @@ const { ethers } = require('ethers');
 const { getNetwork, getContracts, DEFAULT_NETWORK } = require('../shared/networks');
 
 // ── 설정 ──
-const DATA_PATH = path.join(__dirname, 'starbucks-data.json');
-const PROGRESS_PATH = path.join(__dirname, 'bulk-create-progress.json');
+const dataFile = process.argv[2] || 'starbucks-data.json';
+const DATA_PATH = path.join(__dirname, dataFile);
+const PROGRESS_PATH = path.join(__dirname, `bulk-create-progress-${path.basename(dataFile, '.json')}.json`);
 const ABI_PATH = path.join(__dirname, '..', 'contracts', 'out', 'Tokamon.sol', 'Tokamon.json');
 
 const COORD_SCALE = 1_000_000;
@@ -88,7 +89,7 @@ async function main() {
   console.log(`데이터 로드: ${allSpots.length}개 스타벅스\n`);
 
   // 환경변수
-  const privateKey = process.env.SPOT_CREATOR_PRIVATE_KEY;
+  const privateKey = process.env.SPOT_CREATOR_PRIVATE_KEY || process.env.SPOT_CREATER_PRIVATE_KEY;
   if (!privateKey && !process.env.DRY_RUN) {
     console.error('SPOT_CREATOR_PRIVATE_KEY 환경변수가 필요합니다.');
     console.error('.env 파일에 SPOT_CREATOR_PRIVATE_KEY=0x... 를 추가하세요.');

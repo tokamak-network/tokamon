@@ -6,7 +6,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Sun Plaza, 30 Sembawang Drive,"
+    "branch": "Sun Plaza LV 1",
+    "address": "30 Sembawang"
   },
   {
     "name": "Starbucks",
@@ -24,7 +25,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Pacific Plaza"
+    "branch": "Delfi Orchard",
+    "address": "402 Orchard Road"
   },
   {
     "name": "Starbucks",
@@ -42,7 +44,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Wilkie Road"
+    "branch": "Wilkie Edge - Level 1",
+    "address": "8 Wilkie Road"
   },
   {
     "name": "Starbucks",
@@ -51,7 +54,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Dover Road, Food Court 5,"
+    "branch": "Singapore Polytechnic - Dover",
+    "address": "500 Dover Road, FC5"
   },
   {
     "name": "Starbucks",
@@ -69,7 +73,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #8"
+    "branch": "Delfi Orchard",
+    "address": "402 Orchard Road"
   },
   {
     "name": "Starbucks",
@@ -87,7 +92,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #10"
+    "branch": "Bukit Panjang Plaza",
+    "address": "Bukit Panjang Plaza, 1 Jelebu Road"
   },
   {
     "name": "Starbucks",
@@ -105,7 +111,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Robinson Road"
+    "branch": "Singapore Land Tower",
+    "address": "50, Raffles Place"
   },
   {
     "name": "Starbucks",
@@ -114,7 +121,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Sentosa Gateway, Universal Studios Singapore"
+    "branch": "Vivo City 2 - 1 st Floor",
+    "address": "1 Harbourfront Walk"
   },
   {
     "name": "Starbucks",
@@ -141,7 +149,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Eu Tong Sen Street"
+    "branch": "Raffles City Singapore",
+    "address": "252 North Bridge Rd"
   },
   {
     "name": "Starbucks",
@@ -159,7 +168,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "North Bridge Road"
+    "branch": "Raffles Hospital",
+    "address": "585 North Bridge Road,"
   },
   {
     "name": "Starbucks",
@@ -177,7 +187,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Raffles Quay"
+    "branch": "Singapore Land Tower",
+    "address": "50, Raffles Place"
   },
   {
     "name": "Starbucks",
@@ -186,7 +197,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Marina View"
+    "branch": "Singapore Land Tower",
+    "address": "50, Raffles Place"
   },
   {
     "name": "Starbucks",
@@ -204,7 +216,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #23"
+    "branch": "Changi AP Terminal 3 Basement 2",
+    "address": "65 Airport Boulevard"
   },
   {
     "name": "Starbucks",
@@ -213,7 +226,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Nanyang Drive"
+    "branch": "NTU NorthSpine",
+    "address": "76 Nanyang Drive N2.1#01-06"
   },
   {
     "name": "Starbucks",
@@ -231,7 +245,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Lorong 6 Toa Payoh #01-14, Singapore"
+    "branch": "Toa Payoh HDB Hub",
+    "address": "Blk 490, Lor 6 toa Payoh,#01-14"
   },
   {
     "name": "Starbucks",
@@ -240,7 +255,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "North Bridge Road"
+    "branch": "Raffles City Singapore",
+    "address": "252 North Bridge Rd"
   },
   {
     "name": "Starbucks",
@@ -249,7 +265,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #28"
+    "branch": "Cintech 4",
+    "address": "Science Park Drive"
   },
   {
     "name": "Starbucks",
@@ -267,7 +284,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Grange Road, #01-K1 Cathay Cineleisure Orchard"
+    "branch": "Orchard Gateway",
+    "address": "277 Orchard Road, B2-05"
   },
   {
     "name": "Starbucks",
@@ -294,7 +312,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Marina Boulevard #B2-38-36"
+    "branch": "Singapore Land Tower",
+    "address": "50, Raffles Place"
   },
   {
     "name": "Starbucks",
@@ -321,7 +340,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #36"
+    "branch": "Biopolis",
+    "address": "70 Biopolis street,"
   },
   {
     "name": "Starbucks",
@@ -330,7 +350,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #37"
+    "branch": "Rochester Park",
+    "address": "37 Rochester Drive"
   },
   {
     "name": "Starbucks",
@@ -375,7 +396,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Hillion Mall"
+    "branch": "Bukit Panjang Plaza",
+    "address": "Bukit Panjang Plaza, 1 Jelebu Road"
   },
   {
     "name": "Starbucks",
@@ -384,7 +406,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Starbucks"
+    "branch": "587 Bukit Timah Road",
+    "address": "587 Bukit Timah Road"
   },
   {
     "name": "Starbucks",
@@ -402,7 +425,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #45"
+    "branch": "Raffles Hospital",
+    "address": "585 North Bridge Road,"
   },
   {
     "name": "Starbucks",
@@ -429,7 +453,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Tampines Walk, Our Tampines Hub #01-104,"
+    "branch": "Tampines West CC",
+    "address": "5 Tampines West Avenue 3"
   },
   {
     "name": "Starbucks",
@@ -465,7 +490,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Victoria Street"
+    "branch": "Wilkie Edge - Level 1",
+    "address": "8 Wilkie Road"
   },
   {
     "name": "Starbucks",
@@ -474,7 +500,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Beach Road 1st Storey Lobby The Concourse"
+    "branch": "Raffles Hospital",
+    "address": "585 North Bridge Road,"
   },
   {
     "name": "Starbucks",
@@ -501,7 +528,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #56"
+    "branch": "City Square Mall Singapore",
+    "address": "180 Kitchener Road"
   },
   {
     "name": "Starbucks",
@@ -510,7 +538,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Stadium Place, #01-56, Kallang Wave Mall"
+    "branch": "Kallang Wave Mall",
+    "address": "1 Stadium Place"
   },
   {
     "name": "Starbucks",
@@ -519,7 +548,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #58"
+    "branch": "Kallang Leisure Park",
+    "address": "5 Stadium Walk"
   },
   {
     "name": "Starbucks",
@@ -528,7 +558,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Waterway Point, 83 Punggol Central"
+    "branch": "Waterway Point",
+    "address": "83 Punggol Central"
   },
   {
     "name": "Starbucks",
@@ -555,7 +586,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Fusionopolis Way"
+    "branch": "Biopolis",
+    "address": "70 Biopolis street,"
   },
   {
     "name": "Starbucks",
@@ -582,7 +614,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #65"
+    "branch": "NEX",
+    "address": "23 Serangoon Central"
   },
   {
     "name": "Starbucks",
@@ -627,7 +660,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Raffles Boulevard #03-217/218 Marina Square"
+    "branch": "Marina Square II",
+    "address": "6 Raffles Boulevard"
   },
   {
     "name": "Starbucks",
@@ -645,7 +679,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #72"
+    "branch": "Wilkie Edge - Level 1",
+    "address": "8 Wilkie Road"
   },
   {
     "name": "Starbucks",
@@ -672,7 +707,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Airport Boulevard, #02-90, Departure Hall Level 2,"
+    "branch": "Changi AP Terminal 3 Basement 2",
+    "address": "65 Airport Boulevard"
   },
   {
     "name": "Starbucks",
@@ -681,7 +717,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Orchard Road, 313@somerset #02-38/39"
+    "branch": "Orchard Gateway",
+    "address": "277 Orchard Road, B2-05"
   },
   {
     "name": "Starbucks",
@@ -708,7 +745,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Departure / Check-in Hall South, #026-049 Terminal 2 Singapore Changi Airport"
+    "branch": "SIN-T2 Dept/Check-In Hall South L2",
+    "address": "65 Airport Boulevard"
   },
   {
     "name": "Starbucks",
@@ -726,7 +764,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Kallang Avenue"
+    "branch": "City Square Mall Singapore",
+    "address": "180 Kitchener Road"
   },
   {
     "name": "Starbucks",
@@ -744,7 +783,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Bishan Street 13"
+    "branch": "Bishan CC",
+    "address": "51 Bishan Street 13"
   },
   {
     "name": "Starbucks",
@@ -753,7 +793,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Orchard Road, Centrepoint"
+    "branch": "Orchard Gateway",
+    "address": "277 Orchard Road, B2-05"
   },
   {
     "name": "Starbucks",
@@ -762,7 +803,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Simei Street 3, Level 1 Main Atrium, Changi General Hospital"
+    "branch": "Eastpoint Mall L1",
+    "address": "3 Simei Street 6"
   },
   {
     "name": "Starbucks",
@@ -771,7 +813,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Robinson Road #01-02 City House"
+    "branch": "Singapore Land Tower",
+    "address": "50, Raffles Place"
   },
   {
     "name": "Starbucks",
@@ -798,7 +841,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "1 Kim Seng Promenade, Great World City"
+    "branch": "Tiong Bahru Plaza",
+    "address": "302 Tiong Buhru Road"
   },
   {
     "name": "Starbucks",
@@ -807,7 +851,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "3 Simei Street 6"
+    "branch": "Eastpoint Mall L1",
+    "address": "3 Simei Street 6"
   },
   {
     "name": "Starbucks",
@@ -816,7 +861,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Bayfront Avenue"
+    "branch": "Marina Square II",
+    "address": "6 Raffles Boulevard"
   },
   {
     "name": "Starbucks",
@@ -825,7 +871,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "5 Straits View, Marina One (West Tower),"
+    "branch": "Singapore Land Tower",
+    "address": "50, Raffles Place"
   },
   {
     "name": "Starbucks",
@@ -888,7 +935,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Orchard Road"
+    "branch": "Orchard Gateway",
+    "address": "277 Orchard Road, B2-05"
   },
   {
     "name": "Starbucks",
@@ -897,7 +945,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Thomson Road"
+    "branch": "Mount Elizabeth, Novena",
+    "address": "38, Irrawaddy Road #01-14"
   },
   {
     "name": "Starbucks",
@@ -906,7 +955,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Collyer Quay, #B1-07 Ocean Financial Centre"
+    "branch": "Singapore Land Tower",
+    "address": "50, Raffles Place"
   },
   {
     "name": "Starbucks",
@@ -933,7 +983,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Sengkang West Avenue"
+    "branch": "The Seletar Mall",
+    "address": "33 SengKang West Ave #01-15/16"
   },
   {
     "name": "Starbucks",
@@ -942,7 +993,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Paya Lebar Road"
+    "branch": "ONE KM",
+    "address": "11 Tanjong Katong #01-17/18/19"
   },
   {
     "name": "Starbucks",
@@ -987,7 +1039,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Raffles Place #01-15/16 Republic Plaza"
+    "branch": "Singapore Land Tower",
+    "address": "50, Raffles Place"
   },
   {
     "name": "Starbucks",
@@ -1005,7 +1058,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Temasek Boulevard, #02-613/614, Suntec City Mall"
+    "branch": "Raffles Hospital",
+    "address": "585 North Bridge Road,"
   },
   {
     "name": "Starbucks",
@@ -1077,7 +1131,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Ah Hood Road"
+    "branch": "Toa Payoh HDB Hub",
+    "address": "Blk 490, Lor 6 toa Payoh,#01-14"
   },
   {
     "name": "Starbucks",
@@ -1095,7 +1150,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Pasir Ris Central Street 3"
+    "branch": "White Sands",
+    "address": "1 Pasir Ris Central Street 3"
   },
   {
     "name": "Starbucks",
@@ -1113,7 +1169,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #124"
+    "branch": "Vivo City 2 - 1 st Floor",
+    "address": "1 Harbourfront Walk"
   },
   {
     "name": "Starbucks",
@@ -1131,7 +1188,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "East Coast Parkway"
+    "branch": "Parkway Parade - Relocation",
+    "address": "80 Marine Parade Road"
   },
   {
     "name": "Starbucks",
@@ -1140,7 +1198,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Northpoint City"
+    "branch": "Northpoint City",
+    "address": "930 Yishun Ave 2 #01-07/08"
   },
   {
     "name": "Starbucks",
@@ -1158,7 +1217,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #129"
+    "branch": "Orchard Gateway",
+    "address": "277 Orchard Road, B2-05"
   },
   {
     "name": "Starbucks",
@@ -1176,7 +1236,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #131"
+    "branch": "West Coast Plaza",
+    "address": "154 West Coast Road #01-01"
   },
   {
     "name": "Starbucks",
@@ -1230,7 +1291,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #137"
+    "branch": "Wilkie Edge - Level 1",
+    "address": "8 Wilkie Road"
   },
   {
     "name": "Starbucks",
@@ -1275,7 +1337,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #142"
+    "branch": "Singapore Land Tower",
+    "address": "50, Raffles Place"
   },
   {
     "name": "Starbucks",
@@ -1311,7 +1374,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #146"
+    "branch": "Wilkie Edge - Level 1",
+    "address": "8 Wilkie Road"
   },
   {
     "name": "Starbucks",
@@ -1320,7 +1384,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #147"
+    "branch": "Rochester Park",
+    "address": "37 Rochester Drive"
   },
   {
     "name": "Starbucks",
@@ -1338,7 +1403,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Sensoryscape"
+    "branch": "Starbucks at USS(RWS)",
+    "address": "30 SENTOSA GATEWAY, #01-309"
   },
   {
     "name": "Starbucks",
@@ -1356,7 +1422,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore #151"
+    "branch": "Raffles Hospital",
+    "address": "585 North Bridge Road,"
   },
   {
     "name": "Starbucks",
@@ -1392,7 +1459,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Marina Square II"
+    "branch": "Marina Square II",
+    "address": "6 Raffles Boulevard"
   },
   {
     "name": "Starbucks",
@@ -1401,7 +1469,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Hillv2"
+    "branch": "Hillv2",
+    "address": "6 Hillview Rise , #01-05"
   },
   {
     "name": "Starbucks",
@@ -1410,7 +1479,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "SIM - clementi centre"
+    "branch": "SIM - clementi centre",
+    "address": "535A CLEMENTI ROAD,blk C,C01-04"
   },
   {
     "name": "Starbucks",
@@ -1419,7 +1489,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Tiong Bahru Plaza"
+    "branch": "Tiong Bahru Plaza",
+    "address": "302 Tiong Buhru Road"
   },
   {
     "name": "Starbucks",
@@ -1428,7 +1499,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Delfi Orchard"
+    "branch": "Delfi Orchard",
+    "address": "402 Orchard Road"
   },
   {
     "name": "Starbucks",
@@ -1437,7 +1509,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "NUS Yong Loo Lin School of Medicine"
+    "branch": "NUS Yong Loo Lin School of Medicine",
+    "address": "10 Medical Drive #01-40"
   },
   {
     "name": "Starbucks",
@@ -1446,7 +1519,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Tampines West CC"
+    "branch": "Tampines West CC",
+    "address": "5 Tampines West Avenue 3"
   },
   {
     "name": "Starbucks",
@@ -1455,7 +1529,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Raffles Hospital"
+    "branch": "Raffles Hospital",
+    "address": "585 North Bridge Road,"
   },
   {
     "name": "Starbucks",
@@ -1464,7 +1539,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Vivo City 2 - 1 st Floor"
+    "branch": "Vivo City 2 - 1 st Floor",
+    "address": "1 Harbourfront Walk"
   },
   {
     "name": "Starbucks",
@@ -1473,7 +1549,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore Land Tower"
+    "branch": "Singapore Land Tower",
+    "address": "50, Raffles Place"
   },
   {
     "name": "Starbucks",
@@ -1482,7 +1559,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Biopolis"
+    "branch": "Biopolis",
+    "address": "70 Biopolis street,"
   },
   {
     "name": "Starbucks",
@@ -1491,7 +1569,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Anchor Point"
+    "branch": "Anchor Point",
+    "address": "370 Alexandra Road"
   },
   {
     "name": "Starbucks",
@@ -1500,7 +1579,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Bedok Point"
+    "branch": "Bedok Point",
+    "address": "799 New Upper Changi Road"
   },
   {
     "name": "Starbucks",
@@ -1509,7 +1589,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "J Cube"
+    "branch": "J Cube",
+    "address": "2 Jurong East Central 1, #02-19"
   },
   {
     "name": "Starbucks",
@@ -1518,7 +1599,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Waterway Point"
+    "branch": "Waterway Point",
+    "address": "83 Punggol Central"
   },
   {
     "name": "Starbucks",
@@ -1527,7 +1609,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Wheelock Place B1"
+    "branch": "Wheelock Place B1",
+    "address": "501, Orchard Road #B1-01"
   },
   {
     "name": "Starbucks",
@@ -1536,7 +1619,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Woodlands Civic Centre"
+    "branch": "Woodlands Civic Centre",
+    "address": "900 South Woodlands Drive"
   },
   {
     "name": "Starbucks",
@@ -1545,7 +1629,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Mount Elizabeth, Novena"
+    "branch": "Mount Elizabeth, Novena",
+    "address": "38, Irrawaddy Road #01-14"
   },
   {
     "name": "Starbucks",
@@ -1554,7 +1639,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Northpoint City"
+    "branch": "Northpoint City",
+    "address": "930 Yishun Ave 2 #01-07/08"
   },
   {
     "name": "Starbucks",
@@ -1563,7 +1649,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Tanglin Mall"
+    "branch": "Tanglin Mall",
+    "address": "163 Tanglin Road"
   },
   {
     "name": "Starbucks",
@@ -1572,7 +1659,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Eastpoint Mall L1"
+    "branch": "Eastpoint Mall L1",
+    "address": "3 Simei Street 6"
   },
   {
     "name": "Starbucks",
@@ -1581,7 +1669,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "ONE KM"
+    "branch": "ONE KM",
+    "address": "11 Tanjong Katong #01-17/18/19"
   },
   {
     "name": "Starbucks",
@@ -1590,7 +1679,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Orchard Gateway"
+    "branch": "Orchard Gateway",
+    "address": "277 Orchard Road, B2-05"
   },
   {
     "name": "Starbucks",
@@ -1599,7 +1689,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Changi City Point"
+    "branch": "Changi City Point",
+    "address": "Changi South Ave 1, #01-68"
   },
   {
     "name": "Starbucks",
@@ -1608,7 +1699,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Cintech 4"
+    "branch": "Cintech 4",
+    "address": "Science Park Drive"
   },
   {
     "name": "Starbucks",
@@ -1617,7 +1709,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "University Town- NUS"
+    "branch": "University Town- NUS",
+    "address": "8 College Avenue West"
   },
   {
     "name": "Starbucks",
@@ -1626,7 +1719,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Rochester Park"
+    "branch": "Rochester Park",
+    "address": "37 Rochester Drive"
   },
   {
     "name": "Starbucks",
@@ -1635,7 +1729,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "West Coast Plaza"
+    "branch": "West Coast Plaza",
+    "address": "154 West Coast Road #01-01"
   },
   {
     "name": "Starbucks",
@@ -1644,7 +1739,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Toa Payoh HDB Hub"
+    "branch": "Toa Payoh HDB Hub",
+    "address": "Blk 490, Lor 6 toa Payoh,#01-14"
   },
   {
     "name": "Starbucks",
@@ -1653,7 +1749,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Changi AP Terminal 3 Basement 2"
+    "branch": "Changi AP Terminal 3 Basement 2",
+    "address": "65 Airport Boulevard"
   },
   {
     "name": "Starbucks",
@@ -1662,7 +1759,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Bedok Mall"
+    "branch": "Bedok Mall",
+    "address": "New Upper Changi Road"
   },
   {
     "name": "Starbucks",
@@ -1671,7 +1769,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Raffles City Singapore"
+    "branch": "Raffles City Singapore",
+    "address": "252 North Bridge Rd"
   },
   {
     "name": "Starbucks",
@@ -1680,7 +1779,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Clementi Mall"
+    "branch": "Clementi Mall",
+    "address": "3155, Commonwealth Avenue West"
   },
   {
     "name": "Starbucks",
@@ -1689,7 +1789,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "NEX"
+    "branch": "NEX",
+    "address": "23 Serangoon Central"
   },
   {
     "name": "Starbucks",
@@ -1698,7 +1799,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "City Square Mall Singapore"
+    "branch": "City Square Mall Singapore",
+    "address": "180 Kitchener Road"
   },
   {
     "name": "Starbucks",
@@ -1707,7 +1809,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Jurong Point - Level 3"
+    "branch": "Jurong Point - Level 3",
+    "address": "1 Jurong West Central 2"
   },
   {
     "name": "Starbucks",
@@ -1716,7 +1819,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "3 Jalan Jamal"
+    "branch": "3 Jalan Jamal",
+    "address": "3 Jalan Jamal"
   },
   {
     "name": "Starbucks",
@@ -1725,7 +1829,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore General Hospital blk 4"
+    "branch": "Singapore General Hospital blk 4",
+    "address": "1 hospital drive blk 4"
   },
   {
     "name": "Starbucks",
@@ -1734,7 +1839,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "NTU NorthSpine"
+    "branch": "NTU NorthSpine",
+    "address": "76 Nanyang Drive N2.1#01-06"
   },
   {
     "name": "Starbucks",
@@ -1743,7 +1849,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "The Seletar Mall"
+    "branch": "The Seletar Mall",
+    "address": "33 SengKang West Ave #01-15/16"
   },
   {
     "name": "Starbucks",
@@ -1752,7 +1859,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Bukit Panjang Plaza"
+    "branch": "Bukit Panjang Plaza",
+    "address": "Bukit Panjang Plaza, 1 Jelebu Road"
   },
   {
     "name": "Starbucks",
@@ -1761,7 +1869,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Sentosa, Cable Car Arrival Plaza"
+    "branch": "Sentosa, Cable Car Arrival Plaza",
+    "address": "42 Imbiah Rd"
   },
   {
     "name": "Starbucks",
@@ -1770,7 +1879,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Ng Teng Fong Hospital"
+    "branch": "Ng Teng Fong Hospital",
+    "address": "1 Jurong East street 21, #02-08"
   },
   {
     "name": "Starbucks",
@@ -1779,7 +1889,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Kallang Leisure Park"
+    "branch": "Kallang Leisure Park",
+    "address": "5 Stadium Walk"
   },
   {
     "name": "Starbucks",
@@ -1788,7 +1899,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Samsung @ MBC"
+    "branch": "Samsung @ MBC",
+    "address": "30 Pasir Panjang Road #17-31/32"
   },
   {
     "name": "Starbucks",
@@ -1797,7 +1909,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "MBS"
+    "branch": "MBS",
+    "address": "10 Bayfront Ave #B2-56"
   },
   {
     "name": "Starbucks",
@@ -1806,7 +1919,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "587 Bukit Timah Road"
+    "branch": "587 Bukit Timah Road",
+    "address": "587 Bukit Timah Road"
   },
   {
     "name": "Starbucks",
@@ -1815,7 +1929,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Kallang Wave Mall"
+    "branch": "Kallang Wave Mall",
+    "address": "1 Stadium Place"
   },
   {
     "name": "Starbucks",
@@ -1824,7 +1939,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "White Sands"
+    "branch": "White Sands",
+    "address": "1 Pasir Ris Central Street 3"
   },
   {
     "name": "Starbucks",
@@ -1833,7 +1949,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Wilkie Edge - Level 1"
+    "branch": "Wilkie Edge - Level 1",
+    "address": "8 Wilkie Road"
   },
   {
     "name": "Starbucks",
@@ -1842,7 +1959,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Oasis  Sakra"
+    "branch": "Oasis  Sakra",
+    "address": "3 Sakra Road #01-02"
   },
   {
     "name": "Starbucks",
@@ -1851,7 +1969,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Houang Mall"
+    "branch": "Houang Mall",
+    "address": "90 Hougang Avenue 10, #02-11,19"
   },
   {
     "name": "Starbucks",
@@ -1860,7 +1979,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "78 Shenton Way"
+    "branch": "78 Shenton Way",
+    "address": "78 Shenton Way"
   },
   {
     "name": "Starbucks",
@@ -1869,7 +1989,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "at USS(RWS)"
+    "branch": "Starbucks at USS(RWS)",
+    "address": "30 SENTOSA GATEWAY, #01-309"
   },
   {
     "name": "Starbucks",
@@ -1878,7 +1999,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Parkway Parade - Relocation"
+    "branch": "Parkway Parade - Relocation",
+    "address": "80 Marine Parade Road"
   },
   {
     "name": "Starbucks",
@@ -1887,7 +2009,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Keat Hong CC"
+    "branch": "Keat Hong CC",
+    "address": "2 Choa Chu Kang loop, #01-04"
   },
   {
     "name": "Starbucks",
@@ -1896,7 +2019,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Singapore Polytechnic - Dover"
+    "branch": "Singapore Polytechnic - Dover",
+    "address": "500 Dover Road, FC5"
   },
   {
     "name": "Starbucks",
@@ -1905,7 +2029,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Down Town East"
+    "branch": "Down Town East",
+    "address": "1 Pasir Ris Close #02-332"
   },
   {
     "name": "Starbucks",
@@ -1914,7 +2039,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Compass One"
+    "branch": "Compass One",
+    "address": "1 sengkang Sq #01-04"
   },
   {
     "name": "Starbucks",
@@ -1923,7 +2049,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Thomson Plaza"
+    "branch": "Thomson Plaza",
+    "address": "301 Upper Thomson Road"
   },
   {
     "name": "Starbucks",
@@ -1932,7 +2059,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Bishan CC"
+    "branch": "Bishan CC",
+    "address": "51 Bishan Street 13"
   },
   {
     "name": "Starbucks",
@@ -1941,7 +2069,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "SIN-T2 Dept/Check-In Hall South L2"
+    "branch": "SIN-T2 Dept/Check-In Hall South L2",
+    "address": "65 Airport Boulevard"
   },
   {
     "name": "Starbucks",
@@ -1950,7 +2079,8 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Sun Plaza LV 1"
+    "branch": "Sun Plaza LV 1",
+    "address": "30 Sembawang"
   },
   {
     "name": "Starbucks",
@@ -1959,6 +2089,7 @@
     "city": "Singapore",
     "country": "SG",
     "utcOffset": 8,
-    "branch": "Holland Village"
+    "branch": "Holland Village",
+    "address": "255 Holland Avenue"
   }
 ]

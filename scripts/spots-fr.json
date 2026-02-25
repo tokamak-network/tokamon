@@ -6,7 +6,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Gare St Lazare - Mezzanine"
+    "branch": "Gare St Lazare - Mezzanine",
+    "address": "14 Rue Interieure"
   },
   {
     "name": "Starbucks",
@@ -15,7 +16,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Echelle"
+    "branch": "Echelle",
+    "address": "2 RUE DE I'ECHELLE"
   },
   {
     "name": "Starbucks",
@@ -24,7 +26,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Victor Hugo"
+    "branch": "Victor Hugo",
+    "address": "90, avenue Victor Hugo"
   },
   {
     "name": "Starbucks",
@@ -33,7 +36,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Levallois So Ouest"
+    "branch": "Levallois So Ouest",
+    "address": "CC Levallois So Ouest"
   },
   {
     "name": "Starbucks",
@@ -42,7 +46,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Rue de Seze"
+    "branch": "Rue de Seze",
+    "address": "4, Rue de Seze"
   },
   {
     "name": "Starbucks",
@@ -51,7 +56,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Place du Tertre"
+    "branch": "Place du Tertre",
+    "address": "8/10 rue Norvins"
   },
   {
     "name": "Starbucks",
@@ -60,7 +66,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Saint Philippe du Roule"
+    "branch": "Saint Philippe du Roule",
+    "address": "162 Rue du Faubourg Saint Honore"
   },
   {
     "name": "Starbucks",
@@ -69,7 +76,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Paris - Gare du Nord Station"
+    "branch": "Paris - Gare du Nord Station",
+    "address": "18 rue de Dunkerque"
   },
   {
     "name": "Starbucks",
@@ -78,7 +86,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Palais des Congres"
+    "branch": "Palais des Congres",
+    "address": "Porte Maillot CC"
   },
   {
     "name": "Starbucks",
@@ -87,7 +96,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Roquette"
+    "branch": "Roquette",
+    "address": "5 Rue de la Roquette"
   },
   {
     "name": "Starbucks",
@@ -96,7 +106,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "67 rue Lafayette"
+    "branch": "67 rue Lafayette",
+    "address": "67 rue Lafayette"
   },
   {
     "name": "Starbucks",
@@ -105,7 +116,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Paris - Gare Montparnasse"
+    "branch": "Paris - Gare Montparnasse",
+    "address": "17 Boulevard de Vaugirard"
   },
   {
     "name": "Starbucks",
@@ -114,7 +126,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Saint Michel Cluny"
+    "branch": "Saint Michel Cluny",
+    "address": "24, boulevard Saint-Michel"
   },
   {
     "name": "Starbucks",
@@ -123,7 +136,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Monoprix - Dragon"
+    "branch": "Monoprix - Dragon",
+    "address": "50 rue de Rennes"
   },
   {
     "name": "Starbucks",
@@ -132,7 +146,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "46 Rivoli"
+    "branch": "46 Rivoli",
+    "address": "46 Rue de Rivoli"
   },
   {
     "name": "Starbucks",
@@ -141,7 +156,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Rue Saint Dominique"
+    "branch": "Rue Saint Dominique",
+    "address": "90 Rue Saint Dominique"
   },
   {
     "name": "Starbucks",
@@ -150,7 +166,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Petits Carreaux"
+    "branch": "Petits Carreaux",
+    "address": "21 rue des Petits Carreaux"
   },
   {
     "name": "Starbucks",
@@ -159,7 +176,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Felix Faure"
+    "branch": "Felix Faure",
+    "address": "43, Avenue Felix Faure"
   },
   {
     "name": "Starbucks",
@@ -168,7 +186,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Vaugirard"
+    "branch": "Vaugirard",
+    "address": "297, rue de Vaugirard"
   },
   {
     "name": "Starbucks",
@@ -177,7 +196,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Place Charles Michels"
+    "branch": "Place Charles Michels",
+    "address": "83 rue Saint Charles"
   },
   {
     "name": "Starbucks",
@@ -186,7 +206,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Motte Picquet"
+    "branch": "Motte Picquet",
+    "address": "66 avenue de la Motte Piquet"
   },
   {
     "name": "Starbucks",
@@ -195,7 +216,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Monge"
+    "branch": "Monge",
+    "address": "118, rue Monge Paris"
   },
   {
     "name": "Starbucks",
@@ -204,7 +226,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Rue Brea"
+    "branch": "Rue Brea",
+    "address": "21 rue de Brea"
   },
   {
     "name": "Starbucks",
@@ -213,7 +236,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Wagram"
+    "branch": "Wagram",
+    "address": "23 avenue Wagram"
   },
   {
     "name": "Starbucks",
@@ -222,7 +246,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Bercy Parc"
+    "branch": "Bercy Parc",
+    "address": "5, rue de lAmbroisie"
   },
   {
     "name": "Starbucks",
@@ -231,7 +256,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Pepiniere"
+    "branch": "Pepiniere",
+    "address": "2 rue de la Pepiniere"
   },
   {
     "name": "Starbucks",
@@ -240,7 +266,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Carrousel du Louvre"
+    "branch": "Carrousel du Louvre",
+    "address": "Musee de Louvre"
   },
   {
     "name": "Starbucks",
@@ -249,7 +276,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "General Leclerc"
+    "branch": "General Leclerc",
+    "address": "76-80, Avenue du Gal Leclerc"
   },
   {
     "name": "Starbucks",
@@ -258,7 +286,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Saint Paul"
+    "branch": "Saint Paul",
+    "address": "8/10 Rue de Rivoli"
   },
   {
     "name": "Starbucks",
@@ -267,7 +296,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Galeries des Arcades"
+    "branch": "Galeries des Arcades",
+    "address": "76-78 Avenue des Champs Elysees"
   },
   {
     "name": "Starbucks",
@@ -276,7 +306,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Montmartre"
+    "branch": "Montmartre",
+    "address": "18, boulevard Montmartre"
   },
   {
     "name": "Starbucks",
@@ -285,7 +316,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Avenue de France"
+    "branch": "Avenue de France",
+    "address": "107, Avenue de France"
   },
   {
     "name": "Starbucks",
@@ -294,7 +326,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "108 Boulevard Haussmann"
+    "branch": "108 Boulevard Haussmann",
+    "address": "108 Boulevard Haussmann"
   },
   {
     "name": "Starbucks",
@@ -303,7 +336,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Passy Plaza"
+    "branch": "Passy Plaza",
+    "address": "53, rue de Passy"
   },
   {
     "name": "Starbucks",
@@ -312,7 +346,8 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Paris - Monoprix Beaugrenelle"
+    "branch": "Paris - Monoprix Beaugrenelle",
+    "address": "19 rue Linois"
   },
   {
     "name": "Starbucks",
@@ -321,6 +356,7 @@
     "city": "Paris",
     "country": "FR",
     "utcOffset": 1,
-    "branch": "Charles de Gaulle T2D"
+    "branch": "Charles de Gaulle T2D",
+    "address": "Aeroport Roissy Charles de Gaulle Aeroga"
   }
 ]
