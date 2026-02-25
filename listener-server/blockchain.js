@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { ethers } = require('ethers');
 console.log('[Blockchain] ethers 버전:', ethers.version, '| 경로:', require.resolve('ethers'));
-const { syncSpotToFirestore, saveTelegramClaimEvent, syncTelegramBalance, saveWalletTelegramLink, getTelegramUsernameByHash, syncDeviceBalance, NETWORK_ID } = require('./firebase-admin');
+const { db, col, syncSpotToFirestore, saveTelegramClaimEvent, syncTelegramBalance, saveWalletTelegramLink, getTelegramUsernameByHash, syncDeviceBalance, NETWORK_ID } = require('./firebase-admin');
 const { getNetwork, getContracts, DEFAULT_NETWORK } = require('../shared/networks');
 
 // 네트워크 설정: NETWORK 환경변수 → shared/networks.js에서 로드
@@ -148,8 +148,31 @@ async function init() {
   writeContract = new ethers.Contract(address, abi, signer);
   console.log('[Blockchain] 연결 완료:', address, '(WS 구독 + HTTP 트랜잭션)');
 
-  // 메타데이터 로드
+  // 메타데이터 로드 (로컬 파일 → Firestore 폴백)
   loadMetadata();
+  if (Object.keys(spotMetadata).length === 0 && db) {
+    console.log('[복원] 로컬 캐시 없음 → Firestore에서 spot_metadata 복원 중...');
+    try {
+      const snap = await db.collection(col('spot_metadata')).get();
+      let count = 0;
+      snap.docs.forEach((doc) => {
+        const data = doc.data();
+        const id = Number(doc.id);
+        if (id != null && data.reward > 0) {
+          spotMetadata[id] = { ...data, id };
+          count++;
+        }
+      });
+      if (count > 0) {
+        saveMetadata();
+        console.log(`[복원] Firestore에서 ${count}개 스팟 복원 완료`);
+      } else {
+        console.log('[복원] Firestore에 스팟 데이터 없음');
+      }
+    } catch (e) {
+      console.error('[복원] Firestore 복원 실패:', e.message);
+    }
+  }
 
   // 놓친 이벤트 복구: 마지막 처리 블록 이후의 이벤트를 스캔
   const lastBlock = loadLastBlock();
