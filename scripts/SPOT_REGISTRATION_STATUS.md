@@ -6,11 +6,11 @@
 |------|------|------|------|-------------|------|
 | 0 | spots-daechi.json | 15 | 완료 | 4~18 | 시범 등록 |
 | 1 | spots-kr.json | 253 | 완료 | 19~273 | 한글 description 16개 수정 필요 |
-| 2 | spots-us.json | 372 | 진행중 | 274~645 | 313/372 완료, lastIndex: 312에서 중단. 인덱스 313~371 (59개) 미등록 |
-| 3 | spots-jp.json | 30 | 대기 | | |
-| 4 | spots-fr.json | 36 | 대기 | | |
-| 5 | spots-gb.json | 180 | 대기 | | |
-| 6 | spots-sg.json | 218 | 대기 | | |
+| 2 | spots-us.json | 372 | 완료 | 274~646 | 372/372 완료 |
+| 3 | spots-sg.json | 218 | 완료 | 647~864 | 218/218 완료 |
+| 4 | spots-gb.json | 180 | 완료 | 865~1044 | 180/180 완료 |
+| 5 | spots-jp.json | 30 | 대기 | | |
+| 6 | spots-fr.json | 36 | 대기 | | |
 | 7 | spots-th.json | 113 | 대기 | | |
 
 ## 미완료 작업
