@@ -75,9 +75,13 @@ eas submit --platform ios
 # Functions 로그
 firebase functions:log --only api
 
-# Cloud Run 로그
+# Cloud Run 로그 (최근 30건)
 gcloud run services logs read listener-server \
   --project tokamon-go --region asia-northeast3 --limit 30
+
+# Cloud Run 실시간 모니터링 (로컬 터미널에서 로그 스트리밍, Ctrl+C 종료)
+gcloud beta run services logs tail listener-server \
+  --project tokamon-go --region asia-northeast3
 
 # Cloud Run 정상 시작 확인 키워드:
 # ✅ [Firebase] Admin SDK 초기화 완료

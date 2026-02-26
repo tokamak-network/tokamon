@@ -24,9 +24,11 @@ console.log(`[Blockchain] 네트워크: ${networkConfig.name} (${networkId}, cha
 
 const COORD_SCALE = 1_000_000;
 
-let provider;
+let provider;        // WS provider (이벤트 구독 전용)
+let httpProvider;    // HTTP provider (읽기 전용)
 let signer;
-let contract;        // WS provider (이벤트 구독 + 읽기)
+let contract;        // WS contract (이벤트 구독 전용)
+let readContract;    // HTTP contract (읽기 전용)
 let writeContract;   // HTTP signer (트랜잭션 전송)
 
 // TelegramClaimed 이벤트 알림 콜백
@@ -148,8 +150,8 @@ async function init() {
     throw new Error(`[${networkId}] 컨트랙트 주소를 찾을 수 없습니다. CONTRACT_ADDRESS 환경변수, contract-address.json, 또는 shared/networks.js에 설정하세요.`);
   }
 
-  // 트랜잭션 전송용 HTTP provider + signer 획득
-  const httpProvider = new ethers.JsonRpcProvider(RPC_URL);
+  // HTTP provider (읽기 + 트랜잭션 전송)
+  httpProvider = new ethers.JsonRpcProvider(RPC_URL);
   if (process.env.SIGNER_PRIVATE_KEY) {
     // 실제 체인: 환경변수로 전달된 개인키로 Wallet 생성
     signer = new ethers.Wallet(process.env.SIGNER_PRIVATE_KEY, httpProvider);
@@ -176,11 +178,13 @@ async function init() {
     console.log('[Blockchain] 최소 ABI 사용 (아티팩트 없음)');
   }
 
-  // 이벤트 구독용 (WebSocket) + 읽기
+  // 이벤트 구독용 (WebSocket)
   contract = new ethers.Contract(address, abi, provider);
+  // 읽기 전용 (HTTP)
+  readContract = new ethers.Contract(address, abi, httpProvider);
   // 트랜잭션 전송용 (HTTP signer)
   writeContract = new ethers.Contract(address, abi, signer);
-  console.log('[Blockchain] 연결 완료:', address, '(WS 구독 + HTTP 트랜잭션)');
+  console.log('[Blockchain] 연결 완료:', address, '(WS 구독 + HTTP 읽기/트랜잭션)');
 
   // 메타데이터 로드 (로컬 파일 → Firestore 폴백)
   loadMetadata();
@@ -351,7 +355,7 @@ async function init() {
 
     // 컨트랙트에서 실제 잔액 조회 → Firestore 동기화
     try {
-      const bal = await contract.getTelegramBalance(telegramHash);
+      const bal = await readContract.getTelegramBalance(telegramHash);
       await syncTelegramBalance(hashHex, fromWei(bal));
     } catch (e) {
       console.error('[TelegramClaimed] 잔액 동기화 실패:', e.message);
@@ -410,7 +414,7 @@ async function init() {
 
     // 컨트랙트에서 실제 잔액 조회 → Firestore 동기화
     try {
-      const bal = await contract.getDeviceBalance(deviceHash);
+      const bal = await readContract.getDeviceBalance(deviceHash);
       await syncDeviceBalance(hashHex, fromWei(bal));
     } catch (e) {
       console.error('[DeviceClaimed] 잔액 동기화 실패:', e.message);
@@ -457,7 +461,7 @@ async function init() {
     console.log(`[이벤트 수신] TelegramWithdrawn | hash=${hashHex.slice(0,10)}... wallet=${String(wallet).slice(0,10)}... amount=${fromWei(amount)} block=${blockNum}`);
     // 컨트랙트에서 실제 잔액 조회 → Firestore 동기화 (출금 후 0이 되어야 함)
     try {
-      const bal = await contract.getTelegramBalance(telegramHash);
+      const bal = await readContract.getTelegramBalance(telegramHash);
       await syncTelegramBalance(hashHex, fromWei(bal));
     } catch (e) {
       console.error('[TelegramWithdrawn] 잔액 동기화 실패:', e.message);
@@ -482,7 +486,7 @@ async function init() {
     console.log(`[이벤트 수신] DeviceWithdrawn | hash=${hashHex.slice(0,10)}... wallet=${String(wallet).slice(0,10)}... amount=${fromWei(amount)} block=${blockNum}`);
     // 컨트랙트에서 실제 잔액 조회 → Firestore 동기화
     try {
-      const bal = await contract.getDeviceBalance(deviceHash);
+      const bal = await readContract.getDeviceBalance(deviceHash);
       await syncDeviceBalance(hashHex, fromWei(bal));
     } catch (e) {
       console.error('[DeviceWithdrawn] 잔액 동기화 실패:', e.message);
@@ -497,9 +501,9 @@ async function init() {
 
 async function fetchFullSpotFromContract(spotId) {
   try {
-    const s = typeof contract.getSpot === 'function'
-      ? await contract.getSpot(spotId)
-      : await contract.spots(spotId);
+    const s = typeof readContract.getSpot === 'function'
+      ? await readContract.getSpot(spotId)
+      : await readContract.spots(spotId);
     // Spot struct field order:
     // 0:creator 1:allowDuplicateClaims 2:cooldown 3:stampGoal 4:stampBonus
     // 5:reward 6:remaining 7:lat 8:lng 9:startDate 10:endDate
@@ -562,9 +566,9 @@ async function getSpot(spotId) {
   }
   // remaining, cooldown, allow_duplicate_claims는 항상 컨트랙트에서 최신 조회
   try {
-    const core = typeof contract.getSpotCore === 'function'
-      ? await contract.getSpotCore(spotId)
-      : await contract.getSpot(spotId);
+    const core = typeof readContract.getSpotCore === 'function'
+      ? await readContract.getSpotCore(spotId)
+      : await readContract.getSpot(spotId);
     return {
       ...cached,
       id: spotId,
@@ -608,7 +612,7 @@ function getSpotsByGeoHash(prefixes) {
 }
 
 async function getAllSpots() {
-  const nextId = Number(await contract.nextSpotId());
+  const nextId = Number(await readContract.nextSpotId());
   const spots = [];
   for (let i = 0; i < nextId; i++) {
     const spot = await getSpot(i);
@@ -620,12 +624,12 @@ async function getAllSpots() {
 // ─── 잔액/스탬프 조회 ───
 
 async function getBalance(userAddress) {
-  const bal = await provider.getBalance(toAddr(userAddress));
+  const bal = await httpProvider.getBalance(toAddr(userAddress));
   return fromWei(bal);
 }
 
 async function getStampInfo(spotId, userAddress) {
-  const info = await contract.getStampInfo(spotId, toAddr(userAddress));
+  const info = await readContract.getStampInfo(spotId, toAddr(userAddress));
   return {
     stamps: Number(info.stamps),
     goal: Number(info.goal),
@@ -655,12 +659,12 @@ async function sendETH(toAddress, amountETH) {
 
 async function getTelegramBalance(telegramHash) {
   const fullHash = '0x' + telegramHash;
-  const bal = await contract.getTelegramBalance(fullHash);
+  const bal = await readContract.getTelegramBalance(fullHash);
   return fromWei(bal);
 }
 
 async function getTelegramStampInfo(spotId, telegramHash) {
-  const info = await contract.getTelegramStampInfo(spotId, '0x' + telegramHash);
+  const info = await readContract.getTelegramStampInfo(spotId, '0x' + telegramHash);
   return {
     stamps: Number(info.stamps),
     goal: Number(info.goal),
@@ -670,7 +674,7 @@ async function getTelegramStampInfo(spotId, telegramHash) {
 }
 
 async function getTelegramLinkedWallet(telegramHash) {
-  const wallet = await contract.getTelegramLinkedWallet('0x' + telegramHash);
+  const wallet = await readContract.getTelegramLinkedWallet('0x' + telegramHash);
   return wallet;
 }
 
@@ -702,7 +706,7 @@ async function claimToTelegram(spotId, telegramHash) {
     })
     .find((e) => e && e.name === 'TelegramClaimed');
 
-  const bal = await contract.getTelegramBalance('0x' + telegramHash);
+  const bal = await readContract.getTelegramBalance('0x' + telegramHash);
 
   if (event) {
     return {
@@ -719,12 +723,12 @@ async function claimToTelegram(spotId, telegramHash) {
 
 async function getPhoneBalance(phoneHash) {
   // Phone은 Device로 대체됨 — getClaimInfo로 잔액 조회 불가, getDeviceBalance 사용
-  const bal = await contract.getDeviceBalance('0x' + phoneHash);
+  const bal = await readContract.getDeviceBalance('0x' + phoneHash);
   return fromWei(bal);
 }
 
 async function getPhoneStampInfo(spotId, phoneHash) {
-  const info = await contract.getClaimInfo(spotId, '0x' + phoneHash);
+  const info = await readContract.getClaimInfo(spotId, '0x' + phoneHash);
   return {
     stamps: Number(info.stamps),
     goal: Number(info.goal),
@@ -746,7 +750,7 @@ async function claimByDevice(spotId, deviceHash) {
     })
     .find((e) => e && e.name === 'DeviceClaimed');
 
-  const bal = await contract.getDeviceBalance(fullHash);
+  const bal = await readContract.getDeviceBalance(fullHash);
 
   if (event) {
     return {
@@ -761,13 +765,13 @@ async function claimByDevice(spotId, deviceHash) {
 
 async function getDeviceBalance(deviceHash) {
   const fullHash = '0x' + deviceHash;
-  const bal = await contract.getDeviceBalance(fullHash);
+  const bal = await readContract.getDeviceBalance(fullHash);
   return fromWei(bal);
 }
 
 async function getDeviceStampInfo(spotId, deviceHash) {
   const fullHash = '0x' + deviceHash;
-  const info = await contract.getClaimInfo(spotId, fullHash);
+  const info = await readContract.getClaimInfo(spotId, fullHash);
   return {
     stamps: Number(info.stamps),
     goal: Number(info.goal),
@@ -778,7 +782,7 @@ async function getDeviceStampInfo(spotId, deviceHash) {
 
 async function getDeviceLinkedWallet(deviceHash) {
   const fullHash = '0x' + deviceHash;
-  const wallet = await contract.getDeviceLinkedWallet(fullHash);
+  const wallet = await readContract.getDeviceLinkedWallet(fullHash);
   return wallet;
 }
 
@@ -803,7 +807,7 @@ async function linkDeviceToWallet(deviceHash, walletAddress) {
 // ─── 발행 가능 여부 조회 (교차 쿨다운 포함) ───
 
 async function canClaimTelegram(spotId, telegramHash) {
-  const result = await contract.canClaimTelegram(spotId, '0x' + telegramHash);
+  const result = await readContract.canClaimTelegram(spotId, '0x' + telegramHash);
   return {
     claimable: result.claimable,
     cooldown_remaining: Number(result.cooldownRemaining),
@@ -811,7 +815,7 @@ async function canClaimTelegram(spotId, telegramHash) {
 }
 
 async function canClaimDevice(spotId, deviceHash) {
-  const result = await contract.canClaimDevice(spotId, '0x' + deviceHash);
+  const result = await readContract.canClaimDevice(spotId, '0x' + deviceHash);
   return {
     claimable: result.claimable,
     cooldown_remaining: Number(result.cooldownRemaining),
@@ -827,9 +831,9 @@ async function checkWalletAvailability(walletAddress, requestType, requesterHash
   const fullRequesterHash = '0x' + requesterHash;
 
   if (requestType === 'telegram') {
-    const linkedHash = await contract.getWalletLinkedTelegram(wallet);
+    const linkedHash = await readContract.getWalletLinkedTelegram(wallet);
     if (linkedHash !== ZERO_BYTES32 && linkedHash !== fullRequesterHash) {
-      const balance = await contract.getTelegramBalance(linkedHash);
+      const balance = await readContract.getTelegramBalance(linkedHash);
       if (balance > 0n) {
         return {
           available: false,
@@ -838,7 +842,7 @@ async function checkWalletAvailability(walletAddress, requestType, requesterHash
       }
     }
   } else if (requestType === 'device') {
-    const linkedHash = await contract.getWalletLinkedDevice(wallet);
+    const linkedHash = await readContract.getWalletLinkedDevice(wallet);
     if (linkedHash !== ZERO_BYTES32 && linkedHash !== fullRequesterHash) {
       return {
         available: false,
