@@ -211,6 +211,8 @@ contract TokamonTest is Test {
         assertEq(spot.endDate, 1810000000);
         assertEq(spot.reward, 2 ether);
         assertEq(spot.stampGoal, 10);
+        assertEq(spot.lat, 35_689487, "lat should be updated");
+        assertEq(spot.lng, 139_691711, "lng should be updated");
     }
 
     function test_UpdateSpotNotCreator() public {

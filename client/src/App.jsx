@@ -661,6 +661,9 @@ export default function App() {
             balance={balance}
             onConnectWallet={handleConnect}
             onRedeposited={() => { refreshSpots(); refreshBalance(); }}
+            onSpotUpdated={(spotId, updatedFields) => {
+              setSpots(prev => prev.map(s => s.id === spotId ? { ...s, ...updatedFields } : s));
+            }}
             language={language}
             showToast={showToast}
           />

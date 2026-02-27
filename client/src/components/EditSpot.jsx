@@ -92,7 +92,22 @@ export default function EditSpot({ spot, onUpdated, onCancel, language = 'ko', s
       );
 
       showToast('success', t(language, 'spotUpdateSuccess'));
-      onUpdated();
+      onUpdated({
+        name: form.name.trim(),
+        description: form.description.trim(),
+        lat,
+        lng,
+        start_time: form.start_date ? Math.floor(new Date(form.start_date + 'T00:00:00Z').getTime() / 1000) : 0,
+        end_time: form.end_date ? Math.floor(new Date(form.end_date + 'T23:59:59Z').getTime() / 1000) : 0,
+        daily_start_time: dailyStart,
+        daily_end_time: dailyEnd,
+        utc_offset: utcOffset,
+        reward,
+        stamp_goal: stampGoal,
+        stamp_bonus: stampBonus,
+        cooldown: Number(form.cooldown),
+        allow_duplicate_claims: form.allow_duplicate_claims,
+      });
     } catch (err) {
       showToast('error', err.reason || err.message || t(language, 'spotUpdateFailed'));
     } finally {
