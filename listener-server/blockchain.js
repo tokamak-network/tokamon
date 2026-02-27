@@ -31,6 +31,17 @@ let contract;        // WS contract (이벤트 구독 전용)
 let readContract;    // HTTP contract (읽기 전용)
 let writeContract;   // HTTP signer (트랜잭션 전송)
 
+// 재연결에 필요한 상태
+let contractAddress = null;
+let contractAbi = null;
+let isReconnecting = false;
+let reconnectAttempts = 0;
+let reconnectTimer = null;
+
+const RECONNECT_BASE_MS = 1000;
+const RECONNECT_MAX_MS = 60000;
+const RECONNECT_JITTER = 0.2;
+
 // TelegramClaimed 이벤트 알림 콜백
 let telegramClaimedCallback = null;
 // DeviceClaimed 이벤트 알림 콜백
@@ -130,93 +141,94 @@ function normalizeAddress(value) {
   return /^0x[0-9a-fA-F]{40}$/.test(s) ? s : null;
 }
 
-async function init() {
-  // 컨트랙트 주소 우선순위:
-  // 1. 환경변수 CONTRACT_ADDRESS
-  // 2. contract-address.json 파일
-  // 3. shared/networks.js의 contracts 설정
-  let address = normalizeAddress(process.env.CONTRACT_ADDRESS);
-  let addressData = {};
-  if (!address && fs.existsSync(ADDRESS_PATH)) {
+// ─── 이벤트 핸들러 안전 래퍼 ───
+
+function safeEventHandler(eventName, handler) {
+  return async (...args) => {
     try {
-      addressData = JSON.parse(fs.readFileSync(ADDRESS_PATH, 'utf8'));
-      address = normalizeAddress(addressData.address || addressData.tokamon);
+      await handler(...args);
+    } catch (e) {
+      console.error(`[${eventName}] 이벤트 핸들러 오류:`, e.message);
+    }
+  };
+}
+
+// ─── WebSocket 프로바이더 관리 ───
+
+function createWsProvider() {
+  // 기존 프로바이더/리스너 정리
+  if (provider) {
+    try {
+      provider.removeAllListeners();
+      provider.destroy();
     } catch (_) {}
   }
-  if (!address && networkContracts.tokamon) {
-    address = normalizeAddress(networkContracts.tokamon);
-  }
-  if (!address) {
-    throw new Error(`[${networkId}] 컨트랙트 주소를 찾을 수 없습니다. CONTRACT_ADDRESS 환경변수, contract-address.json, 또는 shared/networks.js에 설정하세요.`);
-  }
 
-  // HTTP provider (읽기 + 트랜잭션 전송)
-  httpProvider = new ethers.JsonRpcProvider(RPC_URL);
-  if (process.env.SIGNER_PRIVATE_KEY) {
-    // 실제 체인: 환경변수로 전달된 개인키로 Wallet 생성
-    signer = new ethers.Wallet(process.env.SIGNER_PRIVATE_KEY, httpProvider);
-    console.log('[Blockchain] Signer (Wallet):', signer.address);
-  } else {
-    // 로컬 Anvil: listAccounts()로 서명자 획득
-    const accounts = await httpProvider.listAccounts();
-    signer = accounts[0];
-    console.log('[Blockchain] Signer (listAccounts):', signer?.address);
-  }
-
-  // 이벤트 구독용 WebSocket provider
   provider = new ethers.WebSocketProvider(WS_URL);
+  contract = new ethers.Contract(contractAddress, contractAbi, provider);
+  attachWsHandlers();
   console.log('[Blockchain] WebSocket 연결:', WS_URL);
+}
 
-  // ABI: 아티팩트 우선, 없으면 최소 ABI
-  let abi;
-  if (fs.existsSync(ARTIFACT_PATH)) {
-    const artifact = JSON.parse(fs.readFileSync(ARTIFACT_PATH, 'utf8'));
-    abi = artifact.abi;
-    console.log('[Blockchain] 아티팩트 ABI 로드');
+function attachWsHandlers() {
+  const ws = provider.websocket;
+  if (ws) {
+    ws.addEventListener('close', (ev) => {
+      console.warn(`[WS] WebSocket 연결 끊김 (code: ${ev?.code || '?'}, reason: ${ev?.reason || 'none'})`);
+      reconnectWsProvider();
+    });
+    ws.addEventListener('error', (err) => {
+      console.error('[WS] WebSocket 에러:', err?.message || err);
+    });
   } else {
-    abi = require('./abi');
-    console.log('[Blockchain] 최소 ABI 사용 (아티팩트 없음)');
+    console.warn('[WS] websocket 직접 접근 불가 — provider error 이벤트 감시');
+    provider.on('error', (err) => {
+      console.error('[WS] 프로바이더 에러:', err?.message || err);
+      reconnectWsProvider();
+    });
   }
+}
 
-  // 이벤트 구독용 (WebSocket)
-  contract = new ethers.Contract(address, abi, provider);
-  // 읽기 전용 (HTTP)
-  readContract = new ethers.Contract(address, abi, httpProvider);
-  // 트랜잭션 전송용 (HTTP signer)
-  writeContract = new ethers.Contract(address, abi, signer);
-  console.log('[Blockchain] 연결 완료:', address, '(WS 구독 + HTTP 읽기/트랜잭션)');
+async function reconnectWsProvider() {
+  if (isReconnecting) return;
+  isReconnecting = true;
 
-  // 메타데이터 로드 (로컬 파일 → Firestore 폴백)
-  loadMetadata();
-  if (Object.keys(spotMetadata).length > 0) rebuildGeoIndex();
-  if (Object.keys(spotMetadata).length === 0 && db) {
-    console.log('[복원] 로컬 캐시 없음 → Firestore에서 spot_metadata 복원 중...');
-    try {
-      const snap = await db.collection(col('spot_metadata')).get();
-      let count = 0;
-      snap.docs.forEach((doc) => {
-        const data = doc.data();
-        const id = Number(doc.id);
-        if (id != null && data.reward > 0) {
-          spotMetadata[id] = { ...data, id };
-          count++;
-        }
-      });
-      if (count > 0) {
-        saveMetadata();
-        rebuildGeoIndex();
-        console.log(`[복원] Firestore에서 ${count}개 스팟 복원 완료`);
-      } else {
-        console.log('[복원] Firestore에 스팟 데이터 없음');
+  const baseDelay = Math.min(RECONNECT_BASE_MS * Math.pow(2, reconnectAttempts), RECONNECT_MAX_MS);
+  const jitter = baseDelay * RECONNECT_JITTER * (Math.random() * 2 - 1);
+  const delay = Math.max(0, Math.round(baseDelay + jitter));
+
+  reconnectAttempts++;
+  console.log(`[WS 재연결] ${reconnectAttempts}번째 시도, ${delay}ms 후...`);
+
+  reconnectTimer = setTimeout(() => {
+    (async () => {
+      try {
+        createWsProvider();
+
+        // 연결 확인 (getBlockNumber가 성공하면 WS 정상)
+        await provider.getBlockNumber();
+
+        console.log(`[WS 재연결] 성공 (${reconnectAttempts}번째 시도)`);
+        reconnectAttempts = 0;
+        isReconnecting = false;
+
+        // 이벤트 리스너 재등록
+        registerEventListeners();
+
+        // 놓친 이벤트 복구
+        await recoverMissedEvents();
+      } catch (e) {
+        console.error(`[WS 재연결] 실패: ${e.message}`);
+        isReconnecting = false;
+        reconnectWsProvider();
       }
-    } catch (e) {
-      console.error('[복원] Firestore 복원 실패:', e.message);
-    }
-  }
+    })();
+  }, delay);
+}
 
-  // 놓친 이벤트 복구: 마지막 처리 블록 이후의 이벤트를 스캔
+async function recoverMissedEvents() {
   const lastBlock = loadLastBlock();
-  const currentBlock = await provider.getBlockNumber();
+  const currentBlock = await httpProvider.getBlockNumber();
   if (lastBlock > 0 && lastBlock < currentBlock) {
     console.log(`[복구] 블록 ${lastBlock + 1} ~ ${currentBlock} 사이의 놓친 이벤트 스캔 중...`);
     try {
@@ -252,10 +264,16 @@ async function init() {
     }
   }
   saveLastBlock(currentBlock);
+}
 
-  // 이벤트 구독 (실시간) — 블록 번호도 함께 저장
+// ─── 이벤트 리스너 등록 ───
+
+function registerEventListeners() {
+  // 기존 리스너 제거 (재연결 시 중복 방지)
+  contract.removeAllListeners();
+
   console.log('[이벤트 등록] SpotCreated 리스너 등록');
-  contract.on('SpotCreated', async (spotId, creator, reward, deposit, name, description, lat, lng, ev) => {
+  contract.on('SpotCreated', safeEventHandler('SpotCreated', async (spotId, creator, reward, deposit, name, description, lat, lng, ev) => {
     const id = Number(spotId);
     const blockNum = ev?.log?.blockNumber ?? '?';
     console.log(`[이벤트 수신] SpotCreated | spotId=${id} creator=${String(creator).slice(0,10)}... reward=${fromWei(reward)} deposit=${fromWei(deposit)} name="${name}" block=${blockNum}`);
@@ -268,10 +286,10 @@ async function init() {
       await syncSpotToFirestore(id, meta);
     }
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
-  });
+  }));
 
   console.log('[이벤트 등록] SpotUpdated 리스너 등록');
-  contract.on('SpotUpdated', async (spotId, ev) => {
+  contract.on('SpotUpdated', safeEventHandler('SpotUpdated', async (spotId, ev) => {
     const id = Number(spotId);
     const blockNum = ev?.log?.blockNumber ?? '?';
     console.log(`[이벤트 수신] SpotUpdated | spotId=${id} block=${blockNum}`);
@@ -286,10 +304,10 @@ async function init() {
       await syncSpotToFirestore(id, meta);
     }
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
-  });
+  }));
 
   console.log('[이벤트 등록] Redeposited 리스너 등록');
-  contract.on('Redeposited', async (spotId, creator, amount, ev) => {
+  contract.on('Redeposited', safeEventHandler('Redeposited', async (spotId, creator, amount, ev) => {
     const id = Number(spotId);
     const blockNum = ev?.log?.blockNumber ?? '?';
     console.log(`[이벤트 수신] Redeposited | spotId=${id} creator=${String(creator).slice(0,10)}... amount=${fromWei(amount)} block=${blockNum}`);
@@ -302,10 +320,10 @@ async function init() {
       await syncSpotToFirestore(id, meta);
     }
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
-  });
+  }));
 
   console.log('[이벤트 등록] CooldownUpdated 리스너 등록');
-  contract.on('CooldownUpdated', async (spotId, newCooldown, ev) => {
+  contract.on('CooldownUpdated', safeEventHandler('CooldownUpdated', async (spotId, newCooldown, ev) => {
     const id = Number(spotId);
     const blockNum = ev?.log?.blockNumber ?? '?';
     console.log(`[이벤트 수신] CooldownUpdated | spotId=${id} cooldown=${Number(newCooldown)} block=${blockNum}`);
@@ -318,10 +336,10 @@ async function init() {
       await syncSpotToFirestore(id, meta);
     }
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
-  });
+  }));
 
   console.log('[이벤트 등록] AllowDuplicateClaimsUpdated 리스너 등록');
-  contract.on('AllowDuplicateClaimsUpdated', async (spotId, allow, ev) => {
+  contract.on('AllowDuplicateClaimsUpdated', safeEventHandler('AllowDuplicateClaimsUpdated', async (spotId, allow, ev) => {
     const id = Number(spotId);
     const blockNum = ev?.log?.blockNumber ?? '?';
     console.log(`[이벤트 수신] AllowDuplicateClaimsUpdated | spotId=${id} allow=${allow} block=${blockNum}`);
@@ -334,10 +352,10 @@ async function init() {
       await syncSpotToFirestore(id, meta);
     }
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
-  });
+  }));
 
   console.log('[이벤트 등록] TelegramClaimed 리스너 등록');
-  contract.on('TelegramClaimed', async (spotId, telegramHash, reward, bonus, stamp, timestamp, ev) => {
+  contract.on('TelegramClaimed', safeEventHandler('TelegramClaimed', async (spotId, telegramHash, reward, bonus, stamp, timestamp, ev) => {
     const id = Number(spotId);
     const hashHex = telegramHash.slice(2); // 0x 제거
     const blockNum = ev?.log?.blockNumber ?? '?';
@@ -394,10 +412,10 @@ async function init() {
       }
     }
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
-  });
+  }));
 
   console.log('[이벤트 등록] DeviceClaimed 리스너 등록');
-  contract.on('DeviceClaimed', async (spotId, deviceHash, reward, bonus, stamp, timestamp, ev) => {
+  contract.on('DeviceClaimed', safeEventHandler('DeviceClaimed', async (spotId, deviceHash, reward, bonus, stamp, timestamp, ev) => {
     const id = Number(spotId);
     const hashHex = deviceHash.slice(2);
     const blockNum = ev?.log?.blockNumber ?? '?';
@@ -436,26 +454,26 @@ async function init() {
       }
     }
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
-  });
+  }));
 
   console.log('[이벤트 등록] DeviceLinked 리스너 등록');
-  contract.on('DeviceLinked', async (deviceHash, oldWallet, newWallet, ev) => {
+  contract.on('DeviceLinked', safeEventHandler('DeviceLinked', async (deviceHash, oldWallet, newWallet, ev) => {
     const hashHex = deviceHash.slice(2);
     const blockNum = ev?.log?.blockNumber ?? '?';
     console.log(`[이벤트 수신] DeviceLinked | hash=${hashHex.slice(0,10)}... wallet=${String(newWallet).slice(0,10)}... oldWallet=${String(oldWallet).slice(0,10)}... block=${blockNum}`);
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
-  });
+  }));
 
   console.log('[이벤트 등록] DeviceUnlinked 리스너 등록');
-  contract.on('DeviceUnlinked', async (deviceHash, wallet, ev) => {
+  contract.on('DeviceUnlinked', safeEventHandler('DeviceUnlinked', async (deviceHash, wallet, ev) => {
     const hashHex = deviceHash.slice(2);
     const blockNum = ev?.log?.blockNumber ?? '?';
     console.log(`[이벤트 수신] DeviceUnlinked | hash=${hashHex.slice(0,10)}... wallet=${String(wallet).slice(0,10)}... block=${blockNum}`);
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
-  });
+  }));
 
   console.log('[이벤트 등록] TelegramWithdrawn 리스너 등록');
-  contract.on('TelegramWithdrawn', async (telegramHash, wallet, amount, ev) => {
+  contract.on('TelegramWithdrawn', safeEventHandler('TelegramWithdrawn', async (telegramHash, wallet, amount, ev) => {
     const hashHex = telegramHash.slice(2);
     const blockNum = ev?.log?.blockNumber ?? '?';
     console.log(`[이벤트 수신] TelegramWithdrawn | hash=${hashHex.slice(0,10)}... wallet=${String(wallet).slice(0,10)}... amount=${fromWei(amount)} block=${blockNum}`);
@@ -467,20 +485,20 @@ async function init() {
       console.error('[TelegramWithdrawn] 잔액 동기화 실패:', e.message);
     }
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
-  });
+  }));
 
   console.log('[이벤트 등록] TelegramLinked 리스너 등록');
-  contract.on('TelegramLinked', async (telegramHash, oldWallet, newWallet, transferredAmount, ev) => {
+  contract.on('TelegramLinked', safeEventHandler('TelegramLinked', async (telegramHash, oldWallet, newWallet, transferredAmount, ev) => {
     const hashHex = telegramHash.slice(2);
     const blockNum = ev?.log?.blockNumber ?? '?';
     console.log(`[이벤트 수신] TelegramLinked | hash=${hashHex.slice(0,10)}... wallet=${String(newWallet).slice(0,10)}... block=${blockNum}`);
     // Firestore에 지갑-텔레그램 연결 저장
     await saveWalletTelegramLink(String(newWallet), hashHex);
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
-  });
+  }));
 
   console.log('[이벤트 등록] DeviceWithdrawn 리스너 등록');
-  contract.on('DeviceWithdrawn', async (deviceHash, wallet, amount, ev) => {
+  contract.on('DeviceWithdrawn', safeEventHandler('DeviceWithdrawn', async (deviceHash, wallet, amount, ev) => {
     const hashHex = deviceHash.slice(2);
     const blockNum = ev?.log?.blockNumber ?? '?';
     console.log(`[이벤트 수신] DeviceWithdrawn | hash=${hashHex.slice(0,10)}... wallet=${String(wallet).slice(0,10)}... amount=${fromWei(amount)} block=${blockNum}`);
@@ -492,9 +510,117 @@ async function init() {
       console.error('[DeviceWithdrawn] 잔액 동기화 실패:', e.message);
     }
     if (ev && ev.log && ev.log.blockNumber) saveLastBlock(ev.log.blockNumber);
-  });
+  }));
 
   console.log('[이벤트 등록 완료] 12개 이벤트 리스너 등록됨');
+}
+
+// ─── 초기화 ───
+
+async function init() {
+  // 기존 리스너/프로바이더 정리 (재초기화 시 안전)
+  if (provider) {
+    try {
+      provider.removeAllListeners();
+      provider.destroy();
+    } catch (_) {}
+  }
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+  isReconnecting = false;
+  reconnectAttempts = 0;
+
+  // 컨트랙트 주소 우선순위:
+  // 1. 환경변수 CONTRACT_ADDRESS
+  // 2. contract-address.json 파일
+  // 3. shared/networks.js의 contracts 설정
+  let address = normalizeAddress(process.env.CONTRACT_ADDRESS);
+  let addressData = {};
+  if (!address && fs.existsSync(ADDRESS_PATH)) {
+    try {
+      addressData = JSON.parse(fs.readFileSync(ADDRESS_PATH, 'utf8'));
+      address = normalizeAddress(addressData.address || addressData.tokamon);
+    } catch (_) {}
+  }
+  if (!address && networkContracts.tokamon) {
+    address = normalizeAddress(networkContracts.tokamon);
+  }
+  if (!address) {
+    throw new Error(`[${networkId}] 컨트랙트 주소를 찾을 수 없습니다. CONTRACT_ADDRESS 환경변수, contract-address.json, 또는 shared/networks.js에 설정하세요.`);
+  }
+
+  // HTTP provider (읽기 + 트랜잭션 전송)
+  httpProvider = new ethers.JsonRpcProvider(RPC_URL);
+  if (process.env.SIGNER_PRIVATE_KEY) {
+    // 실제 체인: 환경변수로 전달된 개인키로 Wallet 생성
+    signer = new ethers.Wallet(process.env.SIGNER_PRIVATE_KEY, httpProvider);
+    console.log('[Blockchain] Signer (Wallet):', signer.address);
+  } else {
+    // 로컬 Anvil: listAccounts()로 서명자 획득
+    const accounts = await httpProvider.listAccounts();
+    signer = accounts[0];
+    console.log('[Blockchain] Signer (listAccounts):', signer?.address);
+  }
+
+  // ABI: 아티팩트 우선, 없으면 최소 ABI
+  let abi;
+  if (fs.existsSync(ARTIFACT_PATH)) {
+    const artifact = JSON.parse(fs.readFileSync(ARTIFACT_PATH, 'utf8'));
+    abi = artifact.abi;
+    console.log('[Blockchain] 아티팩트 ABI 로드');
+  } else {
+    abi = require('./abi');
+    console.log('[Blockchain] 최소 ABI 사용 (아티팩트 없음)');
+  }
+
+  // 재연결에 필요한 정보 저장
+  contractAddress = address;
+  contractAbi = abi;
+
+  // 이벤트 구독용 WebSocket provider (+ 핸들러 연결)
+  createWsProvider();
+
+  // 읽기 전용 (HTTP)
+  readContract = new ethers.Contract(address, abi, httpProvider);
+  // 트랜잭션 전송용 (HTTP signer)
+  writeContract = new ethers.Contract(address, abi, signer);
+  console.log('[Blockchain] 연결 완료:', address, '(WS 구독 + HTTP 읽기/트랜잭션)');
+
+  // 메타데이터 로드 (로컬 파일 → Firestore 폴백)
+  loadMetadata();
+  if (Object.keys(spotMetadata).length > 0) rebuildGeoIndex();
+  if (Object.keys(spotMetadata).length === 0 && db) {
+    console.log('[복원] 로컬 캐시 없음 → Firestore에서 spot_metadata 복원 중...');
+    try {
+      const snap = await db.collection(col('spot_metadata')).get();
+      let count = 0;
+      snap.docs.forEach((doc) => {
+        const data = doc.data();
+        const id = Number(doc.id);
+        if (id != null && data.reward > 0) {
+          spotMetadata[id] = { ...data, id };
+          count++;
+        }
+      });
+      if (count > 0) {
+        saveMetadata();
+        rebuildGeoIndex();
+        console.log(`[복원] Firestore에서 ${count}개 스팟 복원 완료`);
+      } else {
+        console.log('[복원] Firestore에 스팟 데이터 없음');
+      }
+    } catch (e) {
+      console.error('[복원] Firestore 복원 실패:', e.message);
+    }
+  }
+
+  // 놓친 이벤트 복구
+  await recoverMissedEvents();
+
+  // 이벤트 구독 (실시간)
+  registerEventListeners();
 }
 
 // ─── 컨트랙트 조회 함수들 ───
@@ -861,6 +987,64 @@ async function updateAllowDuplicateClaims(spotId, allow) {
   await tx.wait();
 }
 
+// ─── 헬스체크 / 상태 조회 ───
+
+function getProviderStatus() {
+  let wsStatus = 'disconnected';
+  if (provider) {
+    try {
+      const ws = provider.websocket;
+      if (ws) {
+        // WebSocket readyState: 0=CONNECTING, 1=OPEN, 2=CLOSING, 3=CLOSED
+        const states = ['connecting', 'connected', 'closing', 'closed'];
+        wsStatus = states[ws.readyState] || 'unknown';
+      } else {
+        wsStatus = 'unknown';
+      }
+    } catch (_) {
+      wsStatus = 'error';
+    }
+  }
+
+  return {
+    ws: wsStatus,
+    http: httpProvider ? 'initialized' : 'not_initialized',
+    isReconnecting,
+    reconnectAttempts,
+    contractAddress,
+  };
+}
+
+async function getBlockNumber() {
+  return await httpProvider.getBlockNumber();
+}
+
+// ─── Graceful Shutdown ───
+
+async function destroy() {
+  console.log('[Blockchain] 프로바이더 정리 중...');
+
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+  isReconnecting = false;
+
+  if (contract) {
+    try { contract.removeAllListeners(); } catch (_) {}
+  }
+  if (provider) {
+    try { provider.destroy(); } catch (_) {}
+    provider = null;
+  }
+  if (httpProvider) {
+    try { httpProvider.destroy(); } catch (_) {}
+    httpProvider = null;
+  }
+
+  console.log('[Blockchain] 프로바이더 정리 완료');
+}
+
 module.exports = {
   init,
   onTelegramClaimed,
@@ -889,4 +1073,7 @@ module.exports = {
   canClaimDevice,
   checkWalletAvailability,
   updateAllowDuplicateClaims,
+  getProviderStatus,
+  getBlockNumber,
+  destroy,
 };
