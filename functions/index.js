@@ -271,7 +271,7 @@ function expandGeoHashPrefixes(lat, lng, precision) {
 // ─── 인메모리 스팟 캐시 (30초 TTL) ───
 
 const spotsCacheByNetwork = {};  // { networkId: { spots: [...], geoIndex: {...}, fetchedAt: timestamp } }
-const SPOTS_CACHE_TTL_MS = 30 * 1000;
+const SPOTS_CACHE_TTL_MS = 5 * 60 * 1000; // 5분 (스팟 데이터는 자주 변경되지 않음)
 
 async function getCachedSpots(req) {
   const networkId = req.networkId;
