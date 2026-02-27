@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image } from 'react-native';
+import { Platform } from 'react-native';
 import { Marker } from 'react-native-maps';
 
 const markerBlue = require('../../assets/marker-blue.png');
@@ -10,15 +10,11 @@ export default function SpotMarker({ spot, selectedSpotId, onPress }) {
 
   return (
     <Marker
+      identifier={String(spot.id)}
       coordinate={{ latitude: spot.lat, longitude: spot.lng }}
+      image={isSelected ? markerGreen : markerBlue}
       onPress={() => onPress(spot)}
       anchor={{ x: 0.5, y: 0.5 }}
-    >
-      <Image
-        source={isSelected ? markerGreen : markerBlue}
-        style={{ width: 36, height: 36 }}
-        resizeMode="contain"
-      />
-    </Marker>
+    />
   );
 }

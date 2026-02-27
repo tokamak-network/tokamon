@@ -98,6 +98,7 @@ gcloud functions logs read api --project tokamon-go --limit 30
 | `TELEGRAM_HASH_SALT` | Secret Manager | 텔레그램 ID 해싱 솔트 |
 | `DEVICE_HASH_SALT` | Secret Manager | 디바이스 ID 해싱 솔트 |
 | `SIGNER_PRIVATE_KEY` | Secret Manager | claimManager 개인키 |
+| `FAUCET_PRIVATE_KEY` | Secret Manager | Faucet 지급용 지갑 개인키 (없으면 Anvil 기본키 fallback) |
 
 ### 재배포 (Docker 수동 빌드)
 
@@ -163,6 +164,19 @@ curl -s -o /dev/null -w "%{http_code}" -X POST \
 # 200이면 정상
 ```
 
+### Faucet 관련 변경 (v697e290)
+
+Faucet이 15 TON / 1일 1회 제한으로 변경됨. 배포 시 `SPOT_CREATER_PRIVATE_KEY`가 Cloud Run에 등록되어 있어야 함.
+
+```bash
+# SPOT_CREATER_PRIVATE_KEY 등록 (최초 1회)
+gcloud run services update listener-server \
+  --region asia-northeast3 --project tokamon-go \
+  --update-env-vars "FAUCET_PRIVATE_KEY=0x실제비밀키"
+```
+
+> 이 키가 없으면 Anvil 기본키로 fallback되므로 테스트넷/메인넷에서는 반드시 설정 필요.
+
 ### 환경변수 업데이트
 
 ```bash
@@ -210,17 +224,65 @@ npm run android
 ```bash
 cd app
 
-# iOS 빌드
-eas build --platform ios
+# Android APK (테스트용)
+eas build --platform android --profile preview
 
-# Android 빌드
-eas build --platform android
+# Android AAB (스토어 배포용)
+eas build --platform android --profile production
 
-# 프로파일 지정
-eas build --platform ios --profile preview
+# iOS (TestFlight/App Store)
+eas build --platform ios --profile production
+
+# iOS 제출 (TestFlight)
+eas submit --platform ios
 ```
 
 설정: `app/eas.json`
+
+### 환경변수
+
+환경변수는 **EAS Secret Manager**로 관리합니다 (`eas.json`에 하드코딩하지 않음).
+
+```bash
+# 등록된 시크릿 확인
+eas env:list --environment production --non-interactive
+
+# 시크릿 추가/수정
+eas env:create --name EXPO_PUBLIC_변수명 --value "값" \
+  --scope project --type string --visibility sensitive \
+  --environment production --environment preview --environment development \
+  --force --non-interactive
+```
+
+| 변수 | 설명 |
+|------|------|
+| `EXPO_PUBLIC_API_BASE` | Firebase Functions API URL |
+| `EXPO_PUBLIC_LISTENER_URL_THANOS_SEPOLIA` | 리스너 서버 URL |
+| `EXPO_PUBLIC_FIREBASE_API_KEY` | Firebase API 키 |
+| `EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase Auth 도메인 |
+| `EXPO_PUBLIC_FIREBASE_PROJECT_ID` | Firebase 프로젝트 ID |
+| `EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET` | Firebase Storage 버킷 |
+| `EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | FCM 발신자 ID |
+| `EXPO_PUBLIC_FIREBASE_APP_ID_ANDROID` | Firebase Android 앱 ID |
+| `EXPO_PUBLIC_FIREBASE_APP_ID_IOS` | Firebase iOS 앱 ID |
+| `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps API 키 |
+
+> 로컬 개발 시에는 `app/.env` 파일을 사용합니다 (git에 미포함).
+
+### Google Cloud Console API 키 제한
+
+| 플랫폼 | 제한 유형 | 등록 항목 |
+|--------|----------|----------|
+| Android | Android 앱 | 패키지: `io.tokamak.tokamon` + SHA-1 지문 |
+| iOS | iOS 앱 | 번들 ID: `io.tokamak.tokamon` |
+
+EAS 키스토어 SHA 지문 확인:
+```bash
+# EAS GraphQL API로 조회
+# sha1CertificateFingerprint, sha256CertificateFingerprint 확인
+```
+
+Firebase Console에도 동일한 SHA 지문을 등록해야 합니다.
 
 ---
 

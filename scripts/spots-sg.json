@@ -1,0 +1,1964 @@
+[
+  {
+    "name": "Starbucks",
+    "lat": 1.4479064,
+    "lng": 103.8194535,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Sun Plaza, 30 Sembawang Drive,"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3388938,
+    "lng": 103.705622,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Jurong West Central 3 #03-52/52A Jurong Point"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3064544,
+    "lng": 103.8324156,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Pacific Plaza"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3055489,
+    "lng": 103.7728511,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "College Avenue West"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3019206,
+    "lng": 103.849799,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Wilkie Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3095202,
+    "lng": 103.7769601,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Dover Road, Food Court 5,"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2826991,
+    "lng": 103.8653995,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #7"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.306993,
+    "lng": 103.828628,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #8"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.4352133,
+    "lng": 103.7868133,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "South Woodlands Drive"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3799583,
+    "lng": 103.7641858,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #10"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.4608373,
+    "lng": 103.7641027,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Jalan Wong Ah Fook"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2775874,
+    "lng": 103.8472839,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Robinson Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.256334,
+    "lng": 103.820019,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Sentosa Gateway, Universal Studios Singapore"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3129222,
+    "lng": 103.9254991,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Jalan Jamal"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.4173197,
+    "lng": 103.6570579,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #15"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2887385,
+    "lng": 103.846844,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Eu Tong Sen Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2888107,
+    "lng": 103.8052495,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "370 Alexandra Road, Anchorpoint Shopping Centre,"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3015253,
+    "lng": 103.8569123,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "North Bridge Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3054958,
+    "lng": 103.7877447,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Rochester Park"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2811501,
+    "lng": 103.8510261,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Raffles Quay"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2781237,
+    "lng": 103.8504885,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Marina View"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.403653,
+    "lng": 103.7904212,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Mandai Lake Road, River Safari"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3613131,
+    "lng": 103.9904139,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #23"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3469027,
+    "lng": 103.6801219,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Nanyang Drive"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3631363,
+    "lng": 103.7645182,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Hillview Rise"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.332626,
+    "lng": 103.8488573,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Lorong 6 Toa Payoh #01-14, Singapore"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2900978,
+    "lng": 103.8497951,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "North Bridge Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2895616,
+    "lng": 103.7900452,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #28"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.4647725,
+    "lng": 103.7266087,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #29"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3011829,
+    "lng": 103.8367385,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Grange Road, #01-K1 Cathay Cineleisure Orchard"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2921569,
+    "lng": 103.8556952,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "One Raffles Link"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3049283,
+    "lng": 103.8233479,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Tanglin Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2807203,
+    "lng": 103.8539014,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Marina Boulevard #B2-38-36"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2551352,
+    "lng": 103.8177459,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #34"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2745103,
+    "lng": 103.8002586,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Pasir Panjang Road Mapletree Business City #02-11"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3031953,
+    "lng": 103.7919503,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #36"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3059696,
+    "lng": 103.7911477,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #37"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.4638868,
+    "lng": 103.7643476,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #38"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.4629145,
+    "lng": 103.7636063,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #39"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2871106,
+    "lng": 103.8534479,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #40"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.315193,
+    "lng": 103.8944083,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Tanjong Katong Road, #01-17/18/19"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3783787,
+    "lng": 103.7627101,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Hillion Mall"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3236266,
+    "lng": 103.8103227,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Starbucks"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2850987,
+    "lng": 103.8498255,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Chulia Street #01-01A/01B OCBC Centre East"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2994608,
+    "lng": 103.8559052,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #45"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.392511,
+    "lng": 103.8949358,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Compass One"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3550914,
+    "lng": 103.8308803,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Upper Thomson Road #01-37A Thomson Plaza"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3537896,
+    "lng": 103.9408874,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Tampines Walk, Our Tampines Hub #01-104,"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2930473,
+    "lng": 103.8265922,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #49"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.4389669,
+    "lng": 103.6205176,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #50"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.4397502,
+    "lng": 103.8005986,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Woodlands Drive 71, Kampung Admiralty #01-02,"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2999537,
+    "lng": 103.854232,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Victoria Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3014082,
+    "lng": 103.8625581,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Beach Road 1st Storey Lobby The Concourse"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3038293,
+    "lng": 103.8330336,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Wisma Atria"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3048264,
+    "lng": 103.8311189,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Wheelock Place"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3112036,
+    "lng": 103.8562706,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #56"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3025112,
+    "lng": 103.8732904,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Stadium Place, #01-56, Kallang Wave Mall"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.302524,
+    "lng": 103.8765891,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #58"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.4066115,
+    "lng": 103.901858,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Waterway Point, 83 Punggol Central"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3824843,
+    "lng": 103.8934942,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #60"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3690938,
+    "lng": 103.8484354,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Ang Mo Kio Avenue 3"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2992866,
+    "lng": 103.7874709,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Fusionopolis Way"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2861428,
+    "lng": 103.8273642,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #63"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3773576,
+    "lng": 103.9548827,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #64"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3506075,
+    "lng": 103.8722546,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #65"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3723972,
+    "lng": 103.8938773,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #66"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.264123,
+    "lng": 103.8221774,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #67"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2856199,
+    "lng": 103.8540183,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Fullerton Road #01-04 One Fullerton"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.317659,
+    "lng": 103.8439745,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #69"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.291003,
+    "lng": 103.8579544,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Raffles Boulevard #03-217/218 Marina Square"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2646464,
+    "lng": 103.8201783,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Maritime Square"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2992591,
+    "lng": 103.8476369,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #72"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2848443,
+    "lng": 103.8444781,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #73"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2752687,
+    "lng": 103.8456235,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Anson Road, #01-02"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3569102,
+    "lng": 103.9871906,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Airport Boulevard, #02-90, Departure Hall Level 2,"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3009103,
+    "lng": 103.838409,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Orchard Road, 313@somerset #02-38/39"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2745484,
+    "lng": 103.8435243,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Tras Street #01-05, 100 AM"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2732494,
+    "lng": 103.8447961,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Shenton Way, #01-02"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.352277,
+    "lng": 103.9877526,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Departure / Check-in Hall South, #026-049 Terminal 2 Singapore Changi Airport"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3415078,
+    "lng": 103.9848947,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Departure / Check-in Hall,Terminal 4 Singapore Changi Airport"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3097673,
+    "lng": 103.8637868,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Kallang Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3250076,
+    "lng": 103.9298477,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "New Upper Changi Road Bedok Mall,"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3496782,
+    "lng": 103.8507959,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Bishan Street 13"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3015983,
+    "lng": 103.8397874,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Orchard Road, Centrepoint"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3407188,
+    "lng": 103.9495468,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Simei Street 3, Level 1 Main Atrium, Changi General Hospital"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2813676,
+    "lng": 103.8496217,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Robinson Road #01-02 City House"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3154547,
+    "lng": 103.7645495,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Commonwealth Avenue West"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2788091,
+    "lng": 103.8545563,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "12 Marina Boulevard, Marina Bay Financial Centre Tower 3"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2932909,
+    "lng": 103.832185,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "1 Kim Seng Promenade, Great World City"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3424219,
+    "lng": 103.9531489,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "3 Simei Street 6"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2855822,
+    "lng": 103.8601111,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Bayfront Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.277217,
+    "lng": 103.8523142,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "5 Straits View, Marina One (West Tower),"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3176846,
+    "lng": 103.7858876,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "293 Holland Road, Jelita Shopping Center"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3042916,
+    "lng": 103.8315893,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "238 Orchard Blvd, ION Orchard"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3841755,
+    "lng": 103.7448019,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "2 Choa Chu Kang Loop, Keart Hong Community Club"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3325334,
+    "lng": 103.7465924,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Jurong East Street 21 #02-08 Ng Teng Fong General Hospital Tower A"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3218524,
+    "lng": 103.8441069,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Irrawaddy Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3336388,
+    "lng": 103.7431812,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Jurong Gateway Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3003536,
+    "lng": 103.8397587,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Orchard Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3196911,
+    "lng": 103.844261,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Thomson Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2829483,
+    "lng": 103.851908,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Collyer Quay, #B1-07 Ocean Financial Centre"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2860675,
+    "lng": 103.8477685,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "George Street #01-02"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.4026727,
+    "lng": 103.9132146,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Punngol Drive, Oasis Terraces, #02-35"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3913556,
+    "lng": 103.8759647,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Sengkang West Avenue"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3172794,
+    "lng": 103.8931861,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Paya Lebar Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2946412,
+    "lng": 103.8558511,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Beach Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3034077,
+    "lng": 103.8357929,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Orchard Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.329055,
+    "lng": 103.7753387,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Clementi Road, Singapore Institute of Management, Block C Unit C.1.07"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2844628,
+    "lng": 103.851882,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Raffles Place"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2832693,
+    "lng": 103.8507296,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Raffles Place #01-15/16 Republic Plaza"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2935204,
+    "lng": 103.8569179,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Temasek Boulevard #02-393/394 Suntec Convention Centre"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2956705,
+    "lng": 103.8594291,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Temasek Boulevard, #02-613/614, Suntec City Mall"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3521425,
+    "lng": 103.9446943,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Tampines Central 5, #01-50,"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2945843,
+    "lng": 103.8578336,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Temasek Boulevard #01-433 Suntec City Mall"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2767691,
+    "lng": 103.8450443,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Wallich Street #01-08 Tanjong Pagar Centre"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3488728,
+    "lng": 103.9356299,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Tampines Ave 3, #01-09"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2928688,
+    "lng": 103.8428591,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Clemenceau Ave #01-31 UE Square"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3310965,
+    "lng": 103.8685581,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Upper Serangoon Road, #01-02 The Poiz Centre"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3338059,
+    "lng": 103.7426654,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Gateway Drive, #02-04/04A"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3271799,
+    "lng": 103.8468453,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Ah Hood Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.303291,
+    "lng": 103.7655737,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "West Coast Rd, #01-01"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3723298,
+    "lng": 103.9494873,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Pasir Ris Central Street 3"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3020216,
+    "lng": 103.9052702,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Marine Parade Road #01-10A/B Parkway Parade"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2559332,
+    "lng": 103.8217332,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #124"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2998912,
+    "lng": 103.8450289,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #125"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.298907,
+    "lng": 103.9067174,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "East Coast Parkway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.4294131,
+    "lng": 103.8357397,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Northpoint City"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3051487,
+    "lng": 103.8511766,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #128"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3015345,
+    "lng": 103.8376402,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #129"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3499505,
+    "lng": 103.7492933,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "West Mall"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2978334,
+    "lng": 103.7715256,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #131"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.4433644,
+    "lng": 103.8303872,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Canberra Plaza"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2960529,
+    "lng": 103.7799816,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #133"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3051395,
+    "lng": 103.9043997,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #134"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2779054,
+    "lng": 103.8354616,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #135"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3342567,
+    "lng": 103.9628834,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #136"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2977972,
+    "lng": 103.8500357,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #137"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3021938,
+    "lng": 103.8348838,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #138"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2935431,
+    "lng": 103.8534409,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "North Bridge Road Raffles City"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.4619738,
+    "lng": 103.7635034,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #140"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3434456,
+    "lng": 103.7219904,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #141"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2835624,
+    "lng": 103.8504519,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #142"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3385846,
+    "lng": 103.8714587,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "The Woodleigh Mall"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2893337,
+    "lng": 103.8367052,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Havelock Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.1541362,
+    "lng": 103.9975116,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #145"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2974144,
+    "lng": 103.8496633,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #146"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3111559,
+    "lng": 103.7939606,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #147"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3972546,
+    "lng": 103.6315257,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Jalan Medini Selatan 1"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2543718,
+    "lng": 103.8190757,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Sensoryscape"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3577974,
+    "lng": 103.768052,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Upper Bukit Timah Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2985259,
+    "lng": 103.8588379,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #151"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3658605,
+    "lng": 103.750049,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Bukit Batok West Avenue 7"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.4152421,
+    "lng": 103.9102924,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore #153"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.2824884,
+    "lng": 103.8439733,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Smith Street"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.29,
+    "lng": 103.86,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Marina Square II"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.36,
+    "lng": 103.76,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Hillv2"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.33,
+    "lng": 103.78,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "SIM - clementi centre"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.29,
+    "lng": 103.83,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Tiong Bahru Plaza"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.31,
+    "lng": 103.83,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Delfi Orchard"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.29,
+    "lng": 103.78,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "NUS Yong Loo Lin School of Medicine"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.35,
+    "lng": 103.94,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Tampines West CC"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3,
+    "lng": 103.86,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Raffles Hospital"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.26,
+    "lng": 103.82,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Vivo City 2 - 1 st Floor"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.28,
+    "lng": 103.85,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore Land Tower"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3,
+    "lng": 103.79,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Biopolis"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.29,
+    "lng": 103.8,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Anchor Point"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.32,
+    "lng": 103.93,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Bedok Point"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.33,
+    "lng": 103.74,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "J Cube"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.41,
+    "lng": 103.9,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Waterway Point"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3,
+    "lng": 103.83,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Wheelock Place B1"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.44,
+    "lng": 103.79,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Woodlands Civic Centre"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.32,
+    "lng": 103.84,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Mount Elizabeth, Novena"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.43,
+    "lng": 103.84,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Northpoint City"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3,
+    "lng": 103.82,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Tanglin Mall"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.34,
+    "lng": 103.95,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Eastpoint Mall L1"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.32,
+    "lng": 103.89,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "ONE KM"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3,
+    "lng": 103.84,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Orchard Gateway"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.33,
+    "lng": 103.96,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Changi City Point"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.29,
+    "lng": 103.79,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Cintech 4"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.31,
+    "lng": 103.77,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "University Town- NUS"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.31,
+    "lng": 103.79,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Rochester Park"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3,
+    "lng": 103.77,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "West Coast Plaza"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.33,
+    "lng": 103.85,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Toa Payoh HDB Hub"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.36,
+    "lng": 103.99,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Changi AP Terminal 3 Basement 2"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.33,
+    "lng": 103.93,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Bedok Mall"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.29,
+    "lng": 103.85,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Raffles City Singapore"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.31,
+    "lng": 103.76,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Clementi Mall"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.35,
+    "lng": 103.87,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "NEX"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.31,
+    "lng": 103.86,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "City Square Mall Singapore"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.34,
+    "lng": 103.71,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Jurong Point - Level 3"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.31,
+    "lng": 103.93,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "3 Jalan Jamal"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.28,
+    "lng": 103.84,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore General Hospital blk 4"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.35,
+    "lng": 103.68,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "NTU NorthSpine"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.39,
+    "lng": 103.88,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "The Seletar Mall"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.38,
+    "lng": 103.76,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Bukit Panjang Plaza"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.26,
+    "lng": 103.81,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Sentosa, Cable Car Arrival Plaza"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.34,
+    "lng": 103.74,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Ng Teng Fong Hospital"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3,
+    "lng": 103.88,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Kallang Leisure Park"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.27,
+    "lng": 103.8,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Samsung @ MBC"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.28,
+    "lng": 103.86,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "MBS"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.32,
+    "lng": 103.81,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "587 Bukit Timah Road"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3,
+    "lng": 103.87,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Kallang Wave Mall"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.37,
+    "lng": 103.95,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "White Sands"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3,
+    "lng": 103.85,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Wilkie Edge - Level 1"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.27,
+    "lng": 103.71,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Oasis  Sakra"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.37,
+    "lng": 103.89,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Houang Mall"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.27,
+    "lng": 103.84,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "78 Shenton Way"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.25,
+    "lng": 103.82,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "at USS(RWS)"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.3,
+    "lng": 103.91,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Parkway Parade - Relocation"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.38,
+    "lng": 103.74,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Keat Hong CC"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.31,
+    "lng": 103.78,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Singapore Polytechnic - Dover"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.38,
+    "lng": 103.96,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Down Town East"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.39,
+    "lng": 103.9,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Compass One"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.35,
+    "lng": 103.83,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Thomson Plaza"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.35,
+    "lng": 103.85,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Bishan CC"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.35,
+    "lng": 103.99,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "SIN-T2 Dept/Check-In Hall South L2"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.45,
+    "lng": 103.82,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Sun Plaza LV 1"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 1.31,
+    "lng": 103.8,
+    "city": "Singapore",
+    "country": "SG",
+    "utcOffset": 8,
+    "branch": "Holland Village"
+  }
+]

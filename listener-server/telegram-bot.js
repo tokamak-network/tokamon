@@ -28,7 +28,16 @@ function initBot(database) {
   bot = new TelegramBot(BOT_TOKEN, { polling: true });
   botEnabled = true;
 
-  console.log('✅ 텔레그램 봇 초기화 완료');
+  console.log('[TelegramBot] 초기화 완료');
+
+  // 봇 에러 핸들러 (Phase 5 — 내결함성)
+  bot.on('polling_error', (err) => {
+    console.error('[TelegramBot] polling_error:', err.code || err.message);
+  });
+
+  bot.on('error', (err) => {
+    console.error('[TelegramBot] error:', err.message);
+  });
 
   // 봇이 메시지를 받을 때마다 캐시 및 DB 업데이트
   bot.on('message', (msg) => {
@@ -495,9 +504,18 @@ function isBotEnabled() {
   return botEnabled;
 }
 
+function stopBot() {
+  if (bot) {
+    bot.stopPolling();
+    botEnabled = false;
+    console.log('[TelegramBot] 폴링 중지');
+  }
+}
+
 module.exports = {
   initBot,
   isBotEnabled,
+  stopBot,
   sendClaimNotification,
   notifyLinkComplete,
   generateLinkToken,

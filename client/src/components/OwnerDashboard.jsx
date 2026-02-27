@@ -5,7 +5,7 @@ import { t } from '../translations';
 import { isWithinActiveTime, isSpotClosed } from '../spotUtils';
 import EditSpot from './EditSpot';
 
-export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet, onRedeposited, language = 'ko', showToast }) {
+export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet, onRedeposited, onSpotUpdated, language = 'ko', showToast }) {
   const [selectedSpotId, setSelectedSpotId] = useState(null);
   const [redepositSpotId, setRedepositSpotId] = useState(null);
   const [redepositAmount, setRedepositAmount] = useState('');
@@ -377,9 +377,10 @@ export default function OwnerDashboard({ spots, wallet, balance, onConnectWallet
             spot={spotToEdit}
             language={language}
             showToast={showToast}
-            onUpdated={() => {
+            onUpdated={(updatedFields) => {
               setEditSpotId(null);
               setSelectedSpotId(null);
+              if (updatedFields) onSpotUpdated(editSpotId, updatedFields);
               onRedeposited();
             }}
             onCancel={() => setEditSpotId(null)}

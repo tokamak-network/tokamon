@@ -1,0 +1,326 @@
+[
+  {
+    "name": "Starbucks",
+    "lat": 48.88,
+    "lng": 2.33,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Gare St Lazare - Mezzanine"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.86,
+    "lng": 2.33,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Echelle"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.87,
+    "lng": 2.29,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Victor Hugo"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.89,
+    "lng": 2.3,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Levallois So Ouest"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.87,
+    "lng": 2.33,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Rue de Seze"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.89,
+    "lng": 2.34,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Place du Tertre"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.87,
+    "lng": 2.31,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Saint Philippe du Roule"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.88,
+    "lng": 2.36,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Paris - Gare du Nord Station"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.88,
+    "lng": 2.28,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Palais des Congres"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.85,
+    "lng": 2.37,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Roquette"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.88,
+    "lng": 2.34,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "67 rue Lafayette"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.84,
+    "lng": 2.32,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Paris - Gare Montparnasse"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.85,
+    "lng": 2.34,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Saint Michel Cluny"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.85,
+    "lng": 2.33,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Monoprix - Dragon"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.86,
+    "lng": 2.35,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "46 Rivoli"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.86,
+    "lng": 2.31,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Rue Saint Dominique"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.87,
+    "lng": 2.35,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Petits Carreaux"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.84,
+    "lng": 2.29,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Felix Faure"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.84,
+    "lng": 2.3,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Vaugirard"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.85,
+    "lng": 2.29,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Place Charles Michels"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.85,
+    "lng": 2.3,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Motte Picquet"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.84,
+    "lng": 2.35,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Monge"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.84,
+    "lng": 2.33,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Rue Brea"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.88,
+    "lng": 2.3,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Wagram"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.83,
+    "lng": 2.39,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Bercy Parc"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.88,
+    "lng": 2.32,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Pepiniere"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.86,
+    "lng": 2.34,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Carrousel du Louvre"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.83,
+    "lng": 2.33,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "General Leclerc"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.86,
+    "lng": 2.36,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Saint Paul"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.87,
+    "lng": 2.3,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Galeries des Arcades"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.87,
+    "lng": 2.34,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Montmartre"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.83,
+    "lng": 2.38,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Avenue de France"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.87,
+    "lng": 2.32,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "108 Boulevard Haussmann"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.86,
+    "lng": 2.28,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Passy Plaza"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 48.85,
+    "lng": 2.28,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Paris - Monoprix Beaugrenelle"
+  },
+  {
+    "name": "Starbucks",
+    "lat": 49,
+    "lng": 2.57,
+    "city": "Paris",
+    "country": "FR",
+    "utcOffset": 1,
+    "branch": "Charles de Gaulle T2D"
+  }
+]

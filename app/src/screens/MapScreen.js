@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -36,7 +36,6 @@ export default function MapScreen({ route, wallet, deviceId, pushToken, received
   const fetchSpots = useCallback(async () => {
     try {
       const data = await getSpots();
-      console.log('[MapScreen] spots loaded:', data.length, JSON.stringify(data.map(s => ({ id: s.id, name: s.name, lat: s.lat, lng: s.lng }))));
       setSpots(data);
     } catch (err) {
       console.warn('Failed to fetch spots:', err.message);
@@ -56,10 +55,8 @@ export default function MapScreen({ route, wallet, deviceId, pushToken, received
 
   // Auto-center on first GPS fix
   useEffect(() => {
-    console.log('[MapScreen] userPos:', userPos, 'gpsStatus:', gpsStatus);
     if (userPos && !hasCentered.current && mapRef.current) {
       hasCentered.current = true;
-      console.log('[MapScreen] auto-centering to GPS:', userPos.lat, userPos.lng);
       mapRef.current.animateToRegion({
         latitude: userPos.lat,
         longitude: userPos.lng,
@@ -75,7 +72,6 @@ export default function MapScreen({ route, wallet, deviceId, pushToken, received
     if (!hasCentered.current && !userPos && visibleSpots.length > 0 && mapRef.current) {
       hasCentered.current = true;
       const firstSpot = visibleSpots[0];
-      console.log('[MapScreen] no GPS, centering to first spot:', firstSpot.lat, firstSpot.lng);
       mapRef.current.animateToRegion({
         latitude: firstSpot.lat,
         longitude: firstSpot.lng,
@@ -102,7 +98,6 @@ export default function MapScreen({ route, wallet, deviceId, pushToken, received
 
   const handleSpotPress = (spot) => {
     setSelectedSpot(spot);
-    // 하단 시트에 가리지 않도록 스팟을 화면 상단 1/3 지점에 표시
     mapRef.current?.animateToRegion({
       latitude: spot.lat - 0.0015,
       longitude: spot.lng,
@@ -111,7 +106,15 @@ export default function MapScreen({ route, wallet, deviceId, pushToken, received
     }, 500);
   };
 
-  const handleLocateMe = () => {
+  const handleMarkerPress = (e) => {
+    const markerId = e.nativeEvent?.id;
+    if (markerId) {
+      const spot = activeSpots.find(s => String(s.id) === markerId);
+      if (spot) handleSpotPress(spot);
+    }
+  };
+
+  const handleLocateMe = useCallback(() => {
     if (userPos && mapRef.current) {
       mapRef.current.animateToRegion({
         latitude: userPos.lat,
@@ -120,13 +123,15 @@ export default function MapScreen({ route, wallet, deviceId, pushToken, received
         longitudeDelta: 0.015,
       }, 500);
     }
-  };
+  }, [userPos]);
 
-  const handleClaimed = () => {
+  const handleClose = useCallback(() => setSelectedSpot(null), []);
+
+  const handleClaimed = useCallback(() => {
     setSelectedSpot(null);
     fetchSpots();
     onRefreshSpots?.();
-  };
+  }, [fetchSpots, onRefreshSpots]);
 
   // Navigate to a specific spot (called from SpotListScreen)
   const navigateToSpot = useCallback((spot) => {
@@ -139,7 +144,10 @@ export default function MapScreen({ route, wallet, deviceId, pushToken, received
     }, 500);
   }, []);
 
-  const activeSpots = spots.filter(s => s.remaining >= s.reward && !isSpotClosed(s) && isWithinActiveTime(s));
+  const activeSpots = useMemo(
+    () => spots.filter(s => s.remaining >= s.reward && !isSpotClosed(s) && isWithinActiveTime(s)),
+    [spots]
+  );
   const activeSpotCount = activeSpots.length;
 
   return (
@@ -185,6 +193,7 @@ export default function MapScreen({ route, wallet, deviceId, pushToken, received
         showsMyLocationButton={false}
         showsCompass={true}
         userInterfaceStyle="light"
+        onMarkerPress={handleMarkerPress}
       >
         {/* User location marker */}
         {userPos && (
@@ -259,7 +268,7 @@ export default function MapScreen({ route, wallet, deviceId, pushToken, received
         deviceId={deviceId}
         pushToken={pushToken}
         receivedCode={receivedCode}
-        onClose={() => setSelectedSpot(null)}
+        onClose={handleClose}
         onClaimed={handleClaimed}
         language={language}
       />

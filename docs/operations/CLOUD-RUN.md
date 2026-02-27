@@ -63,11 +63,29 @@ gcloud run revisions list \
 
 - **Cloud Logging** (로그 뷰어): GCP 콘솔 → Logging → Logs Explorer
 
-### 4. API 엔드포인트 헬스체크
+### 4. 헬스체크 엔드포인트
 
 ```bash
+SERVICE_URL=$(gcloud run services describe listener-server --project tokamon-go --region asia-northeast3 --format='value(status.url)')
+
+# 종합 헬스체크 (WS/HTTP 프로바이더, 봇 상태 — 200=정상, 503=이상)
+curl -s $SERVICE_URL/health | python3 -m json.tool
+
+# Liveness probe (프로세스 살아있는지 — 항상 200)
+curl -s $SERVICE_URL/health/live
+
 # 스팟 목록 조회로 서비스 동작 확인
-curl $(gcloud run services describe listener-server --project tokamon-go --region asia-northeast3 --format='value(status.url)')/api/spots
+curl -s $SERVICE_URL/api/spots
+```
+
+**Cloud Run 헬스체크 설정** (권장):
+```bash
+gcloud run services update listener-server \
+  --startup-probe-path=/health/live \
+  --startup-probe-period=10 \
+  --liveness-probe-path=/health/live \
+  --liveness-probe-period=30 \
+  --project tokamon-go --region asia-northeast3
 ```
 
 ---
@@ -166,7 +184,20 @@ gcloud logging read "resource.type=cloud_run_revision AND resource.labels.servic
 ### WebSocket 연결 끊김
 
 Cloud Run은 `--no-cpu-throttling`으로 설정되어 있어 HTTP 요청이 없어도 CPU가 유지됩니다.
-WebSocket이 끊기면 컨테이너가 자동 재시작되며, 놓친 블록의 이벤트는 `loadLastBlock()` → `queryFilter()`로 복구됩니다.
+
+**자동 재연결 동작** (v2 이후):
+- WebSocket 연결이 끊기면 지수 백오프로 자동 재연결 (1초 → 2초 → 4초 → ... 최대 60초)
+- 재연결 성공 시 12개 이벤트 리스너 자동 재등록
+- 재연결 중 놓친 이벤트는 `lastBlock` 기반으로 자동 복구
+- `/health` 엔드포인트에서 `isReconnecting: true`로 재연결 상태 확인 가능
+
+**관련 로그 패턴:**
+```
+[WS] WebSocket 연결 끊김 (code: 1006, reason: none)
+[WS 재연결] 1번째 시도, 1000ms 후...
+[WS 재연결] 성공 (1번째 시도)
+[복구] 블록 12345 ~ 12350 사이의 놓친 이벤트 스캔 중...
+```
 
 단, Cloud Run 파일시스템은 임시이므로 `last-block.json`은 재시작 시 초기화됩니다.
 최초 기동 시 모든 과거 이벤트를 다시 스캔할 수 있습니다.
