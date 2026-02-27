@@ -5,7 +5,7 @@ import { isWithinActiveTime, isSpotClosed } from '../spotUtils';
 
 const PAGE_SIZE = 50;
 
-export default function SpotList({ spots: propSpots, userPos, onSelect, language = 'ko' }) {
+export default function SpotList({ userPos, onSelect, language = 'ko' }) {
   const [filter, setFilter] = useState('active');
   const [spots, setSpots] = useState([]);
   const [loadingMore, setLoadingMore] = useState(false);

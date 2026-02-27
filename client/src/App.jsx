@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { setWalletProvider, getWalletProvider } from './walletProvider';
 import Map from './components/Map';
 import SpotInfo from './components/SpotInfo';
@@ -237,16 +237,28 @@ export default function App() {
     }
   }, []);
 
-  // 스팟 목록
+  // zoom 레벨에 따른 limit 결정
+  function zoomToLimit(zoom) {
+    if (zoom >= 16) return 50;
+    if (zoom >= 14) return 100;
+    if (zoom >= 12) return 150;
+    return 200;
+  }
+
+  // 스팟 목록 (위치 기반)
   const refreshSpots = useCallback(async () => {
     setSpotsLoading(true);
     try {
-      const data = await getSpots();
-      if (Array.isArray(data)) setSpots(data);
+      const pos = mapView || (userPos ? { lat: userPos.lat, lng: userPos.lng } : null);
+      const limit = zoomToLimit(mapView?.zoom);
+      const params = pos ? { lat: pos.lat, lng: pos.lng, limit } : { limit: 200 };
+      const data = await getSpots(params);
+      const spotsArray = data.spots || data;
+      if (Array.isArray(spotsArray)) setSpots(spotsArray);
     } finally {
       setSpotsLoading(false);
     }
-  }, []);
+  }, [mapView, userPos]);
 
   // 히스토리
   const refreshHistory = useCallback(async () => {
@@ -254,20 +266,36 @@ export default function App() {
   }, [wallet]);
 
   // 역할 선택 후 스팟 로드 (지갑 없이도)
+  const refreshSpotsRef = useRef(refreshSpots);
+  const refreshTelegramBalanceRef = useRef(refreshTelegramBalance);
+  useEffect(() => { refreshSpotsRef.current = refreshSpots; }, [refreshSpots]);
+  useEffect(() => { refreshTelegramBalanceRef.current = refreshTelegramBalance; }, [refreshTelegramBalance]);
+
   useEffect(() => {
     if (!role) return;
-    refreshSpots();
+    refreshSpotsRef.current();
     if (role === 'customer') {
-      refreshTelegramBalance();
+      refreshTelegramBalanceRef.current();
     }
     const interval = setInterval(() => {
-      refreshSpots();
+      refreshSpotsRef.current();
       if (role === 'customer') {
-        refreshTelegramBalance();
+        refreshTelegramBalanceRef.current();
       }
     }, 30000);
     return () => clearInterval(interval);
-  }, [role, refreshSpots, refreshTelegramBalance]);
+  }, [role]);
+
+  // mapView 변경 시 debounce로 스팟 재조회
+  const mapViewDebounceRef = useRef(null);
+  useEffect(() => {
+    if (!role || !mapView) return;
+    clearTimeout(mapViewDebounceRef.current);
+    mapViewDebounceRef.current = setTimeout(() => {
+      refreshSpots();
+    }, 500);
+    return () => clearTimeout(mapViewDebounceRef.current);
+  }, [mapView]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // MetaMask 계정/체인 변경 감지
   useEffect(() => {
@@ -621,7 +649,6 @@ export default function App() {
         {/* 고객: 스팟 목록 탭 */}
         {tab === 'list' && (
           <SpotList
-            spots={spots}
             userPos={userPos}
             language={language}
             onSelect={(spot) => {
