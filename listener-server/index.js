@@ -102,6 +102,17 @@ function initTelegramDb() {
             last_claim INTEGER NOT NULL
           )
         `);
+        db.run(`
+          CREATE TABLE IF NOT EXISTS device_attest_keys (
+            device_hash TEXT PRIMARY KEY,
+            key_id TEXT NOT NULL,
+            public_key_pem TEXT NOT NULL,
+            receipt TEXT,
+            sign_count INTEGER DEFAULT 0,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+          )
+        `);
         // 기존 테이블에 새 컬럼 추가 (이미 존재하면 무시)
         db.run(`ALTER TABLE device_verify_codes ADD COLUMN wallet_address TEXT`, () => {});
         db.run(`ALTER TABLE device_verify_codes ADD COLUMN attempts INTEGER DEFAULT 0`, () => {});
@@ -216,6 +227,7 @@ function startHttpServer(db) {
     res.status(healthy ? 200 : 503).json({
       status: healthy ? 'healthy' : 'degraded',
       uptime: process.uptime(),
+      revision: process.env.K_REVISION || 'local',
       providers: {
         ws: providerStatus.ws,
         http: httpOk ? 'ok' : 'error',
