@@ -332,7 +332,11 @@ async function restoreDeviceAttestKeysFromFirestore(db) {
         DO UPDATE SET key_id = ?, public_key_pem = ?, receipt = ?, sign_count = MAX(sign_count, ?), updated_at = MAX(updated_at, ?)
       `, [key.device_hash, key.key_id, key.public_key_pem, key.receipt, key.sign_count, key.created_at, key.updated_at,
           key.key_id, key.public_key_pem, key.receipt, key.sign_count, key.updated_at], (err) => {
-        if (!err) count++;
+        if (err) {
+          console.error(`[복원] device_attest_keys 복원 실패 (device_hash: ${key.device_hash.slice(0, 12)}...):`, err.message);
+        } else {
+          count++;
+        }
         resolve();
       });
     });
@@ -344,7 +348,11 @@ async function restoreDeviceAttestKeysFromFirestore(db) {
 async function syncDeviceAttestKeysToFirestore(db) {
   return new Promise((resolve) => {
     db.all('SELECT device_hash, key_id, public_key_pem, receipt, sign_count, created_at, updated_at FROM device_attest_keys', async (err, rows) => {
-      if (err || !rows || rows.length === 0) return resolve();
+      if (err) {
+        console.error('[동기화] SQLite device_attest_keys 조회 실패:', err.message);
+        return resolve();
+      }
+      if (!rows || rows.length === 0) return resolve();
       let count = 0;
       for (const row of rows) {
         await saveDeviceAttestKey(row.device_hash, {
