@@ -55,7 +55,7 @@ gcloud run services describe listener-server \
 
 ```bash
 gcloud run services update listener-server \
-  --update-env-vars "REQUIRE_ATTESTATION=false,GOOGLE_CLOUD_PROJECT_NUMBER=370459866598,IOS_APP_ATTEST_APP_ID=FZJ48UG7PY.io.tokamak.tokamon" \
+  --update-env-vars "REQUIRE_ATTESTATION=false,GOOGLE_CLOUD_PROJECT_NUMBER=<YOUR_PROJECT_NUMBER>,IOS_APP_ATTEST_APP_ID=<YOUR_TEAM_ID>.<YOUR_BUNDLE_ID>" \
   --project tokamon-go --region asia-northeast3
 ```
 

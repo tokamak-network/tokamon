@@ -5,6 +5,7 @@ const appAttest = require('appattest-checker-node');
 // ─── Google Play Integrity (Android) ───
 
 const GOOGLE_CLOUD_PROJECT_NUMBER = process.env.GOOGLE_CLOUD_PROJECT_NUMBER;
+const ANDROID_PACKAGE_NAME = process.env.ANDROID_PACKAGE_NAME || 'io.tokamak.tokamon';
 
 let playIntegrityClient = null;
 
@@ -33,7 +34,7 @@ async function verifyPlayIntegrity(token, expectedNonce) {
 
   const client = getPlayIntegrityClient();
   const res = await client.v1.decodeIntegrityToken({
-    packageName: 'io.tokamak.tokamon',
+    packageName: ANDROID_PACKAGE_NAME,
     requestBody: { integrityToken: token },
   });
 
@@ -48,7 +49,7 @@ async function verifyPlayIntegrity(token, expectedNonce) {
   }
 
   // 패키지 이름 검증
-  if (verdict.appIntegrity?.packageName !== 'io.tokamak.tokamon') {
+  if (verdict.appIntegrity?.packageName !== ANDROID_PACKAGE_NAME) {
     return { valid: false, error: 'Package name mismatch' };
   }
 

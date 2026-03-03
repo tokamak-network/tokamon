@@ -132,9 +132,9 @@ function makeAttestationMiddleware(db) {
 
         // signCount 업데이트
         const now = Math.floor(Date.now() / 1000);
-        await new Promise((resolve) => {
+        await new Promise((resolve, reject) => {
           db.run('UPDATE device_attest_keys SET sign_count = ?, updated_at = ? WHERE key_id = ?',
-            [result.newSignCount, now, keyId], () => resolve());
+            [result.newSignCount, now, keyId], (err) => err ? reject(err) : resolve());
         });
 
         // Firestore signCount 동기화 (비동기)
