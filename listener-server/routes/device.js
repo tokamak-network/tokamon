@@ -2,7 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const blockchain = require('../blockchain');
 const { isValidEthAddress, haversineDistance } = require('../utils');
-const { sendPushNotification, saveDeviceClaimEvent } = require('../firebase-admin');
+const { sendPushNotification, saveDeviceClaimEvent, saveDeviceAttestKey, updateDeviceAttestKeySignCount } = require('../firebase-admin');
 const { verifyPlayIntegrity, verifyIosAttestation, verifyIosAssertion, generateChallenge } = require('../attestation');
 
 const COLLECT_RADIUS = 15;
@@ -74,6 +74,7 @@ const REQUIRE_ATTESTATION = process.env.REQUIRE_ATTESTATION || 'false';
 // iOS attestation challenge 저장 (in-memory, 60s TTL)
 const attestChallenges = new Map();
 const CHALLENGE_TTL_MS = 60 * 1000;
+const MAX_CHALLENGES = 10000; // 메모리 보호
 
 // 만료 challenge 정리 (60초마다)
 setInterval(() => {
@@ -111,9 +112,9 @@ function makeAttestationMiddleware(db) {
         const clientDataHash = req.headers['x-attestation-client-data'];
         if (!keyId || !clientDataHash) throw new Error('Missing iOS attestation headers');
 
-        // DB에서 등록된 publicKey 조회
+        // DB에서 등록된 publicKey 조회 (device_hash도 함께 — Firestore 동기화용)
         const row = await new Promise((resolve, reject) => {
-          db.get('SELECT public_key_pem, sign_count FROM device_attest_keys WHERE key_id = ?', [keyId], (err, r) => {
+          db.get('SELECT device_hash, public_key_pem, sign_count FROM device_attest_keys WHERE key_id = ?', [keyId], (err, r) => {
             if (err) reject(err); else resolve(r);
           });
         });
@@ -131,10 +132,16 @@ function makeAttestationMiddleware(db) {
 
         // signCount 업데이트
         const now = Math.floor(Date.now() / 1000);
-        await new Promise((resolve) => {
+        await new Promise((resolve, reject) => {
           db.run('UPDATE device_attest_keys SET sign_count = ?, updated_at = ? WHERE key_id = ?',
-            [result.newSignCount, now, keyId], () => resolve());
+            [result.newSignCount, now, keyId], (err) => err ? reject(err) : resolve());
         });
+
+        // Firestore signCount 동기화 (비동기)
+        if (row.device_hash) {
+          updateDeviceAttestKeySignCount(row.device_hash, result.newSignCount)
+            .catch(e => console.error('[Attestation] Firestore signCount 동기화 실패:', e.message));
+        }
 
       } else {
         return res.status(400).json({ error: 'Unknown platform' });
@@ -159,6 +166,15 @@ module.exports = function(db) {
 
   // POST /api/device/attest-challenge — challenge 생성
   router.post('/attest-challenge', endpointRateLimit(10), (req, res) => {
+    const { device_id } = req.body;
+    if (!device_id) {
+      return res.status(400).json({ error: 'device_id is required' });
+    }
+
+    if (attestChallenges.size >= MAX_CHALLENGES) {
+      return res.status(503).json({ error: 'Too many pending challenges. Please try again later' });
+    }
+
     const challenge = generateChallenge();
     const id = crypto.randomBytes(16).toString('hex');
     attestChallenges.set(id, { challenge, created: Date.now() });
@@ -193,6 +209,7 @@ module.exports = function(db) {
       const deviceHash = hashDeviceId(device_id);
       const now = Math.floor(Date.now() / 1000);
       const receiptStr = result.receipt ? Buffer.from(result.receipt).toString('base64') : null;
+
       await new Promise((resolve, reject) => {
         db.run(
           `INSERT INTO device_attest_keys (device_hash, key_id, public_key_pem, receipt, sign_count, created_at, updated_at)
@@ -203,6 +220,12 @@ module.exports = function(db) {
           (err) => err ? reject(err) : resolve()
         );
       });
+
+      // Firestore 백업 (비동기, 실패해도 등록은 성공)
+      saveDeviceAttestKey(deviceHash, {
+        key_id, public_key_pem: result.publicKeyPem, receipt: receiptStr,
+        sign_count: 0, created_at: now, updated_at: now,
+      }).catch(e => console.error('[Attestation] Firestore 백업 실패:', e.message));
 
       console.log(`[Attestation] iOS device registered: ${deviceHash.slice(0, 12)}...`);
       res.json({ attested: true });

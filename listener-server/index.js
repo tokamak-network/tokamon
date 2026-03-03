@@ -11,7 +11,7 @@ const telegramRoutes = require('./routes/telegram');
 const faucetRoutes = require('./routes/faucet');
 const spotsRoutes = require('./routes/spots');
 const { hashTelegramId, isValidTelegramUsername } = require('./utils');
-const { saveWalletTelegramLink, saveTelegramHashMap, saveTelegramUser, getAllTelegramUsers } = require('./firebase-admin');
+const { saveWalletTelegramLink, saveTelegramHashMap, saveTelegramUser, getAllTelegramUsers, saveDeviceAttestKey, getAllDeviceAttestKeys } = require('./firebase-admin');
 
 // ─── 글로벌 에러 핸들러 (Phase 2) ───
 
@@ -113,6 +113,7 @@ function initTelegramDb() {
             updated_at INTEGER NOT NULL
           )
         `);
+        db.run(`CREATE INDEX IF NOT EXISTS idx_attest_keys_key_id ON device_attest_keys(key_id)`);
         // 기존 테이블에 새 컬럼 추가 (이미 존재하면 무시)
         db.run(`ALTER TABLE device_verify_codes ADD COLUMN wallet_address TEXT`, () => {});
         db.run(`ALTER TABLE device_verify_codes ADD COLUMN attempts INTEGER DEFAULT 0`, () => {});
@@ -317,6 +318,59 @@ async function restoreTelegramUsersFromFirestore(db) {
   if (count > 0) console.log(`[복원] Firestore → SQLite: telegram_users ${count}건 복원 완료`);
 }
 
+// Firestore → SQLite 복원 (컨테이너 재시작 시 device_attest_keys 복구)
+async function restoreDeviceAttestKeysFromFirestore(db) {
+  const keys = await getAllDeviceAttestKeys();
+  if (keys.length === 0) return;
+  let count = 0;
+  for (const key of keys) {
+    await new Promise((resolve) => {
+      db.run(`
+        INSERT INTO device_attest_keys (device_hash, key_id, public_key_pem, receipt, sign_count, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(device_hash)
+        DO UPDATE SET key_id = ?, public_key_pem = ?, receipt = ?, sign_count = MAX(sign_count, ?), updated_at = MAX(updated_at, ?)
+      `, [key.device_hash, key.key_id, key.public_key_pem, key.receipt, key.sign_count, key.created_at, key.updated_at,
+          key.key_id, key.public_key_pem, key.receipt, key.sign_count, key.updated_at], (err) => {
+        if (err) {
+          console.error(`[복원] device_attest_keys 복원 실패 (device_hash: ${key.device_hash.slice(0, 12)}...):`, err.message);
+        } else {
+          count++;
+        }
+        resolve();
+      });
+    });
+  }
+  if (count > 0) console.log(`[복원] Firestore → SQLite: device_attest_keys ${count}건 복원 완료`);
+}
+
+// SQLite → Firestore 동기화 (device_attest_keys)
+async function syncDeviceAttestKeysToFirestore(db) {
+  return new Promise((resolve) => {
+    db.all('SELECT device_hash, key_id, public_key_pem, receipt, sign_count, created_at, updated_at FROM device_attest_keys', async (err, rows) => {
+      if (err) {
+        console.error('[동기화] SQLite device_attest_keys 조회 실패:', err.message);
+        return resolve();
+      }
+      if (!rows || rows.length === 0) return resolve();
+      let count = 0;
+      for (const row of rows) {
+        await saveDeviceAttestKey(row.device_hash, {
+          key_id: row.key_id,
+          public_key_pem: row.public_key_pem,
+          receipt: row.receipt,
+          sign_count: row.sign_count,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+        });
+        count++;
+      }
+      if (count > 0) console.log(`[동기화] SQLite → Firestore: device_attest_keys ${count}건 동기화 완료`);
+      resolve();
+    });
+  });
+}
+
 // ─── Graceful Shutdown (Phase 4) ───
 
 let isShuttingDown = false;
@@ -380,6 +434,12 @@ async function main() {
 
     // SQLite → Firestore 동기화
     await syncTelegramDataToFirestore(sqliteDb);
+
+    // Firestore → SQLite 복원 (컨테이너 재시작 시 device_attest_keys 복구)
+    await restoreDeviceAttestKeysFromFirestore(sqliteDb);
+
+    // SQLite → Firestore 동기화 (device_attest_keys)
+    await syncDeviceAttestKeysToFirestore(sqliteDb);
 
     initBot(sqliteDb);
 

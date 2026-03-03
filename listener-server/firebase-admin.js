@@ -240,6 +240,57 @@ async function syncDeviceBalance(deviceHash, balance) {
   }
 }
 
+async function saveDeviceAttestKey(deviceHash, keyData) {
+  if (!db) return;
+  try {
+    await withRetry(async () => {
+      await db.collection(col('device_attest_keys')).doc(deviceHash).set({
+        key_id: keyData.key_id,
+        public_key_pem: keyData.public_key_pem,
+        receipt: keyData.receipt || null,
+        sign_count: keyData.sign_count || 0,
+        created_at: keyData.created_at,
+        updated_at: keyData.updated_at,
+      }, { merge: true });
+    }, `device_attest_keys/${deviceHash.slice(0, 12)}`);
+  } catch (e) {
+    console.error('[Firestore] device_attest_keys 저장 실패:', e.message);
+  }
+}
+
+async function getAllDeviceAttestKeys() {
+  if (!db) return [];
+  try {
+    const snapshot = await db.collection(col('device_attest_keys')).get();
+    return snapshot.docs.map(doc => ({
+      device_hash: doc.id,
+      key_id: doc.data().key_id,
+      public_key_pem: doc.data().public_key_pem,
+      receipt: doc.data().receipt || null,
+      sign_count: doc.data().sign_count || 0,
+      created_at: doc.data().created_at,
+      updated_at: doc.data().updated_at,
+    }));
+  } catch (e) {
+    console.error('[Firestore] device_attest_keys 조회 실패:', e.message);
+    return [];
+  }
+}
+
+async function updateDeviceAttestKeySignCount(deviceHash, newSignCount) {
+  if (!db) return;
+  try {
+    await withRetry(async () => {
+      await db.collection(col('device_attest_keys')).doc(deviceHash).update({
+        sign_count: newSignCount,
+        updated_at: Math.floor(Date.now() / 1000),
+      });
+    }, `device_attest_keys/${deviceHash.slice(0, 12)}/signCount`);
+  } catch (e) {
+    console.error('[Firestore] device_attest_keys signCount 업데이트 실패:', e.message);
+  }
+}
+
 async function saveTelegramUser(username, chatId, firstSeen, lastSeen) {
   if (!db) return;
   try {
@@ -285,4 +336,7 @@ module.exports = {
   syncDeviceBalance,
   saveTelegramUser,
   getAllTelegramUsers,
+  saveDeviceAttestKey,
+  getAllDeviceAttestKeys,
+  updateDeviceAttestKeySignCount,
 };

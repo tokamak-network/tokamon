@@ -767,10 +767,12 @@ async function getStampInfo(spotId, userAddress) {
 
 // ─── Faucet ───
 
-const FAUCET_PRIVATE_KEY = process.env.FAUCET_PRIVATE_KEY
-  || '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+const FAUCET_PRIVATE_KEY = process.env.FAUCET_PRIVATE_KEY;
 
 async function sendETH(toAddress, amountETH) {
+  if (!FAUCET_PRIVATE_KEY) {
+    throw new Error('FAUCET_PRIVATE_KEY environment variable is required');
+  }
   const httpProvider = new ethers.JsonRpcProvider(RPC_URL);
   const faucetWallet = new ethers.Wallet(FAUCET_PRIVATE_KEY, httpProvider);
   const tx = await faucetWallet.sendTransaction({
