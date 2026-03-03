@@ -2,7 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const blockchain = require('../blockchain');
 const { isValidEthAddress, haversineDistance } = require('../utils');
-const { sendPushNotification, saveDeviceClaimEvent } = require('../firebase-admin');
+const { sendPushNotification, saveDeviceClaimEvent, saveDeviceAttestKey, updateDeviceAttestKeySignCount } = require('../firebase-admin');
 const { verifyPlayIntegrity, verifyIosAttestation, verifyIosAssertion, generateChallenge } = require('../attestation');
 
 const COLLECT_RADIUS = 15;
@@ -136,6 +136,15 @@ function makeAttestationMiddleware(db) {
             [result.newSignCount, now, keyId], () => resolve());
         });
 
+        // Firestore signCount 동기화 (비동기, device_hash로 조회)
+        const deviceHashForKey = await new Promise((resolve) => {
+          db.get('SELECT device_hash FROM device_attest_keys WHERE key_id = ?', [keyId], (_, r) => resolve(r?.device_hash));
+        });
+        if (deviceHashForKey) {
+          updateDeviceAttestKeySignCount(deviceHashForKey, result.newSignCount)
+            .catch(e => console.error('[Attestation] Firestore signCount 동기화 실패:', e.message));
+        }
+
       } else {
         return res.status(400).json({ error: 'Unknown platform' });
       }
@@ -193,6 +202,7 @@ module.exports = function(db) {
       const deviceHash = hashDeviceId(device_id);
       const now = Math.floor(Date.now() / 1000);
       const receiptStr = result.receipt ? Buffer.from(result.receipt).toString('base64') : null;
+
       await new Promise((resolve, reject) => {
         db.run(
           `INSERT INTO device_attest_keys (device_hash, key_id, public_key_pem, receipt, sign_count, created_at, updated_at)
@@ -203,6 +213,12 @@ module.exports = function(db) {
           (err) => err ? reject(err) : resolve()
         );
       });
+
+      // Firestore 백업 (비동기, 실패해도 등록은 성공)
+      saveDeviceAttestKey(deviceHash, {
+        key_id, public_key_pem: result.publicKeyPem, receipt: receiptStr,
+        sign_count: 0, created_at: now, updated_at: now,
+      }).catch(e => console.error('[Attestation] Firestore 백업 실패:', e.message));
 
       console.log(`[Attestation] iOS device registered: ${deviceHash.slice(0, 12)}...`);
       res.json({ attested: true });
