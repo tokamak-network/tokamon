@@ -126,7 +126,7 @@ export default function IntroScreen({ onFinish, onReady }) {
             },
           ]}
         >
-          Visit stores, earn TON
+          Go Spots, Collect TON
         </Animated.Text>
 
       </View>

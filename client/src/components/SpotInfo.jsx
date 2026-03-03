@@ -113,7 +113,7 @@ export default function SpotInfo({ spot, userPos, wallet, role, language = 'ko',
       </div>
       <div className="detail" style={{ color: '#fbbf24' }}>
         {t(language, 'rewardLabel')}: {spot.reward} TON | {t(language, 'remainingTONLabel')}: {spot.remaining}
-        {distance !== null && <span style={{ color: '#94a3b8', marginLeft: 8 }}>📍 {distance}m</span>}
+        {distance !== null && <span style={{ color: '#94a3b8', marginLeft: 8 }}>📍 {distance >= 1000 ? `${(distance / 1000).toFixed(1)}km` : `${distance}m`}</span>}
       </div>
 
       {/* Stamp progress - only show when wallet connected */}

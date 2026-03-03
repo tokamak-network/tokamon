@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,77 +6,97 @@ import {
   TouchableOpacity,
   StyleSheet,
   RefreshControl,
-  Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { getSpots } from '../services/api';
-import NetworkSelector from '../components/NetworkSelector';
 import { t } from '../utils/translations';
 import { isWithinActiveTime, isSpotClosed } from '../utils/spotUtils';
 import useLocation from '../hooks/useLocation';
 
-function haversineDistance(lat1, lng1, lat2, lng2) {
-  const R = 6371000;
-  const toRad = (deg) => (deg * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
+const PAGE_SIZE = 50;
 
 export default function SpotListScreen({ navigation, language = 'ko', networkId, onNetworkChange }) {
   const [spots, setSpots] = useState([]);
   const [filter, setFilter] = useState('active');
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [total, setTotal] = useState(0);
   const { userPos } = useLocation();
-
-  const fetchSpots = useCallback(async () => {
-    try {
-      const data = await getSpots();
-      setSpots(data);
-    } catch (err) {
-      console.warn('Failed to fetch spots:', err.message);
-    }
-  }, [networkId]);
+  const offsetRef = useRef(0);
+  const userPosRef = useRef(userPos);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setSpots([]);
-    fetchSpots();
+    userPosRef.current = userPos;
+  }, [userPos]);
+
+  const fetchSpots = useCallback(async (reset = true) => {
+    try {
+      const newOffset = reset ? 0 : offsetRef.current;
+      const pos = userPosRef.current;
+      const params = {
+        limit: PAGE_SIZE,
+        offset: newOffset,
+        filter,
+      };
+      if (pos) {
+        params.lat = pos.lat;
+        params.lng = pos.lng;
+      }
+      const data = await getSpots(params);
+
+      // 페이지네이션 응답
+      const { spots: pageSpots, pagination } = data;
+      if (reset) {
+        setSpots(pageSpots);
+      } else {
+        setSpots((prev) => [...prev, ...pageSpots]);
+      }
+      setHasMore(pagination.hasMore);
+      setTotal(pagination.total);
+      offsetRef.current = pagination.offset + pagination.limit;
+    } catch (err) {
+      console.warn('Failed to fetch spots:', err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [filter, networkId]);
+
+  useEffect(() => {
+    setLoading(true);
+    offsetRef.current = 0;
+    setHasMore(true);
+    fetchSpots(true);
   }, [fetchSpots]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchSpots();
+    offsetRef.current = 0;
+    await fetchSpots(true);
     setRefreshing(false);
   };
 
-  const distanceTo = useCallback((spot) => {
-    if (!userPos) return Infinity;
-    return haversineDistance(userPos.lat, userPos.lng, spot.lat, spot.lng);
-  }, [userPos]);
+  const onEndReached = async () => {
+    if (!hasMore || loadingMore || refreshing) return;
+    setLoadingMore(true);
+    await fetchSpots(false);
+    setLoadingMore(false);
+  };
 
-  const filtered = useMemo(() => {
-    let list;
-    if (filter === 'active') {
-      list = spots.filter((s) => s.remaining >= s.reward && !isSpotClosed(s) && isWithinActiveTime(s));
-    } else if (filter === 'inactive') {
-      list = spots.filter((s) => s.remaining >= s.reward && !isSpotClosed(s) && !isWithinActiveTime(s));
-    } else {
-      list = [...spots];
-    }
-    // sort by distance (closest first)
-    return list.sort((a, b) => distanceTo(a) - distanceTo(b));
-  }, [spots, filter, distanceTo]);
+  const handleFilterChange = (newFilter) => {
+    if (newFilter === filter) return;
+    setFilter(newFilter);
+  };
 
   const handleSpotPress = (spot) => {
     navigation.navigate('MapTab', { selectedSpot: spot });
   };
 
-  const renderSpotCard = ({ item: spot }) => {
+  const renderSpotCard = useCallback(({ item: spot }) => {
     const isExhausted = spot.remaining < spot.reward;
     const closed = isSpotClosed(spot);
-    const active = !closed && !isExhausted && isWithinActiveTime(spot);
+    const active = spot.active !== undefined ? spot.active : (!closed && !isExhausted && isWithinActiveTime(spot));
     const claimsLeft = spot.reward > 0 ? Math.floor(spot.remaining / spot.reward) : 0;
     const statusColor = isExhausted ? '#6b7280' : closed ? '#6b7280' : active ? '#059669' : '#ef4444';
     const utc = spot.utc_offset || 0;
@@ -85,7 +105,7 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
       const d = new Date(ts * 1000);
       return `${d.getUTCFullYear()}.${d.getUTCMonth() + 1}.${d.getUTCDate()}`;
     };
-    const dist = userPos ? Math.round(distanceTo(spot)) : null;
+    const dist = spot.distance;
 
     return (
       <TouchableOpacity
@@ -113,6 +133,12 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
             </View>
           </View>
 
+          {spot.description ? (
+            <Text style={styles.cardDescription} numberOfLines={1}>
+              {spot.description}
+            </Text>
+          ) : null}
+
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Text style={styles.statIcon}>💰</Text>
@@ -137,7 +163,7 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
             {(spot.daily_start_time > 0 || spot.daily_end_time > 0) && (
               ` | ${String(Math.floor(spot.daily_start_time / 60)).padStart(2, '0')}:${String(spot.daily_start_time % 60).padStart(2, '0')}~${String(Math.floor(spot.daily_end_time / 60)).padStart(2, '0')}:${String(spot.daily_end_time % 60).padStart(2, '0')}`
             )}
-            {dist !== null && ` · 📍 ${dist >= 1000 ? `${(dist / 1000).toFixed(1)}km` : `${dist}m`}`}
+            {dist != null && ` · 📍 ${dist >= 1000 ? `${(dist / 1000).toFixed(1)}km` : `${dist}m`}`}
           </Text>
 
           {spot.stamp_goal > 0 && (
@@ -152,6 +178,25 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
         </View>
       </TouchableOpacity>
     );
+  }, [language, navigation]);
+
+  const renderFooter = () => {
+    if (loadingMore) {
+      return (
+        <View style={styles.footerLoader}>
+          <ActivityIndicator size="small" color="#4FC3F7" />
+          <Text style={styles.footerText}>{spots.length} / {total}</Text>
+        </View>
+      );
+    }
+    if (spots.length > 0 && total > 0 && !hasMore) {
+      return (
+        <View style={styles.footerLoader}>
+          <Text style={styles.footerText}>{spots.length} / {total}</Text>
+        </View>
+      );
+    }
+    return null;
   };
 
   return (
@@ -159,7 +204,7 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
       <View style={styles.filterRow}>
         <TouchableOpacity
           style={[styles.filterBtn, filter === 'active' && styles.filterBtnActive]}
-          onPress={() => setFilter('active')}
+          onPress={() => handleFilterChange('active')}
         >
           <View style={styles.filterInner}>
             <View style={[styles.filterDot, filter === 'active' && styles.filterDotActive]} />
@@ -168,16 +213,16 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
             >
               {t(language, 'activeSpots')}
             </Text>
-            {filter === 'active' && (
+            {filter === 'active' && total > 0 && (
               <View style={styles.filterCountBadge}>
-                <Text style={styles.filterCount}>{filtered.length}</Text>
+                <Text style={styles.filterCount}>{total}</Text>
               </View>
             )}
           </View>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.filterBtn, filter === 'inactive' && styles.filterBtnActive]}
-          onPress={() => setFilter('inactive')}
+          onPress={() => handleFilterChange('inactive')}
         >
           <View style={styles.filterInner}>
             <View style={[styles.filterDot, filter === 'inactive' && styles.filterDotInactive]} />
@@ -186,16 +231,16 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
             >
               {t(language, 'inactiveSpots')}
             </Text>
-            {filter === 'inactive' && (
+            {filter === 'inactive' && total > 0 && (
               <View style={styles.filterCountBadge}>
-                <Text style={styles.filterCount}>{filtered.length}</Text>
+                <Text style={styles.filterCount}>{total}</Text>
               </View>
             )}
           </View>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.filterBtn, filter === 'all' && styles.filterBtnActive]}
-          onPress={() => setFilter('all')}
+          onPress={() => handleFilterChange('all')}
         >
           <View style={styles.filterInner}>
             <Text
@@ -203,9 +248,9 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
             >
               {t(language, 'allSpots')}
             </Text>
-            {filter === 'all' && (
+            {filter === 'all' && total > 0 && (
               <View style={styles.filterCountBadge}>
-                <Text style={styles.filterCount}>{filtered.length}</Text>
+                <Text style={styles.filterCount}>{total}</Text>
               </View>
             )}
           </View>
@@ -221,10 +266,17 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
       </View>
 
       <FlatList
-        data={filtered}
+        data={spots}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderSpotCard}
         contentContainerStyle={styles.listContent}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.3}
+        ListFooterComponent={renderFooter}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        initialNumToRender={10}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -233,15 +285,17 @@ export default function SpotListScreen({ navigation, language = 'ko', networkId,
           />
         }
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
-              {filter === 'active'
-                ? t(language, 'noActiveSpots')
-                : filter === 'inactive'
-                ? t(language, 'noInactiveSpots')
-                : t(language, 'noSpotsRegistered')}
-            </Text>
-          </View>
+          !refreshing && !loading && (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>
+                {filter === 'active'
+                  ? t(language, 'noActiveSpots')
+                  : filter === 'inactive'
+                  ? t(language, 'noInactiveSpots')
+                  : t(language, 'noSpotsRegistered')}
+              </Text>
+            </View>
+          )
         }
       />
     </View>
@@ -355,6 +409,12 @@ const styles = StyleSheet.create({
   cardNameExhausted: {
     color: '#888',
   },
+  cardDescription: {
+    color: '#999',
+    fontSize: 13,
+    marginBottom: 10,
+    lineHeight: 18,
+  },
   statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -441,5 +501,14 @@ const styles = StyleSheet.create({
   refreshBtnText: {
     fontSize: 18,
     color: '#888',
+  },
+  footerLoader: {
+    paddingVertical: 16,
+    alignItems: 'center',
+    gap: 6,
+  },
+  footerText: {
+    color: '#555',
+    fontSize: 12,
   },
 });

@@ -5,12 +5,26 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const { init, onTelegramClaimed, onDeviceClaimed } = require('./blockchain');
 const blockchain = require('./blockchain');
-const { initBot, sendClaimNotification } = require('./telegram-bot');
+const { initBot, sendClaimNotification, isBotEnabled, stopBot } = require('./telegram-bot');
 const deviceRoutes = require('./routes/device');
 const telegramRoutes = require('./routes/telegram');
 const faucetRoutes = require('./routes/faucet');
+const spotsRoutes = require('./routes/spots');
 const { hashTelegramId, isValidTelegramUsername } = require('./utils');
 const { saveWalletTelegramLink, saveTelegramHashMap, saveTelegramUser, getAllTelegramUsers } = require('./firebase-admin');
+
+// ─── 글로벌 에러 핸들러 (Phase 2) ───
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[FATAL] Unhandled Promise Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] Uncaught Exception:', err);
+  // uncaughtException 후에는 프로세스 상태를 신뢰할 수 없으므로 종료
+  // Cloud Run이 자동 재시작함
+  process.exit(1);
+});
 
 const DB_PATH = process.env.DATABASE_PATH
   ? path.isAbsolute(process.env.DATABASE_PATH)
@@ -82,10 +96,16 @@ function initTelegramDb() {
           )
         `);
         db.run(`CREATE INDEX IF NOT EXISTS idx_device_codes_expires ON device_verify_codes(expires_at)`);
+        db.run(`
+          CREATE TABLE IF NOT EXISTS faucet_claims (
+            address TEXT PRIMARY KEY,
+            last_claim INTEGER NOT NULL
+          )
+        `);
         // 기존 테이블에 새 컬럼 추가 (이미 존재하면 무시)
         db.run(`ALTER TABLE device_verify_codes ADD COLUMN wallet_address TEXT`, () => {});
         db.run(`ALTER TABLE device_verify_codes ADD COLUMN attempts INTEGER DEFAULT 0`, () => {});
-        console.log('✅ DB 초기화 완료:', DB_PATH);
+        console.log('DB 초기화 완료:', DB_PATH);
         resolve(db);
       });
     });
@@ -94,15 +114,15 @@ function initTelegramDb() {
 
 // 필수 환경변수 시작 시 검증
 if (!process.env.TELEGRAM_HASH_SALT) {
-  console.error('❌ TELEGRAM_HASH_SALT 환경변수가 설정되지 않았습니다. .env 파일을 확인하세요.');
+  console.error('TELEGRAM_HASH_SALT 환경변수가 설정되지 않았습니다. .env 파일을 확인하세요.');
   process.exit(1);
 }
 if (!process.env.DEVICE_HASH_SALT) {
-  console.error('❌ DEVICE_HASH_SALT 환경변수가 설정되지 않았습니다. .env 파일을 확인하세요.');
+  console.error('DEVICE_HASH_SALT 환경변수가 설정되지 않았습니다. .env 파일을 확인하세요.');
   process.exit(1);
 }
 if (process.env.DEVICE_HASH_SALT === process.env.TELEGRAM_HASH_SALT) {
-  console.warn('⚠️  DEVICE_HASH_SALT와 TELEGRAM_HASH_SALT가 동일합니다. 보안을 위해 서로 다른 값을 사용하세요.');
+  console.warn('DEVICE_HASH_SALT와 TELEGRAM_HASH_SALT가 동일합니다. 보안을 위해 서로 다른 값을 사용하세요.');
 }
 
 const LISTENER_PORT = process.env.PORT || process.env.LISTENER_PORT || 3001;
@@ -169,6 +189,45 @@ function startHttpServer(db) {
   // [#8] JSON body size 명시적 제한
   app.use(express.json({ limit: '10kb' }));
 
+  // ─── 헬스체크 엔드포인트 (Phase 3) ───
+
+  // Liveness probe — 프로세스가 살아있으면 200
+  app.get('/health/live', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+  });
+
+  // Readiness/종합 헬스체크 — WS/HTTP 프로바이더 + 봇 상태
+  app.get('/health', async (req, res) => {
+    const providerStatus = blockchain.getProviderStatus();
+    let blockNumber = null;
+    let httpOk = false;
+
+    try {
+      blockNumber = await blockchain.getBlockNumber();
+      httpOk = true;
+    } catch (e) {
+      httpOk = false;
+    }
+
+    const wsOk = providerStatus.ws === 'connected';
+    const botOk = isBotEnabled();
+    const healthy = wsOk && httpOk;
+
+    res.status(healthy ? 200 : 503).json({
+      status: healthy ? 'healthy' : 'degraded',
+      uptime: process.uptime(),
+      providers: {
+        ws: providerStatus.ws,
+        http: httpOk ? 'ok' : 'error',
+        isReconnecting: providerStatus.isReconnecting,
+        reconnectAttempts: providerStatus.reconnectAttempts,
+      },
+      blockNumber,
+      bot: botOk ? 'running' : 'disabled',
+      contract: providerStatus.contractAddress,
+    });
+  });
+
   // Rate Limiting: device_id 기준으로 각 엔드포인트에서 개별 적용 (routes/device.js)
 
   // 디바이스 클레임 라우트
@@ -177,12 +236,17 @@ function startHttpServer(db) {
   // 텔레그램 라우트 (verify-token, link-wallet, username 등)
   app.use('/api/telegram', telegramRoutes(db));
 
-  // Faucet 라우트
-  app.use('/api/faucet', faucetRoutes);
+  // Spots 라우트
+  app.use('/api/spots', spotsRoutes);
 
-  app.listen(LISTENER_PORT, () => {
+  // Faucet 라우트
+  app.use('/api/faucet', faucetRoutes(db));
+
+  const server = app.listen(LISTENER_PORT, () => {
     console.log(`[Listener HTTP] 포트 ${LISTENER_PORT}에서 실행 중`);
   });
+
+  return server;
 }
 
 async function syncTelegramDataToFirestore(db) {
@@ -241,19 +305,71 @@ async function restoreTelegramUsersFromFirestore(db) {
   if (count > 0) console.log(`[복원] Firestore → SQLite: telegram_users ${count}건 복원 완료`);
 }
 
+// ─── Graceful Shutdown (Phase 4) ───
+
+let isShuttingDown = false;
+
+async function gracefulShutdown(signal, { server, sqliteDb }) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+
+  console.log(`[Shutdown] ${signal} 수신 — graceful shutdown 시작`);
+
+  // 1. HTTP 서버 닫기 (새 요청 거부)
+  if (server) {
+    await new Promise((resolve) => {
+      server.close(() => {
+        console.log('[Shutdown] HTTP 서버 종료');
+        resolve();
+      });
+      // 5초 후 강제 종료
+      setTimeout(resolve, 5000);
+    });
+  }
+
+  // 2. 텔레그램 봇 중지
+  try {
+    stopBot();
+    console.log('[Shutdown] 텔레그램 봇 종료');
+  } catch (e) {
+    console.error('[Shutdown] 봇 종료 실패:', e.message);
+  }
+
+  // 3. 블록체인 프로바이더 정리
+  try {
+    await blockchain.destroy();
+  } catch (e) {
+    console.error('[Shutdown] 프로바이더 정리 실패:', e.message);
+  }
+
+  // 4. SQLite DB 닫기
+  if (sqliteDb) {
+    await new Promise((resolve) => {
+      sqliteDb.close((err) => {
+        if (err) console.error('[Shutdown] DB 닫기 실패:', err.message);
+        else console.log('[Shutdown] SQLite DB 종료');
+        resolve();
+      });
+    });
+  }
+
+  console.log('[Shutdown] graceful shutdown 완료');
+  process.exit(0);
+}
+
 async function main() {
   console.log('[Listener] 블록체인 이벤트 리스너 시작');
   try {
-    const db = await initTelegramDb();
+    const sqliteDb = await initTelegramDb();
     await init();
 
     // Firestore → SQLite 복원 (컨테이너 재시작 시 telegram_users 복구)
-    await restoreTelegramUsersFromFirestore(db);
+    await restoreTelegramUsersFromFirestore(sqliteDb);
 
     // SQLite → Firestore 동기화
-    await syncTelegramDataToFirestore(db);
+    await syncTelegramDataToFirestore(sqliteDb);
 
-    initBot(db);
+    initBot(sqliteDb);
 
     // TelegramClaimed 이벤트 → 텔레그램 알림 자동 전송
     onTelegramClaimed(async ({ username, spotName, reward, bonus, telegramHash }) => {
@@ -265,7 +381,13 @@ async function main() {
       console.log(`[알림] @${username}에게 텔레그램 알림 전송 완료`);
     });
 
-    startHttpServer(db);
+    const server = startHttpServer(sqliteDb);
+
+    // Graceful shutdown 핸들러 등록
+    const shutdownContext = { server, sqliteDb };
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM', shutdownContext));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT', shutdownContext));
+
     console.log('[Listener] 실행 중... (체인 리스너 + 텔레그램 봇 + HTTP, Ctrl+C 종료)');
   } catch (err) {
     console.error('[Listener] 시작 실패:', err.message);

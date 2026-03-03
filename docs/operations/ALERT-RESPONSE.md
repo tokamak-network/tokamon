@@ -132,24 +132,60 @@ gcloud run services describe listener-server --project tokamon-go --region asia-
 
 ---
 
+### 7. WebSocket 재연결 실패 (반복)
+
+**증상:** 로그에 `[WS 재연결]` 패턴이 반복적으로 나타나고 `/health`에서 `"status": "degraded"` 반환
+
+**관련 로그 패턴:**
+```
+[WS] WebSocket 연결 끊김 (code: 1006, reason: none)
+[WS 재연결] 5번째 시도, 32000ms 후...
+[WS 재연결] 실패: WebSocket connection failed
+```
+
+```bash
+# 1. 헬스체크 확인
+curl -s https://listener-server-370459866598.asia-northeast3.run.app/health | python3 -m json.tool
+
+# 2. WS 재연결 로그 확인
+gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="listener-server" AND textPayload=~"WS 재연결"' \
+  --project tokamon-go --limit 20 --format=json --freshness=1h
+
+# 3. RPC 프로바이더 상태 확인 (WS_URL 엔드포인트가 살아있는지)
+# 재연결이 계속 실패하면 RPC 프로바이더 장애일 수 있음
+
+# 4. 서버 재시작 (마지막 수단)
+gcloud run deploy listener-server --image gcr.io/tokamon-go/listener-server --project tokamon-go --region asia-northeast3
+```
+
+> 서버는 WS가 끊겨도 HTTP API는 정상 동작합니다. 재연결은 자동이므로 RPC 프로바이더가 복구되면 자동으로 이벤트 수신이 재개됩니다.
+
+---
+
 ## 복구 후 확인 사항
 
 서버 재시작 후 아래 항목을 순서대로 확인:
 
-1. **API 응답 확인**
+1. **헬스체크 확인** (종합 상태)
+```bash
+curl -s https://listener-server-370459866598.asia-northeast3.run.app/health | python3 -m json.tool
+```
+→ `"status": "healthy"`, WS `"connected"`, HTTP `"ok"` 확인
+
+2. **API 응답 확인**
 ```bash
 curl -m 10 -X POST https://listener-server-370459866598.asia-northeast3.run.app/api/device/balance \
   -H "Content-Type: application/json" -d '{"device_id":"healthcheck"}'
 ```
 
-2. **로그에서 정상 기동 메시지 확인**
+3. **로그에서 정상 기동 메시지 확인**
 ```bash
 gcloud run services logs read listener-server \
   --project tokamon-go --region asia-northeast3 --limit 10
 ```
 → `[Listener HTTP] 포트 8080에서 실행 중` 메시지가 보이면 정상
 
-3. **앱에서 동작 확인**
+4. **앱에서 동작 확인**
 → 앱 재실행 후 잔액 조회, 지갑 등록 등 테스트
 
 ---

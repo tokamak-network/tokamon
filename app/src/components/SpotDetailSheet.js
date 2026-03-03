@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -32,9 +32,24 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
 export default function SpotDetailSheet({ spot, userPos, wallet, deviceId, pushToken, receivedCode, onClose, onClaimed, language = 'ko' }) {
   const [stampInfo, setStampInfo] = useState(null);
   const translateY = useState(new Animated.Value(SHEET_HEIGHT))[0];
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dy) > 10,
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 80) {
+          onCloseRef.current();
+        }
+      },
+    })
+  ).current;
 
   useEffect(() => {
     if (spot) {
+      translateY.setValue(SHEET_HEIGHT);
       Animated.spring(translateY, {
         toValue: 0,
         useNativeDriver: true,
@@ -42,6 +57,7 @@ export default function SpotDetailSheet({ spot, userPos, wallet, deviceId, pushT
         friction: 9,
       }).start();
 
+      setStampInfo(null);
       if (deviceId) {
         getDeviceStampInfo(deviceId, spot.id)
           .then(setStampInfo)
@@ -59,16 +75,6 @@ export default function SpotDetailSheet({ spot, userPos, wallet, deviceId, pushT
       }).start();
     }
   }, [spot, wallet, deviceId]);
-
-  const panResponder = PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onMoveShouldSetPanResponder: (_, gestureState) => gestureState.dy > 10,
-    onPanResponderRelease: (_, gestureState) => {
-      if (gestureState.dy > 80) {
-        onClose();
-      }
-    },
-  });
 
   if (!spot) return null;
 

@@ -155,6 +155,9 @@ listener-server/telegram.db
 # Functions build artifacts (copied from shared/)
 functions/shared/
 
+# Vite config (로컬 프록시 설정 포함, 서버 환경마다 다를 수 있음)
+client/vite.config.js
+
 # Old/backup HTML
 client/index_old.html
 

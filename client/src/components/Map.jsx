@@ -142,10 +142,13 @@ function AutoCenter({ userPos }) {
 // 지도 뷰 상태 저장 (탭 전환 시 복원용)
 function TrackView({ onViewChange }) {
   const map = useMap();
+  const callbackRef = useRef(onViewChange);
+  callbackRef.current = onViewChange;
+
   useEffect(() => {
     const save = () => {
       const c = map.getCenter();
-      onViewChange({ lat: c.lat, lng: c.lng, zoom: map.getZoom() });
+      callbackRef.current({ lat: c.lat, lng: c.lng, zoom: map.getZoom() });
     };
     map.on('moveend', save);
     map.on('zoomend', save);
@@ -153,7 +156,7 @@ function TrackView({ onViewChange }) {
       map.off('moveend', save);
       map.off('zoomend', save);
     };
-  }, [map, onViewChange]);
+  }, [map]);
   return null;
 }
 

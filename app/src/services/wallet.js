@@ -5,7 +5,7 @@ import { getNetworkConfig } from '../utils/networkStore';
 let ethersProvider = null;
 let ethersSigner = null;
 let connectedAddress = null;
-let connectionType = null; // 'walletconnect' | 'privatekey'
+let connectionType = null; // 'privatekey'
 
 // Event listeners
 const listeners = new Set();
@@ -33,29 +33,6 @@ export async function initWallet() {
     }
   } catch {
     // ignore
-  }
-}
-
-/**
- * Set wallet from WalletConnect provider (EIP-1193)
- */
-export async function setWalletFromWC(wcProvider) {
-  try {
-    const provider = new ethers.BrowserProvider(wcProvider);
-    const signer = await provider.getSigner();
-    const address = await signer.getAddress();
-
-    connectedAddress = address;
-    ethersProvider = provider;
-    ethersSigner = signer;
-    connectionType = 'walletconnect';
-
-    await AsyncStorage.setItem('wallet_address', address);
-    await AsyncStorage.setItem('wallet_type', 'walletconnect');
-    notifyListeners();
-    return address;
-  } catch (err) {
-    throw new Error('WalletConnect connection failed: ' + err.message);
   }
 }
 

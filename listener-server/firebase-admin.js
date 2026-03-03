@@ -66,14 +66,34 @@ function col(collection) {
   return collectionPath(NETWORK_ID, collection);
 }
 
+// ─── Firestore 재시도 래퍼 (Phase 6) ───
+
+async function withRetry(operation, label, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (e) {
+      if (attempt === maxRetries) {
+        console.error(`[Firestore] ${label} 최종 실패 (${maxRetries}회 시도):`, e.message);
+        throw e;
+      }
+      const delay = Math.min(500 * Math.pow(2, attempt - 1), 5000);
+      console.warn(`[Firestore] ${label} 재시도 ${attempt}/${maxRetries} (${delay}ms 후):`, e.message);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+}
+
 async function syncSpotToFirestore(spotId, meta) {
   if (!db) {
     console.log('[Firestore] DB 미연결 - 시뮬레이션:', spotId, meta.name);
     return;
   }
-  await db.collection(col('spot_metadata')).doc(String(spotId)).set(meta, {
-    merge: true,
-  });
+  await withRetry(async () => {
+    await db.collection(col('spot_metadata')).doc(String(spotId)).set(meta, {
+      merge: true,
+    });
+  }, `spot_metadata/${spotId}`);
   console.log('[Firestore] spot_metadata 업데이트:', spotId, meta.name);
 }
 
@@ -91,10 +111,12 @@ async function getTelegramUsernameByHash(hash) {
 async function saveTelegramHashMap(hash, username) {
   if (!db) return;
   try {
-    await db.collection(col('telegram_hash_map')).doc(hash).set({
-      username,
-      updated_at: new Date().toISOString(),
-    }, { merge: true });
+    await withRetry(async () => {
+      await db.collection(col('telegram_hash_map')).doc(hash).set({
+        username,
+        updated_at: new Date().toISOString(),
+      }, { merge: true });
+    }, `telegram_hash_map/${hash.slice(0, 10)}`);
   } catch (e) {
     console.error('[Firestore] telegram_hash_map 저장 실패:', e.message);
   }
@@ -103,10 +125,12 @@ async function saveTelegramHashMap(hash, username) {
 async function saveWalletTelegramLink(walletAddress, telegramHash) {
   if (!db) return;
   try {
-    await db.collection(col('telegram_wallet_links')).doc(walletAddress.toLowerCase()).set({
-      telegram_hash: telegramHash,
-      updated_at: new Date().toISOString(),
-    }, { merge: true });
+    await withRetry(async () => {
+      await db.collection(col('telegram_wallet_links')).doc(walletAddress.toLowerCase()).set({
+        telegram_hash: telegramHash,
+        updated_at: new Date().toISOString(),
+      }, { merge: true });
+    }, `telegram_wallet_links/${walletAddress.slice(0, 10)}`);
     console.log('[Firestore] telegram_wallet_links 저장:', walletAddress.slice(0, 10) + '...');
   } catch (e) {
     console.error('[Firestore] telegram_wallet_links 저장 실패:', e.message);
@@ -155,14 +179,16 @@ async function sendPushNotification(fcmToken, title, body, data = {}) {
 async function saveTelegramClaimEvent(event) {
   if (!db) return;
   try {
-    await db.collection(col('claim_events')).add({
-      spot_id: event.spotId,
-      telegram_hash: event.telegramHash,
-      reward: event.reward,
-      bonus: event.bonus,
-      stamp: event.stamp,
-      created_at: new Date(Number(event.timestamp) * 1000).toISOString(),
-    });
+    await withRetry(async () => {
+      await db.collection(col('claim_events')).add({
+        spot_id: event.spotId,
+        telegram_hash: event.telegramHash,
+        reward: event.reward,
+        bonus: event.bonus,
+        stamp: event.stamp,
+        created_at: new Date(Number(event.timestamp) * 1000).toISOString(),
+      });
+    }, 'claim_events');
   } catch (e) {
     console.error('[Firestore] telegram claim_events 저장 실패:', e.message);
   }
@@ -172,10 +198,12 @@ async function saveTelegramClaimEvent(event) {
 async function syncTelegramBalance(telegramHash, balance) {
   if (!db) return;
   try {
-    await db.collection(col('telegram_balances')).doc(telegramHash).set({
-      balance,
-      updated_at: new Date().toISOString(),
-    }, { merge: true });
+    await withRetry(async () => {
+      await db.collection(col('telegram_balances')).doc(telegramHash).set({
+        balance,
+        updated_at: new Date().toISOString(),
+      }, { merge: true });
+    }, `telegram_balances/${telegramHash.slice(0, 10)}`);
   } catch (e) {
     console.error('[Firestore] telegram_balances 동기화 실패:', e.message);
   }
@@ -201,10 +229,12 @@ async function saveDeviceClaimEvent(event) {
 async function syncDeviceBalance(deviceHash, balance) {
   if (!db) return;
   try {
-    await db.collection(col('device_balances')).doc(deviceHash).set({
-      balance,
-      updated_at: new Date().toISOString(),
-    }, { merge: true });
+    await withRetry(async () => {
+      await db.collection(col('device_balances')).doc(deviceHash).set({
+        balance,
+        updated_at: new Date().toISOString(),
+      }, { merge: true });
+    }, `device_balances/${deviceHash.slice(0, 10)}`);
   } catch (e) {
     console.error('[Firestore] device_balances 동기화 실패:', e.message);
   }
