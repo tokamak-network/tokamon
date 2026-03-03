@@ -203,7 +203,7 @@ iOS App Attest 검증 + publicKey 등록 (attestation 미들웨어 적용 전)
 | `TELEGRAM_HASH_SALT` | 텔레그램 해시용 salt | 필수 |
 | `REQUIRE_ATTESTATION` | 디바이스 무결성 검증 모드 (`false`/`log`/`true`) | `false` |
 | `GOOGLE_CLOUD_PROJECT_NUMBER` | Google Cloud 프로젝트 번호 (Play Integrity) | Android attestation 필요 시 필수 |
-| `IOS_APP_ATTEST_APP_ID` | `<TEAM_ID>.<bundle_id>` 형식 | iOS attestation 필요 시 필수 |
+| `IOS_APP_ATTEST_APP_ID` | `FZJ48UG7PY.io.tokamak.tokamon` | iOS attestation 필요 시 필수 |
 
 ### Client (app/.env)
 

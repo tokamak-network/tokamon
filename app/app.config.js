@@ -53,7 +53,6 @@ export default {
       },
     },
     plugins: [
-      "@expo/app-integrity",
       "@react-native-firebase/app",
       "@react-native-firebase/messaging",
       "./plugins/withModularHeaders",

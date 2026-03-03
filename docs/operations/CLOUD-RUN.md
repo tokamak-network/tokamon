@@ -24,6 +24,40 @@
 | `DEVICE_HASH_SALT` | Secret Manager | 디바이스 ID 해싱 솔트 |
 | `SIGNER_PRIVATE_KEY` | Secret Manager | claimManager 개인키 |
 | `FIREBASE_SERVICE_ACCOUNT_JSON` | Secret Manager (`FIREBASE_SERVICE_ACCOUNT_KEY`) | Firebase Admin SDK 서비스 계정 키 (FCM 푸시 전송용) |
+| `REQUIRE_ATTESTATION` | 환경변수 | 디바이스 무결성 검증 모드 (`false`/`log`/`true`, 기본: `false`) |
+| `GOOGLE_CLOUD_PROJECT_NUMBER` | 환경변수 | Google Cloud 프로젝트 번호 (Android Play Integrity용) |
+| `IOS_APP_ATTEST_APP_ID` | 환경변수 | `<TEAM_ID>.<bundle_id>` (iOS App Attest용) |
+
+### 환경변수 설정 방법
+
+환경변수는 Cloud Run 서비스에 한 번 설정하면 이후 재배포해도 자동 유지됩니다.
+
+```bash
+# 일반 환경변수 추가/수정 (기존 변수 유지)
+gcloud run services update listener-server \
+  --update-env-vars "KEY1=value1,KEY2=value2" \
+  --project tokamon-go --region asia-northeast3
+
+# 시크릿 추가 (Secret Manager → 환경변수로 매핑)
+gcloud run services update listener-server \
+  --update-secrets "ENV_VAR_NAME=SECRET_NAME:latest" \
+  --project tokamon-go --region asia-northeast3
+
+# 현재 설정된 환경변수 확인
+gcloud run services describe listener-server \
+  --project tokamon-go --region asia-northeast3 \
+  --format="yaml(spec.template.spec.containers[0].env)"
+```
+
+> `--update-env-vars`는 기존 변수를 유지하면서 추가/수정만 합니다. `--set-env-vars`는 전체 교체이므로 사용하지 마세요.
+
+### Attestation 환경변수 추가
+
+```bash
+gcloud run services update listener-server \
+  --update-env-vars "REQUIRE_ATTESTATION=false,GOOGLE_CLOUD_PROJECT_NUMBER=370459866598,IOS_APP_ATTEST_APP_ID=FZJ48UG7PY.io.tokamak.tokamon" \
+  --project tokamon-go --region asia-northeast3
+```
 
 ---
 
