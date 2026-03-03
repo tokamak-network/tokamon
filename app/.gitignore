@@ -37,9 +37,9 @@ yarn-error.*
 # credentials
 credentials.json
 
-# Firebase (EAS 빌드에 필요하므로 커밋 허용)
-# google-services.json
-# GoogleService-Info.plist
+# Firebase (EAS 빌드 시 GOOGLE_SERVICES_JSON / GOOGLE_SERVICES_PLIST 환경변수로 경로 지정)
+google-services.json
+GoogleService-Info.plist
 
 # typescript
 *.tsbuildinfo
