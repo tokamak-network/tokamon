@@ -74,6 +74,7 @@ const REQUIRE_ATTESTATION = process.env.REQUIRE_ATTESTATION || 'false';
 // iOS attestation challenge 저장 (in-memory, 60s TTL)
 const attestChallenges = new Map();
 const CHALLENGE_TTL_MS = 60 * 1000;
+const MAX_CHALLENGES = 10000; // 메모리 보호
 
 // 만료 challenge 정리 (60초마다)
 setInterval(() => {
@@ -111,9 +112,9 @@ function makeAttestationMiddleware(db) {
         const clientDataHash = req.headers['x-attestation-client-data'];
         if (!keyId || !clientDataHash) throw new Error('Missing iOS attestation headers');
 
-        // DB에서 등록된 publicKey 조회
+        // DB에서 등록된 publicKey 조회 (device_hash도 함께 — Firestore 동기화용)
         const row = await new Promise((resolve, reject) => {
-          db.get('SELECT public_key_pem, sign_count FROM device_attest_keys WHERE key_id = ?', [keyId], (err, r) => {
+          db.get('SELECT device_hash, public_key_pem, sign_count FROM device_attest_keys WHERE key_id = ?', [keyId], (err, r) => {
             if (err) reject(err); else resolve(r);
           });
         });
@@ -136,12 +137,9 @@ function makeAttestationMiddleware(db) {
             [result.newSignCount, now, keyId], () => resolve());
         });
 
-        // Firestore signCount 동기화 (비동기, device_hash로 조회)
-        const deviceHashForKey = await new Promise((resolve) => {
-          db.get('SELECT device_hash FROM device_attest_keys WHERE key_id = ?', [keyId], (_, r) => resolve(r?.device_hash));
-        });
-        if (deviceHashForKey) {
-          updateDeviceAttestKeySignCount(deviceHashForKey, result.newSignCount)
+        // Firestore signCount 동기화 (비동기)
+        if (row.device_hash) {
+          updateDeviceAttestKeySignCount(row.device_hash, result.newSignCount)
             .catch(e => console.error('[Attestation] Firestore signCount 동기화 실패:', e.message));
         }
 
@@ -168,6 +166,15 @@ module.exports = function(db) {
 
   // POST /api/device/attest-challenge — challenge 생성
   router.post('/attest-challenge', endpointRateLimit(10), (req, res) => {
+    const { device_id } = req.body;
+    if (!device_id) {
+      return res.status(400).json({ error: 'device_id is required' });
+    }
+
+    if (attestChallenges.size >= MAX_CHALLENGES) {
+      return res.status(503).json({ error: 'Too many pending challenges. Please try again later' });
+    }
+
     const challenge = generateChallenge();
     const id = crypto.randomBytes(16).toString('hex');
     attestChallenges.set(id, { challenge, created: Date.now() });

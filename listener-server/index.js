@@ -113,6 +113,7 @@ function initTelegramDb() {
             updated_at INTEGER NOT NULL
           )
         `);
+        db.run(`CREATE INDEX IF NOT EXISTS idx_attest_keys_key_id ON device_attest_keys(key_id)`);
         // 기존 테이블에 새 컬럼 추가 (이미 존재하면 무시)
         db.run(`ALTER TABLE device_verify_codes ADD COLUMN wallet_address TEXT`, () => {});
         db.run(`ALTER TABLE device_verify_codes ADD COLUMN attempts INTEGER DEFAULT 0`, () => {});
