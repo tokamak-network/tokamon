@@ -49,6 +49,9 @@ cp listener-server/.env.example listener-server/.env
 | **RPC_URL** | ✓ | 블록체인 RPC URL (로컬: `http://127.0.0.1:8999`) |
 | **CONTRACT_ADDRESS** | ✓* | Tokamon 컨트랙트 주소 (*로컬 배포 후 `contract-address.json`에서 자동 로드) |
 | **SERVICE_ACCOUNT_PATH** | 프로덕션만 | Firebase Service Account JSON 경로 (에뮬레이터 사용 시 불필요) |
+| **REQUIRE_ATTESTATION** | - | 디바이스 무결성 검증 (`false`/`log`/`true`, 기본: `false`) |
+| **GOOGLE_CLOUD_PROJECT_NUMBER** | attestation 시 | Google Cloud 프로젝트 번호 (Play Integrity) |
+| **IOS_APP_ATTEST_APP_ID** | attestation 시 | `<TEAM_ID>.<bundle_id>` (App Attest) |
 
 ### 2.3 functions (`functions/.env`)
 

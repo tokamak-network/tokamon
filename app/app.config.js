@@ -21,6 +21,10 @@ export default {
         NSLocationWhenInUseUsageDescription:
           "Tokamon needs your location to find nearby spots and enable claims within range.",
       },
+      entitlements: {
+        "com.apple.developer.devicecheck.appattest-environment":
+          process.env.NODE_ENV === "production" ? "production" : "development",
+      },
       config: {
         googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || "",
       },

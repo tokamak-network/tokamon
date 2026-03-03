@@ -15,7 +15,9 @@
     "express": "^5.2.1",
     "firebase-admin": "^13.0.0",
     "node-telegram-bot-api": "^0.66.0",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "@googleapis/playintegrity": "^3.0.0",
+    "appattest-checker-node": "^1.0.3"
   },
   "jest": {
     "roots": ["<rootDir>/__tests__"],

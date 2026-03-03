@@ -9,6 +9,7 @@ import IntroScreen from './src/screens/IntroScreen';
 import { initWallet, onWalletChange } from './src/services/wallet';
 import { registerForPushNotifications, setupNotificationListener, getDeviceId } from './src/services/notifications';
 import { initNetwork, onNetworkChange } from './src/utils/networkStore';
+import { initAttestation } from './src/services/attestation';
 
 export default function App() {
   const [showIntro, setShowIntro] = useState(true);
@@ -26,6 +27,7 @@ export default function App() {
 
     initNetwork().then((id) => setNetworkId(id));
     initWallet();
+    initAttestation().catch((e) => console.warn('[App] initAttestation failed:', e.message));
 
     const unsubNetwork = onNetworkChange((id) => setNetworkId(id));
 

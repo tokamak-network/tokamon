@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const blockchain = require('../blockchain');
 const { isValidEthAddress, haversineDistance } = require('../utils');
 const { sendPushNotification, saveDeviceClaimEvent } = require('../firebase-admin');
+const { verifyPlayIntegrity, verifyIosAttestation, verifyIosAssertion, generateChallenge } = require('../attestation');
 
 const COLLECT_RADIUS = 15;
 const CODE_EXPIRY_SECONDS = 180; // 3분
@@ -67,44 +68,152 @@ function hashDeviceId(deviceId) {
 }
 
 // 디바이스 검증 미들웨어 (Play Integrity / App Attest)
-// REQUIRE_ATTESTATION=true 설정 시 프로덕션에서 검증 강제
-const REQUIRE_ATTESTATION = process.env.REQUIRE_ATTESTATION === 'true';
+// REQUIRE_ATTESTATION: 'false' (passthrough) / 'log' (log only) / 'true' (enforce)
+const REQUIRE_ATTESTATION = process.env.REQUIRE_ATTESTATION || 'false';
 
-async function verifyAttestation(req, res, next) {
-  if (!REQUIRE_ATTESTATION) return next();
+// iOS attestation challenge 저장 (in-memory, 60s TTL)
+const attestChallenges = new Map();
+const CHALLENGE_TTL_MS = 60 * 1000;
 
-  const token = req.headers['x-attestation-token'];
-  const platform = req.headers['x-attestation-platform']; // 'android' | 'ios'
-
-  if (!token || !platform) {
-    return res.status(403).json({ error: 'Device attestation required' });
+// 만료 challenge 정리 (60초마다)
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of attestChallenges) {
+    if (now - entry.created > CHALLENGE_TTL_MS) attestChallenges.delete(key);
   }
+}, CHALLENGE_TTL_MS);
 
-  try {
-    if (platform === 'android') {
-      // TODO: Google Play Integrity API 검증
-      // const result = await verifyPlayIntegrity(token);
-      // if (!result.valid) throw new Error('Play Integrity check failed');
-      return res.status(501).json({ error: 'Android attestation not yet implemented' });
-    } else if (platform === 'ios') {
-      // TODO: Apple App Attest 검증
-      // const result = await verifyAppAttest(token);
-      // if (!result.valid) throw new Error('App Attest check failed');
-      return res.status(501).json({ error: 'iOS attestation not yet implemented' });
-    } else {
-      return res.status(400).json({ error: 'Unknown platform' });
+function makeAttestationMiddleware(db) {
+  return async function verifyAttestation(req, res, next) {
+    if (REQUIRE_ATTESTATION === 'false') return next();
+
+    const token = req.headers['x-attestation-token'];
+    const platform = req.headers['x-attestation-platform']; // 'android' | 'ios'
+
+    if (!token || !platform) {
+      if (REQUIRE_ATTESTATION === 'log') {
+        console.warn('[Attestation] Missing headers, allowing (log mode)');
+        return next();
+      }
+      return res.status(403).json({ error: 'Device attestation required', code: 'ATTEST_REQUIRED' });
     }
-  } catch (err) {
-    console.error('[Attestation] 검증 실패:', err.message);
-    return res.status(403).json({ error: 'Device attestation failed' });
-  }
+
+    try {
+      if (platform === 'android') {
+        const nonce = req.headers['x-attestation-nonce'];
+        if (!nonce) throw new Error('Missing nonce header');
+
+        const result = await verifyPlayIntegrity(token, nonce);
+        if (!result.valid) throw new Error(result.error || 'Play Integrity check failed');
+
+      } else if (platform === 'ios') {
+        const keyId = req.headers['x-attestation-key-id'];
+        const clientDataHash = req.headers['x-attestation-client-data'];
+        if (!keyId || !clientDataHash) throw new Error('Missing iOS attestation headers');
+
+        // DB에서 등록된 publicKey 조회
+        const row = await new Promise((resolve, reject) => {
+          db.get('SELECT public_key_pem, sign_count FROM device_attest_keys WHERE key_id = ?', [keyId], (err, r) => {
+            if (err) reject(err); else resolve(r);
+          });
+        });
+
+        if (!row) {
+          if (REQUIRE_ATTESTATION === 'log') {
+            console.warn(`[Attestation] iOS key ${keyId} not registered, allowing (log mode)`);
+            return next();
+          }
+          return res.status(403).json({ error: 'Device not attested', code: 'ATTEST_REQUIRED' });
+        }
+
+        const result = await verifyIosAssertion(token, clientDataHash, row.public_key_pem, row.sign_count);
+        if (!result.valid) throw new Error('iOS assertion verification failed');
+
+        // signCount 업데이트
+        const now = Math.floor(Date.now() / 1000);
+        await new Promise((resolve) => {
+          db.run('UPDATE device_attest_keys SET sign_count = ?, updated_at = ? WHERE key_id = ?',
+            [result.newSignCount, now, keyId], () => resolve());
+        });
+
+      } else {
+        return res.status(400).json({ error: 'Unknown platform' });
+      }
+
+      return next();
+    } catch (err) {
+      console.error('[Attestation] 검증 실패:', err.message);
+      if (REQUIRE_ATTESTATION === 'log') {
+        console.warn('[Attestation] Allowing request despite failure (log mode)');
+        return next();
+      }
+      return res.status(403).json({ error: 'Device attestation failed', code: 'ATTEST_REQUIRED' });
+    }
+  };
 }
 
 module.exports = function(db) {
   const router = express.Router();
 
-  // 디바이스 검증 (REQUIRE_ATTESTATION=true 시 모든 라우트에 적용)
-  router.use(verifyAttestation);
+  // ─── iOS App Attest: challenge/register (attestation 미들웨어 적용 전) ───
+
+  // POST /api/device/attest-challenge — challenge 생성
+  router.post('/attest-challenge', endpointRateLimit(10), (req, res) => {
+    const challenge = generateChallenge();
+    const id = crypto.randomBytes(16).toString('hex');
+    attestChallenges.set(id, { challenge, created: Date.now() });
+    res.json({ challenge_id: id, challenge });
+  });
+
+  // POST /api/device/attest-register — iOS attestation 검증 + publicKey 저장
+  router.post('/attest-register', endpointRateLimit(5), async (req, res) => {
+    try {
+      const { device_id, key_id, attestation, challenge_id } = req.body;
+
+      if (!device_id || !key_id || !attestation || !challenge_id) {
+        return res.status(400).json({ error: 'Required fields are missing' });
+      }
+
+      // challenge 조회 & 소비
+      const entry = attestChallenges.get(challenge_id);
+      if (!entry) {
+        return res.status(400).json({ error: 'Invalid or expired challenge' });
+      }
+      attestChallenges.delete(challenge_id);
+
+      // TTL 검증
+      if (Date.now() - entry.created > CHALLENGE_TTL_MS) {
+        return res.status(400).json({ error: 'Challenge expired' });
+      }
+
+      // Apple App Attest 검증
+      const result = await verifyIosAttestation(key_id, entry.challenge, attestation);
+
+      // DB에 publicKey 저장
+      const deviceHash = hashDeviceId(device_id);
+      const now = Math.floor(Date.now() / 1000);
+      const receiptStr = result.receipt ? Buffer.from(result.receipt).toString('base64') : null;
+      await new Promise((resolve, reject) => {
+        db.run(
+          `INSERT INTO device_attest_keys (device_hash, key_id, public_key_pem, receipt, sign_count, created_at, updated_at)
+           VALUES (?, ?, ?, ?, 0, ?, ?)
+           ON CONFLICT(device_hash) DO UPDATE SET key_id = ?, public_key_pem = ?, receipt = ?, sign_count = 0, updated_at = ?`,
+          [deviceHash, key_id, result.publicKeyPem, receiptStr, now, now,
+           key_id, result.publicKeyPem, receiptStr, now],
+          (err) => err ? reject(err) : resolve()
+        );
+      });
+
+      console.log(`[Attestation] iOS device registered: ${deviceHash.slice(0, 12)}...`);
+      res.json({ attested: true });
+    } catch (err) {
+      console.error('[Attestation] iOS registration failed:', err.message);
+      res.status(403).json({ error: 'Attestation verification failed' });
+    }
+  });
+
+  // ─── 디바이스 검증 미들웨어 (challenge/register 이후 라우트에 적용) ───
+  router.use(makeAttestationMiddleware(db));
 
   // 만료된 인증 코드 주기적 정리 (10분마다)
   setInterval(() => {

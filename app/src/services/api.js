@@ -1,5 +1,6 @@
 import { API_BASE } from '../utils/constants';
 import { getSelectedNetwork, getListenerUrl } from '../utils/networkStore';
+import { getAttestationHeaders, resetAttestation } from './attestation';
 
 // 현재 선택된 네트워크를 쿼리 파라미터로 추가
 function withNetwork(url) {
@@ -22,6 +23,32 @@ async function parseJson(res) {
     throw err;
   }
   return data;
+}
+
+/**
+ * Device API 호출 헬퍼: attestation 헤더 자동 주입 + ATTEST_REQUIRED 자동 재시도
+ */
+async function deviceFetch(path, deviceId, body, { retry = true } = {}) {
+  const attestHeaders = await getAttestationHeaders(deviceId, body);
+  const res = await fetch(`${getListenerUrl()}/api/device${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...attestHeaders },
+    body: JSON.stringify(body),
+  });
+
+  // ATTEST_REQUIRED → 재attestation 후 1회 재시도
+  if (res.status === 403 && retry) {
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const data = await res.json();
+      if (data.code === 'ATTEST_REQUIRED') {
+        await resetAttestation();
+        return deviceFetch(path, deviceId, body, { retry: false });
+      }
+    }
+  }
+
+  return parseJson(res);
 }
 
 export async function getSpots({ lat, lng, limit, offset, filter } = {}) {
@@ -80,54 +107,44 @@ export async function getTelegramUsername(hash, signature) {
   return parseJson(res);
 }
 
-// ─── Device API (listener-server direct) ───
+// ─── Device API (listener-server direct, with attestation) ───
 
 // 푸시 필요: device_id (식별) + fcm_token (푸시 전송)
 export async function requestDeviceCode(deviceId, fcmToken, spotId, lat, lng) {
-  const res = await fetch(`${getListenerUrl()}/api/device/request-code`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ device_id: deviceId, fcm_token: fcmToken, spot_id: spotId, lat, lng }),
+  return deviceFetch('/request-code', deviceId, {
+    device_id: deviceId, fcm_token: fcmToken, spot_id: spotId, lat, lng,
   });
-  return parseJson(res);
 }
 
 // 식별만: device_id
 export async function verifyAndClaimDevice(deviceId, spotId, code) {
-  const res = await fetch(`${getListenerUrl()}/api/device/verify-and-claim`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ device_id: deviceId, spot_id: spotId, code }),
+  return deviceFetch('/verify-and-claim', deviceId, {
+    device_id: deviceId, spot_id: spotId, code,
   });
-  return parseJson(res);
 }
 
 export async function getDeviceStampInfo(deviceId, spotId) {
-  const res = await fetch(`${getListenerUrl()}/api/device/stamp-info`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ device_id: deviceId, spot_id: spotId }),
+  return deviceFetch('/stamp-info', deviceId, {
+    device_id: deviceId, spot_id: spotId,
   });
-  return parseJson(res);
 }
 
 export async function getDeviceBalance(deviceId) {
-  const res = await fetch(`${getListenerUrl()}/api/device/balance`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ device_id: deviceId }),
+  return deviceFetch('/balance', deviceId, {
+    device_id: deviceId,
   });
-  return parseJson(res);
 }
 
 export async function getDeviceBalanceByListenerUrl(deviceId, listenerUrl) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000);
   try {
+    const body = { device_id: deviceId };
+    const attestHeaders = await getAttestationHeaders(deviceId, body);
     const res = await fetch(`${listenerUrl}/api/device/balance`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ device_id: deviceId }),
+      headers: { 'Content-Type': 'application/json', ...attestHeaders },
+      body: JSON.stringify(body),
       signal: controller.signal,
     });
     return parseJson(res);
@@ -138,20 +155,14 @@ export async function getDeviceBalanceByListenerUrl(deviceId, listenerUrl) {
 
 // 푸시 필요: device_id + fcm_token
 export async function requestWalletLinkCode(deviceId, fcmToken, walletAddress) {
-  const res = await fetch(`${getListenerUrl()}/api/device/request-link-code`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ device_id: deviceId, fcm_token: fcmToken, wallet_address: walletAddress }),
+  return deviceFetch('/request-link-code', deviceId, {
+    device_id: deviceId, fcm_token: fcmToken, wallet_address: walletAddress,
   });
-  return parseJson(res);
 }
 
 export async function verifyAndLinkWallet(deviceId, walletAddress, code) {
-  const res = await fetch(`${getListenerUrl()}/api/device/verify-and-link`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ device_id: deviceId, wallet_address: walletAddress, code }),
+  return deviceFetch('/verify-and-link', deviceId, {
+    device_id: deviceId, wallet_address: walletAddress, code,
   });
-  return parseJson(res);
 }
 
