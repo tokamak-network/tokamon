@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import { Buffer } from 'buffer';
 import { getListenerUrl } from '../utils/networkStore';
 
 const ATTEST_KEY_ID_STORE = 'tokamon_attest_key_id';
@@ -168,11 +169,5 @@ async function _sha256Base64(str) {
   const encoder = new TextEncoder();
   const data = encoder.encode(str);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = new Uint8Array(hashBuffer);
-  // base64 encoding
-  let binary = '';
-  for (let i = 0; i < hashArray.length; i++) {
-    binary += String.fromCharCode(hashArray[i]);
-  }
-  return btoa(binary);
+  return Buffer.from(hashBuffer).toString('base64');
 }
