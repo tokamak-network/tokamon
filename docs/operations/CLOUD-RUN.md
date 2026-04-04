@@ -1,4 +1,7 @@
-# listener-server Cloud Run 배포 & 모니터링 가이드
+# [DEPRECATED] listener-server Cloud Run 배포 & 모니터링 가이드
+
+> **이 문서는 더 이상 사용되지 않습니다.** listener-server는 Compute Engine VM으로 이전되었습니다.
+> 현재 운영 가이드: [COMPUTE-ENGINE.md](./COMPUTE-ENGINE.md)
 
 ## 서비스 정보
 
