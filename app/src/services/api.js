@@ -1,5 +1,5 @@
 import { API_BASE } from '../utils/constants';
-import { getSelectedNetwork, getListenerUrl } from '../utils/networkStore';
+import { getSelectedNetwork, getListenerUrl, setListenerUrl } from '../utils/networkStore';
 import { getAttestationHeaders, resetAttestation } from './attestation';
 
 // 현재 선택된 네트워크를 쿼리 파라미터로 추가
@@ -79,7 +79,12 @@ export async function getContractInfo() {
     if (res.ok) {
       const contentType = res.headers.get('content-type') || '';
       if (contentType.includes('application/json')) {
-        return res.json();
+        const data = await res.json();
+        // 서버에서 listenerUrl을 받으면 동적으로 설정
+        if (data.listenerUrl) {
+          setListenerUrl(data.listenerUrl);
+        }
+        return data;
       }
     }
   } catch {

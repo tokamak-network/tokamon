@@ -107,13 +107,17 @@ app.get('/api/networks', (req, res) => {
   res.json(listNetworks());
 });
 
+// listener-server URL (Compute Engine VM)
+const LISTENER_BASE_URL = process.env.LISTENER_URL || 'https://listener.tokamon.io';
+
 // GET /api/contract — Firestore config → shared/networks.js → contract-address.json → env
 app.get('/api/contract', async (req, res) => {
   try {
     // 1. Firestore config (네트워크별)
     const snap = await db.collection(col(req, 'config')).doc('contract').get();
     if (snap.exists) {
-      return res.json({ ...snap.data(), network: req.networkId });
+      const data = snap.data();
+      return res.json({ ...data, listenerUrl: data.listenerUrl || LISTENER_BASE_URL, network: req.networkId });
     }
 
     // 2. shared/networks.js contracts
@@ -127,6 +131,7 @@ app.get('/api/contract', async (req, res) => {
           faucet: networkContracts.faucet || null,
           chainId: networkInfo.chainId,
           network: req.networkId,
+          listenerUrl: LISTENER_BASE_URL,
         });
       }
     } catch (_) {}
@@ -757,3 +762,33 @@ app.use('/api', (req, res) => {
 
 // Cloud Function: 모든 요청을 Express가 처리 (Hosting rewrite에서 /api -> api 로 연결)
 exports.api = functions.https.onRequest(app);
+
+// Proxy: /api/faucet/**, /api/spots/** 요청을 Compute Engine VM (listener-server)으로 전달
+const LISTENER_URL = process.env.LISTENER_URL || 'https://listener.tokamon.io';
+
+exports.listenerProxy = functions.https.onRequest(async (req, res) => {
+  try {
+    const url = new URL(req.url, LISTENER_URL);
+    const options = {
+      method: req.method,
+      headers: {
+        'content-type': req.headers['content-type'] || 'application/json',
+        'x-forwarded-for': req.headers['x-forwarded-for'] || req.ip,
+      },
+    };
+
+    if (req.method !== 'GET' && req.method !== 'HEAD' && req.body) {
+      options.body = JSON.stringify(req.body);
+    }
+
+    const response = await fetch(url.toString(), options);
+    const contentType = response.headers.get('content-type') || 'application/json';
+    const body = contentType.includes('json') ? await response.json() : await response.text();
+
+    res.set('Content-Type', contentType);
+    res.status(response.status).send(body);
+  } catch (error) {
+    console.error('listenerProxy error:', error.message);
+    res.status(503).json({ error: 'Listener server unavailable' });
+  }
+});

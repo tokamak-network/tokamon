@@ -3,9 +3,9 @@
     "public": "client/dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
-      { "source": "/api/faucet/**", "run": { "serviceId": "listener-server", "region": "asia-northeast3" } },
-      { "source": "/api/spots/**", "run": { "serviceId": "listener-server", "region": "asia-northeast3" } },
-      { "source": "/api/spots", "run": { "serviceId": "listener-server", "region": "asia-northeast3" } },
+      { "source": "/api/faucet/**", "function": "listenerProxy" },
+      { "source": "/api/spots/**", "function": "listenerProxy" },
+      { "source": "/api/spots", "function": "listenerProxy" },
       { "source": "/api/**", "function": "api" },
       { "source": "**", "destination": "/index.html" }
     ]
