@@ -4,8 +4,8 @@
 
 set -euo pipefail
 
-DOMAIN="listener.tokamon.io"
-EMAIL="biztigerwonderful@gmail.com"
+DOMAIN="${DOMAIN:-listener.tokamon.io}"
+EMAIL="${EMAIL:?ERROR: EMAIL 환경변수를 설정하세요. 예: EMAIL=admin@example.com ./init-ssl.sh}"
 
 echo "=== Let's Encrypt 인증서 발급 ==="
 
@@ -30,7 +30,7 @@ EOF
 docker run -d --name nginx-temp \
   -p 80:80 \
   -v /tmp/nginx-temp.conf:/etc/nginx/conf.d/default.conf:ro \
-  -v "$(docker volume inspect vm_certbot-www --format '{{ .Mountpoint }}')":/var/www/certbot:ro \
+  -v ~/certbot-www:/var/www/certbot:ro \
   nginx:alpine
 
 # 3. certbot으로 인증서 발급

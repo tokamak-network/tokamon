@@ -143,16 +143,17 @@
 
 ---
 
-## 6. 남은 작업
+## 6. 완료된 작업
 
 | 항목 | 상태 |
 |------|------|
-| Android 앱 재빌드 (EAS Build) | 진행 중 |
-| iOS 앱 재빌드 | 대기 |
-| Firebase Functions 배포 (listenerProxy) | 대기 |
-| Cloud Run 서비스 중지/삭제 | 1-2주 안정 운영 후 |
-| Cloud Monitoring 업타임 체크 설정 | 대기 |
-| COS iptables 영구 설정 | 대기 |
+| Android 앱 재빌드 (EAS Build) | 완료 |
+| iOS 앱 재빌드 + TestFlight 배포 | 완료 |
+| Firebase Functions 배포 (listenerProxy) | 완료 |
+| Cloud Run 서비스 삭제 | 완료 (2026-04-04) |
+| Cloud Monitoring 업타임 체크 설정 | 완료 |
+| COS iptables 영구 설정 | 완료 |
+| certbot 자동 갱신 설정 | 완료 |
 
 ---
 

@@ -107,8 +107,8 @@ app.get('/api/networks', (req, res) => {
   res.json(listNetworks());
 });
 
-// listener-server URL (Compute Engine VM)
-const LISTENER_BASE_URL = process.env.LISTENER_URL || 'https://listener.tokamon.io';
+// listener-server URL (Compute Engine VM) — listenerProxy와 /api/contract 공용
+const LISTENER_SERVER_URL = process.env.LISTENER_URL || 'https://listener.tokamon.io';
 
 // GET /api/contract — Firestore config → shared/networks.js → contract-address.json → env
 app.get('/api/contract', async (req, res) => {
@@ -117,7 +117,7 @@ app.get('/api/contract', async (req, res) => {
     const snap = await db.collection(col(req, 'config')).doc('contract').get();
     if (snap.exists) {
       const data = snap.data();
-      return res.json({ ...data, listenerUrl: data.listenerUrl || LISTENER_BASE_URL, network: req.networkId });
+      return res.json({ ...data, listenerUrl: data.listenerUrl || LISTENER_SERVER_URL, network: req.networkId });
     }
 
     // 2. shared/networks.js contracts
@@ -131,7 +131,7 @@ app.get('/api/contract', async (req, res) => {
           faucet: networkContracts.faucet || null,
           chainId: networkInfo.chainId,
           network: req.networkId,
-          listenerUrl: LISTENER_BASE_URL,
+          listenerUrl: LISTENER_SERVER_URL,
         });
       }
     } catch (_) {}
@@ -764,18 +764,26 @@ app.use('/api', (req, res) => {
 exports.api = functions.https.onRequest(app);
 
 // Proxy: /api/faucet/**, /api/spots/** 요청을 Compute Engine VM (listener-server)으로 전달
-const LISTENER_URL = process.env.LISTENER_URL || 'https://listener.tokamon.io';
 const ALLOWED_PROXY_PREFIXES = ['/api/faucet', '/api/spots'];
+
+function isAllowedProxyPath(path) {
+  return ALLOWED_PROXY_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
+}
 
 exports.listenerProxy = functions.https.onRequest(async (req, res) => {
   try {
     // 경로 검증: 허용된 prefix만 통과 (SSRF 방지)
-    const path = decodeURIComponent(req.path).replace(/\.\./g, '').replace(/\/+/g, '/');
-    if (!ALLOWED_PROXY_PREFIXES.some((p) => path.startsWith(p))) {
+    let path;
+    try {
+      path = decodeURIComponent(req.path).replace(/\.\./g, '').replace(/\/+/g, '/');
+    } catch {
+      return res.status(400).json({ error: 'Malformed request path' });
+    }
+    if (!isAllowedProxyPath(path)) {
       return res.status(403).json({ error: 'Forbidden path' });
     }
 
-    const targetUrl = `${LISTENER_URL}${path}`;
+    const targetUrl = `${LISTENER_SERVER_URL}${path}`;
     const qs = new URLSearchParams(req.query).toString();
     const url = qs ? `${targetUrl}?${qs}` : targetUrl;
 
@@ -783,7 +791,6 @@ exports.listenerProxy = functions.https.onRequest(async (req, res) => {
       method: req.method,
       headers: {
         'content-type': req.headers['content-type'] || 'application/json',
-        'x-forwarded-for': req.ip,
       },
     };
 
@@ -793,7 +800,7 @@ exports.listenerProxy = functions.https.onRequest(async (req, res) => {
 
     const response = await fetch(url, options);
     const contentType = response.headers.get('content-type') || 'application/json';
-    const body = contentType.includes('json') ? await response.json() : await response.text();
+    const body = (response.status !== 204 && contentType.includes('json')) ? await response.json() : await response.text();
 
     res.set('Content-Type', contentType);
     res.status(response.status).send(body);

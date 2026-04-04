@@ -15,7 +15,7 @@
 │  asia-northeast3-a (서울), 고정 IP: 34.64.144.9                    │
 │                                                                     │
 │  [listener-server — 상시 가동]                                     │
-│  - WebSocket 블록체인 이벤트 리스닝 (12개 이벤트)                  │
+│  - WebSocket 블록체인 이벤트 리스닝 (13개 이벤트)                  │
 │  - Telegram 봇 (polling: 알림, /balance, /link, /change)           │
 │  - HTTP API (/api/device/*, /api/telegram/*, /api/faucet/*, etc.)  │
 │  - claimManager 키로 트랜잭션 서명                                  │
