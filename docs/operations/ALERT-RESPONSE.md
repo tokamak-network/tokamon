@@ -1,5 +1,7 @@
 # 알림 발생 시 긴급 대응 가이드
 
+> listener-server: Compute Engine VM (listener.tokamon.io)
+
 ## 알림 유형별 대응
 
 ### 1. 서버 응답 없음 (504 타임아웃)
@@ -8,100 +10,97 @@
 
 ```bash
 # 상태 확인 (10초 내 응답 없으면 서버 멈춘 것)
-curl -m 10 -X POST https://listener-server-370459866598.asia-northeast3.run.app/api/device/balance \
-  -H "Content-Type: application/json" -d '{"device_id":"healthcheck"}'
+curl -m 10 https://listener.tokamon.io/health
 
-# 에러 로그 확인
-gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="listener-server" AND severity>=ERROR' \
-  --project tokamon-go --limit 10 --format=json --freshness=1h
+# VM SSH 접속
+gcloud compute ssh listener-server --zone=asia-northeast3-a --project=tokamon-go
 
-# 서버 재시작 (기존 이미지로 재배포)
-gcloud run deploy listener-server --image gcr.io/tokamon-go/listener-server --project tokamon-go --region asia-northeast3
+# 컨테이너 로그 확인
+docker logs --tail 50 listener-server
+
+# 컨테이너 재시작
+docker restart listener-server
 
 # 재시작 후 정상 확인
-curl -m 10 -X POST https://listener-server-370459866598.asia-northeast3.run.app/api/device/balance \
-  -H "Content-Type: application/json" -d '{"device_id":"healthcheck"}'
+curl -m 10 https://listener.tokamon.io/health
 ```
 
 ---
 
 ### 2. ECONNRESET / 텔레그램 봇 충돌
 
-**증상:** 로그에 `[polling_error] EFATAL: Error: read ECONNRESET` 발생 후 서버 멈춤
+**증상:** 로그에 `[polling_error] EFATAL: Error: read ECONNRESET` 또는 `409 Conflict`
 
 ```bash
-# 서버 재시작으로 복구
-gcloud run deploy listener-server --image gcr.io/tokamon-go/listener-server --project tokamon-go --region asia-northeast3
+# SSH 접속 후 컨테이너 재시작
+gcloud compute ssh listener-server --zone=asia-northeast3-a --project=tokamon-go
+docker restart listener-server
 ```
+
+> 409 Conflict는 같은 봇 토큰으로 다른 인스턴스가 polling 중일 때 발생. Cloud Run이 아직 실행 중인지 확인.
 
 ---
 
 ### 3. 5xx 에러 다수 발생
 
-**증상:** Cloud Monitoring에서 "Listener Server 5xx Error Alert" 이메일 수신
-
 ```bash
-# 에러 상세 확인
-gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="listener-server" AND severity>=ERROR' \
-  --project tokamon-go --limit 20 --format=json --freshness=1h
+# SSH 접속 후 로그 확인
+gcloud compute ssh listener-server --zone=asia-northeast3-a --project=tokamon-go
+docker logs --tail 100 listener-server | grep -i error
 
-# 서버 재시작
-gcloud run deploy listener-server --image gcr.io/tokamon-go/listener-server --project tokamon-go --region asia-northeast3
+# 재시작
+docker restart listener-server
 ```
 
 ---
 
-### 4. 인스턴스 다운
+### 4. VM 인스턴스 다운
 
-**증상:** Cloud Monitoring에서 인스턴스 수 0 알림 수신
+**증상:** Cloud Monitoring 업타임 체크 실패 알림
 
 ```bash
-# 서비스 상태 확인
-gcloud run services describe listener-server \
-  --project tokamon-go --region asia-northeast3
+# VM 상태 확인
+gcloud compute instances describe listener-server \
+  --zone=asia-northeast3-a --project=tokamon-go \
+  --format="value(status)"
 
-# 최근 리비전 확인
-gcloud run revisions list \
-  --service listener-server --project tokamon-go --region asia-northeast3
+# VM이 TERMINATED면 시작
+gcloud compute instances start listener-server \
+  --zone=asia-northeast3-a --project=tokamon-go
 
-# 재배포
-gcloud run deploy listener-server \
-  --image gcr.io/tokamon-go/listener-server \
-  --project tokamon-go --region asia-northeast3
+# SSH 접속 후 컨테이너 확인
+gcloud compute ssh listener-server --zone=asia-northeast3-a --project=tokamon-go
+docker ps -a
+
+# 컨테이너가 꺼져있으면 시작
+docker start listener-server
+docker start nginx
 ```
 
 ---
 
 ### 5. 메모리 사용량 80% 초과
 
-**증상:** Cloud Monitoring에서 메모리 초과 알림 수신
-
 ```bash
-# 메모리 관련 로그 확인
-gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="listener-server" AND textPayload=~"memory|OOM|heap"' \
-  --project tokamon-go --limit 10 --freshness=1h
+# SSH 접속 후 메모리 확인
+gcloud compute ssh listener-server --zone=asia-northeast3-a --project=tokamon-go
+free -h
+docker stats --no-stream
 
-# 메모리 증설 (512Mi → 1Gi)
-gcloud run services update listener-server \
-  --memory 1Gi \
-  --project tokamon-go --region asia-northeast3
+# Docker 정리
+docker system prune -f
+
+# 필요 시 컨테이너 재시작
+docker restart listener-server
 ```
 
 ---
 
 ### 6. FCM 푸시 전송 실패
 
-**증상:** 앱에서 "Failed to send push notification", 로그에 `[FCM] 푸시 전송 실패`
-
 #### 6-1. `messaging/third-party-auth-error` (APNs 인증 실패)
 
 FCM → APNs 전달 시 인증 실패. APNs 키와 팀 ID 불일치가 원인.
-
-**확인:**
-- Firebase Console → 프로젝트 설정 → Cloud Messaging → iOS 앱 선택
-- APNs 인증 키의 **키 ID**와 **팀 ID**가 올바른지 확인
-- APNs 키(.p8)는 **해당 팀 ID의 Apple Developer 계정에서 생성된 것**이어야 함
-- 다른 팀(조직)에서 만든 키는 사용 불가
 
 **조치:**
 1. Apple Developer (https://developer.apple.com/account) → Keys에서 현재 팀의 APNs 키 확인
@@ -110,55 +109,55 @@ FCM → APNs 전달 시 인증 실패. APNs 키와 팀 ID 불일치가 원인.
 
 #### 6-2. `Request is missing required authentication credential` (서버 인증 실패)
 
-서버 → FCM API 호출 시 서비스 계정 인증 실패.
-
-**확인:**
-- Cloud Run 로그에서 Firebase 초기화 로그 확인:
 ```bash
-gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="listener-server" AND textPayload=~"Firebase"' \
-  --project tokamon-go --limit 5 --freshness=10m --format="table(timestamp,textPayload)"
-```
-- `[Firebase] Admin SDK 초기화 완료 (Secret Manager 환경변수)` → 정상
-- `[Firebase] Admin SDK 초기화 완료 (Application Default Credentials)` → Secret Manager 연결 안 됨
+# SSH 접속 후 Firebase 초기화 로그 확인
+gcloud compute ssh listener-server --zone=asia-northeast3-a --project=tokamon-go
+docker logs listener-server 2>&1 | grep Firebase
 
-**조치:**
-```bash
-# Secret Manager에 서비스 계정 키 확인
-gcloud secrets versions access latest --secret=FIREBASE_SERVICE_ACCOUNT_KEY --project=tokamon-go | python3 -c "import sys,json; d=json.load(sys.stdin); print('project_id:', d['project_id']); print('client_email:', d['client_email'])"
-
-# Cloud Run에 시크릿 연결 확인
-gcloud run services describe listener-server --project tokamon-go --region asia-northeast3 --format='yaml(spec.template.spec.containers[0].env)'
+# 정상: [Firebase] Admin SDK 초기화 완료 (Secret Manager 환경변수)
+# 비정상: Firebase 초기화 로그 없음 → FIREBASE_SERVICE_ACCOUNT_JSON 확인
 ```
 
 ---
 
 ### 7. WebSocket 재연결 실패 (반복)
 
-**증상:** 로그에 `[WS 재연결]` 패턴이 반복적으로 나타나고 `/health`에서 `"status": "degraded"` 반환
-
-**관련 로그 패턴:**
-```
-[WS] WebSocket 연결 끊김 (code: 1006, reason: none)
-[WS 재연결] 5번째 시도, 32000ms 후...
-[WS 재연결] 실패: WebSocket connection failed
-```
+**증상:** `/health`에서 `"status": "degraded"`, WS `"reconnecting"` 반환
 
 ```bash
 # 1. 헬스체크 확인
-curl -s https://listener-server-370459866598.asia-northeast3.run.app/health | python3 -m json.tool
+curl -s https://listener.tokamon.io/health | python3 -m json.tool
 
-# 2. WS 재연결 로그 확인
-gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="listener-server" AND textPayload=~"WS 재연결"' \
-  --project tokamon-go --limit 20 --format=json --freshness=1h
+# 2. RPC 서버 상태 확인
+curl -s -o /dev/null -w "%{http_code}" -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+  https://rpc.thanos-sepolia.tokamak.network
 
-# 3. RPC 프로바이더 상태 확인 (WS_URL 엔드포인트가 살아있는지)
-# 재연결이 계속 실패하면 RPC 프로바이더 장애일 수 있음
-
-# 4. 서버 재시작 (마지막 수단)
-gcloud run deploy listener-server --image gcr.io/tokamon-go/listener-server --project tokamon-go --region asia-northeast3
+# 3. RPC 정상인데 WS만 끊기면 컨테이너 재시작
+gcloud compute ssh listener-server --zone=asia-northeast3-a --project=tokamon-go
+docker restart listener-server
 ```
 
-> 서버는 WS가 끊겨도 HTTP API는 정상 동작합니다. 재연결은 자동이므로 RPC 프로바이더가 복구되면 자동으로 이벤트 수신이 재개됩니다.
+> 서버는 WS가 끊겨도 HTTP API는 정상 동작합니다. 재연결은 자동이므로 RPC가 복구되면 이벤트 수신이 재개됩니다.
+
+---
+
+### 8. nginx / TLS 인증서 문제
+
+**증상:** HTTPS 접근 시 인증서 오류
+
+```bash
+# SSH 접속
+gcloud compute ssh listener-server --zone=asia-northeast3-a --project=tokamon-go
+
+# 인증서 만료일 확인
+docker run --rm -v ~/letsencrypt:/etc/letsencrypt certbot/certbot certificates
+
+# 수동 갱신
+docker run --rm -v ~/letsencrypt:/etc/letsencrypt -v ~/certbot-www:/var/www/certbot certbot/certbot renew
+docker restart nginx
+```
 
 ---
 
@@ -168,20 +167,18 @@ gcloud run deploy listener-server --image gcr.io/tokamon-go/listener-server --pr
 
 1. **헬스체크 확인** (종합 상태)
 ```bash
-curl -s https://listener-server-370459866598.asia-northeast3.run.app/health | python3 -m json.tool
+curl -s https://listener.tokamon.io/health | python3 -m json.tool
 ```
 → `"status": "healthy"`, WS `"connected"`, HTTP `"ok"` 확인
 
 2. **API 응답 확인**
 ```bash
-curl -m 10 -X POST https://listener-server-370459866598.asia-northeast3.run.app/api/device/balance \
-  -H "Content-Type: application/json" -d '{"device_id":"healthcheck"}'
+curl -s https://listener.tokamon.io/api/spots?network=thanos-sepolia | head -c 200
 ```
 
 3. **로그에서 정상 기동 메시지 확인**
 ```bash
-gcloud run services logs read listener-server \
-  --project tokamon-go --region asia-northeast3 --limit 10
+docker logs --tail 20 listener-server
 ```
 → `[Listener HTTP] 포트 8080에서 실행 중` 메시지가 보이면 정상
 

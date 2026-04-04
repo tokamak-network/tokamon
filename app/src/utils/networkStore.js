@@ -9,12 +9,14 @@ const networks = {
     chainId: 111551119090,
     name: 'Thanos Sepolia',
     rpcUrl: 'https://rpc.thanos-sepolia.tokamak.network',
-    listenerUrl: process.env.EXPO_PUBLIC_LISTENER_URL_THANOS_SEPOLIA || 'https://listener-server-370459866598.asia-northeast3.run.app',
+    listenerUrl: process.env.EXPO_PUBLIC_LISTENER_URL_THANOS_SEPOLIA || 'https://listener.tokamon.io',
     nativeCurrency: { name: 'TON', symbol: 'TON', decimals: 18 },
   },
 };
 
 let currentNetwork = DEFAULT_NETWORK;
+// 서버에서 받은 동적 listenerUrl (Firestore/api/contract에서 조회)
+let dynamicListenerUrl = null;
 const listeners = new Set();
 
 export async function initNetwork() {
@@ -54,7 +56,21 @@ export function onNetworkChange(fn) {
 }
 
 export function getListenerUrl() {
-  return networks[currentNetwork]?.listenerUrl || networks[DEFAULT_NETWORK].listenerUrl;
+  return dynamicListenerUrl || networks[currentNetwork]?.listenerUrl || networks[DEFAULT_NETWORK].listenerUrl;
+}
+
+const TRUSTED_LISTENER_HOSTS = ['listener.tokamon.io', 'localhost'];
+
+export function setListenerUrl(url) {
+  if (!url) return;
+  try {
+    const parsed = new URL(url);
+    if (!TRUSTED_LISTENER_HOSTS.includes(parsed.hostname)) return;
+    if (parsed.protocol !== 'https:' && parsed.hostname !== 'localhost') return;
+    dynamicListenerUrl = url;
+  } catch {
+    // invalid URL, ignore
+  }
 }
 
 export { networks, DEFAULT_NETWORK };
