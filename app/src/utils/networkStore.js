@@ -59,8 +59,18 @@ export function getListenerUrl() {
   return dynamicListenerUrl || networks[currentNetwork]?.listenerUrl || networks[DEFAULT_NETWORK].listenerUrl;
 }
 
+const TRUSTED_LISTENER_HOSTS = ['listener.tokamon.io', 'localhost'];
+
 export function setListenerUrl(url) {
-  if (url) dynamicListenerUrl = url;
+  if (!url) return;
+  try {
+    const parsed = new URL(url);
+    if (!TRUSTED_LISTENER_HOSTS.includes(parsed.hostname)) return;
+    if (parsed.protocol !== 'https:' && parsed.hostname !== 'localhost') return;
+    dynamicListenerUrl = url;
+  } catch {
+    // invalid URL, ignore
+  }
 }
 
 export { networks, DEFAULT_NETWORK };

@@ -765,15 +765,25 @@ exports.api = functions.https.onRequest(app);
 
 // Proxy: /api/faucet/**, /api/spots/** 요청을 Compute Engine VM (listener-server)으로 전달
 const LISTENER_URL = process.env.LISTENER_URL || 'https://listener.tokamon.io';
+const ALLOWED_PROXY_PREFIXES = ['/api/faucet', '/api/spots'];
 
 exports.listenerProxy = functions.https.onRequest(async (req, res) => {
   try {
-    const url = new URL(req.url, LISTENER_URL);
+    // 경로 검증: 허용된 prefix만 통과 (SSRF 방지)
+    const path = decodeURIComponent(req.path).replace(/\.\./g, '').replace(/\/+/g, '/');
+    if (!ALLOWED_PROXY_PREFIXES.some((p) => path.startsWith(p))) {
+      return res.status(403).json({ error: 'Forbidden path' });
+    }
+
+    const targetUrl = `${LISTENER_URL}${path}`;
+    const qs = new URLSearchParams(req.query).toString();
+    const url = qs ? `${targetUrl}?${qs}` : targetUrl;
+
     const options = {
       method: req.method,
       headers: {
         'content-type': req.headers['content-type'] || 'application/json',
-        'x-forwarded-for': req.headers['x-forwarded-for'] || req.ip,
+        'x-forwarded-for': req.ip,
       },
     };
 
@@ -781,7 +791,7 @@ exports.listenerProxy = functions.https.onRequest(async (req, res) => {
       options.body = JSON.stringify(req.body);
     }
 
-    const response = await fetch(url.toString(), options);
+    const response = await fetch(url, options);
     const contentType = response.headers.get('content-type') || 'application/json';
     const body = contentType.includes('json') ? await response.json() : await response.text();
 
